@@ -50,5 +50,6 @@ The wire format is a placeholder defined in `bot/protocol.py` (the only file to
 rewrite once the real protocol is known).
 
 Evaluator benchmark: `.venv/bin/python -m lab.bench_evaluator`
+Equity benchmark: `.venv/bin/python -m lab.bench_equity`
 
 _Harness (phase 5) and tools (phase 9) are documented as they land._
