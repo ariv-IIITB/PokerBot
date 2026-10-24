@@ -1,0 +1,15 @@
+{
+  "_comment": "Tier 1 hyperparameters. Missing keys use the defaults in bot/brains/tier1.py.",
+  "equity_budget_frac": 0.7,
+  "max_samples": 3000,
+  "raise_equity": [0.70, 0.68, 0.70, 0.74],
+  "strong_equity": 0.85,
+  "value_frac": 0.66,
+  "strong_frac": 1.0,
+  "max_own_raises": 2,
+  "call_margin": 0.02,
+  "bet_pressure": 0.10,
+  "bluff_freq": 0.10,
+  "bluff_max_equity": 0.40,
+  "bluff_frac": 0.5
+}

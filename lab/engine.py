@@ -7,8 +7,9 @@ The deck for (seed, hand) is fixed, and cards are dealt by role (SB's hole cards
 then BB's, then the board). Replaying a seed with the two players swapped therefore gives
 each player exactly the cards the other had: duplicate poker.
 
-The hand logic (`Hand`) is pure Python with no I/O; players are reached only through
-`notify` / `act`. Bets are "raise TO" a total street contribution.
+The rules themselves live in bot/game/ (shared with the bot, which can simulate them);
+`Hand` drives a bot.game.GameState and turns its events into protocol messages.
+Bets are "raise TO" a total street contribution.
 """
 from __future__ import annotations
 
@@ -18,17 +19,18 @@ from typing import Optional, Sequence
 
 import numpy as np
 
-from bot.actions import (CALL, FOLD, RAISE, Action, LegalActions,
-                         SpecialOption, is_legal, safe_action)
+from bot.actions import Action, LegalActions, is_legal, safe_action
 from bot.cards import DECK_SIZE
 from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, MatchEnd,
                           MatchInfo, OppAction, ProtocolError, Showdown, parse_action)
+from bot.game.rules_spec import Rules, rules_from_config
+from bot.game.runner import LazyRng, act, advance, legal_actions
+from bot.game.state import GameState
 from lab.players import PlayerCrashed, PlayerTimeout
 from variant.evaluator_hook import make_evaluator
 from variant.rules import DEFAULT_CONFIG, GameConfig
 
 SB, BB = 0, 1
-ROLE_INDEX = {"SB": SB, "BB": BB}
 
 
 class Forfeit(Exception):
@@ -65,42 +67,38 @@ class Seat:
 
 
 class Hand:
-    """One hand. `seats[role]` gives the player for each role."""
+    """One hand: a thin driver around bot.game. The rules (steps, legality, payoffs) live
+    in bot/game/; this class adds players, the time bank and the protocol messages.
+    `seats[role]` gives the player for each role (0 = SB, 1 = BB)."""
 
     def __init__(self, cfg: GameConfig, seats: Sequence[Seat], stacks: Sequence[int],
-                 deck: list[int], hand_id: int, evaluator, on_illegal: str = "fold") -> None:
+                 deck: list[int], hand_id: int, evaluator, on_illegal: str = "fold",
+                 rules: Optional[Rules] = None, rng=None, audit: bool = False) -> None:
         self.cfg = cfg
         self.seats = list(seats)
-        self.start = list(stacks)
-        self.stack = list(stacks)
-        self.deck = list(deck)          # remaining cards, dealt from the front
+        self.rules = rules or rules_from_config(cfg, evaluator)
+        self.st = GameState(self.rules, deck, list(stacks), hand_id, audit=audit)
         self.hand_id = hand_id
-        self.ev = evaluator
         self.on_illegal = on_illegal
-        self.hole: list[list[int]] = [[], []]
-        self.board: list[int] = []
-        self.street = 0
-        self.bet = [0, 0]               # this street
-        self.total = [0, 0]             # whole hand
-        self.folded: Optional[int] = None
-        self.last_raise = cfg.big_blind
-        self.raises = 0
+        self.rng = rng
+        self._flushed = 0
 
-    # ---- helpers
+    # The game state's cards and chips, under the names the old engine used.
+    hole = property(lambda self: self.st.hole)
+    board = property(lambda self: self.st.board)
+    deck = property(lambda self: self.st.deck)
+    stack = property(lambda self: self.st.stack)
+    start = property(lambda self: self.st.start)
+    bet = property(lambda self: self.st.bet)
+    total = property(lambda self: self.st.total)
+    street = property(lambda self: self.st.street)
+    folded = property(lambda self: self.st.folded)
+
     @property
     def pot(self) -> int:
-        return self.total[0] + self.total[1]
+        return self.st.pot
 
-    def deal(self, n: int) -> list[int]:
-        cards, self.deck = self.deck[:n], self.deck[n:]
-        return cards
-
-    def pay(self, role: int, amount: int) -> None:
-        amount = min(amount, self.stack[role])
-        self.stack[role] -= amount
-        self.bet[role] += amount
-        self.total[role] += amount
-
+    # ---- messages
     def notify(self, role: int, msg) -> None:
         try:
             self.seats[role].player.notify(msg)
@@ -111,13 +109,30 @@ class Hand:
         for r in (SB, BB):
             self.notify(r, msg)
 
+    def flush_events(self) -> None:
+        """Turn new game events into protocol messages for the players who may see them."""
+        events = self.st.events
+        while self._flushed < len(events):
+            e = events[self._flushed]
+            self._flushed += 1
+            k = e.kind
+            if k == "hole":
+                self.notify(e.visible, HoleCards(e.data["cards"]))
+            elif k == "board":
+                self.broadcast(BoardUpdate(e.data["street"], e.data["cards"]))
+            elif k in ("action", "special"):
+                self.notify(1 - e.player, OppAction(e.data["action"]))
+            elif k == "showdown":
+                self.notify(e.visible, Showdown(e.data["cards"]))
+            elif k == "end":
+                self.notify(e.visible, HandEnd(e.data["delta"]))
+
     # ---- asking a player
     def ask(self, role: int, legal: LegalActions) -> Action:
         """Get a legal action from `role`, enforcing the time bank and illegal-reply policy."""
-        seat = self.seats[role]
-        req = ActRequest(self.pot, max(self.bet) - self.bet[role], self.stack[role],
-                         self.stack[1 - role], legal, round(seat.bank, 4),
-                         self.bet[role], self.bet[1 - role])
+        seat, st = self.seats[role], self.st
+        req = ActRequest(st.pot, st.to_call(role), st.stack[role], st.stack[1 - role], legal,
+                         round(seat.bank, 4), st.bet[role], st.bet[1 - role])
         t0 = time.perf_counter()
         try:
             raw = seat.player.act(req)
@@ -147,133 +162,21 @@ class Hand:
             action = safe_action(legal)   # auto check/fold
         return action
 
-    # ---- betting
-    def legal_for(self, role: int) -> LegalActions:
-        to_call = max(self.bet) - self.bet[role]
-        stack, opp_stack = self.stack[role], self.stack[1 - role]
-        cap = self.cfg.max_raises_per_street
-        can_raise = stack > to_call and opp_stack > 0 and (cap is None or self.raises < cap)
-        rmin = rmax = None
-        if can_raise:
-            rmax = self.bet[role] + stack                       # all-in
-            rmin = min(max(self.bet) + max(self.last_raise, self.cfg.big_blind), rmax)
-        return LegalActions(fold=to_call > 0, check=to_call == 0, call=to_call > 0,
-                            raise_min=rmin, raise_max=rmax)
-
-    def apply_bet(self, role: int, a: Action) -> None:
-        if a.kind == FOLD:
-            self.folded = role
-        elif a.kind == CALL:
-            self.pay(role, max(self.bet) - self.bet[role])
-        elif a.kind == RAISE:
-            prev_high = max(self.bet)
-            self.pay(role, a.amount - self.bet[role])  # type: ignore[operator]
-            increment = self.bet[role] - prev_high
-            if increment >= self.last_raise:              # full raise reopens / sets size
-                self.last_raise = increment
-            self.raises += 1
-
-    def betting_round(self) -> None:
-        """Run one betting round; sets self.folded if someone folds."""
-        cfg = self.cfg
-        first = cfg.preflop_first_actor if self.street == 0 else cfg.postflop_first_actor
-        actor = ROLE_INDEX[first]
-        needs = {r for r in (SB, BB) if self.stack[r] > 0}
-        # Nothing to decide if at most one player has chips and nobody faces a bet.
-        if len(needs) < 2 and all(max(self.bet) == self.bet[r] for r in needs):
-            return
-        while needs:
-            if actor in needs:
-                a = self.ask(actor, self.legal_for(actor))
-                self.apply_bet(actor, a)
-                self.notify(1 - actor, OppAction(a))
-                needs.discard(actor)
-                if a.kind == FOLD:
-                    return
-                if a.kind == RAISE:
-                    needs = {r for r in (SB, BB) if r != actor and self.stack[r] > 0}
-            actor = 1 - actor
-
-    # ---- special steps
-    def run_special(self, step) -> None:
-        for role_name in step.order:
-            role = ROLE_INDEX[role_name]
-            if self.folded is not None:
-                return
-            options = tuple(step.choices(self, role))
-            if not options:
-                continue
-            legal = LegalActions(special=SpecialOption(step.name, options))
-            a = self.ask(role, legal)
-            board_before = list(self.board)
-            step.apply(self, role, a.choice)
-            self.notify(1 - role, OppAction(a))
-            self.notify(role, HoleCards(tuple(self.hole[role])))
-            if self.board != board_before:
-                self.broadcast(BoardUpdate(self.street, tuple(self.board)))
-
-    def specials(self, timing: str) -> None:
-        for step in self.cfg.special_steps:
-            if step.street == self.street and step.timing == timing:
-                self.run_special(step)
-
     # ---- whole hand
     def play(self) -> HandResult:
-        cfg = self.cfg
+        st = self.st
         for r in (SB, BB):
-            self.notify(r, HandStart(self.hand_id, r, self.stack[r], self.stack[1 - r],
+            self.notify(r, HandStart(self.hand_id, r, st.stack[r], st.stack[1 - r],
                                      round(self.seats[r].bank, 4)))
-        self.pay(SB, cfg.small_blind)
-        self.pay(BB, cfg.big_blind)
-        for r in (SB, BB):
-            self.hole[r] = self.deal(cfg.hole_cards)
-        for r in (SB, BB):
-            self.notify(r, HoleCards(tuple(self.hole[r])))
-
-        for street, n_new in enumerate(cfg.streets):
-            self.street = street
-            if street > 0:
-                self.bet = [0, 0]
-                self.last_raise = cfg.big_blind
-                self.raises = 0
-                self.board += self.deal(n_new)
-                self.broadcast(BoardUpdate(street, tuple(self.board)))
-            self.specials("before_betting")
-            if self.folded is None:
-                self.betting_round()
-            if self.folded is None:
-                self.specials("after_betting")
-            if self.folded is not None:
+        while True:
+            actor = advance(st, self.rng)
+            self.flush_events()
+            if actor is None:
                 break
-        return self.settle()
-
-    def settle(self) -> HandResult:
-        pot = self.pot
-        if self.folded is not None:
-            winner = 1 - self.folded
-            self.stack[winner] += pot
-            showdown = False
-        else:
-            # Refund any uncalled excess (an all-in for less than the other's bet).
-            matched = min(self.total)
-            for r in (SB, BB):
-                self.stack[r] += self.total[r] - matched
-            vals = [self.ev.evaluate(self.hole[r], self.board) for r in (SB, BB)]
-            share = 2 * matched
-            if vals[0] > vals[1]:
-                self.stack[SB] += share
-            elif vals[1] > vals[0]:
-                self.stack[BB] += share
-            else:
-                self.stack[SB] += share // 2
-                self.stack[BB] += share - share // 2
-            for r in (SB, BB):
-                self.notify(r, Showdown(tuple(self.hole[1 - r])))
-            showdown = True
-        deltas = [self.stack[r] - self.start[r] for r in (SB, BB)]
-        for r in (SB, BB):
-            self.notify(r, HandEnd(deltas[r]))
-        return HandResult(deltas, showdown, self.folded, pot)
+            action = self.ask(actor, legal_actions(st, actor))
+            act(st, actor, action)
+            self.flush_events()
+        return HandResult(list(st.deltas), st.showdown, st.folded, st.pot)
 
 
 # --------------------------------------------------------------------------- matches
@@ -307,6 +210,7 @@ def play_match(players: Sequence, cfg: GameConfig = DEFAULT_CONFIG, seed: int = 
     hands = cfg.hands_per_match if hands is None else hands
     bank = cfg.time_bank_s if time_bank_s is None else time_bank_s
     ev = evaluator or make_evaluator(cfg)
+    rules = rules_from_config(cfg, ev)
     seats = [Seat(p, bank) for p in players]
     info = MatchInfo(hands, bank, cfg.small_blind, cfg.big_blind, cfg.starting_stack)
     stacks = [cfg.starting_stack, cfg.starting_stack]
@@ -322,7 +226,8 @@ def play_match(players: Sequence, cfg: GameConfig = DEFAULT_CONFIG, seed: int = 
             by_role = [seats[sb_player], seats[1 - sb_player]]
             role_stacks = ([cfg.starting_stack] * 2 if cfg.reset_stacks_each_hand
                            else [stacks[sb_player], stacks[1 - sb_player]])
-            hand = Hand(cfg, by_role, role_stacks, deck_for(seed, h), h, ev, on_illegal)
+            hand = Hand(cfg, by_role, role_stacks, deck_for(seed, h), h, ev, on_illegal, rules,
+                        rng=LazyRng([seed, h, 1]))
             try:
                 res = hand.play()
             except Forfeit as f:
