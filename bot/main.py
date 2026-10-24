@@ -1,6 +1,8 @@
 """Bot entry point: stdin lines -> protocol -> state/brain -> one action line on stdout.
 
-Run as `python -m bot.main [--brain NAME] [--verbose]` or `python bot/main.py ...`.
+Run as `python -m bot.main [--brain NAME] [--protocol NAME] [--verbose]` or
+`python bot/main.py ...`. The wire format comes from bot/protocols/ (default: placeholder,
+or $POKERBOT_PROTOCOL).
 
 Safety layers (see CLAUDE.md):
   1. the brain runs inside try/except; any error -> Tier 0 action
@@ -22,8 +24,8 @@ from typing import Optional, TextIO
 from bot import log as botlog
 from bot.actions import Action, LegalActions, clamp, safe_action
 from bot.brains.base import Brain
-from bot.protocol import (ActRequest, MatchEnd, MatchInfo, Message, ProtocolError,
-                          encode_action, parse_line)
+from bot.protocol import ActRequest, MatchEnd, MatchInfo, Message, ProtocolError
+from bot.protocols import ADAPTERS, get_adapter
 from bot.state import GameState
 from bot.timing import DeadlineExceeded, Stopwatch, TimeManager, hard_deadline
 
@@ -32,6 +34,7 @@ BRAINS = {
     "tier0": "bot.brains.tier0:Tier0Brain",
     "tier1": "bot.brains.tier1:Tier1Brain",
     "tier2": "bot.brains.tier2:Tier2Brain",
+    "cfr": "bot.brains.cfr:CFRBrain",
 }
 DEFAULT_BRAIN = "tier2"
 
@@ -42,9 +45,11 @@ def load_brain(name: str) -> Brain:
 
 
 class Bot:
-    def __init__(self, brain: Brain, out: Optional[TextIO], timer: Optional[TimeManager] = None) -> None:
+    def __init__(self, brain: Brain, out: Optional[TextIO], timer: Optional[TimeManager] = None,
+                 adapter=None) -> None:
         self.brain = brain
         self.out = out
+        self.adapter = adapter or get_adapter()
         self.timer = timer or TimeManager()
         self.state = GameState()
         # Counters, handy for tests and the end-of-match stderr summary.
@@ -79,7 +84,7 @@ class Bot:
     def handle_line(self, line: str) -> bool:
         """Process one engine line. Returns False when the match is over."""
         try:
-            msg = parse_line(line)
+            msg = self.adapter.parse_line(line)
         except ProtocolError as e:
             self.bad_lines += 1
             botlog.warn(f"malformed line {line.strip()!r}: {e}")
@@ -88,7 +93,7 @@ class Bot:
             return True  # blank or unknown: ignore
         action = self.on_message(msg)
         if action is not None and self.out is not None:
-            self.out.write(encode_action(action) + "\n")
+            self.out.write(self.adapter.encode_action(action) + "\n")
             self.out.flush()
         return not isinstance(msg, MatchEnd)
 
@@ -134,6 +139,13 @@ def main(argv: Optional[list[str]] = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if "--verbose" in args:
         botlog.VERBOSE = True
+    protocol = None
+    if "--protocol" in args:
+        i = args.index("--protocol")
+        if i + 1 < len(args) and args[i + 1] in ADAPTERS:
+            protocol = args[i + 1]
+        else:
+            botlog.warn("unknown protocol, using the default")
     name = DEFAULT_BRAIN
     if "--brain" in args:
         i = args.index("--brain")
@@ -156,7 +168,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         botlog.warn(f"could not load brain {name!r} ({e!r}); using tier0")
         brain = load_brain("tier0")
     try:
-        return Bot(brain, out).run(sys.stdin)
+        adapter = get_adapter(protocol)
+    except Exception as e:
+        botlog.warn(f"could not load protocol {protocol!r} ({e!r}); using placeholder")
+        adapter = get_adapter("placeholder")
+    try:
+        return Bot(brain, out, adapter=adapter).run(sys.stdin)
     except BaseException as e:  # including KeyboardInterrupt / stray DeadlineExceeded
         botlog.warn(f"fatal: {e!r}")
         return 0

@@ -8,7 +8,7 @@ from bot.state import ME, OPP, GameState
 
 def test_scripted_hand_tracking() -> None:
     st = GameState()
-    lines = scripted_match(hands=2, timebank=30.0)
+    lines = scripted_match(hands=2, timebank=30.0, adapter="placeholder")
     # Feed MATCH + first hand up to (not including) END; act like the bot after each ACT.
     for line in lines[:11]:
         msg = parse_line(line)

@@ -26,7 +26,8 @@ from bot.actions import Action
 from bot.brains.base import Brain
 from bot.main import BRAINS as BOT_BRAINS
 from bot.main import Bot
-from bot.protocol import ActRequest, Message, encode_message
+from bot.protocol import ActRequest, Message
+from bot.protocols import get_adapter
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -81,12 +82,16 @@ class SubprocessPlayer:
 
     def __init__(self, cmd: Optional[list[str]] = None, cwd: Optional[str] = None,
                  name: str = "subprocess", stderr_to: Optional[str] = None,
-                 variant_path: Optional[str] = None) -> None:
-        """variant_path: a spec JSON the bot should play (sets $POKERBOT_VARIANT)."""
+                 variant_path: Optional[str] = None, protocol: Optional[str] = None) -> None:
+        """variant_path: a spec JSON the bot should play (sets $POKERBOT_VARIANT).
+        protocol: wire format (an adapter name; default $POKERBOT_PROTOCOL or placeholder).
+        The bot process is started with the same $POKERBOT_PROTOCOL."""
         self.name = name
         self.cmd = cmd or [sys.executable, "-m", "bot.main"]
+        self.adapter = get_adapter(protocol)
         self._err = open(stderr_to, "ab") if stderr_to else subprocess.DEVNULL
         env = dict(os.environ)
+        env["POKERBOT_PROTOCOL"] = self.adapter.name
         if variant_path:
             env["POKERBOT_VARIANT"] = str(variant_path)
         self.proc = subprocess.Popen(self.cmd, cwd=cwd or str(ROOT), stdin=subprocess.PIPE,
@@ -105,12 +110,18 @@ class SubprocessPlayer:
             raise PlayerCrashed(f"{self.name} closed stdin") from None
 
     def notify(self, msg: Message) -> None:
-        self._send(encode_message(msg))
+        self._send(self.adapter.encode_message(msg))
 
-    def act(self, req: ActRequest, timeout: Optional[float] = None) -> str:
-        self._send(encode_message(req))
+    def act(self, req: ActRequest, timeout: Optional[float] = None) -> Union[Action, str]:
+        """The bot's reply decoded through the adapter (an Action), or the raw line if it
+        can't be decoded (the engine then counts it as illegal)."""
+        self._send(self.adapter.encode_message(req))
         limit = req.timeleft if timeout is None else timeout
-        return self._read_line(max(0.0, limit if limit is not None else 60.0))
+        line = self._read_line(max(0.0, limit if limit is not None else 60.0))
+        try:
+            return self.adapter.parse_action(line)
+        except Exception:
+            return f"<unparseable: {line[:60]}>"
 
     def _read_line(self, timeout: float) -> str:
         fd = self.proc.stdout.fileno()  # type: ignore[union-attr]

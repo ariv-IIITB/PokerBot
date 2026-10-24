@@ -4,10 +4,10 @@ import sys
 import time
 from pathlib import Path
 
-from helpers import scripted_match
+from helpers import decode_replies, encode, scripted_messages
 
-from bot.actions import is_legal
-from bot.protocol import ActRequest, parse_action, parse_line
+from bot.actions import Action, is_legal
+from bot.protocol import ActRequest, MatchEnd, MatchInfo
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -18,23 +18,27 @@ def run(args: list[str], stdin: bytes) -> subprocess.CompletedProcess:
 
 
 def test_stdout_only_valid_actions() -> None:
-    lines = scripted_match(hands=20)
+    msgs = scripted_messages(hands=20)
+    lines = encode(msgs)
     # Sprinkle garbage, including invalid UTF-8, into the input stream.
     data = b"".join(line.encode() + b"\n" + (b"\xff\xfe junk\n" if i % 7 == 0 else b"")
                     for i, line in enumerate(lines))
     proc = run(["-m", "bot.main"], data)
     assert proc.returncode == 0, proc.stderr.decode()
 
-    requests = [m for m in map(parse_line, lines) if isinstance(m, ActRequest)]
+    requests = [m for m in msgs if isinstance(m, ActRequest)]
     replies = proc.stdout.decode().splitlines()
     assert len(replies) == len(requests)
-    for req, reply in zip(requests, replies):
-        assert is_legal(parse_action(reply), req.legal), reply
+    for req, action in zip(requests, decode_replies(msgs, replies)):
+        assert is_legal(action, req.legal), action
 
 
 def test_script_path_entry_point() -> None:
-    proc = run(["bot/main.py", "--brain", "tier0"], ("\n".join(scripted_match(hands=1)) + "\n").encode())
-    assert proc.returncode == 0 and proc.stdout.decode().split() == ["F", "K", "S", "0", "F"]
+    msgs = scripted_messages(hands=1)
+    proc = run(["bot/main.py", "--brain", "tier0"], ("\n".join(encode(msgs)) + "\n").encode())
+    assert proc.returncode == 0
+    assert decode_replies(msgs, proc.stdout.decode().splitlines()) == [
+        Action.fold(), Action.check(), Action.special("0"), Action.fold()]
 
 
 def test_empty_input_exits_cleanly() -> None:
@@ -44,7 +48,7 @@ def test_empty_input_exits_cleanly() -> None:
 
 def test_startup_time() -> None:
     t0 = time.perf_counter()
-    proc = run(["-m", "bot.main"], b"MATCH hands=400 timebank=60.0 sb=1 bb=2 stack=400\nENDMATCH\n")
+    proc = run(["-m", "bot.main"], ("\n".join(encode([MatchInfo(), MatchEnd()])) + "\n").encode())
     elapsed = time.perf_counter() - t0
     print(f"\nbot startup + exit: {elapsed * 1000:.0f} ms")
     assert proc.returncode == 0

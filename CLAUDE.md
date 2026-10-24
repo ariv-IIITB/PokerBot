@@ -24,11 +24,15 @@ file before changing anything.
 
 ## Architecture rules
 
-- `variant/` holds **everything variant-specific** (`rules.py` GameConfig + hooks,
-  `evaluator_hook.py`). Engine, equity and bots read street structure from GameConfig;
-  never hardcode Hold'em numbers (2 hole cards, 5 board cards, 3/1/1).
-- `bot/protocol.py` is the **only** bot file that knows the wire format. Brains see only
-  neutral objects (state, legal actions, time budget).
+- A variant is a JSON spec (`variant/spec.py`; presets in `variant/catalog/`; the bot plays
+  `variant/active.json` or `$POKERBOT_VARIANT`). It compiles into a **hand program** of step
+  plugins (`bot/game/compile.py`). `variant/rules.py` GameConfig is the legacy fallback.
+  Never hardcode Hold'em numbers (2 hole cards, 5 board cards, 3/1/1).
+- `bot/game/` = the rules, pure and submit-safe (state, steps, payoffs, scoring). The lab
+  engine and the bot's simulator (`bot/sim/`) run the same code. Information only flows
+  through `state.emit(..., visible=...)`; hidden-information correctness is tested.
+- Wire formats live only in `bot/protocol.py` (neutral messages) and `bot/protocols/`
+  (one adapter per format). Brains see only neutral objects (state, legal actions, budget).
 - `lab/` is offline tooling, never submitted; it may use anything in the dev venv.
 - Safety, three layers: (1) brain in try/except → Tier 0 on error; (2) every action
   validated + clamped before sending; (3) hard deadline / emergency mode → Tier 0.
@@ -41,6 +45,10 @@ file before changing anything.
 1. Repo setup · 2. Bot skeleton · 3. Generic evaluator · 4. Equity engine ·
 5. Rules engine + duplicate harness · 6. Sparring bots + version loader ·
 7. Tier 1 bot · 8. Tier 2 bot (+ endgame lock) · 9. Test tooling (fuzz, timing, memory, sweep).
+Part 2 (universal toolkit): 10 hand programs · 11 variant spec + catalog · 12 deck/evaluator
+plugins · 13 card steps · 14 betting structures · 15 payoffs/side mechanics · 16 generic
+decision layer · 17 inference · 18 precompute · 19 protocol adapters · 20 day-1 toolkit ·
+21 rehearsal drills · 22 MCCFR-lite (stretch).
 
 Each phase ends with: all tests green on 3.11, a short report (what/tests/numbers),
 the exact list of files that change when the variant is revealed, and a commit
@@ -52,7 +60,8 @@ the exact list of files that change when the variant is revealed, and a commit
 - Write tests as you go; never move on with failing tests. Tests are seeded/deterministic.
   Slow tests are marked `@pytest.mark.slow` (run with `-m slow`).
 - Type hints on public functions, small modules, useful comments.
-- Run tests: `.venv/bin/python -m pytest`.
+- Run tests: `.venv/bin/python -m pytest -n auto` (slow: `-m slow`; another wire format:
+  `POKERBOT_PROTOCOL=json`).
 - If the spec is ambiguous, pick the simplest reasonable option and note it in the
   phase report. Only stop to ask if it would be expensive to undo.
 - Keep replies short: what was built, test results, what's next.

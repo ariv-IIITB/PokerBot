@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 import pytest
-from helpers import scripted_match
+from helpers import decode_replies, encode, scripted_messages
 
 from bot.actions import Action, LegalActions, pot_fraction_raise
 from bot.cards import parse_cards as P
@@ -58,12 +58,14 @@ def test_registry_has_all() -> None:
 
 
 def test_run_brain_subprocess() -> None:
-    data = ("\n".join(scripted_match(hands=2)) + "\n").encode()
+    msgs = scripted_messages(hands=2)
+    data = ("\n".join(encode(msgs)) + "\n").encode()
     proc = subprocess.run([sys.executable, "-m", "lab.run_brain", "calling_station"],
                           input=data, capture_output=True, cwd=ROOT, timeout=30)
-    replies = proc.stdout.decode().splitlines()
+    replies = decode_replies(msgs, proc.stdout.decode().splitlines())
     assert proc.returncode == 0 and len(replies) == 8
-    assert replies[0] == "C" and replies[1] == "K" and replies[2].startswith("S ")
+    assert replies[0] == Action.call() and replies[1] == Action.check()
+    assert replies[2].kind == "S"
 
 
 # --------------------------------------------------------------------------- versions
