@@ -30,8 +30,9 @@ from bot.timing import DeadlineExceeded, Stopwatch, TimeManager, hard_deadline
 # Brain registry: name -> "module:Class", imported lazily so startup stays fast.
 BRAINS = {
     "tier0": "bot.brains.tier0:Tier0Brain",
+    "tier1": "bot.brains.tier1:Tier1Brain",
 }
-DEFAULT_BRAIN = "tier0"
+DEFAULT_BRAIN = "tier1"
 
 
 def load_brain(name: str) -> Brain:

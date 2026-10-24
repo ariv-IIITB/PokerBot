@@ -40,12 +40,12 @@ def _default_evaluator(config: GameConfig) -> Evaluator:
     return make_evaluator(config)
 
 
-def _setup(hole, board, config, evaluator, dead):
+def _setup(hole, board, config, evaluator, dead, opp_cards=None, runout=None):
     ev = evaluator if evaluator is not None else _default_evaluator(config)
     known = list(hole) + list(board) + list(dead)
     deck = remaining_deck(known)
-    n_opp = config.hole_cards
-    n_run = config.board_cards - len(board)
+    n_opp = config.hole_cards if opp_cards is None else opp_cards
+    n_run = config.board_cards - len(board) if runout is None else runout
     if n_run < 0:
         raise ValueError("board longer than the variant allows")
     if n_opp + n_run > len(deck):
@@ -66,9 +66,10 @@ def _result(total: float, total_sq: float, n: int) -> EquityResult:
 def equity_scalar(hole: Sequence[int], board: Sequence[int],
                   config: GameConfig = DEFAULT_CONFIG, evaluator: Optional[Evaluator] = None,
                   *, time_budget_s: Optional[float] = None, max_samples: int = 2000,
-                  rng: Optional[np.random.Generator] = None, dead: Sequence[int] = ()) -> EquityResult:
+                  rng: Optional[np.random.Generator] = None, dead: Sequence[int] = (),
+                  opp_cards: Optional[int] = None, runout: Optional[int] = None) -> EquityResult:
     """Pure-Python Monte Carlo. Checks the clock every 32 samples."""
-    ev, deck, n_opp, n_run = _setup(hole, board, config, evaluator, dead)
+    ev, deck, n_opp, n_run = _setup(hole, board, config, evaluator, dead, opp_cards, runout)
     rng = rng if rng is not None else np.random.default_rng()
     pyrng = random.Random(int(rng.integers(2**62)))
     hole, board = list(hole), list(board)
@@ -120,10 +121,13 @@ def equity_vectorized(hole: Sequence[int], board: Sequence[int],
                       config: GameConfig = DEFAULT_CONFIG, evaluator: Optional[Evaluator] = None,
                       *, time_budget_s: Optional[float] = None, max_samples: int = 20000,
                       rng: Optional[np.random.Generator] = None, dead: Sequence[int] = (),
-                      first_chunk: int = 128, max_chunk: int = 4096) -> EquityResult:
+                      first_chunk: int = 128, max_chunk: int = 4096,
+                      opp_cards: Optional[int] = None, runout: Optional[int] = None) -> EquityResult:
     """NumPy Monte Carlo in chunks. The first chunk measures speed; later chunks are sized
-    to fit the remaining budget, so the deadline is overshot by at most ~one small chunk."""
-    ev, deck, n_opp, n_run = _setup(hole, board, config, evaluator, dead)
+    to fit the remaining budget, so the deadline is overshot by at most ~one small chunk.
+    opp_cards / runout override the opponent's hole-card count and the number of board
+    cards still to come (defaults: from GameConfig)."""
+    ev, deck, n_opp, n_run = _setup(hole, board, config, evaluator, dead, opp_cards, runout)
     rng = rng if rng is not None else np.random.default_rng()
     hole_np = np.asarray(hole, dtype=np.intp)
     board_np = np.asarray(board, dtype=np.intp)
@@ -161,9 +165,10 @@ def equity(hole: Sequence[int], board: Sequence[int], config: GameConfig = DEFAU
 
 def equity_exact(hole: Sequence[int], board: Sequence[int],
                  config: GameConfig = DEFAULT_CONFIG, evaluator: Optional[Evaluator] = None,
-                 dead: Sequence[int] = (), max_cases: int = 3_000_000) -> EquityResult:
+                 dead: Sequence[int] = (), max_cases: int = 3_000_000,
+                 opp_cards: Optional[int] = None, runout: Optional[int] = None) -> EquityResult:
     """Enumerate every opponent hand and board completion (small spots only)."""
-    ev, deck, n_opp, n_run = _setup(hole, board, config, evaluator, dead)
+    ev, deck, n_opp, n_run = _setup(hole, board, config, evaluator, dead, opp_cards, runout)
     cases = math.comb(len(deck), n_opp) * math.comb(len(deck) - n_opp, n_run)
     if cases > max_cases:
         raise ValueError(f"{cases} cases is too many to enumerate")

@@ -33,7 +33,7 @@ def test_stdout_only_valid_actions() -> None:
 
 
 def test_script_path_entry_point() -> None:
-    proc = run(["bot/main.py"], ("\n".join(scripted_match(hands=1)) + "\n").encode())
+    proc = run(["bot/main.py", "--brain", "tier0"], ("\n".join(scripted_match(hands=1)) + "\n").encode())
     assert proc.returncode == 0 and proc.stdout.decode().split() == ["F", "K", "S", "0", "F"]
 
 

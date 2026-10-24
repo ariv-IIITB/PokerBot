@@ -129,6 +129,8 @@ def main(argv: Optional[list[str]] = None) -> None:
     ap.add_argument("--first-seed", type=int, default=0)
     ap.add_argument("--hands", type=int, default=None)
     ap.add_argument("--processes", type=int, default=None)
+    ap.add_argument("--bank", type=float, default=None,
+                    help="time bank per match in seconds (smaller = faster, weaker brains)")
     ap.add_argument("--subprocess", action="store_true",
                     help="run A as a real subprocess bot (uses `--brain A`)")
     args = ap.parse_args(argv)
@@ -141,7 +143,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     for b in args.b:
         rep = run_duplicate(spec_a, PlayerSpec.brain(b),
                             seeds=range(args.first_seed, args.first_seed + args.seeds),
-                            hands=args.hands, processes=args.processes)
+                            hands=args.hands, processes=args.processes, time_bank_s=args.bank)
         print(rep.summary(), flush=True)
 
 
