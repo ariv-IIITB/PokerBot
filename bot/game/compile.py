@@ -13,7 +13,8 @@ from bot.evaluator import HandEvaluator, order_from_names
 from bot.game.deck import Deck
 from bot.game.scoring import SCORES, CustomEvaluator, Scorer
 from bot.game.rules_spec import Rules, street_label
-from bot.game.steps import Betting, DealBoard, DealHole, PostBlinds, ShowdownStep
+from bot.game.steps import (Betting, Choose, DealBoard, DealHole, Discard, Draw, Expose, Peek,
+                            PostBlinds, ShowdownStep, Swap)
 from bot.game.steps.base import Step
 
 
@@ -74,23 +75,22 @@ def build_evaluator(spec, deck: Optional[Deck] = None) -> Scorer:
 
 def _betting_step(spec, s: dict, round_index: int) -> Step:
     b = spec.betting
-    if b.structure != "NL":
-        raise NotSupported(f"{b.structure} betting", 14)
-    if b.bet_sizes or b.bet_multiple or not b.check_raise:
-        raise NotSupported("restricted bet sizes / no check-raise", 14)
-    first = s.get("first") or (b.preflop_first if round_index == 0 else b.postflop_first)
+    if round_index == 0:
+        default_first = "BB" if b.straddle else b.preflop_first   # straddler acts last
+    else:
+        default_first = b.postflop_first
+    first = s.get("first") or default_first
     label = s.get("round") or street_label(round_index)
-    return Betting(first, b.max_raises, b.big_blind, label)
+    fixed = b.fixed_bets[round_index] if b.structure == "FL" else None
+    return Betting(first, b.max_raises, b.big_blind, label, structure=b.structure,
+                   fixed_bet=fixed, bet_sizes=b.bet_sizes, bet_multiple=b.bet_multiple,
+                   check_raise=b.check_raise)
 
 
 def compile_spec(spec) -> Rules:
     """VariantSpec -> Rules. Raises SpecError if invalid, NotSupported if a plugin is missing."""
     spec.check()
     b, m = spec.betting, spec.match
-    if b.ante or b.straddle:
-        raise NotSupported("antes / straddle", 14)
-    if m.blind_schedule or not m.bust_ends_match:
-        raise NotSupported("blind schedule / bust rules", 14)
     if spec.payoffs:
         raise NotSupported("payoff modifiers (bounty / multiplier / rake)", 15)
     deck = build_deck(spec)
@@ -103,11 +103,9 @@ def compile_spec(spec) -> Rules:
     for s in spec.full_program():
         t = s["type"]
         if t == "post_blinds":
-            prog.append(PostBlinds(b.small_blind, b.big_blind))
+            prog.append(PostBlinds(b.small_blind, b.big_blind, b.ante, b.straddle))
         elif t == "deal_hole":
-            if s["face_up"]:
-                raise NotSupported("face-up hole cards", 13)
-            prog.append(DealHole(s["n"]))
+            prog.append(DealHole(s["n"], s["face_up"]))
             hole += s["n"]
         elif t == "deal_board":
             if s["boards"] not in (None, 1):
@@ -121,12 +119,31 @@ def compile_spec(spec) -> Rules:
             if s.get("runs", 1) != 1:
                 raise NotSupported("run it multiple times", 15)
             prog.append(ShowdownStep())
-        elif t in ("discard", "draw", "swap", "choose", "peek", "expose"):
-            raise NotSupported(f"{t} step", 13)
+        elif t == "discard":
+            prog.append(Discard(s["n"], s["destination"], s["optional"], order=s["order"],
+                                visibility=s["visibility"]))
+        elif t == "draw":
+            prog.append(Draw(s["max"], s["min"], order=s["order"], cost=s["cost"],
+                             visibility=s["visibility"]))
+        elif t == "swap":
+            if s["n"] != 1:
+                raise NotSupported("swapping more than one card", 99)
+            prog.append(Swap(s["with"], s["mode"], s["probability"], order=s["order"],
+                             cost=s["cost"]))
+        elif t == "choose":
+            prog.append(Choose(s["offer"], s["keep"], order=s["order"], visibility=s["visibility"]))
+        elif t == "peek":
+            prog.append(Peek(s["target"], order=s["order"], cost=s["cost"]))
+        elif t == "expose":
+            prog.append(Expose(s["n"], s["chosen"], order=s["order"]))
         elif t in ("auction", "market", "bounty"):
             raise NotSupported(f"{t} step", 15)
         else:
             raise NotSupported(f"step {t}", 99)
+    if "post_blinds" not in spec.step_types() and b.ante:
+        prog.insert(0, PostBlinds(0, 0, b.ante, 0))          # antes-only variants
+    schedule = tuple(sorted(tuple(row) for row in m.blind_schedule))
     return Rules(tuple(prog), evaluator, spec.players, hole, b.small_blind, b.big_blind,
                  m.starting_stack, m.reset_stacks, m.hands, m.time_bank_s, deck.cards,
-                 tuple(streets), spec.name, m.bust_ends_match, spec)
+                 tuple(streets), spec.name, m.bust_ends_match, spec, b.ante, b.straddle,
+                 schedule)

@@ -8,7 +8,7 @@ EXPECTED_UNSUPPORTED must be updated as plugins land (a test enforces it).
 import pytest
 
 from bot.game.compile import NotSupported, compile_spec
-from bot.protocol import HandStart, HoleCards
+from bot.protocol import HandStart, HoleCards, Info
 from lab.engine import play_match
 from lab.players import PlayerSpec
 from lab.random_variant import random_supported_spec
@@ -20,11 +20,7 @@ BOTS = ["random_legal", "all_in", "calling_station", "tight", "maniac"]
 
 # variant -> phase whose plugin it still needs
 EXPECTED_UNSUPPORTED = {
-    "short_bounty_rit": 15, "lowball_27": 13,
-    "choose_two": 13, "mit2026_discard": 13, "pineapple": 13, "draw1": 13,
-    "exposed_hole": 13, "peek_board": 13, "swap_opponent": 13,
-    "fl_holdem": 14, "boards_discard_pl": 14, "plo": 14, "antes_straddle": 14,
-    "escalating_blinds": 14,
+    "short_bounty_rit": 15, "boards_discard_pl": 15,
     "auction_card": 15, "bounty_rank": 15, "side_market": 15, "three_boards": 15,
     "run_it_twice": 15,
 }
@@ -54,7 +50,8 @@ def check_variant(spec, hands: int, seed: int) -> None:
 
 
 class Recorder:
-    """Wraps a player and records the first hole cards it receives in each hand."""
+    """Wraps a player and records the first cards dealt to it in each hand: its hole
+    cards, or the cards it is offered when the variant deals by choice."""
 
     def __init__(self, inner) -> None:
         self.inner, self.holes, self._got_hole = inner, [], True
@@ -65,7 +62,8 @@ class Recorder:
     def notify(self, msg) -> None:
         if isinstance(msg, HandStart):
             self._got_hole = False
-        elif isinstance(msg, HoleCards) and not self._got_hole:
+        elif not self._got_hole and (isinstance(msg, HoleCards) or
+                                     (isinstance(msg, Info) and msg.kind == "offer")):
             self.holes.append(msg.cards)
             self._got_hole = True
         self.inner.notify(msg)

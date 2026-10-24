@@ -31,12 +31,14 @@ DEFAULTS.update({
 })
 
 
-def lock_margin(state: GameState, assume_alternating: bool = True) -> Optional[int]:
+def lock_margin(state: GameState, assume_alternating: bool = True, rules=None) -> Optional[int]:
     """Lead minus the worst-case loss from check/folding the rest of the match.
 
-    Worst case = what we've already put in this hand (lost if we fold now) + the blind we
-    post in every future hand. Our seat alternates each hand (seat 0 = small blind), as in
-    a duplicate match; with assume_alternating=False every future hand costs a big blind.
+    Worst case = what we've already put in this hand (lost if we fold now) + the forced
+    bets we post in every future hand (ante + our blind, or the straddle). Our seat
+    alternates each hand (seat 0 = small blind), as in a duplicate match; with
+    assume_alternating=False every future hand costs the bigger forced bet. Blind
+    schedules come from `rules` (the compiled variant) when known.
     > 0 means the match is mathematically won by check/folding. None if unknown.
     """
     h, m = state.hand, state.match
@@ -44,12 +46,25 @@ def lock_margin(state: GameState, assume_alternating: bool = True) -> Optional[i
         return None
     committed = h.start_stack - h.my_stack
     future = max(0, m.hands - state.hands_played - 1)
-    if assume_alternating:
-        # Future hand j (1..future) has seat (seat + j) % 2.
-        sb_hands = sum(1 for j in range(1, future + 1) if (h.seat + j) % 2 == 0)
-        cost = sb_hands * m.sb + (future - sb_hands) * m.bb
-    else:
-        cost = future * max(m.sb, m.bb)
+    first_future = h.hand_id + 1
+
+    def costs(j: int) -> tuple[int, int]:
+        """(small-blind seat cost, big-blind seat cost) for future hand j."""
+        if rules is not None and hasattr(rules, "level_at"):
+            sb, bb, ante, straddle = rules.level_at(first_future + j - 1)
+        else:
+            sb = h.sb if h.sb is not None else m.sb
+            bb = h.bb if h.bb is not None else m.bb
+            ante, straddle = h.ante or 0, 0
+        return ante + (straddle or sb), ante + bb
+
+    cost = 0
+    for j in range(1, future + 1):
+        sb_cost, bb_cost = costs(j)
+        if assume_alternating:
+            cost += sb_cost if (h.seat + j) % 2 == 0 else bb_cost
+        else:
+            cost += max(sb_cost, bb_cost)
     return state.bankroll - committed - cost
 
 
@@ -90,7 +105,7 @@ class Tier2Brain(Tier1Brain):
 
     def decide(self, state: GameState, legal: LegalActions, budget_s: float) -> Action:
         if self.p["lock_enabled"]:
-            margin = lock_margin(state, bool(self.p["lock_assume_alternating"]))
+            margin = lock_margin(state, bool(self.p["lock_assume_alternating"]), self.rules)
             if margin is not None and margin > 0:
                 self.locked_decisions += 1
                 return safe_action(legal)

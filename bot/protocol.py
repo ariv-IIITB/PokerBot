@@ -8,7 +8,8 @@ Format: one message per line, a tag followed by KEY=value tokens. Cards "Ah,Kd",
 
 Engine -> bot:
     MATCH hands=400 timebank=60.0 sb=1 bb=2 stack=400
-    HAND id=17 seat=0 stack=400 oppstack=400 timeleft=55.21     (seat 0 = small blind)
+    HAND id=17 seat=0 stack=400 oppstack=400 timeleft=55.21     (seat 0 = small blind;
+                                       optional sb= bb= ante=: this hand's blinds)
     HOLE cards=Ah,Kd
     BOARD street=1 cards=Ts,9h,2c                               (full board so far)
     OPP type=R amount=6                                         (F/K/C/R/S; S uses choice=)
@@ -16,9 +17,20 @@ Engine -> bot:
         (optional: mybet= oppbet= = chips each side has put in on this street;
          pot = everything committed this hand, including the current street)
     SHOW oppcards=Qs,Qd
+    INFO kind=expose who=opp cards=Ah        (card information outside HOLE/BOARD/SHOW:
+                                              kind = expose | peek | reveal | burn | offer,
+                                              who = me | opp | none: whose cards they are)
     END delta=-6
     ENDMATCH
 Bot -> engine (only in reply to ACT): F | K | C | R <amount> | S <choice>
+
+Special steps (variant card steps) appear in ACT as legal=S:<step>:<opt>|<opt>|...
+with option tokens (no spaces/commas/pipes):
+    "0", "0+2"   hole-card indices into my current hole cards (discard / draw / expose /
+                 swap) or into the offered cards (choose)
+    "none"       do nothing;  "yes" / "no"  (peek);  "h1b3"  swap hole 1 with board card 3
+The opponent's choice arrives as OPP type=S choice=<token>, or choice=hidden for private
+steps (draw shows the number of cards drawn instead).
 
 Unknown tags and unknown keys are ignored (parse_line returns None / skips them).
 Known tags with missing or bad values raise ProtocolError.
@@ -55,6 +67,9 @@ class HandStart:
     stack: int
     oppstack: int
     timeleft: Optional[float] = None
+    sb: Optional[int] = None        # this hand's blinds/ante, when they can change
+    bb: Optional[int] = None
+    ante: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -91,6 +106,13 @@ class Showdown:
 
 
 @dataclass(frozen=True)
+class Info:
+    kind: str                     # expose | peek | reveal | burn | offer
+    who: str                      # me | opp | none
+    cards: tuple[int, ...]
+
+
+@dataclass(frozen=True)
 class HandEnd:
     delta: int
 
@@ -101,7 +123,7 @@ class MatchEnd:
 
 
 Message = Union[MatchInfo, HandStart, HoleCards, BoardUpdate, OppAction, ActRequest,
-                Showdown, HandEnd, MatchEnd]
+                Showdown, Info, HandEnd, MatchEnd]
 
 
 # --------------------------------------------------------------------------- helpers
@@ -128,9 +150,11 @@ def _get(kv: dict[str, str], key: str, conv, default=None, required: bool = True
 
 
 def parse_legal(text: str) -> LegalActions:
-    """Parse e.g. "F,C,R:8-400" or "S:discard:0|1|2" or "-" (nothing legal)."""
+    """Parse e.g. "F,C,R:8-400", "R:8-400/2" (multiples of 2, or all-in),
+    "R:6|12|400" (only these amounts), "S:discard:0|1|2" or "-" (nothing legal)."""
     fold = check = call = False
     rmin = rmax = None
+    sizes = step = None
     special = None
     if text.strip() in ("", "-"):
         return LegalActions()
@@ -143,11 +167,17 @@ def parse_legal(text: str) -> LegalActions:
         elif head == CALL and not rest:
             call = True
         elif head == RAISE:
-            lo, dash, hi = rest.partition("-")
-            if not dash:
-                raise ProtocolError(f"bad raise range {part!r}")
             try:
-                rmin, rmax = int(lo), int(hi)
+                if "|" in rest:
+                    sizes = tuple(int(x) for x in rest.split("|"))
+                    rmin, rmax = min(sizes), max(sizes)
+                else:
+                    rng, slash, st = rest.partition("/")
+                    lo, dash, hi = rng.partition("-")
+                    if not dash:
+                        raise ValueError
+                    rmin, rmax = int(lo), int(hi)
+                    step = int(st) if slash else None
             except ValueError:
                 raise ProtocolError(f"bad raise range {part!r}") from None
         elif head == SPECIAL:
@@ -157,7 +187,7 @@ def parse_legal(text: str) -> LegalActions:
             special = SpecialOption(name, tuple(choices.split("|")))
         else:
             raise ProtocolError(f"unknown legal token {part!r}")
-    return LegalActions(fold, check, call, rmin, rmax, special)
+    return LegalActions(fold, check, call, rmin, rmax, special, sizes, step)
 
 
 def format_legal(legal: LegalActions) -> str:
@@ -169,7 +199,11 @@ def format_legal(legal: LegalActions) -> str:
     if legal.call:
         parts.append(CALL)
     if legal.raise_min is not None and legal.raise_max is not None:
-        parts.append(f"{RAISE}:{legal.raise_min}-{legal.raise_max}")
+        if legal.raise_sizes:
+            parts.append(f"{RAISE}:{'|'.join(str(a) for a in legal.raise_sizes)}")
+        else:
+            step = f"/{legal.raise_step}" if legal.raise_step else ""
+            parts.append(f"{RAISE}:{legal.raise_min}-{legal.raise_max}{step}")
     if legal.special is not None:
         parts.append(f"{SPECIAL}:{legal.special.name}:{'|'.join(legal.special.choices)}")
     return ",".join(parts) if parts else "-"
@@ -210,7 +244,10 @@ def _p_match(kv):
 def _p_hand(kv):
     return HandStart(_get(kv, "id", int), _get(kv, "seat", int), _get(kv, "stack", int),
                      _get(kv, "oppstack", int),
-                     _get(kv, "timeleft", float, None, required=False))
+                     _get(kv, "timeleft", float, None, required=False),
+                     _get(kv, "sb", int, None, required=False),
+                     _get(kv, "bb", int, None, required=False),
+                     _get(kv, "ante", int, None, required=False))
 
 
 def _p_opp(kv):
@@ -241,6 +278,8 @@ _PARSERS = {
     "OPP": _p_opp,
     "ACT": _p_act,
     "SHOW": lambda kv: Showdown(_get(kv, "oppcards", parse_cards)),
+    "INFO": lambda kv: Info(_get(kv, "kind", str), _get(kv, "who", str, "none", required=False),
+                            _get(kv, "cards", parse_cards)),
     "END": lambda kv: HandEnd(_get(kv, "delta", int)),
 }
 
@@ -252,6 +291,9 @@ def encode_message(msg: Message) -> str:
                 f"sb={msg.sb} bb={msg.bb} stack={msg.stack}")
     if isinstance(msg, HandStart):
         s = f"HAND id={msg.hand_id} seat={msg.seat} stack={msg.stack} oppstack={msg.oppstack}"
+        for key in ("sb", "bb", "ante"):
+            if getattr(msg, key) is not None:
+                s += f" {key}={getattr(msg, key)}"
         return s + (f" timeleft={msg.timeleft:.4f}" if msg.timeleft is not None else "")
     if isinstance(msg, HoleCards):
         return f"HOLE cards={format_cards(msg.cards)}"
@@ -272,6 +314,8 @@ def encode_message(msg: Message) -> str:
         return s + (f" timeleft={msg.timeleft:.4f}" if msg.timeleft is not None else "")
     if isinstance(msg, Showdown):
         return f"SHOW oppcards={format_cards(msg.oppcards)}"
+    if isinstance(msg, Info):
+        return f"INFO kind={msg.kind} who={msg.who} cards={format_cards(msg.cards)}"
     if isinstance(msg, HandEnd):
         return f"END delta={msg.delta}"
     if isinstance(msg, MatchEnd):

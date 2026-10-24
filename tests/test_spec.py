@@ -71,9 +71,12 @@ def test_check_raises_with_all_messages() -> None:
 
 
 def test_not_supported_names_phase() -> None:
+    """Features without a plugin raise NotSupported naming where support would come from."""
+    prog = default_program()
+    prog.insert(3, {"type": "swap", "n": 2})
     with pytest.raises(NotSupported) as e:
-        compile_spec(VariantSpec.from_dict({"betting": {"structure": "PL"}}))
-    assert e.value.phase == 14 and "phase 14" in str(e.value)
+        compile_spec(VariantSpec.from_dict({"hole_cards": 3, "program": prog}))
+    assert f"phase {e.value.phase}" in str(e.value) and "more than one card" in str(e.value)
 
 
 def test_compiled_program_describes_itself() -> None:

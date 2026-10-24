@@ -60,12 +60,38 @@ class LegalActions:
     raise_min: Optional[int] = None   # inclusive, "raise to" amounts
     raise_max: Optional[int] = None
     special: Optional[SpecialOption] = None
+    # Optional restrictions on raise amounts (betting plugins):
+    raise_sizes: Optional[tuple[int, ...]] = None   # only these "raise to" amounts
+    raise_step: Optional[int] = None                 # amounts must be multiples (or all-in)
 
     @property
     def can_raise(self) -> bool:
         # An inverted range is treated as "no raise" rather than guessing.
         return (self.raise_min is not None and self.raise_max is not None
                 and self.raise_min <= self.raise_max)
+
+    def raise_ok(self, amount: int) -> bool:
+        """Is `amount` an allowed raise-to amount?"""
+        if not self.can_raise or not self.raise_min <= amount <= self.raise_max:  # type: ignore[operator]
+            return False
+        if self.raise_sizes is not None:
+            return amount in self.raise_sizes
+        if self.raise_step:
+            return amount % self.raise_step == 0 or amount == self.raise_max
+        return True
+
+    def nearest_raise(self, amount: int) -> int:
+        """The allowed raise-to amount closest to `amount` (ties: the smaller)."""
+        lo, hi = self.raise_min, self.raise_max
+        amount = min(max(amount, lo), hi)  # type: ignore[type-var]
+        if self.raise_sizes:
+            return min(self.raise_sizes, key=lambda a: (abs(a - amount), a))
+        if self.raise_step:
+            m = self.raise_step
+            down, up = (amount // m) * m, -(-amount // m) * m
+            cands = [a for a in (down, up, hi) if lo <= a <= hi]  # type: ignore[operator]
+            return min(cands, key=lambda a: (abs(a - amount), a))
+        return amount
 
     @property
     def can_special(self) -> bool:
@@ -87,8 +113,7 @@ def is_legal(action: Action, legal: LegalActions) -> bool:
     if k == CALL:
         return legal.call
     if k == RAISE:
-        return (legal.can_raise and type(action.amount) is int
-                and legal.raise_min <= action.amount <= legal.raise_max)  # type: ignore[operator]
+        return type(action.amount) is int and legal.raise_ok(action.amount)
     if k == SPECIAL:
         return legal.can_special and action.choice in legal.special.choices  # type: ignore[union-attr]
     return False
@@ -106,7 +131,7 @@ def safe_action(legal: LegalActions) -> Action:
     if legal.call:
         return Action.call()
     if legal.can_raise:
-        return Action.raise_to(legal.raise_min)  # type: ignore[arg-type]
+        return Action.raise_to(legal.nearest_raise(legal.raise_min))  # type: ignore[arg-type]
     return Action.fold()
 
 
@@ -143,7 +168,7 @@ def clamp(action: object, legal: LegalActions) -> Action:
             amt = _to_int(action.amount)
             if amt is None:
                 amt = legal.raise_min
-            return Action.raise_to(min(max(amt, legal.raise_min), legal.raise_max))  # type: ignore[type-var]
+            return Action.raise_to(legal.nearest_raise(amt))  # type: ignore[arg-type]
         if legal.call:
             return Action.call()
         return safe_action(legal)
@@ -166,5 +191,4 @@ def pot_fraction_raise(frac: float, pot: int, tocall: int, mybet: Optional[int],
         target = mybet + tocall + extra
     else:
         target = legal.raise_min + extra  # type: ignore[operator]
-    amount = int(round(min(max(target, legal.raise_min), legal.raise_max)))  # type: ignore[type-var]
-    return Action.raise_to(amount)
+    return Action.raise_to(legal.nearest_raise(int(round(target))))

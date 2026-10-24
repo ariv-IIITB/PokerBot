@@ -12,8 +12,11 @@ from typing import Any, NamedTuple, Optional
 
 ALL = -1
 
-# Event kinds that are allowed to show cards another player holds privately.
+# Event kinds that are allowed to show cards another player holds privately (or undealt
+# cards, for peeks). Their correctness is tested per step; every other kind is audited.
 REVEAL_KINDS = frozenset({"showdown", "expose", "peek", "reveal"})
+# Kinds that carry card information to players (sent as INFO messages by the engine).
+INFO_KINDS = frozenset({"expose", "peek", "reveal", "burn", "offer"})
 
 
 class Event(NamedTuple):
@@ -30,15 +33,19 @@ class VisibilityError(AssertionError):
 class GameState:
     __slots__ = ("rules", "deck", "hole", "board", "start", "stack", "bet", "total", "folded",
                  "street", "rounds_done", "last_raise", "raises", "pc", "entered", "step_state",
-                 "events", "record", "audit", "done", "deltas", "showdown", "hand_id", "extra")
+                 "events", "record", "audit", "done", "deltas", "showdown", "hand_id", "extra",
+                 "muck", "rng", "level")
 
     def __init__(self, rules, deck: list[int], stacks: list[int], hand_id: int = 0,
-                 record: bool = True, audit: bool = False) -> None:
+                 record: bool = True, audit: bool = False, level=None) -> None:
         self.rules = rules
+        # (sb, bb, ante, straddle) for this hand; None = the steps' own defaults
+        self.level = level if level is not None else getattr(rules, "level_at", lambda h: None)(hand_id)
         self.deck = list(deck)              # undealt cards, dealt from the front
         n = len(stacks)
         self.hole: list[list[int]] = [[] for _ in range(n)]
         self.board: list[int] = []
+        self.muck: list[int] = []           # discarded / burned / unchosen cards
         self.start = list(stacks)
         self.stack = list(stacks)
         self.bet = [0] * n                  # this betting round
@@ -59,6 +66,7 @@ class GameState:
         self.showdown = False
         self.hand_id = hand_id
         self.extra: dict = {}               # room for plugin data (bounties, bids, ...)
+        self.rng = None                     # set by the runner; steps call random()
 
     # ---- basics
     @property
@@ -77,6 +85,21 @@ class GameState:
             raise ValueError(f"deck exhausted: need {n}, have {len(self.deck)}")
         cards, self.deck = self.deck[:n], self.deck[n:]
         return cards
+
+    def random(self):
+        """The hand's random generator (numpy-like: .random(), .integers(...))."""
+        if self.rng is None:
+            import numpy as np
+            self.rng = np.random.default_rng(self.hand_id)
+        return self.rng
+
+    def pay_cost(self, p: int, amount: int) -> int:
+        """A non-betting payment into the pot (draw / peek / swap costs): counts toward
+        the pot but not toward this round's bets."""
+        amount = max(0, min(amount, self.stack[p]))
+        self.stack[p] -= amount
+        self.total[p] += amount
+        return amount
 
     def pay(self, p: int, amount: int) -> int:
         """Move up to `amount` chips from p's stack into the pot; returns what was paid."""
@@ -112,6 +135,9 @@ class GameState:
         g.deck = list(self.deck)
         g.hole = [list(h) for h in self.hole]
         g.board = list(self.board)
+        g.muck = list(self.muck)
+        g.rng = self.rng
+        g.level = self.level
         g.start, g.stack = list(self.start), list(self.stack)
         g.bet, g.total = list(self.bet), list(self.total)
         g.folded, g.street, g.rounds_done = self.folded, self.street, self.rounds_done
@@ -123,5 +149,5 @@ class GameState:
         g.record, g.audit = record, False
         g.done, g.showdown, g.hand_id = self.done, self.showdown, self.hand_id
         g.deltas = list(self.deltas) if self.deltas is not None else None
-        g.extra = dict(self.extra)
+        g.extra = {k: (v.copy() if hasattr(v, "copy") else v) for k, v in self.extra.items()}
         return g

@@ -37,6 +37,8 @@ def current_step(st):
 
 def advance(st, rng=None) -> Optional[int]:
     """Run until a player must decide (returns that player) or the hand ends (None)."""
+    if rng is not None:
+        st.rng = rng
     prog = st.rules.program
     while st.pc < len(prog):
         step = prog[st.pc]

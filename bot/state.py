@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from bot.actions import Action
-from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards,
+from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, Info,
                           MatchEnd, MatchInfo, Message, OppAction, Showdown)
 
 ME = "me"
@@ -40,8 +40,25 @@ class HandState:
     opp_bet: Optional[int] = None
     history: list[ActionRecord] = field(default_factory=list)
     opp_cards: tuple[int, ...] = ()  # filled at showdown
+    info: list[Info] = field(default_factory=list)     # INFO messages this hand
+    sb: Optional[int] = None        # this hand's blinds if the engine announced them
+    bb: Optional[int] = None
+    ante: Optional[int] = None
+    offer: tuple[int, ...] = ()      # cards currently offered to me (choose steps)
     delta: Optional[int] = None      # our chip result, set at END
     finished: bool = False
+
+    @property
+    def known_opp_cards(self) -> set[int]:
+        """Opponent cards I've been shown (exposed / peeked / revealed), still possibly held."""
+        return {c for i in self.info if i.who == "opp" and i.kind in ("expose", "peek", "reveal")
+                for c in i.cards}
+
+    @property
+    def dead_cards(self) -> set[int]:
+        """Cards I know are out of play (burned / revealed discards / peeked deck cards)."""
+        return {c for i in self.info if i.kind in ("burn", "reveal") or
+                (i.kind == "peek" and i.who == "none") for c in i.cards}
 
     def actions_on(self, street: int, actor: Optional[str] = None) -> list[Action]:
         """Actions taken on a street, optionally only by one actor."""
@@ -69,7 +86,8 @@ class GameState:
             self.match = msg
         elif isinstance(msg, HandStart):
             self.hand = HandState(msg.hand_id, msg.seat, msg.stack, msg.oppstack,
-                                  my_stack=msg.stack, opp_stack=msg.oppstack)
+                                  my_stack=msg.stack, opp_stack=msg.oppstack,
+                                  sb=msg.sb, bb=msg.bb, ante=msg.ante)
             self._set_time(msg.timeleft)
         elif isinstance(msg, MatchEnd):
             self.match_over = True
@@ -89,6 +107,10 @@ class GameState:
             self._set_time(msg.timeleft)
         elif isinstance(msg, Showdown):
             self.hand.opp_cards = msg.oppcards
+        elif isinstance(msg, Info):
+            self.hand.info.append(msg)
+            if msg.kind == "offer":
+                self.hand.offer = msg.cards
         elif isinstance(msg, HandEnd):
             if not self.hand.finished:
                 self.hand.delta = msg.delta

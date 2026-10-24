@@ -21,11 +21,12 @@ import numpy as np
 
 from bot.actions import Action, LegalActions, is_legal, safe_action
 from bot.cards import FULL_DECK
-from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, MatchEnd,
-                          MatchInfo, OppAction, ProtocolError, Showdown, parse_action)
+from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, Info,
+                          MatchEnd, MatchInfo, OppAction, ProtocolError, Showdown,
+                          parse_action)
 from bot.game.rules_spec import Rules, to_rules
 from bot.game.runner import LazyRng, act, advance, legal_actions
-from bot.game.state import GameState
+from bot.game.state import ALL, INFO_KINDS, GameState
 from lab.players import PlayerCrashed, PlayerTimeout
 from variant.rules import DEFAULT_CONFIG, GameConfig  # noqa: F401  (GameConfig: type hints)
 
@@ -78,6 +79,8 @@ class Hand:
         self.seats = list(seats)
         self.rules = rules or to_rules(cfg, evaluator)
         self.st = GameState(self.rules, deck, list(stacks), hand_id, audit=audit)
+        self.announce_level = bool(getattr(self.rules, "has_schedule", False)
+                                   or getattr(self.rules, "ante", 0))
         self.hand_id = hand_id
         self.on_illegal = on_illegal
         self.rng = rng
@@ -116,14 +119,21 @@ class Hand:
             e = events[self._flushed]
             self._flushed += 1
             k = e.kind
+            viewers = (SB, BB) if e.visible == ALL else (e.visible,)
             if k == "hole":
                 self.notify(e.visible, HoleCards(e.data["cards"]))
             elif k == "board":
                 self.broadcast(BoardUpdate(e.data["street"], e.data["cards"]))
             elif k in ("action", "special"):
-                self.notify(1 - e.player, OppAction(e.data["action"]))
+                for r in viewers:
+                    if r != e.player:          # the actor already knows its own choice
+                        self.notify(r, OppAction(e.data["action"]))
             elif k == "showdown":
                 self.notify(e.visible, Showdown(e.data["cards"]))
+            elif k in INFO_KINDS:
+                for r in viewers:
+                    who = "none" if e.player < 0 else ("me" if e.player == r else "opp")
+                    self.notify(r, Info(k, who, e.data["cards"]))
             elif k == "end":
                 self.notify(e.visible, HandEnd(e.data["delta"]))
 
@@ -165,9 +175,11 @@ class Hand:
     # ---- whole hand
     def play(self) -> HandResult:
         st = self.st
+        lv = st.level if self.announce_level and st.level else None
         for r in (SB, BB):
             self.notify(r, HandStart(self.hand_id, r, st.stack[r], st.stack[1 - r],
-                                     round(self.seats[r].bank, 4)))
+                                     round(self.seats[r].bank, 4),
+                                     *((lv[0], lv[1], lv[2]) if lv else ())))
         while True:
             actor = advance(st, self.rng)
             self.flush_events()
@@ -227,7 +239,9 @@ def play_match(players: Sequence, cfg=DEFAULT_CONFIG, seed: int = 0,
             _safe_notify(seats, i, info)
         for h in range(hands):
             if not rules.reset_stacks_each_hand and min(stacks) <= 0:
-                break                                   # someone is bust
+                if rules.bust_ends_match:
+                    break                               # someone is bust: match over
+                stacks = [s if s > 0 else start for s in stacks]   # rebuy (chips still count)
             sb_player = h % 2
             by_role = [seats[sb_player], seats[1 - sb_player]]
             role_stacks = ([start, start] if rules.reset_stacks_each_hand

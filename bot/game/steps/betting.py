@@ -1,16 +1,25 @@
-"""No-limit betting round ("raise TO" a total street contribution).
+"""Betting round plugin: no-limit, pot-limit and fixed-limit, "raise TO" amounts.
 
-Rules: facing a bet you may fold, call (all-in for less is a call) or raise; with nothing
-to call you may check or bet. The minimum raise is the previous full raise increment (at
-least the big blind); an all-in for less than that is allowed but does not set a new
-increment. Raising is impossible if the opponent is all-in or the raise cap is reached.
-The round ends when every player with chips has acted since the last raise.
+Rules (all structures): facing a bet you may fold, call (all-in for less is a call) or
+raise; with nothing to call you may check or bet. Raising is impossible if the opponent is
+all-in or the raise cap is reached. An all-in for less than a full raise is allowed but
+doesn't set a new raise increment. The round ends when every player with chips has acted
+since the last raise.
+
+  NL  min raise-to = current bet + max(last full raise, big blind); max = all-in
+  PL  max raise-to = current bet + (pot after calling)     i.e.  bet + pot + to_call
+  FL  the only raise-to = current bet + fixed size for this round (cap default 4)
+Optional restrictions:
+  bet_sizes      raise-to must be current bet + f x (pot after calling) for f in the list
+                 (or all-in), snapped into the legal range
+  bet_multiple   raise-to amounts must be multiples of this (or all-in)
+  check_raise    False: a player who checked this round may not raise later in it
 """
 from __future__ import annotations
 
 from typing import Optional
 
-from bot.actions import CALL, FOLD, RAISE, Action, LegalActions
+from bot.actions import CALL, CHECK, FOLD, RAISE, Action, LegalActions
 from bot.game.state import ALL
 from bot.game.steps.base import Step
 
@@ -18,13 +27,15 @@ ROLE = {"SB": 0, "BB": 1}
 
 
 class _Progress:
-    __slots__ = ("actor", "needs")
+    __slots__ = ("actor", "needs", "checked")
 
     def __init__(self, actor: int, needs: set) -> None:
-        self.actor, self.needs = actor, needs
+        self.actor, self.needs, self.checked = actor, needs, set()
 
     def copy(self) -> "_Progress":
-        return _Progress(self.actor, set(self.needs))
+        p = _Progress(self.actor, set(self.needs))
+        p.checked = set(self.checked)
+        return p
 
 
 class Betting(Step):
@@ -32,17 +43,34 @@ class Betting(Step):
     decision = True
 
     def __init__(self, first_actor: str = "BB", max_raises: Optional[int] = None,
-                 big_blind: int = 2, label: str = "") -> None:
-        super().__init__(first_actor=first_actor, max_raises=max_raises, label=label)
+                 big_blind: int = 2, label: str = "", structure: str = "NL",
+                 fixed_bet: Optional[int] = None, bet_sizes: Optional[tuple] = None,
+                 bet_multiple: Optional[int] = None, check_raise: bool = True) -> None:
+        if structure == "FL" and max_raises is None:
+            max_raises = 4
+        super().__init__(first_actor=first_actor, max_raises=max_raises, label=label,
+                         structure=structure)
+        if structure not in ("NL", "PL", "FL"):
+            raise ValueError(f"unknown betting structure {structure!r}")
+        if structure == "FL" and not fixed_bet:
+            raise ValueError("fixed-limit betting needs a fixed bet size")
         self.first = ROLE[first_actor]
         self.max_raises = max_raises
         self.bb = big_blind
         self.label = label
+        self.structure = structure
+        self.fixed_bet = fixed_bet
+        self.bet_sizes = tuple(bet_sizes) if bet_sizes else None
+        self.bet_multiple = bet_multiple
+        self.check_raise = check_raise
+
+    def _bb(self, st) -> int:
+        return st.level[1] if st.level else self.bb
 
     def begin(self, st) -> None:
         if st.rounds_done > 0:                  # later rounds start from zero bets
             st.bet = [0] * st.n_players
-            st.last_raise = self.bb
+            st.last_raise = self._bb(st)
             st.raises = 0
         needs = {p for p in range(st.n_players) if st.stack[p] > 0}
         # Nothing to decide if at most one player has chips and nobody faces a bet.
@@ -63,19 +91,42 @@ class Betting(Step):
     def legal(self, st, p: int) -> LegalActions:
         to_call = st.to_call(p)
         stack = st.stack[p]
+        high = max(st.bet)
+        all_in = st.bet[p] + stack
         opp_has_chips = any(st.stack[q] > 0 for q in range(st.n_players) if q != p)
         capped = self.max_raises is not None and st.raises >= self.max_raises
+        no_cr = not self.check_raise and p in st.step_state.checked
         rmin = rmax = None
-        if stack > to_call and opp_has_chips and not capped:
-            rmax = st.bet[p] + stack
-            rmin = min(max(st.bet) + max(st.last_raise, self.bb), rmax)
+        sizes = step = None
+        if stack > to_call and opp_has_chips and not capped and not no_cr:
+            if self.structure == "FL":
+                rmin = rmax = min(high + self.fixed_bet, all_in)
+            else:
+                rmin = high + max(st.last_raise, self._bb(st))
+                rmax = all_in
+                if self.structure == "PL":
+                    rmax = min(all_in, high + st.pot + to_call)
+                rmin = min(rmin, rmax)
+                if self.bet_sizes:
+                    pot_after = st.pot + to_call
+                    sizes = sorted({min(max(int(round(high + f * pot_after)), rmin), rmax)
+                                    for f in self.bet_sizes} | {rmax})
+                    sizes = tuple(sizes)
+                    rmin, rmax = sizes[0], sizes[-1]
+                elif self.bet_multiple:
+                    m = self.bet_multiple
+                    up = -(-rmin // m) * m
+                    rmin = up if up <= rmax else rmax
+                    step = m
         return LegalActions(fold=to_call > 0, check=to_call == 0, call=to_call > 0,
-                            raise_min=rmin, raise_max=rmax)
+                            raise_min=rmin, raise_max=rmax, raise_sizes=sizes, raise_step=step)
 
     def apply_choice(self, st, p: int, a: Action) -> None:
         prog: _Progress = st.step_state
         if a.kind == FOLD:
             st.folded = p
+        elif a.kind == CHECK:
+            prog.checked.add(p)
         elif a.kind == CALL:
             st.pay(p, st.to_call(p))
         elif a.kind == RAISE:
@@ -99,4 +150,13 @@ class Betting(Step):
     def describe(self) -> str:
         cap = f", max {self.max_raises} raises" if self.max_raises is not None else ""
         name = f"{self.label} " if self.label else ""
-        return f"{name}no-limit betting, {self.params['first_actor']} acts first{cap}"
+        kind = {"NL": "no-limit", "PL": "pot-limit",
+                "FL": f"fixed-limit ({self.fixed_bet})"}[self.structure]
+        extra = ""
+        if self.bet_sizes:
+            extra += f", sizes {list(self.bet_sizes)} x pot"
+        if self.bet_multiple:
+            extra += f", multiples of {self.bet_multiple}"
+        if not self.check_raise:
+            extra += ", no check-raise"
+        return f"{name}{kind} betting, {self.params['first_actor']} acts first{cap}{extra}"

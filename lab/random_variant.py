@@ -19,8 +19,35 @@ from variant.spec import STANDARD_RANKS, VariantSpec
 ROUND_NAMES = ["preflop", "flop", "turn", "river", "fifth", "sixth"]
 
 
+ORDER_CHOICES = ["BB_first", "SB_first", "simultaneous"]
+
+
+def _card_step(r: random.Random) -> dict:
+    """A random card-manipulation step (phase 13 plugins)."""
+    kind = r.choice(["discard", "draw", "swap", "peek", "expose"])
+    order = r.choice(ORDER_CHOICES)
+    if kind == "discard":
+        return {"type": "discard", "n": 1, "order": order,
+                "visibility": r.choice(["public", "private", "later"]),
+                "destination": r.choice(["board", "muck", "opponent"]),
+                "optional": r.random() < 0.3}
+    if kind == "draw":
+        return {"type": "draw", "max": r.randint(1, 2), "order": order,
+                "cost": r.choice([0, 0, 2]), "visibility": r.choice(["public", "private"])}
+    if kind == "swap":
+        return {"type": "swap", "with": r.choice(["opponent", "board", "deck"]),
+                "mode": r.choice(["optional", "forced", "random"]), "order": order,
+                "probability": r.choice([1.0, 0.5])}
+    if kind == "peek":
+        return {"type": "peek", "target": r.choice(["board", "opponent"]), "order": order,
+                "cost": r.choice([0, 3])}
+    return {"type": "expose", "n": 1, "chosen": r.random() < 0.5, "order": order}
+
+
 def _program(r: random.Random, hole: int, streets: list[int], max_phase: int) -> list[dict]:
-    prog: list[dict] = [{"type": "post_blinds"}, {"type": "deal_hole", "n": hole}]
+    prog: list[dict] = [{"type": "post_blinds"},
+                        {"type": "deal_hole", "n": hole,
+                         "face_up": 1 if max_phase >= 13 and r.random() < 0.1 else 0}]
     burn = r.random() < 0.2
     for i, n in enumerate(streets):
         if i:
@@ -28,6 +55,8 @@ def _program(r: random.Random, hole: int, streets: list[int], max_phase: int) ->
             if burn:
                 step.update(burn=1, burn_revealed=r.random() < 0.5)
             prog.append(step)
+        if max_phase >= 13 and r.random() < 0.25:
+            prog.append(_card_step(r))
         bet = {"type": "betting", "round": ROUND_NAMES[i] if i < len(ROUND_NAMES) else f"r{i}"}
         if r.random() < 0.15:
             bet["first"] = r.choice(["SB", "BB"])
@@ -96,6 +125,19 @@ def random_spec(seed: int, max_phase: int = 99) -> VariantSpec:
             if bet["structure"] == "FL":
                 bb = bet.get("big_blind", 2)
                 bet["fixed_bets"] = [bb] * 2 + [2 * bb] * 8
+        if max_phase >= 14 and bet.get("structure", "NL") == "NL":
+            if r.random() < 0.15:
+                bet["bet_sizes"] = sorted(r.sample([0.33, 0.5, 0.75, 1.0, 1.5, 2.0], 2))
+            elif r.random() < 0.1:
+                bet["bet_multiple"] = r.choice([2, 5])
+        if max_phase >= 14:
+            bb = bet.get("big_blind", 2)
+            if r.random() < 0.15:
+                bet["ante"] = max(1, bb // 2)
+            if r.random() < 0.1:
+                bet["straddle"] = 2 * bb
+            if r.random() < 0.1:
+                bet["check_raise"] = False
         if bet:
             d["betting"] = bet
 
@@ -105,6 +147,11 @@ def random_spec(seed: int, max_phase: int = 99) -> VariantSpec:
             match["starting_stack"] = bb * r.choice([3, 10, 50, 100, 200, 500])
         if r.random() < 0.2:
             match["reset_stacks"] = False
+            if max_phase >= 14 and r.random() < 0.5:
+                match["bust_ends_match"] = False
+        if max_phase >= 14 and r.random() < 0.15:
+            sb0, bb0 = bet.get("small_blind", 1), bet.get("big_blind", 2)
+            match["blind_schedule"] = [[50, 2 * sb0, 2 * bb0], [150, 4 * sb0, 4 * bb0]]
         if match:
             d["match"] = match
 

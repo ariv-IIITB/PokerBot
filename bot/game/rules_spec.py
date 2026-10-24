@@ -38,6 +38,21 @@ class Rules:
     name: str = "holdem"
     bust_ends_match: bool = True
     spec: Any = field(default=None, compare=False, repr=False)
+    ante: int = 0
+    straddle: int = 0
+    blind_schedule: tuple = ()      # ((from_hand, sb, bb), ...) sorted by from_hand
+
+    def level_at(self, hand_index: int) -> tuple[int, int, int, int]:
+        """(sb, bb, ante, straddle) in force for hand `hand_index` (0-based)."""
+        sb, bb = self.small_blind, self.big_blind
+        for start, s, b in self.blind_schedule:
+            if hand_index >= start:
+                sb, bb = s, b
+        return sb, bb, self.ante, self.straddle
+
+    @property
+    def has_schedule(self) -> bool:
+        return bool(self.blind_schedule)
 
     @property
     def board_cards(self) -> int:

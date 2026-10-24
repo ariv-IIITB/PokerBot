@@ -41,7 +41,7 @@ STEP_PARAMS: dict[str, dict[str, Any]] = {
     "swap": {"with": "opponent", "mode": "optional", "n": 1, "probability": 1.0,
              "order": "BB_first", "cost": 0},
     "choose": {"offer": 3, "keep": 1, "order": "BB_first", "visibility": "private"},
-    "peek": {"target": "board", "cost": 0, "order": "BB_first"},
+    "peek": {"target": "board", "cost": 0, "order": "BB_first"},  # target: board|opponent
     "expose": {"n": 1, "order": "BB_first", "chosen": True},
     "auction": {"kind": "second_price", "prize": "card", "payment": "pot", "tie": "BB",
                 "max_bid": None},
