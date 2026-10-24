@@ -152,3 +152,19 @@ def clamp(action: object, legal: LegalActions) -> Action:
     if k == SPECIAL and legal.can_special:
         return Action.special(legal.special.choices[0])  # type: ignore[union-attr]
     return safe_action(legal)
+
+
+def pot_fraction_raise(frac: float, pot: int, tocall: int, mybet: Optional[int],
+                       legal: LegalActions) -> Optional[Action]:
+    """A raise of about `frac` x pot (pot counted after we call), clamped to the legal
+    range. "Raise to" = our street bet + the call + frac * (pot + call). If the engine
+    doesn't report our street bet, approximate from the min-raise. None if we can't raise."""
+    if not legal.can_raise:
+        return None
+    extra = frac * (pot + tocall)
+    if mybet is not None:
+        target = mybet + tocall + extra
+    else:
+        target = legal.raise_min + extra  # type: ignore[operator]
+    amount = int(round(min(max(target, legal.raise_min), legal.raise_max)))  # type: ignore[type-var]
+    return Action.raise_to(amount)

@@ -7,7 +7,8 @@ deal mostly cancels, so chips/hand standard errors are computed per pair.
 Seeds run in parallel across cores (multiprocessing, `spawn`-safe: workers are top-level
 functions and players are rebuilt from picklable PlayerSpecs).
 
-CLI:  .venv/bin/python -m lab.harness tier0 random_legal --seeds 20 --hands 400
+CLI:  .venv/bin/python -m lab.harness tier0 random_legal maniac --seeds 20 --hands 400
+      (A = first name, then one duplicate run against each opponent listed)
 """
 from __future__ import annotations
 
@@ -123,7 +124,7 @@ def run_duplicate(a: PlayerSpec, b: PlayerSpec, cfg: GameConfig = DEFAULT_CONFIG
 def main(argv: Optional[list[str]] = None) -> None:
     ap = argparse.ArgumentParser(description="Duplicate match between two brains.")
     ap.add_argument("a")
-    ap.add_argument("b")
+    ap.add_argument("b", nargs="+", help="one or more opponents")
     ap.add_argument("--seeds", type=int, default=10)
     ap.add_argument("--first-seed", type=int, default=0)
     ap.add_argument("--hands", type=int, default=None)
@@ -137,10 +138,11 @@ def main(argv: Optional[list[str]] = None) -> None:
                                        label=f"{args.a}(proc)")
     else:
         spec_a = PlayerSpec.brain(args.a)
-    rep = run_duplicate(spec_a, PlayerSpec.brain(args.b),
-                        seeds=range(args.first_seed, args.first_seed + args.seeds),
-                        hands=args.hands, processes=args.processes)
-    print(rep.summary())
+    for b in args.b:
+        rep = run_duplicate(spec_a, PlayerSpec.brain(b),
+                            seeds=range(args.first_seed, args.first_seed + args.seeds),
+                            hands=args.hands, processes=args.processes)
+        print(rep.summary(), flush=True)
 
 
 if __name__ == "__main__":

@@ -55,8 +55,19 @@ Equity benchmark: `.venv/bin/python -m lab.bench_equity`
 Duplicate harness (each seed played twice with seats swapped, parallel over cores):
 
 ```bash
-.venv/bin/python -m lab.harness tier0 random_legal --seeds 20 --hands 400
+.venv/bin/python -m lab.harness tier0 random_legal maniac --seeds 20 --hands 400   # A vs each
 .venv/bin/python -m lab.harness tier0 tier0 --subprocess   # A runs as a real bot process
+```
+
+Sparring brains (lab only): `random_legal`, `all_in`, `calling_station`, `tight`, `maniac`.
+Run any of them as a protocol bot: `.venv/bin/python -m lab.run_brain maniac`.
+
+Snapshots of past versions (run as subprocess bots):
+
+```bash
+.venv/bin/python -m lab.versions create v1               # from the working tree
+.venv/bin/python -m lab.versions create v0 --ref <tag>   # from git
+.venv/bin/python -m lab.versions list
 ```
 
 _Tools (phase 9) are documented as they land._
