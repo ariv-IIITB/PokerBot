@@ -69,6 +69,7 @@ class Tier2Brain(Tier1Brain):
         return {k: (dict(v) if isinstance(v, dict) else v) for k, v in DEFAULTS.items()}
 
     def observe(self, state: GameState, msg: Message) -> None:
+        super().observe(state, msg)
         self.opp.update(state, msg)
 
     def adjusted(self) -> dict[str, Any]:

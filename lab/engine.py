@@ -60,6 +60,8 @@ class Seat:
         self.errors = 0          # illegal / unparseable replies
         self.decisions = 0
         self.worst_decision_s = 0.0
+        self.first_decision_s = 0.0      # includes process start-up overlap for subprocesses
+        self.worst_after_first_s = 0.0
 
 
 class Hand:
@@ -128,6 +130,10 @@ class Hand:
         seat.bank -= dt
         seat.decisions += 1
         seat.worst_decision_s = max(seat.worst_decision_s, dt)
+        if seat.decisions == 1:
+            seat.first_decision_s = dt
+        else:
+            seat.worst_after_first_s = max(seat.worst_after_first_s, dt)
         if seat.bank < 0:
             raise Forfeit(role, "time bank exhausted")
         try:
@@ -282,6 +288,8 @@ class MatchResult:
     worst_decision_s: list[float] = field(default_factory=lambda: [0.0, 0.0])
     decisions: list[int] = field(default_factory=lambda: [0, 0])
     bank_left: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    first_decision_s: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    worst_after_first_s: list[float] = field(default_factory=lambda: [0.0, 0.0])
     hand_deltas: list[int] = field(default_factory=list)   # player 0's delta per hand
 
     def score(self, index: int) -> float:
@@ -339,6 +347,8 @@ def play_match(players: Sequence, cfg: GameConfig = DEFAULT_CONFIG, seed: int = 
     result.worst_decision_s = [s.worst_decision_s for s in seats]
     result.decisions = [s.decisions for s in seats]
     result.bank_left = [max(0.0, s.bank) for s in seats]
+    result.first_decision_s = [s.first_decision_s for s in seats]
+    result.worst_after_first_s = [s.worst_after_first_s for s in seats]
     return result
 
 

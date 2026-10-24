@@ -20,6 +20,8 @@ from bot.actions import RAISE, Action, LegalActions, pot_fraction_raise, safe_ac
 from bot.brains.base import Brain
 from bot.brains.params import load_params, per_street
 from bot.equity import equity
+from bot.log import warn
+from bot.protocol import MatchInfo, Message
 from bot.state import ME, GameState
 from variant.rules import DEFAULT_CONFIG, GameConfig
 
@@ -56,6 +58,20 @@ class Tier1Brain(Brain):
     @classmethod
     def defaults(cls) -> dict[str, Any]:
         return dict(DEFAULTS)
+
+    # ---- warm-up
+    def observe(self, state: GameState, msg: Message) -> None:
+        if isinstance(msg, MatchInfo):
+            self.warm_up()
+
+    def warm_up(self) -> None:
+        """Build evaluator tables and NumPy code paths before the first timed decision
+        (the first equity call is ~60 ms, later ones well under 1 ms)."""
+        try:
+            hole = list(range(self.game.hole_cards))
+            equity(hole, (), self.game, max_samples=16, rng=self.rng)
+        except Exception as e:  # never fatal: the first decision just pays the cost
+            warn(f"warm-up failed: {e!r}")
 
     # ---- equity
     def equity(self, state: GameState, budget_s: float) -> float:

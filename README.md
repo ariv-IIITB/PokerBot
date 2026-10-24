@@ -70,4 +70,16 @@ Snapshots of past versions (run as subprocess bots):
 .venv/bin/python -m lab.versions list
 ```
 
-_Tools (phase 9) are documented as they land._
+Test tooling:
+
+```bash
+.venv/bin/python -m lab.fuzz --hands 200000                  # weird bots x example variants, all cores
+.venv/bin/python -m lab.fuzz --hands 2000 --subprocess       # real bot process + junk input lines
+.venv/bin/python -m lab.timing_bench --hands 400             # startup, bank used, worst decision, x2 projection
+.venv/bin/python -m lab.memory_check --hands 400             # peak RSS of the bot process
+.venv/bin/python -m lab.sweep tier2 lab/spaces/tier2_example.json --mode random --n 12 \
+    --opponents tier1 maniac tight --seeds 8 --hands 200     # ranked parameter sweep
+```
+
+Brains: `tier0` (check/fold), `tier1` (equity vs pot odds), `tier2` (default: opponent model +
+endgame lock). Hyperparameters: `bot/config/tier1.json`, `bot/config/tier2.json` (optional files).
