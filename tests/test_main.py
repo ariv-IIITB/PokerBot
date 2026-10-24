@@ -5,7 +5,7 @@ import time
 import pytest
 from helpers import scripted_match
 
-from bot.actions import Action, LegalActions
+from bot.actions import Action
 from bot.brains.base import Brain
 from bot.brains.tier0 import Tier0Brain
 from bot.main import Bot

@@ -2,7 +2,6 @@
 import random
 import sys
 
-import pytest
 
 from bot.actions import Action, LegalActions
 from bot.brains.base import Brain
@@ -11,7 +10,8 @@ from bot.protocol import ActRequest, BoardUpdate, HoleCards, OppAction, Showdown
 from lab.engine import BB, SB, Hand, Seat, deck_for, play_match
 from lab.players import InProcessPlayer, SubprocessPlayer
 from variant.evaluator_hook import make_evaluator
-from variant.rules import GameConfig, SpecialStep
+from lab.example_variants import EXAMPLES
+from variant.rules import GameConfig
 
 CFG = GameConfig()
 EV = make_evaluator(CFG)
@@ -206,21 +206,9 @@ def test_persistent_stacks_end_on_bust() -> None:
 
 # --------------------------------------------------------------------------- special-step hook
 
-def discard_choices(hand, role):
-    """After the flop each player discards 1 of 3 hole cards (choice = index)."""
-    return tuple(str(i) for i in range(len(hand.hole[role]))) if len(hand.hole[role]) == 3 else ()
-
-
-def discard_apply(hand, role, choice):
-    card = hand.hole[role].pop(int(choice))
-    hand.board.append(card)          # face up onto the board
-
-
-DISCARD_CFG = GameConfig(
-    hole_cards=3,
-    special_steps=(SpecialStep(street=1, name="discard", choices=discard_choices,
-                               apply=discard_apply, order=("BB", "SB")),),
-)
+# The example hook lives in lab/example_variants.py (shared with the fuzzer):
+# after the flop each player discards 1 of 3 hole cards face up onto the board, BB first.
+DISCARD_CFG = EXAMPLES["discard3"]
 
 
 def test_discard_hook_example() -> None:

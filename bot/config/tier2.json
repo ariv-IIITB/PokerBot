@@ -1,0 +1,34 @@
+{
+  "_comment": "Tier 2 hyperparameters (Tier 1 keys + opponent-model and lock settings). Missing keys use bot/brains/tier2.py defaults.",
+  "equity_budget_frac": 0.7,
+  "max_samples": 3000,
+  "raise_equity": [
+    0.7,
+    0.68,
+    0.7,
+    0.74
+  ],
+  "strong_equity": 0.85,
+  "value_frac": 0.66,
+  "strong_frac": 1.0,
+  "max_own_raises": 2,
+  "call_margin": 0.02,
+  "bet_pressure": 0.1,
+  "bluff_freq": 0.1,
+  "bluff_max_equity": 0.4,
+  "bluff_frac": 0.5,
+  "prior_k": 15.0,
+  "priors": {
+    "vpip": 0.55,
+    "pfr": 0.25,
+    "aggression": 0.35,
+    "fold_to_raise": 0.4,
+    "wtsd": 0.35
+  },
+  "bluff_scale_max": 2.0,
+  "value_shift": 0.15,
+  "value_size_shift": 0.6,
+  "aggr_call_shift": 0.1,
+  "lock_enabled": true,
+  "lock_assume_alternating": true
+}

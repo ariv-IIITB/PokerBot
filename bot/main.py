@@ -31,8 +31,9 @@ from bot.timing import DeadlineExceeded, Stopwatch, TimeManager, hard_deadline
 BRAINS = {
     "tier0": "bot.brains.tier0:Tier0Brain",
     "tier1": "bot.brains.tier1:Tier1Brain",
+    "tier2": "bot.brains.tier2:Tier2Brain",
 }
-DEFAULT_BRAIN = "tier1"
+DEFAULT_BRAIN = "tier2"
 
 
 def load_brain(name: str) -> Brain:

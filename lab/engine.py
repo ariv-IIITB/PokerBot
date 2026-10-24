@@ -18,7 +18,7 @@ from typing import Optional, Sequence
 
 import numpy as np
 
-from bot.actions import (CALL, CHECK, FOLD, RAISE, SPECIAL, Action, LegalActions,
+from bot.actions import (CALL, FOLD, RAISE, Action, LegalActions,
                          SpecialOption, is_legal, safe_action)
 from bot.cards import DECK_SIZE
 from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, MatchEnd,
@@ -281,6 +281,7 @@ class MatchResult:
     forfeit_reason: str = ""
     worst_decision_s: list[float] = field(default_factory=lambda: [0.0, 0.0])
     decisions: list[int] = field(default_factory=lambda: [0, 0])
+    bank_left: list[float] = field(default_factory=lambda: [0.0, 0.0])
     hand_deltas: list[int] = field(default_factory=list)   # player 0's delta per hand
 
     def score(self, index: int) -> float:
@@ -337,6 +338,7 @@ def play_match(players: Sequence, cfg: GameConfig = DEFAULT_CONFIG, seed: int = 
     result.errors = [s.errors for s in seats]
     result.worst_decision_s = [s.worst_decision_s for s in seats]
     result.decisions = [s.decisions for s in seats]
+    result.bank_left = [max(0.0, s.bank) for s in seats]
     return result
 
 
