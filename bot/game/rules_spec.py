@@ -41,6 +41,7 @@ class Rules:
     ante: int = 0
     straddle: int = 0
     blind_schedule: tuple = ()      # ((from_hand, sb, bb), ...) sorted by from_hand
+    payoffs: tuple = ()             # payoff modifiers: ({"type": "rake", ...}, ...)
 
     def level_at(self, hand_index: int) -> tuple[int, int, int, int]:
         """(sb, bb, ante, straddle) in force for hand `hand_index` (0-based)."""

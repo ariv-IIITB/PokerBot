@@ -49,7 +49,9 @@ class WeirdPlayer:
         style = self.style if self.style != "mixed" else self.rng.choice(self.STYLES[:-1])
         L, r = req.legal, self.rng
         if L.special is not None:
-            return r.choice([f"S {r.choice(L.special.choices)}", "S nope", "F"])
+            sp = L.special
+            pick = str(r.randint(sp.lo - 3, sp.hi + 3)) if sp.is_range else r.choice(sp.choices)
+            return r.choice([f"S {pick}", "S nope", "F"])
         if style == "random_size":
             return r.choice(["F", "K", "C", f"R {r.randint(-50, 2000)}"])
         if style == "min_raise":

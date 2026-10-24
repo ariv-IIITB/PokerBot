@@ -44,6 +44,20 @@ def _card_step(r: random.Random) -> dict:
     return {"type": "expose", "n": 1, "chosen": r.random() < 0.5, "order": order}
 
 
+def _side_step(r: random.Random) -> dict:
+    """A random side mechanic (phase 15 plugins)."""
+    kind = r.choice(["bounty", "auction", "market"])
+    if kind == "bounty":
+        return {"type": "bounty", "mode": r.choice(["random", "chosen"]),
+                "bonus": r.choice([0, 5, 10]), "multiplier": r.choice([1.0, 1.0, 2.0])}
+    if kind == "auction":
+        return {"type": "auction", "kind": r.choice(["first_price", "second_price", "all_pay"]),
+                "prize": r.choice(["card", "peek", "position", "swap"]),
+                "payment": r.choice(["pot", "opponent", "burn"]),
+                "tie": r.choice(["BB", "SB", "random", "none"]), "max_bid": r.choice([None, 20])}
+    return {"type": "market", "quantity": r.choice(["board_rank_sum", "board_hearts", "board_high"])}
+
+
 def _program(r: random.Random, hole: int, streets: list[int], max_phase: int) -> list[dict]:
     prog: list[dict] = [{"type": "post_blinds"},
                         {"type": "deal_hole", "n": hole,
@@ -57,11 +71,21 @@ def _program(r: random.Random, hole: int, streets: list[int], max_phase: int) ->
             prog.append(step)
         if max_phase >= 13 and r.random() < 0.25:
             prog.append(_card_step(r))
+        if max_phase >= 15 and r.random() < 0.12:
+            prog.append(_side_step(r))
         bet = {"type": "betting", "round": ROUND_NAMES[i] if i < len(ROUND_NAMES) else f"r{i}"}
         if r.random() < 0.15:
             bet["first"] = r.choice(["SB", "BB"])
         prog.append(bet)
-    prog.append({"type": "showdown"})
+    showdown = {"type": "showdown"}
+    if max_phase >= 15 and r.random() < 0.1:
+        showdown["runs"] = 2
+    prog.append(showdown)
+    if max_phase >= 15 and r.random() < 0.1:              # several boards
+        k = r.choice([2, 3])
+        for st in prog:
+            if st["type"] == "deal_board":
+                st["boards"] = k
     return prog
 
 
@@ -154,6 +178,10 @@ def random_spec(seed: int, max_phase: int = 99) -> VariantSpec:
             match["blind_schedule"] = [[50, 2 * sb0, 2 * bb0], [150, 4 * sb0, 4 * bb0]]
         if match:
             d["match"] = match
+        if max_phase >= 15 and r.random() < 0.15:
+            d["payoffs"] = [r.choice([{"type": "rake", "percent": 5, "cap": 5},
+                                      {"type": "multiplier", "factor": 2.0},
+                                      {"type": "bounty", "mode": "random", "bonus": 5}])]
 
         spec = VariantSpec.from_dict(d)
         if not spec.validate():

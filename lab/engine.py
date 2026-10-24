@@ -52,6 +52,7 @@ class HandResult:
     showdown: bool
     folded: Optional[int]           # role that folded, if any
     pot: int
+    house: int = 0                  # chips that left the table (rake, burned bids)
 
 
 class Seat:
@@ -123,7 +124,7 @@ class Hand:
             if k == "hole":
                 self.notify(e.visible, HoleCards(e.data["cards"]))
             elif k == "board":
-                self.broadcast(BoardUpdate(e.data["street"], e.data["cards"]))
+                self.broadcast(BoardUpdate(e.data["street"], e.data["cards"], e.data.get("index")))
             elif k in ("action", "special"):
                 for r in viewers:
                     if r != e.player:          # the actor already knows its own choice
@@ -133,7 +134,9 @@ class Hand:
             elif k in INFO_KINDS:
                 for r in viewers:
                     who = "none" if e.player < 0 else ("me" if e.player == r else "opp")
-                    self.notify(r, Info(k, who, e.data["cards"]))
+                    value = e.data.get("value")
+                    self.notify(r, Info(k, who, e.data.get("cards", ()),
+                                        int(value) if value is not None else None))
             elif k == "end":
                 self.notify(e.visible, HandEnd(e.data["delta"]))
 
@@ -188,7 +191,7 @@ class Hand:
             action = self.ask(actor, legal_actions(st, actor))
             act(st, actor, action)
             self.flush_events()
-        return HandResult(list(st.deltas), st.showdown, st.folded, st.pot)
+        return HandResult(list(st.deltas), st.showdown, st.folded, st.pot, st.house)
 
 
 # --------------------------------------------------------------------------- matches
@@ -206,6 +209,7 @@ class MatchResult:
     first_decision_s: list[float] = field(default_factory=lambda: [0.0, 0.0])
     worst_after_first_s: list[float] = field(default_factory=lambda: [0.0, 0.0])
     hand_deltas: list[int] = field(default_factory=list)   # player 0's delta per hand
+    house: int = 0                                         # total rake / burned chips
 
     def score(self, index: int) -> float:
         """Match points for player `index`: win 1, draw 0.5, loss 0."""
@@ -251,7 +255,8 @@ def play_match(players: Sequence, cfg=DEFAULT_CONFIG, seed: int = 0,
             try:
                 res = hand.play()
                 if audit:
-                    assert sum(res.deltas) == 0, f"hand {h}: chips not conserved {res.deltas}"
+                    assert sum(res.deltas) + res.house == 0, \
+                        f"hand {h}: chips not conserved {res.deltas} (house {res.house})"
             except Forfeit as f:
                 result.forfeit = sb_player if f.role == SB else 1 - sb_player
                 result.forfeit_reason = f.reason
@@ -261,6 +266,7 @@ def play_match(players: Sequence, cfg=DEFAULT_CONFIG, seed: int = 0,
                 chips[i] += d[i]
                 stacks[i] += d[i]
             result.hand_deltas.append(d[0])
+            result.house += res.house
             result.hands_played += 1
         for i in (0, 1):
             _safe_notify(seats, i, MatchEnd())

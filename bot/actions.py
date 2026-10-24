@@ -47,9 +47,29 @@ class Action:
 
 @dataclass(frozen=True)
 class SpecialOption:
-    """A variant-specific action on offer, e.g. name="discard", choices=("0","1","2")."""
+    """A variant-specific action on offer: finite choices, e.g. name="discard",
+    choices=("0","1","2"), or a numeric range lo..hi (bids, quotes), choices=()."""
     name: str
-    choices: tuple[str, ...]
+    choices: tuple[str, ...] = ()
+    lo: Optional[int] = None
+    hi: Optional[int] = None
+
+    @property
+    def is_range(self) -> bool:
+        return self.lo is not None and self.hi is not None and self.lo <= self.hi
+
+    def allows(self, choice: object) -> bool:
+        if self.is_range:
+            try:
+                v = int(str(choice))
+            except ValueError:
+                return False
+            return self.lo <= v <= self.hi and str(v) == str(choice)  # type: ignore[operator]
+        return choice in self.choices
+
+    def default(self) -> str:
+        """The safe choice: the first listed option, or the bottom of the range."""
+        return str(self.lo) if self.is_range else self.choices[0]
 
 
 @dataclass(frozen=True)
@@ -95,7 +115,7 @@ class LegalActions:
 
     @property
     def can_special(self) -> bool:
-        return self.special is not None and len(self.special.choices) > 0
+        return self.special is not None and (len(self.special.choices) > 0 or self.special.is_range)
 
     def is_empty(self) -> bool:
         return not (self.fold or self.check or self.call or self.can_raise or self.can_special)
@@ -115,7 +135,7 @@ def is_legal(action: Action, legal: LegalActions) -> bool:
     if k == RAISE:
         return type(action.amount) is int and legal.raise_ok(action.amount)
     if k == SPECIAL:
-        return legal.can_special and action.choice in legal.special.choices  # type: ignore[union-attr]
+        return legal.can_special and legal.special.allows(action.choice)  # type: ignore[union-attr]
     return False
 
 
@@ -127,7 +147,7 @@ def safe_action(legal: LegalActions) -> Action:
     if legal.fold:
         return Action.fold()
     if legal.can_special:
-        return Action.special(legal.special.choices[0])  # type: ignore[union-attr]
+        return Action.special(legal.special.default())  # type: ignore[union-attr]
     if legal.call:
         return Action.call()
     if legal.can_raise:
@@ -175,7 +195,12 @@ def clamp(action: object, legal: LegalActions) -> Action:
     if k == CALL:
         return Action.check() if legal.check else safe_action(legal)
     if k == SPECIAL and legal.can_special:
-        return Action.special(legal.special.choices[0])  # type: ignore[union-attr]
+        sp = legal.special
+        if sp.is_range:  # type: ignore[union-attr]
+            v = _to_int(action.choice)
+            if v is not None:
+                return Action.special(str(min(max(v, sp.lo), sp.hi)))  # type: ignore[union-attr,type-var]
+        return Action.special(sp.default())  # type: ignore[union-attr]
     return safe_action(legal)
 
 

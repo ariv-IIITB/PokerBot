@@ -92,7 +92,7 @@ class Tier1Brain(Brain):
     # ---- decision
     def decide(self, state: GameState, legal: LegalActions, budget_s: float) -> Action:
         if legal.can_special:
-            return Action.special(legal.special.choices[0])  # type: ignore[union-attr]
+            return Action.special(legal.special.default())  # type: ignore[union-attr]
         h = state.hand
         if h is None or not h.hole:
             return safe_action(legal)

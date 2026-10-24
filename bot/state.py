@@ -41,6 +41,7 @@ class HandState:
     history: list[ActionRecord] = field(default_factory=list)
     opp_cards: tuple[int, ...] = ()  # filled at showdown
     info: list[Info] = field(default_factory=list)     # INFO messages this hand
+    boards: dict = field(default_factory=dict)          # several boards: index -> cards
     sb: Optional[int] = None        # this hand's blinds if the engine announced them
     bb: Optional[int] = None
     ante: Optional[int] = None
@@ -96,7 +97,12 @@ class GameState:
         elif isinstance(msg, HoleCards):
             self.hand.hole = msg.cards
         elif isinstance(msg, BoardUpdate):
-            self.hand.board = msg.cards
+            if msg.index is not None:
+                self.hand.boards[msg.index] = msg.cards
+                if msg.index == 0:
+                    self.hand.board = msg.cards
+            else:
+                self.hand.board = msg.cards
             self.hand.street = msg.street
         elif isinstance(msg, OppAction):
             self.hand.history.append(ActionRecord(self.hand.street, OPP, msg.action))

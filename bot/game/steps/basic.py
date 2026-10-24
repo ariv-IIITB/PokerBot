@@ -67,9 +67,10 @@ class DealBoard(Step):
     `n` public cards to the board (n may be 0: a betting round with no new cards)."""
     type_name = "deal_board"
 
-    def __init__(self, n: int, burn: int = 0, burn_revealed: bool = False) -> None:
-        super().__init__(n=n, burn=burn, burn_revealed=burn_revealed)
-        self.n, self.burn, self.burn_revealed = n, burn, burn_revealed
+    def __init__(self, n: int, burn: int = 0, burn_revealed: bool = False,
+                 boards: int = 1) -> None:
+        super().__init__(n=n, burn=burn, burn_revealed=burn_revealed, boards=boards)
+        self.n, self.burn, self.burn_revealed, self.n_boards = n, burn, burn_revealed, boards
 
     def apply(self, st, rng) -> None:
         st.street += 1
@@ -78,6 +79,15 @@ class DealBoard(Step):
             st.muck += burned
             if self.burn_revealed:
                 st.emit("burn", visible=ALL, cards=tuple(burned))
+        if self.n_boards > 1 or st.boards:
+            # Several boards: each gets its own n cards (shared cards stay in st.board).
+            while len(st.boards) < self.n_boards:
+                st.boards.append([])
+            for i in range(len(st.boards)):
+                st.boards[i] = st.boards[i] + st.deal(self.n)
+                st.emit("board", visible=ALL, street=st.street, index=i,
+                        cards=tuple(st.board + st.boards[i]))
+            return
         st.board = st.board + st.deal(self.n)
         st.emit("board", visible=ALL, street=st.street, cards=tuple(st.board))
 
@@ -85,4 +95,5 @@ class DealBoard(Step):
         burn = ""
         if self.burn:
             burn = f"burn {self.burn}{' face up' if self.burn_revealed else ''}, then "
-        return f"{burn}deal {self.n} board card{'s' * (self.n != 1)} (new street)"
+        boards = f" to each of {self.n_boards} boards" if self.n_boards > 1 else ""
+        return f"{burn}deal {self.n} board card{'s' * (self.n != 1)}{boards} (new street)"

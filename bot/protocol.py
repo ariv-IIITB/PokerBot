@@ -17,9 +17,11 @@ Engine -> bot:
         (optional: mybet= oppbet= = chips each side has put in on this street;
          pot = everything committed this hand, including the current street)
     SHOW oppcards=Qs,Qd
-    INFO kind=expose who=opp cards=Ah        (card information outside HOLE/BOARD/SHOW:
-                                              kind = expose | peek | reveal | burn | offer,
-                                              who = me | opp | none: whose cards they are)
+    INFO kind=expose who=opp cards=Ah        (information outside HOLE/BOARD/SHOW:
+                                              kind = expose | peek | reveal | burn | offer |
+                                              run | bounty | auction | market | payment,
+                                              who = me | opp | none, optional value=<int>)
+    BOARD ... index=1                        (several boards: which one)
     END delta=-6
     ENDMATCH
 Bot -> engine (only in reply to ACT): F | K | C | R <amount> | S <choice>
@@ -29,6 +31,7 @@ with option tokens (no spaces/commas/pipes):
     "0", "0+2"   hole-card indices into my current hole cards (discard / draw / expose /
                  swap) or into the offered cards (choose)
     "none"       do nothing;  "yes" / "no"  (peek);  "h1b3"  swap hole 1 with board card 3
+    "0-50"       a numeric range (bids, quotes): reply with any integer in it, e.g. "S 17"
 The opponent's choice arrives as OPP type=S choice=<token>, or choice=hidden for private
 steps (draw shows the number of cards drawn instead).
 
@@ -81,6 +84,7 @@ class HoleCards:
 class BoardUpdate:
     street: int
     cards: tuple[int, ...]
+    index: Optional[int] = None     # which board, when several are dealt
 
 
 @dataclass(frozen=True)
@@ -107,9 +111,10 @@ class Showdown:
 
 @dataclass(frozen=True)
 class Info:
-    kind: str                     # expose | peek | reveal | burn | offer
-    who: str                      # me | opp | none
-    cards: tuple[int, ...]
+    kind: str                     # expose | peek | reveal | burn | offer | run | bounty |
+    who: str                      #   auction | market | payment;   who: me | opp | none
+    cards: tuple[int, ...] = ()
+    value: Optional[int] = None   # numbers: bounty rank, auction price, market value, ...
 
 
 @dataclass(frozen=True)
@@ -184,7 +189,11 @@ def parse_legal(text: str) -> LegalActions:
             name, colon, choices = rest.partition(":")
             if not colon or not name or not choices:
                 raise ProtocolError(f"bad special {part!r}")
-            special = SpecialOption(name, tuple(choices.split("|")))
+            lo, dash, hi = choices.partition("-")
+            if dash and "|" not in choices and lo.isdigit() and hi.isdigit():
+                special = SpecialOption(name, (), int(lo), int(hi))      # numeric range
+            else:
+                special = SpecialOption(name, tuple(choices.split("|")))
         else:
             raise ProtocolError(f"unknown legal token {part!r}")
     return LegalActions(fold, check, call, rmin, rmax, special, sizes, step)
@@ -205,7 +214,9 @@ def format_legal(legal: LegalActions) -> str:
             step = f"/{legal.raise_step}" if legal.raise_step else ""
             parts.append(f"{RAISE}:{legal.raise_min}-{legal.raise_max}{step}")
     if legal.special is not None:
-        parts.append(f"{SPECIAL}:{legal.special.name}:{'|'.join(legal.special.choices)}")
+        sp = legal.special
+        opts = f"{sp.lo}-{sp.hi}" if sp.is_range else "|".join(sp.choices)
+        parts.append(f"{SPECIAL}:{sp.name}:{opts}")
     return ",".join(parts) if parts else "-"
 
 
@@ -274,12 +285,14 @@ _PARSERS = {
     "MATCH": _p_match,
     "HAND": _p_hand,
     "HOLE": lambda kv: HoleCards(_get(kv, "cards", parse_cards)),
-    "BOARD": lambda kv: BoardUpdate(_get(kv, "street", int), _get(kv, "cards", parse_cards)),
+    "BOARD": lambda kv: BoardUpdate(_get(kv, "street", int), _get(kv, "cards", parse_cards),
+                                    _get(kv, "index", int, None, required=False)),
     "OPP": _p_opp,
     "ACT": _p_act,
     "SHOW": lambda kv: Showdown(_get(kv, "oppcards", parse_cards)),
     "INFO": lambda kv: Info(_get(kv, "kind", str), _get(kv, "who", str, "none", required=False),
-                            _get(kv, "cards", parse_cards)),
+                            _get(kv, "cards", parse_cards, (), required=False),
+                            _get(kv, "value", int, None, required=False)),
     "END": lambda kv: HandEnd(_get(kv, "delta", int)),
 }
 
@@ -298,7 +311,8 @@ def encode_message(msg: Message) -> str:
     if isinstance(msg, HoleCards):
         return f"HOLE cards={format_cards(msg.cards)}"
     if isinstance(msg, BoardUpdate):
-        return f"BOARD street={msg.street} cards={format_cards(msg.cards)}"
+        idx = f" index={msg.index}" if msg.index is not None else ""
+        return f"BOARD street={msg.street} cards={format_cards(msg.cards)}{idx}"
     if isinstance(msg, OppAction):
         a = msg.action
         if a.kind == RAISE:
@@ -315,7 +329,8 @@ def encode_message(msg: Message) -> str:
     if isinstance(msg, Showdown):
         return f"SHOW oppcards={format_cards(msg.oppcards)}"
     if isinstance(msg, Info):
-        return f"INFO kind={msg.kind} who={msg.who} cards={format_cards(msg.cards)}"
+        val = f" value={msg.value}" if msg.value is not None else ""
+        return f"INFO kind={msg.kind} who={msg.who} cards={format_cards(msg.cards)}{val}"
     if isinstance(msg, HandEnd):
         return f"END delta={msg.delta}"
     if isinstance(msg, MatchEnd):

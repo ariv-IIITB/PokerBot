@@ -19,11 +19,7 @@ FAST = {"max_samples": 64}
 BOTS = ["random_legal", "all_in", "calling_station", "tight", "maniac"]
 
 # variant -> phase whose plugin it still needs
-EXPECTED_UNSUPPORTED = {
-    "short_bounty_rit": 15, "boards_discard_pl": 15,
-    "auction_card": 15, "bounty_rank": 15, "side_market": 15, "three_boards": 15,
-    "run_it_twice": 15,
-}
+EXPECTED_UNSUPPORTED: dict = {}   # every catalog variant compiles as of phase 15
 
 
 def tier2():
@@ -40,7 +36,7 @@ def check_variant(spec, hands: int, seed: int) -> None:
         m = play_match([make_a(), make_b()], rules, seed=seed + i, hands=hands, audit=True)
         assert m.errors == [0, 0], (spec.name, i, m.errors)
         assert m.forfeit is None, (spec.name, m.forfeit_reason)
-        assert m.chips[0] + m.chips[1] == 0
+        assert m.chips[0] + m.chips[1] + m.house == 0     # rake / burned bids go to the house
     # Determinism: the same seed replays identically.
     runs = [play_match([PlayerSpec.brain("random_legal").build(),
                         PlayerSpec.brain("maniac").build()], rules, seed=seed,

@@ -76,7 +76,11 @@ class Betting(Step):
         # Nothing to decide if at most one player has chips and nobody faces a bet.
         if len(needs) < 2 and all(st.to_call(p) == 0 for p in needs):
             needs = set()
-        st.step_state = _Progress(self.first, needs)
+        first = self.first
+        winner = st.extra.get("position_winner")       # auction prize: act last postflop
+        if winner is not None and st.rounds_done > 0:
+            first = (winner + 1) % st.n_players
+        st.step_state = _Progress(first, needs)
 
     def next_actor(self, st) -> Optional[int]:
         prog: _Progress = st.step_state
@@ -146,6 +150,10 @@ class Betting(Step):
 
     def end(self, st) -> None:
         st.rounds_done += 1
+        # Remember where the board stood when an all-in closed the action ("run it twice").
+        if (st.folded is None and "allin_cut" not in st.extra
+                and any(st.stack[p] == 0 for p in range(st.n_players))):
+            st.extra["allin_cut"] = (len(st.board), tuple(len(b) for b in st.boards))
 
     def describe(self) -> str:
         cap = f", max {self.max_raises} raises" if self.max_raises is not None else ""

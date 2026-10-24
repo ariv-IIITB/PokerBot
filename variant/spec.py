@@ -45,7 +45,7 @@ STEP_PARAMS: dict[str, dict[str, Any]] = {
     "expose": {"n": 1, "order": "BB_first", "chosen": True},
     "auction": {"kind": "second_price", "prize": "card", "payment": "pot", "tie": "BB",
                 "max_bid": None},
-    "market": {"quantity": "board_rank_sum", "spread_max": None, "size": 1, "settle_scale": 1},
+    "market": {"quantity": "board_rank_sum", "size": 1, "settle_scale": 1},
     "bounty": {"mode": "random", "rank": None, "bonus": 0, "multiplier": 1.0},
     "showdown": {"runs": 1},
 }
@@ -300,6 +300,21 @@ def validate(spec: VariantSpec) -> list[str]:
     for i, p in enumerate(spec.payoffs):
         if p.get("type") not in ("bounty", "multiplier", "rake"):
             e.append(f"payoffs[{i}]: unknown type {p.get('type')!r}")
+        elif p["type"] == "rake" and not 0 <= p.get("percent", 5) <= 100:
+            e.append(f"payoffs[{i}]: rake percent must be 0..100")
+        elif p["type"] == "multiplier" and p.get("factor", 1.0) < 1.0:
+            e.append(f"payoffs[{i}]: multiplier factor must be >= 1")
+    for i, s in enumerate(prog):
+        if s.get("type") == "market" and s.get("quantity") not in (
+                "board_rank_sum", "board_hearts", "board_high"):
+            e.append(f"program[{i}] market: unknown quantity {s.get('quantity')!r}")
+        if s.get("type") == "auction":
+            for key, allowed in (("kind", ("first_price", "second_price", "all_pay")),
+                                 ("prize", ("card", "peek", "position", "swap")),
+                                 ("payment", ("pot", "opponent", "burn")),
+                                 ("tie", ("BB", "SB", "random", "none"))):
+                if s.get(key) not in allowed:
+                    e.append(f"program[{i}] auction: {key} must be one of {list(allowed)}")
 
     # G. match
     if m.hands <= 0 or m.time_bank_s <= 0:

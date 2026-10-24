@@ -16,7 +16,8 @@ ALL = -1
 # cards, for peeks). Their correctness is tested per step; every other kind is audited.
 REVEAL_KINDS = frozenset({"showdown", "expose", "peek", "reveal"})
 # Kinds that carry card information to players (sent as INFO messages by the engine).
-INFO_KINDS = frozenset({"expose", "peek", "reveal", "burn", "offer"})
+INFO_KINDS = frozenset({"expose", "peek", "reveal", "burn", "offer", "run", "bounty",
+                        "auction", "market", "payment"})
 
 
 class Event(NamedTuple):
@@ -34,7 +35,7 @@ class GameState:
     __slots__ = ("rules", "deck", "hole", "board", "start", "stack", "bet", "total", "folded",
                  "street", "rounds_done", "last_raise", "raises", "pc", "entered", "step_state",
                  "events", "record", "audit", "done", "deltas", "showdown", "hand_id", "extra",
-                 "muck", "rng", "level")
+                 "muck", "rng", "level", "boards", "house")
 
     def __init__(self, rules, deck: list[int], stacks: list[int], hand_id: int = 0,
                  record: bool = True, audit: bool = False, level=None) -> None:
@@ -46,6 +47,8 @@ class GameState:
         self.hole: list[list[int]] = [[] for _ in range(n)]
         self.board: list[int] = []
         self.muck: list[int] = []           # discarded / burned / unchosen cards
+        self.boards: list[list[int]] = []   # several boards: each board's own cards
+        self.house = 0                      # chips that left the table (rake, burned bids)
         self.start = list(stacks)
         self.stack = list(stacks)
         self.bet = [0] * n                  # this betting round
@@ -138,6 +141,8 @@ class GameState:
         g.muck = list(self.muck)
         g.rng = self.rng
         g.level = self.level
+        g.boards = [list(b) for b in self.boards]
+        g.house = self.house
         g.start, g.stack = list(self.start), list(self.stack)
         g.bet, g.total = list(self.bet), list(self.total)
         g.folded, g.street, g.rounds_done = self.folded, self.street, self.rounds_done

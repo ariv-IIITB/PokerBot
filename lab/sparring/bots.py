@@ -23,7 +23,10 @@ class _Sparring(Brain):
         self.rng = random.Random(self.cfg.get("seed", 0))
 
     def special(self, legal: LegalActions) -> Action:
-        return Action.special(self.rng.choice(legal.special.choices))  # type: ignore[union-attr]
+        sp = legal.special
+        if sp.is_range:  # type: ignore[union-attr]
+            return Action.special(str(self.rng.randint(sp.lo, sp.hi)))  # type: ignore[union-attr]
+        return Action.special(self.rng.choice(sp.choices))  # type: ignore[union-attr]
 
     def raise_frac(self, state: GameState, legal: LegalActions, frac: float) -> Optional[Action]:
         h = state.hand
@@ -124,7 +127,7 @@ class Tight(_Sparring):
 
     def decide(self, state, legal, budget_s):
         if legal.can_special:
-            return Action.special(legal.special.choices[0])  # type: ignore[union-attr]
+            return Action.special(legal.special.default())  # type: ignore[union-attr]
         h = state.hand
         if h is None:
             return safe_action(legal)

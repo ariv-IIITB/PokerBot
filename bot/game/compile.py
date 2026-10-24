@@ -15,6 +15,8 @@ from bot.game.scoring import SCORES, CustomEvaluator, Scorer
 from bot.game.rules_spec import Rules, street_label
 from bot.game.steps import (Betting, Choose, DealBoard, DealHole, Discard, Draw, Expose, Peek,
                             PostBlinds, ShowdownStep, Swap)
+from bot.game.steps.side import Auction, Bounty, Market
+from variant.spec import STEP_PARAMS
 from bot.game.steps.base import Step
 
 
@@ -91,8 +93,6 @@ def compile_spec(spec) -> Rules:
     """VariantSpec -> Rules. Raises SpecError if invalid, NotSupported if a plugin is missing."""
     spec.check()
     b, m = spec.betting, spec.match
-    if spec.payoffs:
-        raise NotSupported("payoff modifiers (bounty / multiplier / rake)", 15)
     deck = build_deck(spec)
     evaluator = build_evaluator(spec, deck)
 
@@ -108,17 +108,13 @@ def compile_spec(spec) -> Rules:
             prog.append(DealHole(s["n"], s["face_up"]))
             hole += s["n"]
         elif t == "deal_board":
-            if s["boards"] not in (None, 1):
-                raise NotSupported("multiple boards", 15)
-            prog.append(DealBoard(s["n"], s["burn"], s["burn_revealed"]))
+            prog.append(DealBoard(s["n"], s["burn"], s["burn_revealed"], s["boards"] or 1))
             streets.append(s["n"])
         elif t == "betting":
             prog.append(_betting_step(spec, s, rounds))
             rounds += 1
         elif t == "showdown":
-            if s.get("runs", 1) != 1:
-                raise NotSupported("run it multiple times", 15)
-            prog.append(ShowdownStep())
+            prog.append(ShowdownStep(s.get("runs", 1)))
         elif t == "discard":
             prog.append(Discard(s["n"], s["destination"], s["optional"], order=s["order"],
                                 visibility=s["visibility"]))
@@ -136,14 +132,29 @@ def compile_spec(spec) -> Rules:
             prog.append(Peek(s["target"], order=s["order"], cost=s["cost"]))
         elif t == "expose":
             prog.append(Expose(s["n"], s["chosen"], order=s["order"]))
-        elif t in ("auction", "market", "bounty"):
-            raise NotSupported(f"{t} step", 15)
+        elif t == "bounty":
+            prog.append(_bounty(s, spec))
+        elif t == "auction":
+            prog.append(Auction(s["kind"], s["prize"], s["payment"], s["tie"], s["max_bid"]))
+        elif t == "market":
+            prog.append(Market(s["quantity"], s["size"], s["settle_scale"],
+                               sum(x["n"] for x in spec.full_program() if x["type"] == "deal_board")))
         else:
             raise NotSupported(f"step {t}", 99)
     if "post_blinds" not in spec.step_types() and b.ante:
         prog.insert(0, PostBlinds(0, 0, b.ante, 0))          # antes-only variants
+    modifiers = []
+    for pay in spec.payoffs:
+        if pay["type"] == "bounty":                          # bounty as a payoff = a step
+            prog.insert(1, _bounty({**STEP_PARAMS["bounty"], **pay}, spec))
+        else:
+            modifiers.append(dict(pay))
     schedule = tuple(sorted(tuple(row) for row in m.blind_schedule))
     return Rules(tuple(prog), evaluator, spec.players, hole, b.small_blind, b.big_blind,
                  m.starting_stack, m.reset_stacks, m.hands, m.time_bank_s, deck.cards,
                  tuple(streets), spec.name, m.bust_ends_match, spec, b.ante, b.straddle,
-                 schedule)
+                 schedule, tuple(modifiers))
+
+
+def _bounty(s: dict, spec) -> Step:
+    return Bounty(s["mode"], s.get("rank"), s["bonus"], s["multiplier"], spec.deck.ranks)
