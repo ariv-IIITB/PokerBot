@@ -1,0 +1,51 @@
+"""Run the bot as a real subprocess: stdout must contain only valid actions."""
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+from helpers import scripted_match
+
+from bot.actions import is_legal
+from bot.protocol import ActRequest, parse_action, parse_line
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def run(args: list[str], stdin: bytes) -> subprocess.CompletedProcess:
+    return subprocess.run([sys.executable, *args], input=stdin, capture_output=True,
+                          cwd=ROOT, timeout=30)
+
+
+def test_stdout_only_valid_actions() -> None:
+    lines = scripted_match(hands=20)
+    # Sprinkle garbage, including invalid UTF-8, into the input stream.
+    data = b"".join(line.encode() + b"\n" + (b"\xff\xfe junk\n" if i % 7 == 0 else b"")
+                    for i, line in enumerate(lines))
+    proc = run(["-m", "bot.main"], data)
+    assert proc.returncode == 0, proc.stderr.decode()
+
+    requests = [m for m in map(parse_line, lines) if isinstance(m, ActRequest)]
+    replies = proc.stdout.decode().splitlines()
+    assert len(replies) == len(requests)
+    for req, reply in zip(requests, replies):
+        assert is_legal(parse_action(reply), req.legal), reply
+
+
+def test_script_path_entry_point() -> None:
+    proc = run(["bot/main.py"], ("\n".join(scripted_match(hands=1)) + "\n").encode())
+    assert proc.returncode == 0 and proc.stdout.decode().split() == ["F", "K", "S", "0", "F"]
+
+
+def test_empty_input_exits_cleanly() -> None:
+    proc = run(["-m", "bot.main"], b"")
+    assert proc.returncode == 0 and proc.stdout == b""
+
+
+def test_startup_time() -> None:
+    t0 = time.perf_counter()
+    proc = run(["-m", "bot.main"], b"MATCH hands=400 timebank=60.0 sb=1 bb=2 stack=400\nENDMATCH\n")
+    elapsed = time.perf_counter() - t0
+    print(f"\nbot startup + exit: {elapsed * 1000:.0f} ms")
+    assert proc.returncode == 0
+    assert elapsed < 2.0

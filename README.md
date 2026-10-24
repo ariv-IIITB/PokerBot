@@ -38,4 +38,15 @@ Runtime dependencies of the submitted bot: `numpy` (and `scipy`, optional).
 
 ## Running the bot / harness / tools
 
-_Filled in as the phases land (bot in phase 2, harness in phase 5, tools in phase 9)._
+Bot (reads the engine on stdin, writes actions on stdout, logs on stderr):
+
+```bash
+.venv/bin/python -m bot.main                 # default brain
+.venv/bin/python -m bot.main --brain tier0   # pick a brain from bot/main.py BRAINS
+.venv/bin/python -m bot.main --verbose       # extra stderr logging
+```
+
+The wire format is a placeholder defined in `bot/protocol.py` (the only file to
+rewrite once the real protocol is known).
+
+_Harness (phase 5) and tools (phase 9) are documented as they land._
