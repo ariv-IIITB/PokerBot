@@ -1,0 +1,5 @@
+# Runtime (allowed in the competition bot)
+numpy==2.3.4
+scipy==1.16.2
+# Dev only
+pytest==8.4.2

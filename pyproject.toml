@@ -1,0 +1,14 @@
+[project]
+name = "pokerbots-synergy"
+version = "0.1.0"
+description = "Variant-agnostic poker bot toolkit for Synergy PokerBots"
+requires-python = ">=3.11,<3.12"
+dependencies = ["numpy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Slow tests are skipped by default; run them with `-m slow` (or `-m ""` for all).
+addopts = "-m 'not slow'"
+markers = [
+    "slow: long-running tests (randomized evaluator checks, big fuzz runs)",
+]
