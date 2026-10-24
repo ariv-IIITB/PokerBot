@@ -4,12 +4,32 @@
 structure and hand rules from it instead of hardcoding Hold'em numbers.
 Placeholder defaults = heads-up No-Limit Texas Hold'em.
 
-Special-action hooks (e.g. a discard step) are added to GameConfig in phase 5.
+Special steps (e.g. a discard) are optional hooks the engine runs on a given street,
+before or after that street's betting round. None by default.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Callable, Optional
+
+
+@dataclass(frozen=True)
+class SpecialStep:
+    """A non-betting decision step, e.g. "each player discards one hole card".
+
+    The engine asks each role in `order` (skipping folded players) for a choice:
+      choices(hand, role) -> tuple of option strings (empty tuple = skip this player)
+      apply(hand, role, choice) -> mutate the engine's hand (hole / board / deck lists)
+    `hand` is the lab engine's hand object (attributes: hole[role], board, deck, ...).
+    The chosen option is shown to the opponent as `OPP type=S choice=...`; any changes to
+    the board are broadcast, changes to a player's hole cards are sent to that player.
+    """
+    street: int
+    name: str
+    choices: Callable[[Any, int], tuple[str, ...]]
+    apply: Callable[[Any, int, str], None]
+    order: tuple[str, ...] = ("BB", "SB")
+    timing: str = "before_betting"     # or "after_betting"
 
 
 @dataclass(frozen=True)
@@ -35,6 +55,9 @@ class GameConfig:
     # --- match
     hands_per_match: int = 400
     time_bank_s: float = 60.0
+
+    # --- variant hooks
+    special_steps: tuple[SpecialStep, ...] = ()
 
     def __post_init__(self) -> None:
         if self.hole_cards_used is not None:

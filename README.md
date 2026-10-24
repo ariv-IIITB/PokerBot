@@ -52,4 +52,11 @@ rewrite once the real protocol is known).
 Evaluator benchmark: `.venv/bin/python -m lab.bench_evaluator`
 Equity benchmark: `.venv/bin/python -m lab.bench_equity`
 
-_Harness (phase 5) and tools (phase 9) are documented as they land._
+Duplicate harness (each seed played twice with seats swapped, parallel over cores):
+
+```bash
+.venv/bin/python -m lab.harness tier0 random_legal --seeds 20 --hands 400
+.venv/bin/python -m lab.harness tier0 tier0 --subprocess   # A runs as a real bot process
+```
+
+_Tools (phase 9) are documented as they land._

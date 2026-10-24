@@ -36,6 +36,8 @@ class HandState:
     tocall: int = 0
     my_stack: int = 0
     opp_stack: int = 0
+    my_bet: Optional[int] = None     # chips in on this street (if the engine says)
+    opp_bet: Optional[int] = None
     history: list[ActionRecord] = field(default_factory=list)
     opp_cards: tuple[int, ...] = ()  # filled at showdown
     delta: Optional[int] = None      # our chip result, set at END
@@ -83,6 +85,7 @@ class GameState:
         elif isinstance(msg, ActRequest):
             h = self.hand
             h.pot, h.tocall, h.my_stack, h.opp_stack = msg.pot, msg.tocall, msg.mystack, msg.oppstack
+            h.my_bet, h.opp_bet = msg.mybet, msg.oppbet
             self._set_time(msg.timeleft)
         elif isinstance(msg, Showdown):
             self.hand.opp_cards = msg.oppcards

@@ -22,8 +22,8 @@ from typing import Optional, TextIO
 from bot import log as botlog
 from bot.actions import Action, LegalActions, clamp, safe_action
 from bot.brains.base import Brain
-from bot.protocol import (ActRequest, MatchEnd, MatchInfo, ProtocolError, encode_action,
-                          parse_line)
+from bot.protocol import (ActRequest, MatchEnd, MatchInfo, Message, ProtocolError,
+                          encode_action, parse_line)
 from bot.state import GameState
 from bot.timing import DeadlineExceeded, Stopwatch, TimeManager, hard_deadline
 
@@ -40,7 +40,7 @@ def load_brain(name: str) -> Brain:
 
 
 class Bot:
-    def __init__(self, brain: Brain, out: TextIO, timer: Optional[TimeManager] = None) -> None:
+    def __init__(self, brain: Brain, out: Optional[TextIO], timer: Optional[TimeManager] = None) -> None:
         self.brain = brain
         self.out = out
         self.timer = timer or TimeManager()
@@ -84,28 +84,31 @@ class Bot:
             return True
         if msg is None:
             return True  # blank or unknown: ignore
+        action = self.on_message(msg)
+        if action is not None and self.out is not None:
+            self.out.write(encode_action(action) + "\n")
+            self.out.flush()
+        return not isinstance(msg, MatchEnd)
 
+    def on_message(self, msg: Message) -> Optional[Action]:
+        """Apply one neutral message; returns our (legal) action if it was an ACT.
+        The lab's in-process player calls this directly, skipping the text format."""
         self.state.apply(msg)
+        action = None
         if isinstance(msg, MatchInfo):
             self.timer.configure(msg.timebank, msg.hands)
-        if isinstance(msg, ActRequest):
+        elif isinstance(msg, ActRequest):
+            watch = Stopwatch()
             self.timer.observe_timeleft(msg.timeleft)
-            self._respond(msg.legal)
+            action = clamp(self.choose(msg.legal), msg.legal)
+            self.state.record_my_action(action)
+            self.timer.add_used(watch.elapsed())
         try:
             self.brain.observe(self.state, msg)
         except Exception as e:
             self.brain_errors += 1
             botlog.warn(f"brain.observe failed: {e!r}")
-        return not isinstance(msg, MatchEnd)
-
-    # ---- one decision
-    def _respond(self, legal: LegalActions) -> None:
-        watch = Stopwatch()
-        action = clamp(self.choose(legal), legal)
-        self.out.write(encode_action(action) + "\n")
-        self.out.flush()
-        self.timer.add_used(watch.elapsed())
-        self.state.record_my_action(action)
+        return action
 
     def choose(self, legal: LegalActions) -> Action:
         """Ask the brain, with Tier 0 fallback on emergency, error or deadline."""

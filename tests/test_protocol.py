@@ -20,6 +20,7 @@ MESSAGES = [
     ActRequest(9, 4, 398, 394, LegalActions(fold=True, call=True, raise_min=8,
                                              raise_max=400), 55.21),
     ActRequest(4, 0, 398, 398, LegalActions(check=True), None),
+    ActRequest(14, 4, 390, 386, LegalActions(fold=True, call=True), 12.5, mybet=6, oppbet=10),
     ActRequest(4, 0, 398, 398, LegalActions(special=SpecialOption("discard", ("0", "1", "2")))),
     ActRequest(0, 0, 0, 0, LegalActions()),
     Showdown(parse_cards("Qs,Qd")),

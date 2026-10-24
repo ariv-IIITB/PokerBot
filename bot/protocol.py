@@ -13,6 +13,8 @@ Engine -> bot:
     BOARD street=1 cards=Ts,9h,2c                               (full board so far)
     OPP type=R amount=6                                         (F/K/C/R/S; S uses choice=)
     ACT pot=9 tocall=4 mystack=398 oppstack=394 legal=F,C,R:8-400 timeleft=55.21
+        (optional: mybet= oppbet= = chips each side has put in on this street;
+         pot = everything committed this hand, including the current street)
     SHOW oppcards=Qs,Qd
     END delta=-6
     ENDMATCH
@@ -79,6 +81,8 @@ class ActRequest:
     oppstack: int
     legal: LegalActions
     timeleft: Optional[float] = None
+    mybet: Optional[int] = None     # our chips in on this street
+    oppbet: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -224,7 +228,9 @@ def _p_act(kv):
     return ActRequest(_get(kv, "pot", int), _get(kv, "tocall", int),
                       _get(kv, "mystack", int), _get(kv, "oppstack", int),
                       parse_legal(_get(kv, "legal", str)),
-                      _get(kv, "timeleft", float, None, required=False))
+                      _get(kv, "timeleft", float, None, required=False),
+                      _get(kv, "mybet", int, None, required=False),
+                      _get(kv, "oppbet", int, None, required=False))
 
 
 _PARSERS = {
@@ -261,6 +267,8 @@ def encode_message(msg: Message) -> str:
     if isinstance(msg, ActRequest):
         s = (f"ACT pot={msg.pot} tocall={msg.tocall} mystack={msg.mystack} "
              f"oppstack={msg.oppstack} legal={format_legal(msg.legal)}")
+        if msg.mybet is not None and msg.oppbet is not None:
+            s += f" mybet={msg.mybet} oppbet={msg.oppbet}"
         return s + (f" timeleft={msg.timeleft:.4f}" if msg.timeleft is not None else "")
     if isinstance(msg, Showdown):
         return f"SHOW oppcards={format_cards(msg.oppcards)}"
