@@ -18,3 +18,5 @@ results/
 # Submission packages (tools/package_submission.py)
 dist/
 *.ckpt
+# Generated tables / strategies (lab/precompute.py, lab/cfr/train.py)
+data/
