@@ -68,12 +68,20 @@ def measure_startup(brain: str, repeats: int = 3) -> float:
 
 
 def run_timing(brain: str = "tier2", opponent: str = "maniac", hands: Optional[int] = None,
-               bank_s: Optional[float] = None, slowdown: float = 2.0, seed: int = 0) -> TimingReport:
+               bank_s: Optional[float] = None, slowdown: float = 2.0, seed: int = 0,
+               variant: Optional[str] = None) -> TimingReport:
+    """variant: catalog name or spec path; the bot process plays it via $POKERBOT_VARIANT."""
+    spec, path = DEFAULT_CONFIG, None
+    if variant:
+        from lab.harness import load_variant
+        spec = load_variant(variant)
+        path = variant if variant.endswith(".json") else str(ROOT / "variant" / "catalog" / f"{variant}.json")
     hands = hands or DEFAULT_CONFIG.hands_per_match
     bank = bank_s or DEFAULT_CONFIG.time_bank_s
     startup = measure_startup(brain)
-    bot = SubprocessPlayer([sys.executable, "-m", "bot.main", "--brain", brain], name=brain)
-    m = play_match([bot, PlayerSpec.brain(opponent).build()], seed=seed, hands=hands,
+    bot = SubprocessPlayer([sys.executable, "-m", "bot.main", "--brain", brain], name=brain,
+                           variant_path=path)
+    m = play_match([bot, PlayerSpec.brain(opponent).build()], spec, seed=seed, hands=hands,
                    time_bank_s=bank)
     # Bank used = our decisions' wall time as the engine measured it.
     used = bank - m.bank_left[0]
@@ -88,8 +96,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--hands", type=int, default=None)
     ap.add_argument("--bank", type=float, default=None)
     ap.add_argument("--slowdown", type=float, default=2.0)
+    ap.add_argument("--variant", default=None, help="catalog name or spec JSON path")
     args = ap.parse_args(argv)
-    rep = run_timing(args.brain, args.opponent, args.hands, args.bank, args.slowdown)
+    rep = run_timing(args.brain, args.opponent, args.hands, args.bank, args.slowdown,
+                     variant=args.variant)
     print(rep.summary())
     return 0 if rep.ok else 1
 

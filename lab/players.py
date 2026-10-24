@@ -80,12 +80,18 @@ class SubprocessPlayer:
     at most `timeleft` seconds (the engine passes the player's remaining bank)."""
 
     def __init__(self, cmd: Optional[list[str]] = None, cwd: Optional[str] = None,
-                 name: str = "subprocess", stderr_to: Optional[str] = None) -> None:
+                 name: str = "subprocess", stderr_to: Optional[str] = None,
+                 variant_path: Optional[str] = None) -> None:
+        """variant_path: a spec JSON the bot should play (sets $POKERBOT_VARIANT)."""
         self.name = name
         self.cmd = cmd or [sys.executable, "-m", "bot.main"]
         self._err = open(stderr_to, "ab") if stderr_to else subprocess.DEVNULL
+        env = dict(os.environ)
+        if variant_path:
+            env["POKERBOT_VARIANT"] = str(variant_path)
         self.proc = subprocess.Popen(self.cmd, cwd=cwd or str(ROOT), stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE, stderr=self._err, bufsize=0)
+                                     stdout=subprocess.PIPE, stderr=self._err, bufsize=0,
+                                     env=env)
         self._buf = b""
         self.dead = False
 

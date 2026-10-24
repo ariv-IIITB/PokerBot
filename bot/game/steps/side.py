@@ -222,14 +222,14 @@ class Market(CardStep):
         q = st.step_state
         q.order.pop(0)
         v = min(max(int(a.choice), self.lo), self.hi)
-        q.chosen.append((p, str(v)))
+        q.chosen.append((p, str(v), True))
 
     def next_actor(self, st):
         q = st.step_state
         if q.order:
             return q.order[0]
         if q.chosen:
-            quotes = {p: int(c) for p, c in q.chosen}
+            quotes = {p: int(c) for p, c, _ in q.chosen}
             q.chosen = []
             for p in quotes:
                 for o in quotes:

@@ -27,7 +27,7 @@ from lab.example_variants import EXAMPLES
 from lab.players import PlayerSpec, SubprocessPlayer
 
 # A fast setting for our brain so fuzzing covers many hands.
-FAST_BRAIN = {"max_samples": 64}
+FAST_BRAIN = {"max_samples": 64, "rollout_worlds": 12, "pimc_worlds": 2}
 JUNK = ["", "garbage", "ACT pot=x", "HOLE cards=ZZ", "OPP type=Q", "\x00\x01\x02",
         "MATCH hands=-1", "END delta=abc", "BOARD street=1 cards=Ah,Ah", "R 10", "💥"]
 

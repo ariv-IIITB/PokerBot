@@ -190,6 +190,6 @@ def test_catalog_betting_variants_play(name) -> None:
     from variant.spec import load_catalog
     spec = load_catalog()[name]
     for opp in ["maniac", "random_legal"]:
-        m = play_match([PlayerSpec.brain("tier2", {"max_samples": 64}).build(),
+        m = play_match([PlayerSpec.brain("tier2", {"max_samples": 64, "rollout_worlds": 12, "pimc_worlds": 2}).build(),
                         PlayerSpec.brain(opp).build()], spec, seed=2, hands=150, audit=True)
         assert m.errors == [0, 0] and m.forfeit is None

@@ -35,8 +35,12 @@ def current_step(st):
     return st.rules.program[st.pc]
 
 
-def advance(st, rng=None) -> Optional[int]:
-    """Run until a player must decide (returns that player) or the hand ends (None)."""
+STOP = -2   # returned by advance() when its `stop` predicate fires
+
+
+def advance(st, rng=None, stop: Optional[Callable] = None) -> Optional[int]:
+    """Run until a player must decide (returns that player) or the hand ends (None).
+    stop(st) is checked before each new step is entered; if true, returns STOP there."""
     if rng is not None:
         st.rng = rng
     prog = st.rules.program
@@ -46,6 +50,8 @@ def advance(st, rng=None) -> Optional[int]:
             if st.folded is not None and step.skip_on_fold:
                 st.pc += 1
                 continue
+            if stop is not None and stop(st):
+                return STOP
             st.entered = True
             step.begin(st)
             if not step.decision:

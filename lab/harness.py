@@ -131,6 +131,8 @@ def main(argv: Optional[list[str]] = None) -> None:
     ap.add_argument("--processes", type=int, default=None)
     ap.add_argument("--bank", type=float, default=None,
                     help="time bank per match in seconds (smaller = faster, weaker brains)")
+    ap.add_argument("--variant", default=None,
+                    help="catalog variant name or path to a spec JSON (default: GameConfig)")
     ap.add_argument("--subprocess", action="store_true",
                     help="run A as a real subprocess bot (uses `--brain A`)")
     args = ap.parse_args(argv)
@@ -140,11 +142,21 @@ def main(argv: Optional[list[str]] = None) -> None:
                                        label=f"{args.a}(proc)")
     else:
         spec_a = PlayerSpec.brain(args.a)
+    variant = load_variant(args.variant) if args.variant else DEFAULT_CONFIG
     for b in args.b:
-        rep = run_duplicate(spec_a, PlayerSpec.brain(b),
+        rep = run_duplicate(spec_a, PlayerSpec.brain(b), variant,
                             seeds=range(args.first_seed, args.first_seed + args.seeds),
                             hands=args.hands, processes=args.processes, time_bank_s=args.bank)
         print(rep.summary(), flush=True)
+
+
+def load_variant(name_or_path: str):
+    """A VariantSpec from a catalog name or a JSON path."""
+    from pathlib import Path
+    from variant.spec import VariantSpec, load_catalog
+    if Path(name_or_path).is_file():
+        return VariantSpec.load(name_or_path)
+    return load_catalog()[name_or_path]
 
 
 if __name__ == "__main__":

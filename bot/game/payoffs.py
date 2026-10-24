@@ -202,6 +202,7 @@ def settle(st, scorer, runs: int = 1, modifiers=()) -> None:
             for p in range(n):
                 st.stack[p] += chips[p]
         st.showdown = True
+        st.extra["shares"] = shares_all          # read by rollouts (expected showdown share)
         if shares_all is not None:
             full = [p for p in range(n) if shares_all[p] >= 1.0 - 1e-9]
             outright = full[0] if full else None

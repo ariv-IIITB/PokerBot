@@ -129,6 +129,25 @@ class Scorer:
                 out[p] += weight / len(win)
         return out
 
+    def shares_batch(self, mine: np.ndarray, opp: np.ndarray, boards) -> np.ndarray:
+        """Vectorized pot share of `mine` vs `opp` (heads-up) over B samples.
+        mine (B, h), opp (B, h2), boards: list of (B, b) arrays, one per board."""
+        out = np.zeros(mine.shape[0])
+        for board in boards:
+            if self.hilo:
+                h0, h1 = self.high.evaluate_batch(mine, board), self.high.evaluate_batch(opp, board)
+                l0, l1 = self.low.evaluate_batch(mine, board), self.low.evaluate_batch(opp, board)
+                hi = (h0 > h1) + 0.5 * (h0 == h1)
+                lo = (l0 > l1) + 0.5 * (l0 == l1)
+                live = (l0 > NOT_QUALIFIED) | (l1 > NOT_QUALIFIED)
+                share = np.where(live, 0.5 * hi + 0.5 * lo, hi)
+            else:
+                v0 = self.primary.evaluate_batch(mine, board)
+                v1 = self.primary.evaluate_batch(opp, board)
+                share = (v0 > v1) + 0.5 * (v0 == v1)
+            out += share / len(boards)
+        return out
+
     def shares(self, holes: Sequence[Sequence[int]],
                boards: Sequence[Sequence[int]]) -> list[float]:
         """Fraction of the pot each player wins, splitting evenly across boards."""

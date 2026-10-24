@@ -94,5 +94,8 @@ Test tooling:
     --opponents tier1 maniac tight --seeds 8 --hands 200     # ranked parameter sweep
 ```
 
-Brains: `tier0` (check/fold), `tier1` (equity vs pot odds), `tier2` (default: opponent model +
-endgame lock). Hyperparameters: `bot/config/tier1.json`, `bot/config/tier2.json` (optional files).
+Brains: `tier0` (check/fold), `tier1` (expected showdown share vs pot odds + generic step
+policies), `tier2` (default: tier1 + opponent model + endgame lock). The generic decision
+layer lives in `bot/sim/` (rebuild the hand, sample hidden cards, check-down rollouts, PIMC);
+benchmark it with `.venv/bin/python -m lab.bench_sim`.
+Per-variant runs: `lab.harness ... --variant mit2026_discard`, `lab.timing_bench --variant plo`. Hyperparameters: `bot/config/tier1.json`, `bot/config/tier2.json` (optional files).

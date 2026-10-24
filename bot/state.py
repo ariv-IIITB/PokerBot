@@ -42,6 +42,8 @@ class HandState:
     opp_cards: tuple[int, ...] = ()  # filled at showdown
     info: list[Info] = field(default_factory=list)     # INFO messages this hand
     boards: dict = field(default_factory=dict)          # several boards: index -> cards
+    card_log: list = field(default_factory=list)        # (kind, cards) of every card message,
+                                                        # in order: used to rebuild the hand
     sb: Optional[int] = None        # this hand's blinds if the engine announced them
     bb: Optional[int] = None
     ante: Optional[int] = None
@@ -96,7 +98,9 @@ class GameState:
             return  # hand-level message outside a hand: ignore
         elif isinstance(msg, HoleCards):
             self.hand.hole = msg.cards
+            self.hand.card_log.append(("hole", msg.cards))
         elif isinstance(msg, BoardUpdate):
+            self.hand.card_log.append(("board", msg.cards))
             if msg.index is not None:
                 self.hand.boards[msg.index] = msg.cards
                 if msg.index == 0:
@@ -115,6 +119,8 @@ class GameState:
             self.hand.opp_cards = msg.oppcards
         elif isinstance(msg, Info):
             self.hand.info.append(msg)
+            if msg.cards:
+                self.hand.card_log.append(("info:" + msg.kind, msg.cards))
             if msg.kind == "offer":
                 self.hand.offer = msg.cards
         elif isinstance(msg, HandEnd):

@@ -90,7 +90,7 @@ class CardStep(Step):
             auto = self.auto_choice(st, p)
             if auto is not None:
                 q.order.pop(0)
-                self._commit(st, p, auto)
+                self._commit(st, p, auto, decided=False)
                 continue
             opts = self.affordable(st, p, self.options(st, p))
             if not opts:
@@ -98,8 +98,8 @@ class CardStep(Step):
                 continue
             q.options = opts
             return p
-        for p, choice in q.chosen:       # simultaneous: apply everything at the end
-            self._apply(st, p, choice)
+        for p, choice, decided in q.chosen:     # simultaneous: apply everything at the end
+            self._apply(st, p, choice, decided)
         q.chosen = []
         return None
 
@@ -111,16 +111,17 @@ class CardStep(Step):
         q.order.pop(0)
         self._commit(st, p, a.choice)
 
-    def _commit(self, st, p: int, choice: str) -> None:
+    def _commit(self, st, p: int, choice: str, decided: bool = True) -> None:
         if self.simultaneous:
-            st.step_state.chosen.append((p, choice))
+            st.step_state.chosen.append((p, choice, decided))
         else:
-            self._apply(st, p, choice)
+            self._apply(st, p, choice, decided)
 
-    def _apply(self, st, p: int, choice: str) -> None:
+    def _apply(self, st, p: int, choice: str, decided: bool = True) -> None:
         if self.cost and choice not in self.free_choices:
             st.pay_cost(p, self.cost)
-        self.announce(st, p, choice)
+        if decided:              # random outcomes aren't anyone's choice: shown by effects only
+            self.announce(st, p, choice)
         self.perform(st, p, choice)
 
     def announce(self, st, p: int, choice: str) -> None:

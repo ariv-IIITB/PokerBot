@@ -15,7 +15,7 @@ from lab.random_variant import random_supported_spec
 from variant.spec import load_catalog
 
 CATALOG = load_catalog()
-FAST = {"max_samples": 64}
+FAST = {"max_samples": 64, "rollout_worlds": 12, "pimc_worlds": 2}
 BOTS = ["random_legal", "all_in", "calling_station", "tight", "maniac"]
 
 # variant -> phase whose plugin it still needs
