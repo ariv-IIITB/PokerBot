@@ -148,34 +148,51 @@ class RolloutShare:
     path: str = "rollout"
 
 
+def _batch_worlds(rec, rng, batch, inference):
+    """`batch` determinized worlds and their log importance weights."""
+    cols = rec.assignments(rng, batch)
+    lw = None
+    if inference is not None and inference.enabled:
+        lw = inference.log_weights(rec, cols, batch, rng)
+    lw = lw if lw is not None else np.zeros(batch)
+    return [rec.world_from(cols, i) for i in range(batch)], lw
+
+
 def rollout_share(rec: Reconstruction, rng: np.random.Generator, time_budget_s: float,
-                  max_worlds: int = 2000, runouts: int = 16, batch: int = 12) -> RolloutShare:
+                  max_worlds: int = 2000, runouts: int = 16, batch: int = 12,
+                  inference=None) -> RolloutShare:
     """Expected showdown share by check-down rollouts (works for any rules). Worlds are
     rolled and scored in small batches so the time budget is overshot by one batch at most."""
+    from bot.sim.share import weighted_mean
     t0 = time.perf_counter()
     me = rec.me
     vals: list[float] = []
+    logws: list[float] = []
     weights: list[int] = []
     n = 0
     scorer = rec.state.rules.evaluator
     while n < max_worlds and (n == 0 or time.perf_counter() - t0 < time_budget_s):
         pend: list[_Pending] = []
-        for _ in range(batch):
-            w = rec.world(rng)
+        ws, lw = _batch_worlds(rec, rng, batch, inference)
+        lw_pend = []
+        for j, w in enumerate(ws):
             r = np.random.default_rng(int(rng.integers(2**62)))
             if needs_full_rollout(w) or not play_to_simple(w, rollout_policy(r), r):
                 play_to_end(w, rollout_policy(r), r)
                 shares = w.extra.get("shares")
                 vals.append(shares[me] if shares is not None else float(w.folded == 1 - me))
+                logws.append(float(lw[j]))
                 weights.append(1)
             else:
                 pend.append(_pending(w, me, n))
+                lw_pend.append(float(lw[j]))
             n += 1
         if pend:
             vals += score_pending(pend, scorer, rng, runouts)
+            logws += lw_pend
             weights += [runouts] * len(pend)
-    mean = float(np.mean(vals))
-    se = float(np.std(vals) / max(1, len(vals)) ** 0.5)
+    min_ess = inference.params["min_ess"] if inference is not None else 0.0
+    mean, se = weighted_mean(np.asarray(vals), np.asarray(logws), min_ess)
     return RolloutShare(mean, int(sum(weights)), se)
 
 
@@ -191,7 +208,8 @@ class PimcResult:
 
 def pimc(rec: Reconstruction, candidates: Sequence[Action], rng: np.random.Generator,
          time_budget_s: float, max_worlds: int = 400, runouts: int = 12, batch: int = 4,
-         value_fn: Optional[Callable] = None, apply_fn: Optional[Callable] = None) -> PimcResult:
+         value_fn: Optional[Callable] = None, apply_fn: Optional[Callable] = None,
+         inference=None) -> PimcResult:
     """Pick the candidate with the best mean value for us over shared worlds.
 
     value: our expected final stack (stack now + share x pot when batched).
@@ -201,34 +219,45 @@ def pimc(rec: Reconstruction, candidates: Sequence[Action], rng: np.random.Gener
     t0 = time.perf_counter()
     me = rec.me
     k = len(candidates)
-    sums = [0.0] * k
-    counts = [0] * k
+    per_world: list[list[float]] = []      # value of each candidate in each world
+    logw_all: list[float] = []
     worlds = rollouts = 0
     apply_fn = apply_fn or (lambda w, a: act(w, me, a))
     scorer = rec.state.rules.evaluator
     while worlds < max_worlds and (worlds == 0 or time.perf_counter() - t0 < time_budget_s):
         pend: list[_Pending] = []
-        for _ in range(batch):
-            base = rec.world(rng)
+        bases, lw = _batch_worlds(rec, rng, batch, inference)
+        for j, base in enumerate(bases):
             seed = int(rng.integers(2**62))
+            row = [0.0] * k
             for i, a in enumerate(candidates):
                 w = base.copy()
                 r = np.random.default_rng(seed)        # same randomness for every candidate
                 apply_fn(w, a)
                 if (value_fn is None and not needs_full_rollout(w)
                         and play_to_simple(w, rollout_policy(r), r)):
-                    pend.append(_pending(w, me, i))
+                    pend.append(_pending(w, me, (len(per_world), i)))
                 else:
                     play_to_end(w, rollout_policy(r), r)
-                    sums[i] += value_fn(w, me) if value_fn else float(w.stack[me])
-                    counts[i] += 1
+                    row[i] = value_fn(w, me) if value_fn else float(w.stack[me])
                 rollouts += 1
+            per_world.append(row)
+            logw_all.append(float(lw[j]))
             worlds += 1
         if pend:
             for it, sh in zip(pend, score_pending(pend, scorer, rng, runouts)):
-                sums[it.key] += it.stack + sh * it.pot
-                counts[it.key] += 1
-    means = [sums[i] / max(1, counts[i]) for i in range(k)]
+                wi, ci = it.key
+                per_world[wi][ci] = it.stack + sh * it.pot
+    vals = np.asarray(per_world)
+    logw = np.asarray(logw_all)
+    w = np.ones(len(vals))
+    if np.any(logw != 0):
+        cand = np.exp(logw - logw.max())
+        ess = cand.sum() ** 2 / max((cand * cand).sum(), 1e-300)
+        min_ess = inference.params["min_ess"] if inference is not None else 0.0
+        if ess >= min_ess * len(vals):
+            w = cand
+    means = list((w[:, None] * vals).sum(axis=0) / w.sum())
     values = {(candidates[i].choice if candidates[i].choice is not None else str(candidates[i])):
               means[i] for i in range(k)}
     best_i = max(range(k), key=lambda i: (means[i], -i))

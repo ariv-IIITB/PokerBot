@@ -15,6 +15,10 @@ class Brain(ABC):
     def set_rules(self, rules) -> None:
         """Called by the lab before a match; the submitted bot uses its active variant."""
         self.rules = rules
+        self.on_rules()
+
+    def on_rules(self) -> None:
+        """Hook: the variant changed (reload anything derived from the rules)."""
 
     @abstractmethod
     def decide(self, state: GameState, legal: LegalActions, budget_s: float) -> Action:

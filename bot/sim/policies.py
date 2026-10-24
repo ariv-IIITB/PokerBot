@@ -78,7 +78,7 @@ def decide_special(rec: Reconstruction, legal: LegalActions, rng: np.random.Gene
     if len(sp.choices) == 1:
         return Action.special(sp.choices[0])
     res = pimc(rec, _candidates(legal, rng, int(p["max_candidates"])), rng, budget_s,
-               max_worlds=int(p["pimc_worlds"]))
+               max_worlds=int(p["pimc_worlds"]), inference=p.get("_inference"))
     p["_stats"].update(rollouts=res.rollouts, worlds=res.worlds)
     return res.best
 
@@ -103,10 +103,11 @@ def auction_bid(rec, legal, rng, budget_s, step, p) -> Action:
         return apply
 
     worlds = int(p["pimc_worlds"])
+    inf = p.get("_inference")
     win = pimc(rec, [Action.special("win")], rng, budget_s / 2, max_worlds=worlds,
-               apply_fn=award_to(me))
+               apply_fn=award_to(me), inference=inf)
     lose = pimc(rec, [Action.special("lose")], rng, budget_s / 2, max_worlds=worlds,
-                apply_fn=award_to(1 - me))
+                apply_fn=award_to(1 - me), inference=inf)
     value = win.values["win"] - lose.values["lose"]
     p["_stats"].update(rollouts=win.rollouts + lose.rollouts, worlds=win.worlds + lose.worlds)
     shade = p["bid_shade"].get(step.kind, 0.5)

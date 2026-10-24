@@ -25,12 +25,14 @@ from bot.brains.base import Brain
 from bot.brains.params import load_params, per_street
 from bot.equity import equity
 from bot.log import warn
-from bot.protocol import MatchInfo, Message
+from bot.protocol import MatchInfo, Message, Showdown
 from bot.state import ME, GameState
 from bot.game.rules_spec import active_rules, to_rules
+from bot.sim.inference import Inference, Trust
 from bot.sim.policies import decide_special
 from bot.sim.replay import reconstruct
 from bot.sim.share import expected_share
+from bot.sim.tables import load_tables
 
 DEFAULTS: dict[str, Any] = {
     "seed": 12345,
@@ -50,6 +52,11 @@ DEFAULTS: dict[str, Any] = {
     "use_sim": True,               # False: old equity only (and first option for specials)
     "rollout_worlds": 2000,        # caps (the time budget usually binds first)
     "pimc_worlds": 400,
+    "inference": True,             # weight opponent hands by their visible choices
+    "inference_beta": 6.0,
+    "inference_gamma": 3.0,
+    "inference_trust": True,       # scale inference by how well it predicted past showdowns
+    "use_tables": True,            # precomputed start-of-hand shares, if valid data exists
 }
 
 
@@ -65,15 +72,42 @@ class Tier1Brain(Brain):
         self.pyrng = random.Random(int(self.p["seed"]))
         self._cache: dict = {}
         self._cache_hand: Optional[int] = None
+        self.tables = load_tables(self.rules) if self.p.get("use_tables", True) else None
+        self.trust = Trust()
+        self._last_rec = None                 # (hand id, Reconstruction) of our last decision
+        self.inference = Inference({"enabled": bool(self.p["inference"]),
+                                    "beta": float(self.p["inference_beta"]),
+                                    "gamma": float(self.p["inference_gamma"]),
+                                    "ref_hands": 120, "min_ess": 0.08})
 
     @classmethod
     def defaults(cls) -> dict[str, Any]:
         return dict(DEFAULTS)
 
+    def on_rules(self) -> None:
+        self.tables = load_tables(self.rules) if self.p.get("use_tables", True) else None
+
     # ---- warm-up
     def observe(self, state: GameState, msg: Message) -> None:
         if isinstance(msg, MatchInfo):
             self.warm_up()
+        elif isinstance(msg, Showdown) and self.inference.enabled and self.p["inference_trust"]:
+            self._score_showdown(state, msg)
+
+    def _score_showdown(self, state: GameState, msg) -> None:
+        """Opponent cards revealed: how well did the model explain their decisions?"""
+        last = self._last_rec
+        if last is None or state.hand is None or last[0] != state.hand.hand_id:
+            return
+        try:
+            self.trust.update(self.inference.decision_llr(last[1], list(msg.oppcards), self.rng))
+        except Exception as e:
+            warn(f"trust update failed: {e!r}")
+
+    def _apply_trust(self) -> None:
+        if self.p["inference_trust"]:
+            self.inference.params["gamma"] = float(self.p["inference_gamma"]) * self.trust.level("bet")
+            self.inference.params["beta"] = float(self.p["inference_beta"]) * self.trust.level("discard")
 
     def warm_up(self) -> None:
         """Build evaluator tables and NumPy code paths before the first timed decision
@@ -90,7 +124,10 @@ class Tier1Brain(Brain):
         """The current hand rebuilt in bot.game (None if it can't be matched)."""
         h = state.hand
         try:
-            return reconstruct(self.rules, h, self.rng, level=self._level(h))
+            rec = reconstruct(self.rules, h, self.rng, level=self._level(h))
+            self._last_rec = (h.hand_id, rec)
+            self._apply_trust()
+            return rec
         except Exception as e:
             warn(f"reconstruction failed: {e!r}")
             return None
@@ -106,17 +143,26 @@ class Tier1Brain(Brain):
         assert h is not None
         if self._cache_hand != h.hand_id:
             self._cache, self._cache_hand = {}, h.hand_id
-        key = (len(h.card_log), h.hole, h.board)
+        # Shares change when we learn cards, or (with inference) when the opponent acts.
+        n_opp = sum(1 for r in h.history if r.actor != ME) if self.inference.enabled else 0
+        key = (len(h.card_log), h.hole, h.board, n_opp)
         if key not in self._cache:
             budget = budget_s * self.p["equity_budget_frac"]
             eq = None
-            if self.p["use_sim"]:
+            if (self.tables is not None and h.street == 0 and not h.board
+                    and len(h.hole) == self.tables.classes.size and len(h.card_log) == 1):
+                try:
+                    eq = self.tables.start_share(h.hole)      # precomputed, no sampling
+                except Exception:
+                    eq = None
+            if eq is None and self.p["use_sim"]:
                 rec = self.reconstruct(state)
                 if rec is not None:
                     try:
                         eq = expected_share(rec, self.rng, budget,
                                             max_samples=int(self.p["max_samples"]),
-                                            worlds=int(self.p["rollout_worlds"])).share
+                                            worlds=int(self.p["rollout_worlds"]),
+                                            inference=self.inference).share
                     except Exception as e:
                         warn(f"share estimate failed: {e!r}")
             if eq is None:
@@ -145,7 +191,8 @@ class Tier1Brain(Brain):
                 try:
                     return decide_special(rec, legal, self.rng,
                                           budget_s * self.p["special_budget_frac"],
-                                          {"pimc_worlds": int(self.p["pimc_worlds"])})
+                                          {"pimc_worlds": int(self.p["pimc_worlds"]),
+                                           "_inference": self.inference})
                 except Exception as e:
                     warn(f"special-step policy failed: {e!r}")
         return Action.special(legal.special.default())  # type: ignore[union-attr]

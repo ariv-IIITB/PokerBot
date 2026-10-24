@@ -18,7 +18,7 @@ the alignment fails; we retry with another random seed, and give up after a few 
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 import numpy as np
@@ -42,14 +42,27 @@ class Reconstruction:
     pool: list                       # real cards not seen: candidates for the unknowns
     sampled_opp_choices: int = 0     # opponent choices we had to guess
     tries: int = 1
+    opp_decisions: list = field(default_factory=list)   # visible opponent choices (inference)
+    bet_log: list = field(default_factory=list)         # (player, action, pot, to_call, bet,
+                                                        #  all_in, street) per betting action
+
+    def assignments(self, rng: np.random.Generator, n: int) -> dict:
+        """n random fillings of the hidden tokens: token -> (n,) array of real cards."""
+        k = len(self.unknown)
+        pool = np.asarray(self.pool)
+        idx = np.argsort(rng.random((n, len(pool))), axis=1)[:, :k]
+        cards = pool[idx]
+        return {tok: cards[:, i] for i, tok in enumerate(self.unknown)}
+
+    def world_from(self, columns: dict, row: int) -> GameState:
+        full = dict(self.mapping)
+        for tok, col in columns.items():
+            full[tok] = int(col[row])
+        return substitute(self.state, full)
 
     def world(self, rng: np.random.Generator) -> GameState:
         """One determinized copy: unknown placeholders replaced by random unseen cards."""
-        perm = rng.permutation(len(self.pool))
-        full = dict(self.mapping)
-        for i, tok in enumerate(self.unknown):
-            full[tok] = self.pool[perm[i]] if i < len(perm) else tok
-        return substitute(self.state, full)
+        return self.world_from(self.assignments(rng, 1), 0)
 
 
 def _visible_card_events(st: GameState, me: int) -> list[tuple[str, tuple]]:
@@ -109,6 +122,13 @@ def replay_once(rules, hand: HandState, rng, level=None) -> Reconstruction:
     mine = [r.action for r in hand.history if r.actor == ME]
     theirs = [r.action for r in hand.history if r.actor == OPP]
     guessed = 0
+    decisions: list = []
+    bet_log: list = []
+
+    def log_bet(p, a):
+        if st.rules.program[st.pc].type_name == "betting" and a.kind != SPECIAL:
+            all_in = a.kind == "R" and a.amount == st.bet[p] + st.stack[p]
+            bet_log.append((p, a, st.pot, st.to_call(p), st.bet[p], all_in, st.street))
     while True:
         p = advance(st, rng)
         if p is None:
@@ -117,16 +137,24 @@ def replay_once(rules, hand: HandState, rng, level=None) -> Reconstruction:
         if p == me:
             if not mine:
                 break                                    # our current decision
-            act(st, p, clamp(mine.pop(0), legal))
+            a = clamp(mine.pop(0), legal)
+            log_bet(p, a)
+            act(st, p, a)
             continue
         if theirs:
             a = theirs.pop(0)
             if a.kind == SPECIAL and not legal.can_special:
                 raise ReplayError("opponent special action out of place")
+            genuine = True
             if a.kind == SPECIAL and not legal.special.allows(a.choice):
                 a = _sample_hidden_choice(legal, a.choice, rng)
                 guessed += 1
-            act(st, p, clamp(a, legal))
+                genuine = False
+            if genuine:
+                _record(decisions, st, p, a, legal)
+            a = clamp(a, legal)
+            log_bet(p, a)
+            act(st, p, a)
         else:                                            # opponent choice not shown yet
             act(st, p, _sample_hidden_choice(legal, None, rng) if legal.can_special
                 else clamp(Action.check(), legal))
@@ -154,7 +182,22 @@ def replay_once(rules, hand: HandState, rng, level=None) -> Reconstruction:
     for v in st.extra.get("offers", {}).values():
         in_play |= set(v)
     unknown = sorted(t for t in in_play if t < 0 and t not in mapping)
-    return Reconstruction(st, me, mapping, unknown, pool, guessed)
+    return Reconstruction(st, me, mapping, unknown, pool, guessed, opp_decisions=decisions,
+                          bet_log=bet_log)
+
+
+def _record(decisions: list, st: GameState, p: int, a: Action, legal) -> None:
+    """Keep the opponent's visible choices that say something about their cards."""
+    from bot.sim.inference import OppDecision
+    step = st.rules.program[st.pc]
+    if step.type_name == "betting" and a.kind != SPECIAL:
+        kinds = tuple(k for k, ok in (("F", legal.fold), ("K", legal.check), ("C", legal.call),
+                                      ("R", legal.can_raise)) if ok)
+        decisions.append(OppDecision("bet", a, tuple(st.hole[p]), tuple(st.board),
+                                     legal_kinds=kinds))
+    elif step.type_name == "discard" and getattr(step, "visibility", "") == "public":
+        decisions.append(OppDecision("discard", a, tuple(st.hole[p]), tuple(st.board),
+                                     options=tuple(legal.special.choices)))
 
 
 def reconstruct(rules, hand: HandState, rng: np.random.Generator, level=None,

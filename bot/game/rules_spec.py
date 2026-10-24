@@ -117,5 +117,9 @@ def active_rules() -> Rules:
             except Exception as e:  # bad spec: fall back, but say so
                 from bot.log import warn
                 warn(f"could not use variant spec {path}: {e!r}")
-    from variant.rules import DEFAULT_CONFIG
+    from variant.rules import DEFAULT_CONFIG, GameConfig
+    if DEFAULT_CONFIG == GameConfig():
+        # The built-in default is plain Hold'em: use its spec so precomputed data can match.
+        from variant.spec import VariantSpec
+        return to_rules(VariantSpec(name="holdem_nl"))
     return rules_from_config(DEFAULT_CONFIG)
