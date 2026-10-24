@@ -156,6 +156,11 @@ class Discard(CardStep):
     "muck", or "opponent" (the opponent receives them). optional: may discard nothing."""
     type_name = "discard"
 
+    @classmethod
+    def from_spec(cls, s, ctx):
+        return cls(s["n"], s["destination"], s["optional"], order=s["order"],
+                   visibility=s["visibility"])
+
     def __init__(self, n: int = 1, destination: str = "board", optional: bool = False,
                  **kw) -> None:
         super().__init__(n=n, destination=destination, optional=optional, **kw)
@@ -198,6 +203,11 @@ class Draw(CardStep):
     deck (discards go to the muck). The number drawn is always public."""
     type_name = "draw"
 
+    @classmethod
+    def from_spec(cls, s, ctx):
+        return cls(s["max"], s["min"], order=s["order"], cost=s["cost"],
+                   visibility=s["visibility"])
+
     def __init__(self, max: int = 1, min: int = 0, **kw) -> None:
         kw.setdefault("visibility", "private")
         super().__init__(max=max, min=min, **kw)
@@ -233,6 +243,13 @@ class Swap(CardStep):
     board card), or the deck (the top card). mode: "optional" (may pass), "forced" (must
     choose), "random" (no decision: a random card, and it only happens with `probability`)."""
     type_name = "swap"
+
+    @classmethod
+    def from_spec(cls, s, ctx):
+        if s["n"] != 1:
+            from bot.game.compile import NotSupported
+            raise NotSupported("swapping more than one card", 99)
+        return cls(s["with"], s["mode"], s["probability"], order=s["order"], cost=s["cost"])
 
     def __init__(self, target: str = "opponent", mode: str = "optional",
                  probability: float = 1.0, **kw) -> None:
@@ -297,6 +314,10 @@ class Choose(CardStep):
     cards; the rest are mucked."""
     type_name = "choose"
 
+    @classmethod
+    def from_spec(cls, s, ctx):
+        return cls(s["offer"], s["keep"], order=s["order"], visibility=s["visibility"])
+
     def __init__(self, offer: int = 3, keep: int = 1, **kw) -> None:
         kw.setdefault("visibility", "private")
         super().__init__(offer=offer, keep=keep, **kw)
@@ -336,6 +357,10 @@ class Peek(CardStep):
     that will be dealt, if no burn) or one random hole card of the opponent's."""
     type_name = "peek"
 
+    @classmethod
+    def from_spec(cls, s, ctx):
+        return cls(s["target"], order=s["order"], cost=s["cost"])
+
     def __init__(self, target: str = "board", **kw) -> None:
         super().__init__(target=target, **kw)
         self.target = target
@@ -367,6 +392,10 @@ class Peek(CardStep):
 class Expose(CardStep):
     """Each player shows `n` hole cards face up: chosen by the player, or at random."""
     type_name = "expose"
+
+    @classmethod
+    def from_spec(cls, s, ctx):
+        return cls(s["n"], s["chosen"], order=s["order"])
 
     def __init__(self, n: int = 1, chosen: bool = True, **kw) -> None:
         super().__init__(n=n, chosen=chosen, **kw)

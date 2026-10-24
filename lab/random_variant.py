@@ -24,7 +24,7 @@ ORDER_CHOICES = ["BB_first", "SB_first", "simultaneous"]
 
 def _card_step(r: random.Random) -> dict:
     """A random card-manipulation step (phase 13 plugins)."""
-    kind = r.choice(["discard", "draw", "swap", "peek", "expose"])
+    kind = r.choice(["discard", "draw", "swap", "peek", "expose", "redraw_board"])
     order = r.choice(ORDER_CHOICES)
     if kind == "discard":
         return {"type": "discard", "n": 1, "order": order,
@@ -41,6 +41,9 @@ def _card_step(r: random.Random) -> dict:
     if kind == "peek":
         return {"type": "peek", "target": r.choice(["board", "opponent"]), "order": order,
                 "cost": r.choice([0, 3])}
+    if kind == "redraw_board":
+        return {"type": "redraw_board", "cost": r.choice([0, 3]),
+                "order": r.choice(["BB_first", "SB_first"])}
     return {"type": "expose", "n": 1, "chosen": r.random() < 0.5, "order": order}
 
 

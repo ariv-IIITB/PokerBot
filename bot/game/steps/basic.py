@@ -17,6 +17,11 @@ class PostBlinds(Step):
         super().__init__(sb=sb, bb=bb, ante=ante, straddle=straddle)
         self.sb, self.bb, self.ante, self.straddle = sb, bb, ante, straddle
 
+    @classmethod
+    def from_spec(cls, s, ctx):
+        b = ctx.spec.betting
+        return cls(b.small_blind, b.big_blind, b.ante, b.straddle)
+
     def apply(self, st, rng) -> None:
         sb, bb, ante, straddle = st.level if st.level else (self.sb, self.bb, self.ante,
                                                              self.straddle)
@@ -66,6 +71,10 @@ class DealBoard(Step):
     """Start a new street: burn `burn` cards (shown to both if burn_revealed), then deal
     `n` public cards to the board (n may be 0: a betting round with no new cards)."""
     type_name = "deal_board"
+
+    @classmethod
+    def from_spec(cls, s, ctx):
+        return cls(s["n"], s["burn"], s["burn_revealed"], s["boards"] or 1)
 
     def __init__(self, n: int, burn: int = 0, burn_revealed: bool = False,
                  boards: int = 1) -> None:

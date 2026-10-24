@@ -17,6 +17,10 @@ class ShowdownStep(Step):
         super().__init__(runs=runs)
         self.runs = runs
 
+    @classmethod
+    def from_spec(cls, s, ctx):
+        return cls(s.get("runs", 1))
+
     def apply(self, st, rng) -> None:
         settle(st, st.rules.evaluator, self.runs, getattr(st.rules, "payoffs", ()))
 

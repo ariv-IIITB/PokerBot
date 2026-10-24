@@ -56,21 +56,29 @@ class TimingReport:
                 + (f"\nFORFEIT: {self.forfeit}" if self.forfeit else ""))
 
 
-def measure_startup(brain: str, repeats: int = 3) -> float:
-    """Best-of-N wall time for the bot to start, load its brain, and exit on ENDMATCH."""
+def measure_startup(brain: str, repeats: int = 3, cwd=None, protocol: Optional[str] = None) -> float:
+    """Best-of-N wall time for the bot to start, load its brain, and exit at end of match."""
+    import os
+    from bot.protocol import MatchEnd
+    from bot.protocols import get_adapter
+    a = get_adapter(protocol)
+    env = dict(os.environ, POKERBOT_PROTOCOL=a.name)
     best = float("inf")
     for _ in range(repeats):
         t0 = time.perf_counter()
-        subprocess.run([sys.executable, "-m", "bot.main", "--brain", brain], cwd=ROOT,
-                       input=b"ENDMATCH\n", capture_output=True, timeout=60)
+        subprocess.run([sys.executable, "-m", "bot.main", "--brain", brain], cwd=cwd or ROOT,
+                       input=(a.encode_message(MatchEnd()) + "\n").encode(),
+                       capture_output=True, timeout=60, env=env)
         best = min(best, time.perf_counter() - t0)
     return best
 
 
 def run_timing(brain: str = "tier2", opponent: str = "maniac", hands: Optional[int] = None,
                bank_s: Optional[float] = None, slowdown: float = 2.0, seed: int = 0,
-               variant: Optional[str] = None) -> TimingReport:
-    """variant: catalog name or spec path; the bot process plays it via $POKERBOT_VARIANT."""
+               variant: Optional[str] = None, cwd=None, protocol: Optional[str] = None,
+               bot_variant_path: Optional[str] = None) -> TimingReport:
+    """variant: catalog name or spec path; the bot process plays it via $POKERBOT_VARIANT
+    (or, with cwd = a submission package, its own active.json: bot_variant_path=None)."""
     spec, path = DEFAULT_CONFIG, None
     if variant:
         from lab.harness import load_variant
@@ -78,9 +86,10 @@ def run_timing(brain: str = "tier2", opponent: str = "maniac", hands: Optional[i
         path = variant if variant.endswith(".json") else str(ROOT / "variant" / "catalog" / f"{variant}.json")
     hands = hands or DEFAULT_CONFIG.hands_per_match
     bank = bank_s or DEFAULT_CONFIG.time_bank_s
-    startup = measure_startup(brain)
+    startup = measure_startup(brain, cwd=cwd, protocol=protocol)
     bot = SubprocessPlayer([sys.executable, "-m", "bot.main", "--brain", brain], name=brain,
-                           variant_path=path)
+                           variant_path=path if cwd is None else bot_variant_path,
+                           cwd=str(cwd) if cwd else None, protocol=protocol)
     m = play_match([bot, PlayerSpec.brain(opponent).build()], spec, seed=seed, hands=hands,
                    time_bank_s=bank)
     # Bank used = our decisions' wall time as the engine measured it.

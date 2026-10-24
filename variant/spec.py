@@ -47,6 +47,7 @@ STEP_PARAMS: dict[str, dict[str, Any]] = {
                 "max_bid": None},
     "market": {"quantity": "board_rank_sum", "size": 1, "settle_scale": 1},
     "bounty": {"mode": "random", "rank": None, "bonus": 0, "multiplier": 1.0},
+    "redraw_board": {"cost": 0, "order": "BB_first"},
     "showdown": {"runs": 1},
 }
 
@@ -370,6 +371,8 @@ def _check_cards(spec: VariantSpec, prog: list[dict]) -> list[str]:
             used += s["n"] * spec.players
         elif t == "auction" and s["prize"] == "card":
             used += 1
+        elif t == "redraw_board":
+            used += spec.players                      # each player may redraw one card
         elif t == "showdown":
             runs = s.get("runs", 1)
             if runs > 1:
@@ -399,6 +402,19 @@ def _runout_after_first_bet(prog: list[dict]) -> int:
         elif s["type"] == "deal_board" and seen_bet:
             n += s["n"]
     return n
+
+
+def spec_hash(spec: VariantSpec) -> str:
+    """Fingerprint of the game rules (name and description excluded): precomputed data is
+    only used when this matches the active variant."""
+    import hashlib
+    d = spec.to_dict()
+    d.pop("name", None)
+    d.pop("description", None)
+    d["program"] = spec.full_program()            # shorthand and explicit programs agree
+    d.pop("hole_cards", None)
+    d.pop("streets", None)
+    return hashlib.sha256(json.dumps(d, sort_keys=True).encode()).hexdigest()[:16]
 
 
 def load_catalog(directory: Optional[Path] = None) -> dict[str, VariantSpec]:

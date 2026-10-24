@@ -64,6 +64,16 @@ class Betting(Step):
         self.bet_multiple = bet_multiple
         self.check_raise = check_raise
 
+    @classmethod
+    def from_spec(cls, s, ctx):
+        from bot.game.rules_spec import street_label
+        b, i = ctx.spec.betting, ctx.round_index
+        default_first = ("BB" if b.straddle else b.preflop_first) if i == 0 else b.postflop_first
+        fixed = b.fixed_bets[i] if b.structure == "FL" else None
+        return cls(s.get("first") or default_first, b.max_raises, b.big_blind,
+                   s.get("round") or street_label(i), structure=b.structure, fixed_bet=fixed,
+                   bet_sizes=b.bet_sizes, bet_multiple=b.bet_multiple, check_raise=b.check_raise)
+
     def _bb(self, st) -> int:
         return st.level[1] if st.level else self.bb
 

@@ -44,6 +44,10 @@ class Bounty(CardStep):
         self.mode, self.rank, self.bonus, self.multiplier = mode, rank, bonus, multiplier
         self.deck_ranks = ranks
 
+    @classmethod
+    def from_spec(cls, s, ctx):
+        return cls(s["mode"], s.get("rank"), s["bonus"], s["multiplier"], ctx.spec.deck.ranks)
+
     def begin(self, st) -> None:
         super().begin(st)
         base = {"ranks": {}, "bonus": self.bonus, "multiplier": self.multiplier,
@@ -105,6 +109,10 @@ class Auction(Step):
         if payment not in ("pot", "opponent", "burn"):
             raise ValueError(f"unknown auction payment {payment!r}")
         self.kind, self.prize, self.payment, self.tie, self.max_bid = kind, prize, payment, tie, max_bid
+
+    @classmethod
+    def from_spec(cls, s, ctx):
+        return cls(s["kind"], s["prize"], s["payment"], s["tie"], s["max_bid"])
 
     def begin(self, st) -> None:
         st.step_state = _AuctionState()
@@ -211,6 +219,10 @@ class Market(CardStep):
                          size=size, settle_scale=settle_scale)
         self.quantity, self.size, self.scale = quantity, size, settle_scale
         self.lo, self.hi = market_range(quantity, board_cards)
+
+    @classmethod
+    def from_spec(cls, s, ctx):
+        return cls(s["quantity"], s["size"], s["settle_scale"], ctx.board_total)
 
     def options(self, st, p: int) -> tuple[str, ...]:
         return ("quote",)            # placeholder: legal() offers a numeric range instead

@@ -18,9 +18,18 @@ Other hooks:
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Optional
 
 from bot.actions import Action, LegalActions, safe_action
+
+
+@dataclass
+class CompileContext:
+    """What a plugin may need to know while being built from a spec entry."""
+    spec: Any                # the VariantSpec
+    round_index: int = 0     # betting rounds compiled so far
+    board_total: int = 0     # board cards per board over the whole program
 
 
 class Step:
@@ -30,6 +39,12 @@ class Step:
 
     def __init__(self, **params: Any) -> None:
         self.params = params
+
+    @classmethod
+    def from_spec(cls, s: dict, ctx: CompileContext) -> "Step":
+        """Build the step from its program entry `s` (defaults already filled in).
+        Default: pass every parameter except "type" to the constructor."""
+        return cls(**{k: v for k, v in s.items() if k != "type"})
 
     # ---- lifecycle
     def begin(self, st) -> None:

@@ -49,6 +49,23 @@ otherwise the built-in Hold'em config. Specs compile into a *hand program* of st
   print(compile_spec(VariantSpec.load('variant/catalog/omaha.json')).describe())"
 ```
 
+## Reveal day
+
+Follow `docs/DAY1_CHECKLIST.md`. The main tools:
+
+```bash
+.venv/bin/python -m lab.new_variant --from <preset>        # write + check variant/active.json
+.venv/bin/python -m lab.precompute --variant variant/active.json --hours 8   # overnight tables
+.venv/bin/python -m tools.package_submission --zip          # build + verify dist/submission.zip
+```
+
+Docs: `docs/VARIANT_INTERVIEW.md` (rules -> spec), `docs/WRITING_A_PLUGIN.md` (new step types),
+`docs/PROTOCOL_ADAPTER_GUIDE.md` (real wire format; adapters in `bot/protocols/`, select with
+`--protocol` or `$POKERBOT_PROTOCOL`; run the suite on one: `POKERBOT_PROTOCOL=json pytest`).
+
+Stretch: MCCFR-lite (`lab/cfr/`): `.venv/bin/python -m lab.cfr.train --variant <spec> --minutes 60`
+then `--brain cfr` (falls back to Tier 2 outside its tree).
+
 ## Running the bot / harness / tools
 
 Bot (reads the engine on stdin, writes actions on stdout, logs on stderr):
