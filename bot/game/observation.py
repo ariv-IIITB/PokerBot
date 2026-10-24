@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from bot.game.state import ALL
+from bot.game.state import ALL, REVEAL_KINDS
 
 
 @dataclass
@@ -42,16 +42,30 @@ def observe(st, p: int) -> View:
         elif e.kind in ("action", "special"):
             v.actions.append((e.player, e.data["action"]))
         elif e.kind in ("showdown", "expose", "reveal", "peek"):
-            v.revealed[e.player] = tuple(cards)
+            v.revealed[e.player] = v.revealed.get(e.player, ()) + tuple(cards)
         elif e.kind == "end":
             v.delta = e.data["delta"]
     return v
 
 
+def legit_knowledge(st, p: int) -> set[int]:
+    """Cards p may legitimately know even if they're now hidden: anything shown by a
+    reveal-type event or on the public board, plus every card p itself has held or been
+    offered (a card p gave away, or that left the board, is still known to p).
+    Whether each event was allowed when it was emitted is checked by the state audit."""
+    known = set()
+    for e in visible_events(st, p):
+        if (e.kind in REVEAL_KINDS or e.kind in ("board", "burn")
+                or (e.kind in ("hole", "offer") and e.player == p)):
+            known.update(e.data.get("cards", ()))
+    return known
+
+
 def hidden_from(st, p: int) -> set[int]:
-    """Cards p must not know right now: undealt cards and other players' unrevealed holes."""
+    """Cards p must not know right now: undealt cards and other players' hole cards,
+    minus what p legitimately learned."""
     hidden = set(st.deck)
     for q in range(st.n_players):
         if q != p:
             hidden |= set(st.hole[q])
-    return hidden
+    return hidden - legit_knowledge(st, p)
