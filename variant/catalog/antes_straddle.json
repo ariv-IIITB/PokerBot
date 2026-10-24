@@ -1,0 +1,8 @@
+{
+  "name": "antes_straddle",
+  "description": "Hold'em with a 1-chip ante and a 4-chip straddle by the small blind.",
+  "betting": {
+    "ante": 1,
+    "straddle": 4
+  }
+}

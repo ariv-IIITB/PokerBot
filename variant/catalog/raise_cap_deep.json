@@ -1,0 +1,12 @@
+{
+  "name": "raise_cap_deep",
+  "description": "Hold'em, 500 bb deep, at most 3 raises per betting round, blinds 5/10.",
+  "betting": {
+    "small_blind": 5,
+    "big_blind": 10,
+    "max_raises": 3
+  },
+  "match": {
+    "starting_stack": 5000
+  }
+}

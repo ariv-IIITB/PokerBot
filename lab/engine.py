@@ -20,15 +20,14 @@ from typing import Optional, Sequence
 import numpy as np
 
 from bot.actions import Action, LegalActions, is_legal, safe_action
-from bot.cards import DECK_SIZE
+from bot.cards import FULL_DECK
 from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, MatchEnd,
                           MatchInfo, OppAction, ProtocolError, Showdown, parse_action)
-from bot.game.rules_spec import Rules, rules_from_config
+from bot.game.rules_spec import Rules, to_rules
 from bot.game.runner import LazyRng, act, advance, legal_actions
 from bot.game.state import GameState
 from lab.players import PlayerCrashed, PlayerTimeout
-from variant.evaluator_hook import make_evaluator
-from variant.rules import DEFAULT_CONFIG, GameConfig
+from variant.rules import DEFAULT_CONFIG, GameConfig  # noqa: F401  (GameConfig: type hints)
 
 SB, BB = 0, 1
 
@@ -40,9 +39,10 @@ class Forfeit(Exception):
         self.reason = reason
 
 
-def deck_for(seed: int, hand_index: int) -> list[int]:
+def deck_for(seed: int, hand_index: int, deck: Sequence[int] = FULL_DECK) -> list[int]:
     """Deterministic shuffled deck for one hand of one seed."""
-    return np.random.default_rng([seed, hand_index]).permutation(DECK_SIZE).tolist()
+    order = np.random.default_rng([seed, hand_index]).permutation(len(deck)).tolist()
+    return [deck[i] for i in order]
 
 
 @dataclass
@@ -76,7 +76,7 @@ class Hand:
                  rules: Optional[Rules] = None, rng=None, audit: bool = False) -> None:
         self.cfg = cfg
         self.seats = list(seats)
-        self.rules = rules or rules_from_config(cfg, evaluator)
+        self.rules = rules or to_rules(cfg, evaluator)
         self.st = GameState(self.rules, deck, list(stacks), hand_id, audit=audit)
         self.hand_id = hand_id
         self.on_illegal = on_illegal
@@ -203,33 +203,41 @@ class MatchResult:
         return 1.0 if c > 0 else (0.5 if c == 0 else 0.0)
 
 
-def play_match(players: Sequence, cfg: GameConfig = DEFAULT_CONFIG, seed: int = 0,
+def play_match(players: Sequence, cfg=DEFAULT_CONFIG, seed: int = 0,
                hands: Optional[int] = None, on_illegal: str = "fold",
-               evaluator=None, time_bank_s: Optional[float] = None) -> MatchResult:
-    """Play one match between players[0] and players[1]. Player (h % 2) is SB in hand h."""
-    hands = cfg.hands_per_match if hands is None else hands
-    bank = cfg.time_bank_s if time_bank_s is None else time_bank_s
-    ev = evaluator or make_evaluator(cfg)
-    rules = rules_from_config(cfg, ev)
+               evaluator=None, time_bank_s: Optional[float] = None,
+               audit: bool = False) -> MatchResult:
+    """Play one match between players[0] and players[1]. Player (h % 2) is SB in hand h.
+    `cfg` may be a GameConfig, a VariantSpec or compiled Rules. audit=True checks every
+    event's visibility and chip conservation in every hand (AssertionError on failure)."""
+    rules = to_rules(cfg, evaluator)
+    hands = rules.hands_per_match if hands is None else hands
+    bank = rules.time_bank_s if time_bank_s is None else time_bank_s
     seats = [Seat(p, bank) for p in players]
-    info = MatchInfo(hands, bank, cfg.small_blind, cfg.big_blind, cfg.starting_stack)
-    stacks = [cfg.starting_stack, cfg.starting_stack]
+    info = MatchInfo(hands, bank, rules.small_blind, rules.big_blind, rules.starting_stack)
+    start = rules.starting_stack
+    stacks = [start, start]
     chips = [0, 0]
     result = MatchResult(chips, 0, [0, 0])
     try:
         for i in (0, 1):
+            set_rules = getattr(players[i], "set_rules", None)
+            if set_rules is not None:
+                set_rules(rules)          # in-process brains learn the variant directly
             _safe_notify(seats, i, info)
         for h in range(hands):
-            if not cfg.reset_stacks_each_hand and min(stacks) <= 0:
+            if not rules.reset_stacks_each_hand and min(stacks) <= 0:
                 break                                   # someone is bust
             sb_player = h % 2
             by_role = [seats[sb_player], seats[1 - sb_player]]
-            role_stacks = ([cfg.starting_stack] * 2 if cfg.reset_stacks_each_hand
+            role_stacks = ([start, start] if rules.reset_stacks_each_hand
                            else [stacks[sb_player], stacks[1 - sb_player]])
-            hand = Hand(cfg, by_role, role_stacks, deck_for(seed, h), h, ev, on_illegal, rules,
-                        rng=LazyRng([seed, h, 1]))
+            hand = Hand(cfg, by_role, role_stacks, deck_for(seed, h, rules.deck), h, None,
+                        on_illegal, rules, rng=LazyRng([seed, h, 1]), audit=audit)
             try:
                 res = hand.play()
+                if audit:
+                    assert sum(res.deltas) == 0, f"hand {h}: chips not conserved {res.deltas}"
             except Forfeit as f:
                 result.forfeit = sb_player if f.role == SB else 1 - sb_player
                 result.forfeit_reason = f.reason

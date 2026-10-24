@@ -1,0 +1,23 @@
+{
+  "name": "escalating_blinds",
+  "description": "Hold'em whose blinds double every 100 hands.",
+  "match": {
+    "blind_schedule": [
+      [
+        100,
+        2,
+        4
+      ],
+      [
+        200,
+        4,
+        8
+      ],
+      [
+        300,
+        8,
+        16
+      ]
+    ]
+  }
+}

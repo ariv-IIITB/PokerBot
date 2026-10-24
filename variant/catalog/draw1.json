@@ -1,0 +1,48 @@
+{
+  "name": "draw1",
+  "description": "Hold'em where after the flop betting each player may replace up to 1 hole card.",
+  "program": [
+    {
+      "type": "post_blinds"
+    },
+    {
+      "type": "deal_hole",
+      "n": 2
+    },
+    {
+      "type": "betting",
+      "round": "preflop"
+    },
+    {
+      "type": "deal_board",
+      "n": 3
+    },
+    {
+      "type": "betting",
+      "round": "flop"
+    },
+    {
+      "type": "deal_board",
+      "n": 1
+    },
+    {
+      "type": "draw",
+      "max": 1
+    },
+    {
+      "type": "betting",
+      "round": "turn"
+    },
+    {
+      "type": "deal_board",
+      "n": 1
+    },
+    {
+      "type": "betting",
+      "round": "river"
+    },
+    {
+      "type": "showdown"
+    }
+  ]
+}

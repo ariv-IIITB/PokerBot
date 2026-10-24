@@ -42,17 +42,25 @@ class DealHole(Step):
 
 
 class DealBoard(Step):
-    """Deal `n` public cards to the board and start a new street (n may be 0)."""
+    """Start a new street: burn `burn` cards (shown to both if burn_revealed), then deal
+    `n` public cards to the board (n may be 0: a betting round with no new cards)."""
     type_name = "deal_board"
 
-    def __init__(self, n: int) -> None:
-        super().__init__(n=n)
-        self.n = n
+    def __init__(self, n: int, burn: int = 0, burn_revealed: bool = False) -> None:
+        super().__init__(n=n, burn=burn, burn_revealed=burn_revealed)
+        self.n, self.burn, self.burn_revealed = n, burn, burn_revealed
 
     def apply(self, st, rng) -> None:
         st.street += 1
+        if self.burn:
+            burned = st.deal(self.burn)
+            if self.burn_revealed:
+                st.emit("burn", visible=ALL, cards=tuple(burned))
         st.board = st.board + st.deal(self.n)
         st.emit("board", visible=ALL, street=st.street, cards=tuple(st.board))
 
     def describe(self) -> str:
-        return f"deal {self.n} board card{'s' * (self.n != 1)} (new street)"
+        burn = ""
+        if self.burn:
+            burn = f"burn {self.burn}{' face up' if self.burn_revealed else ''}, then "
+        return f"{burn}deal {self.n} board card{'s' * (self.n != 1)} (new street)"

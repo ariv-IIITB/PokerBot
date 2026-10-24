@@ -2,8 +2,8 @@
 
 equity = P(win) + 0.5 * P(tie), estimated by dealing random opponent hole cards and a
 random completion of the board, then comparing best hands. Card counts come from
-GameConfig (hole cards, board size), and the evaluator is passed in, so this works for
-any variant whose showdown is "best hand wins".
+the config (a GameConfig or compiled Rules: hole cards, board size, deck, evaluator), so
+this works for any variant whose showdown is "best hand wins".
 
 Two implementations:
   * equity_scalar     - plain Python loop (simple reference, low overhead for tiny runs)
@@ -23,7 +23,7 @@ from typing import Optional, Sequence
 
 import numpy as np
 
-from bot.cards import remaining_deck
+from bot.cards import FULL_DECK
 from variant.evaluator_hook import Evaluator, make_evaluator
 from variant.rules import DEFAULT_CONFIG, GameConfig
 
@@ -41,9 +41,12 @@ def _default_evaluator(config: GameConfig) -> Evaluator:
 
 
 def _setup(hole, board, config, evaluator, dead, opp_cards=None, runout=None):
-    ev = evaluator if evaluator is not None else _default_evaluator(config)
-    known = list(hole) + list(board) + list(dead)
-    deck = remaining_deck(known)
+    if evaluator is not None:
+        ev = evaluator
+    else:
+        ev = getattr(config, "evaluator", None) or _default_evaluator(config)
+    known = set(hole) | set(board) | set(dead)
+    deck = [c for c in getattr(config, "deck", FULL_DECK) if c not in known]
     n_opp = config.hole_cards if opp_cards is None else opp_cards
     n_run = config.board_cards - len(board) if runout is None else runout
     if n_run < 0:
@@ -155,7 +158,7 @@ def equity_vectorized(hole: Sequence[int], board: Sequence[int],
     return _result(total, total_sq, n)
 
 
-def equity(hole: Sequence[int], board: Sequence[int], config: GameConfig = DEFAULT_CONFIG,
+def equity(hole: Sequence[int], board: Sequence[int], config=DEFAULT_CONFIG,
            evaluator: Optional[Evaluator] = None, **kw) -> EquityResult:
     """Default entry point (vectorized)."""
     return equity_vectorized(hole, board, config, evaluator, **kw)

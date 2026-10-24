@@ -1,0 +1,45 @@
+{
+  "name": "choose_two",
+  "description": "Each player is offered 4 cards and keeps 2 as hole cards.",
+  "program": [
+    {
+      "type": "post_blinds"
+    },
+    {
+      "type": "choose",
+      "offer": 4,
+      "keep": 2
+    },
+    {
+      "type": "betting",
+      "round": "preflop"
+    },
+    {
+      "type": "deal_board",
+      "n": 3
+    },
+    {
+      "type": "betting",
+      "round": "flop"
+    },
+    {
+      "type": "deal_board",
+      "n": 1
+    },
+    {
+      "type": "betting",
+      "round": "turn"
+    },
+    {
+      "type": "deal_board",
+      "n": 1
+    },
+    {
+      "type": "betting",
+      "round": "river"
+    },
+    {
+      "type": "showdown"
+    }
+  ]
+}

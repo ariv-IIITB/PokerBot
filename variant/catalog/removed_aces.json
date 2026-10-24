@@ -1,0 +1,12 @@
+{
+  "name": "removed_aces",
+  "description": "Hold'em with all four aces removed from the deck.",
+  "deck": {
+    "removed": [
+      "Ac",
+      "Ad",
+      "Ah",
+      "As"
+    ]
+  }
+}

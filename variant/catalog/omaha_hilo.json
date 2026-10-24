@@ -1,0 +1,10 @@
+{
+  "name": "omaha_hilo",
+  "description": "Omaha hi-lo 8-or-better: half the pot to the best high, half to the best qualifying low.",
+  "hole_cards": 4,
+  "evaluation": {
+    "kind": "hilo",
+    "hole_exact": 2,
+    "low_qualifier": 8
+  }
+}

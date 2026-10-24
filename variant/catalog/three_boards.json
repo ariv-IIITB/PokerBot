@@ -1,0 +1,47 @@
+{
+  "name": "three_boards",
+  "description": "Hold'em with three boards dealt in parallel; the pot is split per board.",
+  "program": [
+    {
+      "type": "post_blinds"
+    },
+    {
+      "type": "deal_hole",
+      "n": 2
+    },
+    {
+      "type": "betting",
+      "round": "preflop"
+    },
+    {
+      "type": "deal_board",
+      "n": 3,
+      "boards": 3
+    },
+    {
+      "type": "betting",
+      "round": "flop"
+    },
+    {
+      "type": "deal_board",
+      "n": 1,
+      "boards": 3
+    },
+    {
+      "type": "betting",
+      "round": "turn"
+    },
+    {
+      "type": "deal_board",
+      "n": 1,
+      "boards": 3
+    },
+    {
+      "type": "betting",
+      "round": "river"
+    },
+    {
+      "type": "showdown"
+    }
+  ]
+}

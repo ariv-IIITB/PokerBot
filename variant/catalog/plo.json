@@ -1,0 +1,11 @@
+{
+  "name": "plo",
+  "description": "Pot-limit Omaha.",
+  "hole_cards": 4,
+  "evaluation": {
+    "hole_exact": 2
+  },
+  "betting": {
+    "structure": "PL"
+  }
+}

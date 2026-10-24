@@ -10,6 +10,11 @@ from bot.state import GameState
 
 class Brain(ABC):
     name = "base"
+    rules = None      # compiled bot.game Rules of the variant being played, if known
+
+    def set_rules(self, rules) -> None:
+        """Called by the lab before a match; the submitted bot uses its active variant."""
+        self.rules = rules
 
     @abstractmethod
     def decide(self, state: GameState, legal: LegalActions, budget_s: float) -> Action:

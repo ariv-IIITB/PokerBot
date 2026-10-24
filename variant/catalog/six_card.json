@@ -1,0 +1,5 @@
+{
+  "name": "six_card",
+  "description": "Six-card hold'em: 6 hole cards, best 5 of 11.",
+  "hole_cards": 6
+}

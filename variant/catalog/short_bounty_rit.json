@@ -1,0 +1,66 @@
+{
+  "name": "short_bounty_rit",
+  "description": "Weird combo: short deck + bounty rank + run it twice.",
+  "deck": {
+    "ranks": "6789TJQKA"
+  },
+  "evaluation": {
+    "category_order": [
+      "high_card",
+      "pair",
+      "two_pair",
+      "trips",
+      "straight",
+      "full_house",
+      "flush",
+      "quads",
+      "straight_flush"
+    ]
+  },
+  "program": [
+    {
+      "type": "post_blinds"
+    },
+    {
+      "type": "deal_hole",
+      "n": 2
+    },
+    {
+      "type": "bounty",
+      "mode": "random",
+      "bonus": 10
+    },
+    {
+      "type": "betting",
+      "round": "preflop"
+    },
+    {
+      "type": "deal_board",
+      "n": 3
+    },
+    {
+      "type": "betting",
+      "round": "flop"
+    },
+    {
+      "type": "deal_board",
+      "n": 1
+    },
+    {
+      "type": "betting",
+      "round": "turn"
+    },
+    {
+      "type": "deal_board",
+      "n": 1
+    },
+    {
+      "type": "betting",
+      "round": "river"
+    },
+    {
+      "type": "showdown",
+      "runs": 2
+    }
+  ]
+}

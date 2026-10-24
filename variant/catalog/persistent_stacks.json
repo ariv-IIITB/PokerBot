@@ -1,0 +1,8 @@
+{
+  "name": "persistent_stacks",
+  "description": "Stacks carry over between hands; the match ends when someone busts.",
+  "match": {
+    "reset_stacks": false,
+    "starting_stack": 200
+  }
+}

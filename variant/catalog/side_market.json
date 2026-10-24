@@ -1,0 +1,48 @@
+{
+  "name": "side_market",
+  "description": "Hold'em plus a side market each hand on the sum of the board's ranks.",
+  "program": [
+    {
+      "type": "post_blinds"
+    },
+    {
+      "type": "deal_hole",
+      "n": 2
+    },
+    {
+      "type": "market",
+      "quantity": "board_rank_sum"
+    },
+    {
+      "type": "betting",
+      "round": "preflop"
+    },
+    {
+      "type": "deal_board",
+      "n": 3
+    },
+    {
+      "type": "betting",
+      "round": "flop"
+    },
+    {
+      "type": "deal_board",
+      "n": 1
+    },
+    {
+      "type": "betting",
+      "round": "turn"
+    },
+    {
+      "type": "deal_board",
+      "n": 1
+    },
+    {
+      "type": "betting",
+      "round": "river"
+    },
+    {
+      "type": "showdown"
+    }
+  ]
+}

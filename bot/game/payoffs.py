@@ -7,9 +7,22 @@ their own chip result (end events).
 """
 from __future__ import annotations
 
+from bot.game.scoring import split_pot
 
-def settle(st, evaluate) -> None:
-    """Pay out `st` using evaluate(hole, board) -> comparable value. Sets st.deltas."""
+
+def showdown_shares(st, scorer) -> list[float]:
+    """Each player's fraction of the matched pot at showdown."""
+    n = st.n_players
+    if hasattr(scorer, "shares"):
+        return scorer.shares([st.hole[p] for p in range(n)], [st.board])
+    values = [scorer.evaluate(st.hole[p], st.board) for p in range(n)]
+    best = max(values)
+    winners = [p for p in range(n) if values[p] == best]
+    return [1.0 / len(winners) if p in winners else 0.0 for p in range(n)]
+
+
+def settle(st, scorer) -> None:
+    """Pay out `st` with a Scorer (or any object with evaluate(hole, board)). Sets st.deltas."""
     n = st.n_players
     if st.folded is not None:
         winners = [p for p in range(n) if p != st.folded]
@@ -18,13 +31,9 @@ def settle(st, evaluate) -> None:
         matched = min(st.total)
         for p in range(n):
             st.stack[p] += st.total[p] - matched       # uncalled excess back
-        values = [evaluate(st.hole[p], st.board) for p in range(n)]
-        best = max(values)
-        winners = [p for p in range(n) if values[p] == best]
-        share = matched * n
-        each, odd = divmod(share, len(winners))
-        for i, p in enumerate(winners):
-            st.stack[p] += each + (1 if i < odd else 0)
+        chips = split_pot(matched * n, showdown_shares(st, scorer))
+        for p in range(n):
+            st.stack[p] += chips[p]
         st.showdown = True
         for p in range(n):
             for q in range(n):

@@ -1,0 +1,20 @@
+{
+  "name": "short_deck",
+  "description": "Short-deck Hold'em: 36 cards (6-A), flush beats full house, A-6-7-8-9 is a straight.",
+  "deck": {
+    "ranks": "6789TJQKA"
+  },
+  "evaluation": {
+    "category_order": [
+      "high_card",
+      "pair",
+      "two_pair",
+      "trips",
+      "straight",
+      "full_house",
+      "flush",
+      "quads",
+      "straight_flush"
+    ]
+  }
+}

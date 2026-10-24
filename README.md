@@ -36,6 +36,19 @@ Runtime dependencies of the submitted bot: `numpy` (and `scipy`, optional).
 | `docs/` | Project docs (e.g. `POKERBOTS_BIBLE.md`) |
 | `tests/` | pytest suite, one file per module |
 
+## Variants
+
+A variant is a JSON spec (`variant/spec.py` documents every field; presets live in
+`variant/catalog/`). The bot plays `variant/active.json` if present (or `$POKERBOT_VARIANT`),
+otherwise the built-in Hold'em config. Specs compile into a *hand program* of step plugins
+(`bot/game/`), shared by the bot and the lab engine.
+
+```bash
+.venv/bin/python -m lab.random_variant --seed 3 --count 2 --supported   # random valid specs
+.venv/bin/python -c "from variant.spec import VariantSpec; from bot.game.compile import compile_spec; \
+  print(compile_spec(VariantSpec.load('variant/catalog/omaha.json')).describe())"
+```
+
 ## Running the bot / harness / tools
 
 Bot (reads the engine on stdin, writes actions on stdout, logs on stderr):

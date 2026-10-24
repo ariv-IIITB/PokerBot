@@ -1,0 +1,11 @@
+{
+  "name": "extra_round",
+  "description": "Hold'em with an extra betting round after the river with no new cards.",
+  "streets": [
+    0,
+    3,
+    1,
+    1,
+    0
+  ]
+}

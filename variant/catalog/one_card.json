@@ -1,0 +1,11 @@
+{
+  "name": "one_card",
+  "description": "One hole card and a 4-card board dealt 2-1-1; best 5 of 5.",
+  "hole_cards": 1,
+  "streets": [
+    0,
+    2,
+    1,
+    1
+  ]
+}

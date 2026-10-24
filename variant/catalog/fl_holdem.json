@@ -1,0 +1,14 @@
+{
+  "name": "fl_holdem",
+  "description": "Fixed-limit Hold'em: bets of 2 preflop/flop, 4 turn/river, 4 raises max.",
+  "betting": {
+    "structure": "FL",
+    "fixed_bets": [
+      2,
+      2,
+      4,
+      4
+    ],
+    "max_raises": 4
+  }
+}

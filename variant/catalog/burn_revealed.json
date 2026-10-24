@@ -1,0 +1,50 @@
+{
+  "name": "burn_revealed",
+  "description": "Hold'em with one burn card before each street, shown face up to both players.",
+  "program": [
+    {
+      "type": "post_blinds"
+    },
+    {
+      "type": "deal_hole",
+      "n": 2
+    },
+    {
+      "type": "betting",
+      "round": "preflop"
+    },
+    {
+      "type": "deal_board",
+      "n": 3,
+      "burn": 1,
+      "burn_revealed": true
+    },
+    {
+      "type": "betting",
+      "round": "flop"
+    },
+    {
+      "type": "deal_board",
+      "n": 1,
+      "burn": 1,
+      "burn_revealed": true
+    },
+    {
+      "type": "betting",
+      "round": "turn"
+    },
+    {
+      "type": "deal_board",
+      "n": 1,
+      "burn": 1,
+      "burn_revealed": true
+    },
+    {
+      "type": "betting",
+      "round": "river"
+    },
+    {
+      "type": "showdown"
+    }
+  ]
+}

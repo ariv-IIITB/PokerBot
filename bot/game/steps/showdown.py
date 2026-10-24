@@ -11,7 +11,7 @@ class ShowdownStep(Step):
     skip_on_fold = False
 
     def apply(self, st, rng) -> None:
-        settle(st, st.rules.evaluator.evaluate)
+        settle(st, st.rules.evaluator)
 
     def describe(self) -> str:
         return "showdown: best hand wins the pot (fold: the other player wins)"

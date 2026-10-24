@@ -60,6 +60,10 @@ class InProcessPlayer:
         self.name = name or getattr(brain, "name", "brain")
         self.bot = Bot(brain, out=None)
 
+    def set_rules(self, rules) -> None:
+        """Tell the brain which variant this match uses (the real bot reads variant/active.json)."""
+        self.bot.brain.set_rules(rules)
+
     def notify(self, msg: Message) -> None:
         self.bot.on_message(msg)
 

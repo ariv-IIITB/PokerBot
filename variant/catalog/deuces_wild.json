@@ -1,0 +1,9 @@
+{
+  "name": "deuces_wild",
+  "description": "Hold'em with all deuces wild.",
+  "evaluation": {
+    "wild": {
+      "rank": "2"
+    }
+  }
+}

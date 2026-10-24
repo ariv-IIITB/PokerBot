@@ -23,7 +23,7 @@ from bot.equity import equity
 from bot.log import warn
 from bot.protocol import MatchInfo, Message
 from bot.state import ME, GameState
-from variant.rules import DEFAULT_CONFIG, GameConfig
+from bot.game.rules_spec import active_rules, to_rules
 
 DEFAULTS: dict[str, Any] = {
     "seed": 12345,
@@ -46,10 +46,10 @@ class Tier1Brain(Brain):
     name = "tier1"
     param_file = "tier1"
 
-    def __init__(self, config: Optional[dict] = None, game: GameConfig = DEFAULT_CONFIG,
-                 config_dir=None) -> None:
+    def __init__(self, config: Optional[dict] = None, game=None, config_dir=None) -> None:
         self.p = load_params(self.param_file, self.defaults(), config, config_dir)
-        self.game = game
+        # `game`: GameConfig, VariantSpec or Rules; default = the bot's active variant.
+        self.rules = to_rules(game) if game is not None else active_rules()
         self.rng = np.random.default_rng(int(self.p["seed"]))
         self.pyrng = random.Random(int(self.p["seed"]))
         self._cache: dict = {}
@@ -68,8 +68,9 @@ class Tier1Brain(Brain):
         """Build evaluator tables and NumPy code paths before the first timed decision
         (the first equity call is ~60 ms, later ones well under 1 ms)."""
         try:
-            hole = list(range(self.game.hole_cards))
-            equity(hole, (), self.game, max_samples=16, rng=self.rng)
+            r = self.rules
+            hole = list(r.deck[:r.hole_cards])
+            equity(hole, (), r, max_samples=16, rng=self.rng, opp_cards=r.hole_cards)
         except Exception as e:  # never fatal: the first decision just pays the cost
             warn(f"warm-up failed: {e!r}")
 
@@ -81,8 +82,8 @@ class Tier1Brain(Brain):
             self._cache, self._cache_hand = {}, h.hand_id
         key = (h.hole, h.board)
         if key not in self._cache:
-            runout = sum(self.game.streets[h.street + 1:])
-            r = equity(h.hole, h.board, self.game, time_budget_s=budget_s * self.p["equity_budget_frac"],
+            runout = sum(self.rules.streets[h.street + 1:])
+            r = equity(h.hole, h.board, self.rules, time_budget_s=budget_s * self.p["equity_budget_frac"],
                        max_samples=int(self.p["max_samples"]), rng=self.rng,
                        opp_cards=len(h.hole), runout=runout)
             self._cache[key] = r.equity

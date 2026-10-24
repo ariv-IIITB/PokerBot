@@ -1,0 +1,57 @@
+{
+  "name": "boards_discard_pl",
+  "description": "Weird combo: two boards, 3 hole cards with a public discard, pot-limit.",
+  "betting": {
+    "structure": "PL"
+  },
+  "program": [
+    {
+      "type": "post_blinds"
+    },
+    {
+      "type": "deal_hole",
+      "n": 3
+    },
+    {
+      "type": "betting",
+      "round": "preflop"
+    },
+    {
+      "type": "deal_board",
+      "n": 3,
+      "boards": 2
+    },
+    {
+      "type": "discard",
+      "n": 1,
+      "order": "SB_first",
+      "visibility": "public",
+      "destination": "muck"
+    },
+    {
+      "type": "betting",
+      "round": "flop"
+    },
+    {
+      "type": "deal_board",
+      "n": 1,
+      "boards": 2
+    },
+    {
+      "type": "betting",
+      "round": "turn"
+    },
+    {
+      "type": "deal_board",
+      "n": 1,
+      "boards": 2
+    },
+    {
+      "type": "betting",
+      "round": "river"
+    },
+    {
+      "type": "showdown"
+    }
+  ]
+}

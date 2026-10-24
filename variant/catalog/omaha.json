@@ -1,0 +1,8 @@
+{
+  "name": "omaha",
+  "description": "Omaha: 4 hole cards, must use exactly 2 of them and 3 board cards.",
+  "hole_cards": 4,
+  "evaluation": {
+    "hole_exact": 2
+  }
+}

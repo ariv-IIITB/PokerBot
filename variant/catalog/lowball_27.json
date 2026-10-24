@@ -1,0 +1,32 @@
+{
+  "name": "lowball_27",
+  "description": "2-7 lowball: 5 hole cards, no board, one draw of up to 3 cards; the lowest hand wins.",
+  "program": [
+    {
+      "type": "post_blinds"
+    },
+    {
+      "type": "deal_hole",
+      "n": 5
+    },
+    {
+      "type": "betting",
+      "round": "predraw"
+    },
+    {
+      "type": "draw",
+      "max": 3,
+      "visibility": "private"
+    },
+    {
+      "type": "betting",
+      "round": "postdraw"
+    },
+    {
+      "type": "showdown"
+    }
+  ],
+  "evaluation": {
+    "kind": "low_27"
+  }
+}

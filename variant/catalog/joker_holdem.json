@@ -1,0 +1,12 @@
+{
+  "name": "joker_holdem",
+  "description": "Hold'em with two jokers in the deck; jokers are wild.",
+  "deck": {
+    "jokers": 2
+  },
+  "evaluation": {
+    "wild": {
+      "jokers": true
+    }
+  }
+}
