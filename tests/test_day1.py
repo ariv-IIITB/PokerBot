@@ -45,7 +45,7 @@ def test_package_contains_only_what_the_variant_needs(tmp_path) -> None:
     assert pkg.check_imports(out) == []
     assert info["protocol"] == "placeholder"
     # The packaged bot plays the variant from its own folder (its own active.json).
-    bot = SubprocessPlayer([sys.executable, "-m", "bot.main"], cwd=str(out))
+    bot = SubprocessPlayer([sys.executable, "-m", "bot.main"], cwd=str(out), protocol="placeholder")
     m = play_match([bot, PlayerSpec.brain("random_legal").build()], load_catalog()["mit2026_discard"],
                    seed=1, hands=15, audit=True)
     assert m.forfeit is None and m.errors[0] == 0
