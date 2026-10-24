@@ -39,6 +39,7 @@ from variant.spec import VariantSpec, spec_hash  # noqa: E402
 
 ALWAYS = ["bot.main", "bot.protocols.placeholder", "bot.brains.tier0", "variant.spec",
           "variant.rules", "variant.evaluator_hook"]
+DATA_CAP_MB = 50
 FORBIDDEN = {"socket", "ssl", "http", "urllib", "ftplib", "smtplib", "poplib", "imaplib",
              "telnetlib", "xmlrpc", "socketserver", "asyncio", "webbrowser", "requests",
              "subprocess", "multiprocessing", "sqlite3", "tempfile", "shutil"}
@@ -120,7 +121,16 @@ def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
     if (data_src / "meta.json").is_file():
         meta = json.loads((data_src / "meta.json").read_text())
         if meta.get("spec_hash") == spec_hash(spec):
-            shutil.copytree(data_src, out / "data" / spec.name)
+            # Runtime files only (tables + exported strategy); never training checkpoints.
+            dst = out / "data" / spec.name
+            dst.mkdir(parents=True)
+            files = [f for f in data_src.iterdir()
+                     if f.suffix == ".npy" or f.name in ("meta.json", "cfr_strategy.json")]
+            total = sum(f.stat().st_size for f in files)
+            if total > DATA_CAP_MB * 1024 * 1024:
+                raise SystemExit(f"data/{spec.name} is {total / 1e6:.0f} MB > cap {DATA_CAP_MB} MB")
+            for f in files:
+                shutil.copyfile(f, dst / f.name)
             data = True
     info = {"variant": spec.name, "spec_hash": spec_hash(spec), "brain": brain,
             "protocol": protocol, "modules": sorted(mods), "data": data}

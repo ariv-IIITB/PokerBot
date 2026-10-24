@@ -17,3 +17,4 @@ results/
 
 # Submission packages (tools/package_submission.py)
 dist/
+*.ckpt
