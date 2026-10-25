@@ -62,6 +62,8 @@ def test_model_counts() -> None:
     assert model.raw("aggression") == (1, 1)
     assert model.raw("wtsd") == (1, 1)
     assert model.get("vpip") == pytest.approx(2 / 3, abs=1e-3)
+    # every street: hand 2 call (pre) + raise (flop), hand 3 raise (pre)
+    assert model.raw("aggression_all") == (2, 3)
 
 
 def test_adjustments_vs_station_and_bluffable() -> None:
@@ -76,6 +78,24 @@ def test_adjustments_vs_station_and_bluffable() -> None:
     folder = Tier2Brain()
     folder.opp.stats["fold_to_raise"].count, folder.opp.stats["fold_to_raise"].n = 180, 200
     assert folder.adjusted()["bluff_freq"] > DEFAULTS["bluff_freq"]
+
+
+def _with_aggression(rate: float) -> Tier2Brain:
+    b = Tier2Brain()
+    b.opp.stats["aggression_all"].count, b.opp.stats["aggression_all"].n = int(rate * 400), 400
+    return b
+
+
+def test_bet_pressure_relaxes_only_vs_extreme_aggression() -> None:
+    base = DEFAULTS["bet_pressure"]
+    assert Tier2Brain().adjusted()["bet_pressure"] == base           # unknown opponent
+    assert _with_aggression(0.45).adjusted()["bet_pressure"] == base  # normal bots (~0.4-0.45)
+    maniac = _with_aggression(0.85).adjusted()["bet_pressure"]
+    shover = _with_aggression(1.0).adjusted()["bet_pressure"]
+    assert 0 < shover < maniac < base and shover < 0.1 * base
+    off = Tier2Brain({"pressure_aggr_shift": 0.0})
+    off.opp.stats["aggression_all"].count = off.opp.stats["aggression_all"].n = 400
+    assert off.adjusted()["bet_pressure"] == base                     # switch works
 
 
 def test_shipped_config_matches_known_keys() -> None:

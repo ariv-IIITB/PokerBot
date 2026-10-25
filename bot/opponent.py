@@ -7,6 +7,7 @@ Stats (all from the opponent's point of view):
   vpip           put chips in voluntarily preflop (call or raise), per preflop decision hand
   pfr            raised preflop
   aggression     raises / (raises + calls), postflop
+  aggression_all raises / (raises + calls), every street (catches preflop shovers)
   fold_to_raise  folded directly after one of our raises
   wtsd           reached showdown, per hand they saw a flop
 Fed from neutral messages via `update(state, msg)` (called from Brain.observe).
@@ -20,7 +21,7 @@ from bot.protocol import HandEnd, HandStart, Message, OppAction, Showdown
 from bot.state import ME, GameState
 
 DEFAULT_PRIORS = {"vpip": 0.55, "pfr": 0.25, "aggression": 0.35, "fold_to_raise": 0.40,
-                  "wtsd": 0.35}
+                  "wtsd": 0.35, "aggression_all": 0.35}
 
 
 def shrink(count: float, n: float, prior: float, k: float) -> float:
@@ -68,6 +69,8 @@ class OpponentModel:
             prev = h.history[-2] if len(h.history) >= 2 else None
             if prev is not None and prev.actor == ME and prev.action.kind == RAISE:
                 self.stats["fold_to_raise"].add(a.kind == FOLD)
+            if a.kind in (CALL, RAISE):
+                self.stats["aggression_all"].add(a.kind == RAISE)
             if h.street == 0:
                 self._pre_acted = True
                 if a.kind in (CALL, RAISE):

@@ -4,6 +4,8 @@ Adjustments (each bounded, all scaled by how far a shrunk stat is from its prior
   * bluffs scale with the opponent's fold-to-raise (fewer bluffs vs calling stations)
   * vs loose/passive callers: lower value-raise thresholds and bigger value sizes
   * vs aggressive opponents: call a little lighter
+  * vs opponents who raise most of the time (any street): shrink the "big bets are strong"
+    call penalty (bet_pressure), down to 0 for an always-raise / always-shove bot
 Endgame lock: once our match lead is bigger than the most we could lose by check/folding
 every remaining hand, we only check/fold (a guaranteed match win). See `lock_margin`.
 """
@@ -26,6 +28,8 @@ DEFAULTS.update({
     "value_shift": 0.15,           # raise threshold drop per unit of (vpip - prior)
     "value_size_shift": 0.6,       # size boost per unit of (prior_ftr - ftr)
     "aggr_call_shift": 0.10,       # call margin drop per unit of (aggression - prior)
+    "pressure_aggr_from": 0.6,     # all-street aggression above this shrinks bet_pressure...
+    "pressure_aggr_shift": 1.0,    # ...to bet_pressure x (1 - shift * excess); 0 = off
     "lock_enabled": True,
     "lock_assume_alternating": True,   # blinds alternate each hand (False = assume BB always)
 })
@@ -101,6 +105,12 @@ class Tier2Brain(Tier1Brain):
         boost = 1.0 + p["value_size_shift"] * max(0.0, pri["fold_to_raise"] - ftr)
         p["value_frac"] = p["value_frac"] * boost
         p["call_margin"] = p["call_margin"] - p["aggr_call_shift"] * (aggr - pri["aggression"])
+        # Big bets from someone who raises nearly always say little about their hand.
+        # Normal bots measure ~0.40-0.45 here, so they keep the full penalty; maniacs ~0.85,
+        # always-shove bots ~0.97.
+        a_all, start = self.opp.get("aggression_all"), p["pressure_aggr_from"]
+        excess = max(0.0, a_all - start) / max(1e-6, 1.0 - start)       # 0 below start, 1 at always
+        p["bet_pressure"] = p["bet_pressure"] * min(1.0, max(0.0, 1.0 - p["pressure_aggr_shift"] * excess))
         return p
 
     def decide(self, state: GameState, legal: LegalActions, budget_s: float) -> Action:

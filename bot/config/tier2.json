@@ -23,12 +23,15 @@
     "pfr": 0.25,
     "aggression": 0.35,
     "fold_to_raise": 0.4,
-    "wtsd": 0.35
+    "wtsd": 0.35,
+    "aggression_all": 0.35
   },
   "bluff_scale_max": 2.0,
   "value_shift": 0.15,
   "value_size_shift": 0.6,
   "aggr_call_shift": 0.1,
+  "pressure_aggr_from": 0.6,
+  "pressure_aggr_shift": 1.0,
   "lock_enabled": true,
   "lock_assume_alternating": true
 }
