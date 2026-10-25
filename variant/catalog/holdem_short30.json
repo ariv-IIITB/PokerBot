@@ -1,0 +1,10 @@
+{
+  "name": "holdem_short30",
+  "description": "Hold'em, 30 bb deep (blinds 1/2, stacks 60), at most 2 raises per betting round. A small game for solver experiments.",
+  "betting": {
+    "max_raises": 2
+  },
+  "match": {
+    "starting_stack": 60
+  }
+}

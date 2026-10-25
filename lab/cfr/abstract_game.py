@@ -1,7 +1,7 @@
 """The active variant as an abstract game for MCCFR, using bot/game for the rules.
 
 State = (GameState, history string). Betting decisions offer the abstract actions of
-bot/sim/abstraction.py; non-betting decisions (card steps, bids, ...) are resolved
+lab/cfr/abstraction.py; non-betting decisions (card steps, bids, ...) are resolved
 automatically with the first legal option (an abstraction limitation: MCCFR here learns
 betting only). The infoset is (street, hand-strength bucket, betting history this hand).
 """
@@ -11,13 +11,14 @@ from __future__ import annotations
 from bot.actions import Action
 from bot.game.runner import act, advance, legal_actions
 from bot.game.state import GameState
-from bot.sim.abstraction import Bucketer, abstract_actions, infoset_key
+from lab.cfr.abstraction import Bucketer, abstract_actions, infoset_key
 
 
 class AbstractGame:
-    def __init__(self, rules, n_buckets: int = 8) -> None:
+    def __init__(self, rules, n_buckets: int = 8, fractions=None) -> None:
         self.rules = rules
         self.bucketer = Bucketer(rules, n_buckets)
+        self.fractions = fractions                 # raise label -> pot fraction (None: default)
 
     def _settle(self, st):
         """Advance through automatic steps and non-betting decisions."""
@@ -54,7 +55,7 @@ class AbstractGame:
         st = s[0]
         p = self.to_act(s)
         legal = legal_actions(st, p)
-        return abstract_actions(legal, st.pot, st.to_call(p), st.bet[p])
+        return abstract_actions(legal, st.pot, st.to_call(p), st.bet[p], self.fractions)
 
     def actions(self, s):
         return [label for label, _ in self._abstract(s)]

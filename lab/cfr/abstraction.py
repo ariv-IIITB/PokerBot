@@ -1,4 +1,4 @@
-"""Game abstraction shared by the MCCFR trainer (lab/cfr) and the CFR brain.
+"""Game abstraction shared by the MCCFR trainer and the lab-only CFR brain (lab/cfr/).
 
 Buckets: hand strength = percentile of our hand vs random hands on the current board
 (deterministic: the reference hands are seeded from the cards), cut into `n_buckets`.
@@ -23,15 +23,17 @@ FRACTIONS = {"H": 0.5, "P": 1.0}
 ORDER = ("F", "C", "H", "P", "A")
 
 
-def abstract_actions(legal: LegalActions, pot: int, to_call: int, mybet: int) -> list[tuple[str, Action]]:
-    """(label, concrete action) pairs for the abstract actions legal here."""
+def abstract_actions(legal: LegalActions, pot: int, to_call: int, mybet: int,
+                     fractions: Optional[dict] = None) -> list[tuple[str, Action]]:
+    """(label, concrete action) pairs for the abstract actions legal here.
+    `fractions`: raise label -> pot fraction (default FRACTIONS); all-in is always "A"."""
     out: list[tuple[str, Action]] = []
     if legal.fold:
         out.append(("F", Action.fold()))
     out.append(("C", Action.call() if legal.call else Action.check()))
     if legal.can_raise:
         seen = set()
-        for label, frac in FRACTIONS.items():
+        for label, frac in (fractions or FRACTIONS).items():
             a = pot_fraction_raise(frac, pot, to_call, mybet, legal)
             if a is not None and a.amount not in seen:
                 seen.add(a.amount)
@@ -43,13 +45,14 @@ def abstract_actions(legal: LegalActions, pot: int, to_call: int, mybet: int) ->
 
 
 def raise_label(amount: int, pot_before: int, call_before: int, bet_before: int,
-                rng: Optional[np.random.Generator] = None, all_in: bool = False) -> str:
+                rng: Optional[np.random.Generator] = None, all_in: bool = False,
+                fractions: Optional[dict] = None) -> str:
     """Abstract label for an observed raise to `amount` (pseudo-harmonic between sizes)."""
     if all_in:
         return "A"
     denom = max(1, pot_before + call_before)
     x = (amount - bet_before - call_before) / denom          # the raise as a pot fraction
-    sizes = sorted(FRACTIONS.items(), key=lambda kv: kv[1])
+    sizes = sorted((fractions or FRACTIONS).items(), key=lambda kv: kv[1])
     if x <= sizes[0][1]:
         return sizes[0][0]
     if x >= sizes[-1][1]:

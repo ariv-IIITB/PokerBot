@@ -1,5 +1,8 @@
 # CLAUDE.md — Synergy PokerBots toolkit
 
+**Main repo: `~/Desktop/pokerbots_synergy2`** (since 2026-10-25). The original
+`~/Desktop/pokerbots_synergy` is an untouched archive: never edit or commit there.
+
 Variant-agnostic poker bot toolkit. The real variant is revealed on day 1 of the
 competition; we then have ~3 days to fill in the variant-specific parts. Read this
 file before changing anything.
@@ -49,6 +52,11 @@ Part 2 (universal toolkit): 10 hand programs · 11 variant spec + catalog · 12 
 plugins · 13 card steps · 14 betting structures · 15 payoffs/side mechanics · 16 generic
 decision layer · 17 inference · 18 precompute · 19 protocol adapters · 20 day-1 toolkit ·
 21 rehearsal drills · 22 MCCFR-lite (stretch).
+Part 3 (`docs/PART3_ROADMAP.md`): 23 CFR diagnosis (done) → **CFR is a no-go**: Tier 2 is
+the shipped bot; CFR code stays lab-only (`lab/cfr/`), out of `bot/` and the package.
+Next: reduced 24 (tournament simulator, hackathon-day bot + realistic opponents, training /
+held-out pool split, tournament-points report; no LBR), then 21 rehearsals with
+self-written variants. Phases 25–32 are not pursued.
 
 Each phase ends with: all tests green on 3.11, a short report (what/tests/numbers),
 the exact list of files that change when the variant is revealed, and a commit

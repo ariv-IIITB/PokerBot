@@ -39,6 +39,7 @@ BRAINS.update({
     "calling_station": "lab.sparring.bots:CallingStation",
     "tight": "lab.sparring.bots:Tight",
     "maniac": "lab.sparring.bots:Maniac",
+    "cfr": "lab.cfr.brain:CFRBrain",          # lab only: CFR is a no-go for the real bot
 })
 
 

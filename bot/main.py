@@ -34,7 +34,6 @@ BRAINS = {
     "tier0": "bot.brains.tier0:Tier0Brain",
     "tier1": "bot.brains.tier1:Tier1Brain",
     "tier2": "bot.brains.tier2:Tier2Brain",
-    "cfr": "bot.brains.cfr:CFRBrain",
 }
 DEFAULT_BRAIN = "tier2"
 

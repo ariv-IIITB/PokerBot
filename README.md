@@ -1,5 +1,8 @@
 # Synergy PokerBots toolkit
 
+> **Main repo:** `~/Desktop/pokerbots_synergy2` (since 2026-10-25). The original
+> `~/Desktop/pokerbots_synergy` is an untouched archive of the state before Part 3.
+
 Variant-agnostic toolkit for the Synergy PokerBots competition. The variant-specific
 parts live in `variant/` (and the wire format in `bot/protocol.py`); everything else is
 generic. See `CLAUDE.md` for the competition constraints and working rules.
@@ -63,8 +66,25 @@ Docs: `docs/VARIANT_INTERVIEW.md` (rules -> spec), `docs/WRITING_A_PLUGIN.md` (n
 `docs/PROTOCOL_ADAPTER_GUIDE.md` (real wire format; adapters in `bot/protocols/`, select with
 `--protocol` or `$POKERBOT_PROTOCOL`; run the suite on one: `POKERBOT_PROTOCOL=json pytest`).
 
-Stretch: MCCFR-lite (`lab/cfr/`): `.venv/bin/python -m lab.cfr.train --variant <spec> --minutes 60`
-then `--brain cfr` (falls back to Tier 2 outside its tree).
+CFR (lab only, **no-go** for the submitted bot; see "CFR status" in `docs/PART3_ROADMAP.md`):
+MCCFR-lite lives in `lab/cfr/` (`.venv/bin/python -m lab.cfr.train --variant <spec> --minutes 60`).
+Its brain is `lab/cfr/brain.py`, registered only in the lab (`lab.harness tier2 cfr`,
+`lab.run_brain cfr`); it is not in `bot/` and never packaged. Phase reports: `docs/reports/`.
+
+Solver diagnostics (Phase 23):
+
+```bash
+.venv/bin/python -m lab.cfr.diagnose leduc --max-iters 1000000      # exact exploitability curve (Leduc)
+.venv/bin/python -m lab.cfr.diagnose visits data/holdem_nl/cfr_strategy.ckpt   # visit histogram
+.venv/bin/python -m lab.cfr.diagnose quantization <ckpt>            # uint8 rounding / pruning effect
+.venv/bin/python -m lab.cfr.diagnose export <ckpt> holdem_nl --kind float --out f.json
+.venv/bin/python -m lab.cfr.runtime_audit --strategy f.json --opponent tier2 --seeds 64   # on/off tree
+.venv/bin/python -m lab.sparring_audit --variants holdem_nl short_deck   # Tier 2 vs sparring, lock on/off
+```
+
+Chips/hand against weak bots are only meaningful with the endgame lock off
+(`lab.sparring_audit` shows both): with the lock on, the bot stops playing once a match is
+won, which caps the number at roughly +0.4..+1.4 chips/hand whatever the opponent.
 
 ## Running the bot / harness / tools
 

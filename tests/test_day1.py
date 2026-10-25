@@ -76,3 +76,19 @@ def test_package_with_other_protocol_and_side_plugins(tmp_path) -> None:
 def test_full_package_checks(tmp_path) -> None:
     rc = pkg.main(["--variant", "mit2026_discard", "--out", str(tmp_path / "s"), "--hands", "150"])
     assert rc == 0
+
+
+def test_cfr_is_lab_only_and_never_packaged(tmp_path) -> None:
+    # CFR is a no-go for the submitted bot (docs/PART3_ROADMAP.md "CFR status"): its brain is
+    # registered only in the lab, no bot/ module holds it, and the packager can't ship it.
+    from bot.main import BRAINS as BOT_BRAINS
+    from lab.players import BRAINS as LAB_BRAINS
+    assert "cfr" not in BOT_BRAINS and LAB_BRAINS["cfr"].startswith("lab.")
+    assert not [p for p in (pkg.ROOT / "bot").rglob("*.py") if "cfr" in p.name]
+    with pytest.raises(SystemExit):
+        pkg.main(["--brain", "cfr", "--out", str(tmp_path / "never")])
+    data = tmp_path / "data"
+    data.mkdir()
+    for name in ("meta.json", "eq_random.npy", "cfr_strategy.json", "cfr_strategy.ckpt"):
+        (data / name).write_text("x")
+    assert [f.name for f in pkg.runtime_data_files(data)] == ["eq_random.npy", "meta.json"]

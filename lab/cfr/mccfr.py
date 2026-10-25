@@ -25,6 +25,9 @@ import numpy as np
 
 
 class MCCFR:
+    # epsilon > 0 samples opponent actions off-policy WITHOUT importance correction: this
+    # biases the solution (Phase 23: on Leduc, eps=0.05 stalls at ~0.063 exploitability
+    # while eps=0 keeps falling to 0.020 at 10^6 iterations). Keep 0 unless you know why.
     def __init__(self, game, seed: int = 0, epsilon: float = 0.0) -> None:
         self.game = game
         self.rng = np.random.default_rng(seed)
@@ -32,6 +35,7 @@ class MCCFR:
         self.regret: dict = {}                 # infoset -> np.ndarray
         self.avg: dict = {}                    # infoset -> np.ndarray (weighted strategy sum)
         self.iterations = 0
+        self.visits: dict = {}                 # infoset -> traverser visits (diagnostics)
 
     # ---- strategy
     def strategy(self, key, n: int) -> np.ndarray:
@@ -64,6 +68,7 @@ class MCCFR:
             vals = np.array([self.traverse(g.play(s, a), p) for a in acts])
             node = float(sigma @ vals)
             r = self.regret.setdefault(key, np.zeros(n))
+            self.visits[key] = self.visits.get(key, 0) + 1
             r += vals - node
             np.maximum(r, 0.0, out=r)                       # CFR+: no negative regrets
             return node
@@ -84,7 +89,7 @@ class MCCFR:
     def save(self, path) -> None:
         with open(path, "wb") as f:
             pickle.dump({"regret": self.regret, "avg": self.avg, "iterations": self.iterations,
-                         "rng": self.rng.bit_generator.state}, f)
+                         "rng": self.rng.bit_generator.state, "visits": self.visits}, f)
 
     @staticmethod
     def load(path, game, epsilon: float = 0.0) -> "MCCFR":
@@ -93,6 +98,7 @@ class MCCFR:
             d = pickle.load(f)
         m.regret, m.avg, m.iterations = d["regret"], d["avg"], d["iterations"]
         m.rng.bit_generator.state = d["rng"]
+        m.visits = d.get("visits", {})
         return m
 
 
@@ -113,13 +119,17 @@ def expected_value(game, policy, p: int = 0, samples: Optional[int] = None, rng=
     return float(np.mean([walk(game.root(rng)) for _ in range(samples or 10000)]))
 
 
-def export_uint8(solver: MCCFR, min_visits: float = 0.0) -> dict:
-    """Average strategies quantized to uint8 (sum 255), pruning infosets whose average
-    weight is below `min_visits` (rarely reached) or that are uniform (no information)."""
+def export_uint8(solver: MCCFR, min_visits: float = 0.0, min_traverser_visits: int = 0) -> dict:
+    """Average strategies quantized to uint8 (sum 255), pruning infosets that are uniform
+    (no information), whose average weight is <= `min_visits` (note: weights grow with the
+    iteration number, so this barely prunes anything in a long run), or that the traverser
+    visited fewer than `min_traverser_visits` times (undertrained; the bot falls back)."""
     out = {}
     for key, a in solver.avg.items():
         total = a.sum()
         if total <= min_visits:
+            continue
+        if min_traverser_visits and solver.visits.get(key, 0) < min_traverser_visits:
             continue
         p = a / total
         if np.allclose(p, 1.0 / len(p), atol=1e-3):

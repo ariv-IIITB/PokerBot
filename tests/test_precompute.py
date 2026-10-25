@@ -49,7 +49,9 @@ def test_pipeline_end_to_end_and_bot_loading(tmp_path, monkeypatch) -> None:
     rng_eq = np.load(out / "eq_range.npy")
     assert rng_eq[hc.class_of(P("7h,2d"))] < seven_two      # worse vs a strong range
     # The bot loads it for the matching variant only.
+    import bot.sim.tables as tables
     monkeypatch.setenv("POKERBOT_DATA", str(tmp_path))
+    monkeypatch.setattr(tables, "ROOT", tmp_path / "no_repo")   # ignore generated repo data/
     rules = compile_spec(load_catalog()["holdem_nl"])
     tables = load_tables(rules)
     assert tables is not None and abs(tables.start_share(P("Ah,Ad")) - aa) < 1e-9
@@ -86,7 +88,9 @@ def test_three_card_variant_classes(tmp_path) -> None:
 
 
 def test_missing_or_corrupt_data_falls_back(tmp_path, monkeypatch) -> None:
+    import bot.sim.tables as tables
     monkeypatch.setenv("POKERBOT_DATA", str(tmp_path))
+    monkeypatch.setattr(tables, "ROOT", tmp_path / "no_repo")   # ignore generated repo data/
     rules = compile_spec(load_catalog()["holdem_nl"])
     assert load_tables(rules) is None                         # nothing there
     d = tmp_path / "holdem_nl"

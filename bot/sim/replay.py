@@ -44,7 +44,7 @@ class Reconstruction:
     tries: int = 1
     opp_decisions: list = field(default_factory=list)   # visible opponent choices (inference)
     bet_log: list = field(default_factory=list)         # (player, action, pot, to_call, bet,
-                                                        #  all_in, street) per betting action
+                                                        #  all_in, street, legal) per betting action
 
     def assignments(self, rng: np.random.Generator, n: int) -> dict:
         """n random fillings of the hidden tokens: token -> (n,) array of real cards."""
@@ -125,10 +125,10 @@ def replay_once(rules, hand: HandState, rng, level=None) -> Reconstruction:
     decisions: list = []
     bet_log: list = []
 
-    def log_bet(p, a):
+    def log_bet(p, a, legal):
         if st.rules.program[st.pc].type_name == "betting" and a.kind != SPECIAL:
             all_in = a.kind == "R" and a.amount == st.bet[p] + st.stack[p]
-            bet_log.append((p, a, st.pot, st.to_call(p), st.bet[p], all_in, st.street))
+            bet_log.append((p, a, st.pot, st.to_call(p), st.bet[p], all_in, st.street, legal))
     while True:
         p = advance(st, rng)
         if p is None:
@@ -138,7 +138,7 @@ def replay_once(rules, hand: HandState, rng, level=None) -> Reconstruction:
             if not mine:
                 break                                    # our current decision
             a = clamp(mine.pop(0), legal)
-            log_bet(p, a)
+            log_bet(p, a, legal)
             act(st, p, a)
             continue
         if theirs:
@@ -153,7 +153,7 @@ def replay_once(rules, hand: HandState, rng, level=None) -> Reconstruction:
             if genuine:
                 _record(decisions, st, p, a, legal)
             a = clamp(a, legal)
-            log_bet(p, a)
+            log_bet(p, a, legal)
             act(st, p, a)
         else:                                            # opponent choice not shown yet
             act(st, p, _sample_hidden_choice(legal, None, rng) if legal.can_special

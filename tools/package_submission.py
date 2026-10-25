@@ -6,7 +6,9 @@
 The package contains only what the variant needs: bot/ modules reachable from bot/main.py
 (imports scanned with ast) plus the brain, the protocol adapter and the step plugins the
 spec uses; variant/spec.py, rules.py, evaluator_hook.py and the spec as variant/active.json;
-bot/config/*.json; and data/<variant>/ if precomputed tables match the spec.
+bot/config/*.json; and data/<variant>/ tables (.npy + meta.json) if they match the spec.
+Only bot brains can be packaged (the lab-only CFR brain can't), and CFR strategy files are
+never copied.
 The repo itself is never modified: everything is copied into --out (a fresh folder).
 
 Then it checks the PACKAGE and fails loudly (exit 1) if any check fails:
@@ -94,6 +96,14 @@ def needed_modules(spec: VariantSpec, brain: str, protocol: str) -> set[str]:
     return seen
 
 
+def runtime_data_files(data_dir: Path) -> list[Path]:
+    """The data files the bot reads at runtime: precomputed tables (.npy) and meta.json.
+    Never training checkpoints, and never CFR strategies (CFR is lab-only, see
+    docs/PART3_ROADMAP.md "CFR status")."""
+    return sorted(f for f in data_dir.iterdir()
+                  if f.is_file() and (f.suffix == ".npy" or f.name == "meta.json"))
+
+
 def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
     spec = VariantSpec.load(spec_path)
     if out.exists():
@@ -121,11 +131,9 @@ def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
     if (data_src / "meta.json").is_file():
         meta = json.loads((data_src / "meta.json").read_text())
         if meta.get("spec_hash") == spec_hash(spec):
-            # Runtime files only (tables + exported strategy); never training checkpoints.
             dst = out / "data" / spec.name
             dst.mkdir(parents=True)
-            files = [f for f in data_src.iterdir()
-                     if f.suffix == ".npy" or f.name in ("meta.json", "cfr_strategy.json")]
+            files = runtime_data_files(data_src)
             total = sum(f.stat().st_size for f in files)
             if total > DATA_CAP_MB * 1024 * 1024:
                 raise SystemExit(f"data/{spec.name} is {total / 1e6:.0f} MB > cap {DATA_CAP_MB} MB")
