@@ -20,3 +20,11 @@ dist/
 *.ckpt
 # Generated tables / strategies (lab/precompute.py, lab/cfr/train.py)
 data/
+
+# From the team setup (ariv-IIITB)
+*$py.class
+venv/
+env/
+*.log
+.scratch/
+Thumbs.db
