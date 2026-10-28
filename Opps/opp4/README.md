@@ -2,7 +2,7 @@
 
 A championship Heads-Up No-Limit Texas Hold'em bot engineered to exact specifications, featuring range-weighted Monte Carlo equity, Bayesian opponent tracking, candidate EV bet selection, river bluff-balancing, and match-win probability optimization.
 
-Located in: `/home/fioriv/synergy/PokerBot/Opps/opp 4`
+Located in: `/home/fioriv/synergy/PokerBot/Opps/opp4`
 
 ---
 
@@ -78,7 +78,7 @@ Located in: `/home/fioriv/synergy/PokerBot/Opps/opp 4`
 ## 2. File Organization
 
 ```
-Opps/opp 4/
+Opps/opp4/
 ├── __init__.py          # Package export
 ├── bot.py               # Main PokerBot class
 ├── evaluator.py         # Sub-microsecond 7-card evaluator
@@ -99,7 +99,7 @@ Opps/opp 4/
 ## 3. Running Verification & Benchmarks
 
 ```bash
-cd "/home/fioriv/synergy/PokerBot/Opps/opp 4"
+cd "/home/fioriv/synergy/PokerBot/Opps/opp4"
 
 # 1. Run unit tests
 python3 -m unittest test_opp4.py

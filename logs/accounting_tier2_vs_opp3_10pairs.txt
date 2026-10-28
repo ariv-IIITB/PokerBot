@@ -1,0 +1,27 @@
+total -19690 chips over 8000 hands = -1.231 bb/hand
+seat    street outcome          hands  %hands    chips bb/100 of all
+SB/BTN  river  showdown lost      357    4.5%   -16770        -104.8
+BB      river  showdown lost      268    3.4%   -15734         -98.3
+BB      flop   we fold           1025   12.8%    -4345         -27.2
+BB      turn   we fold            534    6.7%    -4139         -25.9
+SB/BTN  flop   we fold            860   10.8%    -4123         -25.8
+SB/BTN  turn   we fold            441    5.5%    -3862         -24.1
+SB/BTN  river  we fold            221    2.8%    -3645         -22.8
+BB      river  we fold            289    3.6%    -3635         -22.7
+SB/BTN  pre    we fold            348    4.3%     -696          -4.3
+BB      pre    we fold             67    0.8%     -134          -0.8
+BB      river  showdown split      49    0.6%       +0          +0.0
+SB/BTN  river  showdown split      60    0.8%       +0          +0.0
+SB/BTN  pre    they fold           57    0.7%     +114          +0.7
+BB      pre    they fold          381    4.8%     +423          +2.6
+BB      flop   they fold          475    5.9%    +1900         +11.9
+SB/BTN  flop   they fold          620    7.8%    +2392         +14.9
+BB      turn   they fold          329    4.1%    +2571         +16.1
+BB      river  they fold          280    3.5%    +3864         +24.1
+SB/BTN  turn   they fold          499    6.2%    +5107         +31.9
+SB/BTN  river  they fold          304    3.8%    +5458         +34.1
+BB      river  showdown won       303    3.8%    +6579         +41.1
+SB/BTN  river  showdown won       233    2.9%    +8985         +56.2
+--- by street: river -93.1 bb/100 (30%) | flop -26.1 bb/100 (37%) | turn -2.0 bb/100 (23%) | pre -1.8 bb/100 (11%)
+--- by outcome: showdown lost -203.1 bb/100 (8%) | we fold -153.6 bb/100 (47%) | showdown split +0.0 bb/100 (1%) | showdown won +97.3 bb/100 (7%) | they fold +136.4 bb/100 (37%)
+--- by seat: BB -79.1 bb/100 (50%) | SB/BTN -44.0 bb/100 (50%)
