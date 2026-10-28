@@ -1,0 +1,21 @@
+tier2 chips over 6 matches: -4845 (-2.02/hand)
+--- tier2
+  flop  checked_to n= 1496 K=65% R=35%
+  flop  vs_bet     n= 1162 C=40% F=54% R=6%
+  pre   open       n= 1200 C=97% R=3%
+  pre   other      n=  400 K=96% R=4%
+  pre   vs_raise   n= 1297 C=85% F=13% R=2%
+  river checked_to n=  486 K=57% R=43%
+  river vs_bet     n=  226 C=37% F=55% R=8%
+  turn  checked_to n=  836 K=60% R=40%
+  turn  vs_bet     n=  527 C=39% F=54% R=8%
+--- opp3
+  flop  checked_to n= 1800 K=37% R=63%
+  flop  vs_bet     n=  603 C=37% F=57% R=5%
+  pre   open       n= 1200 C=33% F=10% R=57%
+  pre   other      n= 1164 K=48% R=52%
+  pre   vs_raise   n=   74 C=50% F=39% R=11%
+  river checked_to n=  471 K=54% R=46%
+  river vs_bet     n=  227 C=17% F=80% R=3%
+  turn  checked_to n=  912 K=44% R=56%
+  turn  vs_bet     n=  376 C=36% F=60% R=4%

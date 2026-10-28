@@ -1,0 +1,4 @@
+tier2-nolock vs opp3-nolock: -2.73 ± 0.33 chips/hand | match score 0.150 ± 0.036 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 303.4s (132/s)
+tier2-nolock vs opp1-nolock: +4.40 ± 0.16 chips/hand | match score 0.980 ± 0.014 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 213.1s (188/s)
+tier2-nolock vs opp2-nolock: +7.74 ± 0.26 chips/hand | match score 1.000 ± 0.000 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 261.5s (153/s)
+tier2-nolock vs opp4-nolock: +1.41 ± 0.15 chips/hand | match score 0.860 ± 0.035 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 193.3s (207/s)

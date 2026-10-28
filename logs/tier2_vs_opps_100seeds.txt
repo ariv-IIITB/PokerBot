@@ -1,0 +1,4 @@
+tier2 vs opp1: +0.24 ± 0.04 chips/hand | match score 0.980 ± 0.010 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 121.5s (658/s)
+tier2 vs opp2: +0.28 ± 0.01 chips/hand | match score 1.000 ± 0.000 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 78.6s (1,018/s)
+tier2 vs opp3: -0.32 ± 0.02 chips/hand | match score 0.120 ± 0.023 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 287.8s (278/s)
+tier2 vs opp4: +0.33 ± 0.06 chips/hand | match score 0.890 ± 0.022 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 194.9s (410/s)

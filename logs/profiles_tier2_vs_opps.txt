@@ -1,0 +1,61 @@
+tier2 chips over 6 matches: 9764 (+4.07/hand)
+--- tier2
+  flop  checked_to n= 1844 K=57% R=43%
+  flop  vs_bet     n=  641 C=15% F=79% R=5%
+  pre   open       n= 1200 C=97% R=3%
+  pre   other      n=  240 K=96% R=4%
+  pre   vs_raise   n= 1168 C=85% F=13% R=2%
+  river checked_to n=  875 K=40% R=60%
+  river vs_bet     n=  155 C=15% F=62% R=23%
+  turn  checked_to n= 1216 K=44% R=56%
+  turn  vs_bet     n=  385 C=16% F=68% R=16%
+--- opp1
+  flop  checked_to n= 1928 K=68% R=32%
+  flop  vs_bet     n=  832 C=71% F=26% R=2%
+  pre   open       n= 1200 C=20% F=6% R=74%
+  pre   other      n= 1168 K=77% R=23%
+  pre   vs_raise   n=   66 C=64% F=24% R=12%
+  river checked_to n=  689 K=79% R=21%
+  river vs_bet     n=  557 C=60% F=38% R=2%
+  turn  checked_to n= 1112 K=68% R=32%
+  turn  vs_bet     n=  743 C=71% F=26% R=3%
+tier2 chips over 6 matches: 18187 (+7.58/hand)
+--- tier2
+  flop  checked_to n= 1397 K=71% R=29%
+  flop  vs_bet     n= 1439 C=69% F=17% R=14%
+  pre   open       n= 1200 C=97% R=3%
+  pre   vs_raise   n= 1090 C=82% F=15% R=3%
+  river checked_to n= 1015 K=61% R=39%
+  river vs_bet     n=  381 C=45% F=48% R=8%
+  turn  checked_to n= 1295 K=65% R=35%
+  turn  vs_bet     n=  768 C=62% F=27% R=11%
+--- opp2
+  flop  checked_to n= 1908 K=39% R=61%
+  flop  vs_bet     n=  612 C=30% F=25% R=46%
+  pre   open       n= 1200 F=10% R=90%
+  pre   other      n= 1168 K=100%
+  pre   vs_raise   n=   62 C=87% F=6% R=6%
+  river checked_to n= 1065 K=67% R=33%
+  river vs_bet     n=  425 C=58% F=34% R=8%
+  turn  checked_to n= 1474 K=54% R=46%
+  turn  vs_bet     n=  531 C=53% F=29% R=18%
+tier2 chips over 6 matches: 4780 (+1.99/hand)
+--- tier2
+  flop  checked_to n= 1181 K=54% R=46%
+  flop  vs_bet     n=  936 C=26% F=70% R=4%
+  pre   open       n= 1200 C=97% R=3%
+  pre   vs_raise   n=  912 C=91% F=7% R=2%
+  river checked_to n=  302 K=43% R=57%
+  river vs_bet     n=   72 C=35% F=62% R=3%
+  turn  checked_to n=  588 K=48% R=52%
+  turn  vs_bet     n=  247 C=14% F=71% R=15%
+--- opp4
+  flop  checked_to n= 1586 K=42% R=58%
+  flop  vs_bet     n=  578 C=43% F=54% R=3%
+  pre   open       n= 1200 F=49% R=51%
+  pre   other      n= 1168 K=75% R=25%
+  pre   vs_raise   n=   47 C=23% F=64% R=13%
+  river checked_to n=  257 K=75% R=25%
+  river vs_bet     n=  175 C=30% F=66% R=5%
+  turn  checked_to n=  627 K=62% R=38%
+  turn  vs_bet     n=  344 C=40% F=58% R=2%

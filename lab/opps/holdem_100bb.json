@@ -1,0 +1,7 @@
+{
+  "name": "holdem_100bb",
+  "description": "MIT-style heads-up NL Hold'em: blinds 1/2, stacks 200 (100 bb), reset every hand. The rules the Opps/ bots were written for.",
+  "match": {
+    "starting_stack": 200
+  }
+}

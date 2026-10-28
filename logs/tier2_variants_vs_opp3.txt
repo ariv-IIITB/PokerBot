@@ -1,0 +1,6 @@
+tier2[base] vs opp3: -1.71 ± 0.44 chips/hand | match score 0.175 ± 0.061 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 117.2s (136/s)
+tier2[no_inference] vs opp3: -8.23 ± 0.23 chips/hand | match score 0.000 ± 0.000 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 117.1s (137/s)
+tier2[no_pressure] vs opp3: -3.01 ± 0.54 chips/hand | match score 0.075 ± 0.042 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 130.4s (123/s)
+tier2[looser_call] vs opp3: -3.46 ± 0.85 chips/hand | match score 0.150 ± 0.057 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 141.0s (113/s)
+tier2[raise_pre] vs opp3: -2.38 ± 0.47 chips/hand | match score 0.050 ± 0.035 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 121.1s (132/s)
+tier2[combo] vs opp3: -2.64 ± 0.77 chips/hand | match score 0.200 ± 0.064 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 138.2s (116/s)

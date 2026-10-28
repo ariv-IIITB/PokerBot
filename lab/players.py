@@ -40,6 +40,11 @@ BRAINS.update({
     "tight": "lab.sparring.bots:Tight",
     "maniac": "lab.sparring.bots:Maniac",
     "cfr": "lab.cfr.brain:CFRBrain",          # lab only: CFR is a no-go for the real bot
+    # LLM-built opponents from Opps/ (play them on lab/opps/holdem_100bb.json)
+    "opp1": "lab.opps:Opp1Brain",
+    "opp2": "lab.opps:Opp2Brain",
+    "opp3": "lab.opps:Opp3Brain",
+    "opp4": "lab.opps:Opp4Brain",
 })
 
 
