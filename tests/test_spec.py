@@ -99,7 +99,7 @@ def test_active_rules_env_override(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("POKERBOT_VARIANT", str(path))
     assert active_rules().name == "omaha_test"
     path.write_text("{broken")
-    assert active_rules().name in ("config", "holdem_nl")   # falls back, never raises
+    assert active_rules().name in ("config", "holdem_nl", "discard_holdem")   # falls back, never raises
 
 
 def test_to_rules_accepts_everything() -> None:

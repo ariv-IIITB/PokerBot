@@ -38,7 +38,7 @@ def test_script_path_entry_point() -> None:
     proc = run(["bot/main.py", "--brain", "tier0"], ("\n".join(encode(msgs)) + "\n").encode())
     assert proc.returncode == 0
     assert decode_replies(msgs, proc.stdout.decode().splitlines()) == [
-        Action.fold(), Action.check(), Action.special("0"), Action.fold()]
+        Action.fold(), Action.check(), Action.special("1"), Action.fold()]   # lowest of Ah,Kd
 
 
 def test_empty_input_exits_cleanly() -> None:

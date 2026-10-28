@@ -1,0 +1,15 @@
+{
+  "name": "discard_holdem",
+  "description": "Official Pokerbots 2026 game: 3 hole cards; 3-card flop; after flop betting both players discard 1 hole card simultaneously, face up, removed from play; turn; river.",
+  "betting": {"small_blind": 1, "big_blind": 2, "max_raises": 4, "blind_counts_as_raise": true},
+  "match": {"hands": 400, "time_bank_s": 60.0, "starting_stack": 200, "reset_stacks": true},
+  "program": [
+    {"type": "post_blinds"}, {"type": "deal_hole", "n": 3},
+    {"type": "betting", "round": "preflop"}, {"type": "deal_board", "n": 3},
+    {"type": "betting", "round": "flop"},
+    {"type": "discard", "n": 1, "order": "simultaneous", "visibility": "public", "destination": "muck"},
+    {"type": "deal_board", "n": 1}, {"type": "betting", "round": "turn"},
+    {"type": "deal_board", "n": 1}, {"type": "betting", "round": "river"},
+    {"type": "showdown"}
+  ]
+}

@@ -57,6 +57,7 @@ def summarize(spec: VariantSpec, rules) -> str:
     bet += f", ante {b.ante}" if b.ante else ""
     bet += f", SB straddle {b.straddle}" if b.straddle else ""
     bet += f", max {b.max_raises} raises/round" if b.max_raises is not None else ""
+    bet += " (the big blind counts as the first preflop)" if b.blind_counts_as_raise else ""
     bet += f", sizes {b.bet_sizes} x pot" if b.bet_sizes else ""
     bet += f", multiples of {b.bet_multiple}" if b.bet_multiple else ""
     bet += ", no check-raise" if not b.check_raise else ""

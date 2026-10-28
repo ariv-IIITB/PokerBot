@@ -20,7 +20,8 @@ from __future__ import annotations
 import itertools
 from typing import Optional
 
-from bot.actions import Action, LegalActions, SpecialOption
+from bot.actions import Action, LegalActions, SpecialOption, safe_action
+from bot.cards import rank_of, suit_of
 from bot.game.state import ALL
 from bot.game.steps.base import Step
 
@@ -34,6 +35,28 @@ def idx_choice(indices) -> str:
 
 def parse_idx(choice: str) -> list[int]:
     return [] if choice in ("none", "") else [int(x) for x in choice.split("+")]
+
+
+def fallback_discard(cards) -> int:
+    """The card the rules discard when a discard is missing or illegal: the lowest rank
+    (2 lowest, ace highest); among equal ranks the first suit in the order s, h, d, c.
+    The bot uses it as its own Tier 0 discard. Card ids order suits c, d, h, s, so the
+    suit tie-break takes the highest suit index."""
+    return min(cards, key=lambda c: (rank_of(c), -suit_of(c)))
+
+
+def safe_action_for_hole(legal: LegalActions, hole) -> Action:
+    """Tier 0 (bot.actions.safe_action), except a discard follows the rules' fallback.
+    Used where the hole cards are known: the lab engine's illegal-reply path and the bot's
+    fallbacks."""
+    sp = legal.special
+    if legal.can_special and sp.name == "discard" and not (legal.check or legal.fold):  # type: ignore[union-attr]
+        hole = list(hole)
+        if hole:
+            token = str(hole.index(fallback_discard(hole)))
+            if sp.allows(token):                                       # type: ignore[union-attr]
+                return Action.special(token)
+    return safe_action(legal)
 
 
 class _Pending:

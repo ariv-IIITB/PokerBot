@@ -19,13 +19,14 @@ from typing import Optional, Sequence
 
 import numpy as np
 
-from bot.actions import Action, LegalActions, is_legal, safe_action
+from bot.actions import Action, LegalActions, is_legal
 from bot.cards import FULL_DECK
 from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, Info,
                           MatchEnd, MatchInfo, OppAction, ProtocolError, Showdown,
                           parse_action)
 from bot.game.rules_spec import Rules, to_rules
 from bot.game.runner import LazyRng, act, advance, legal_actions
+from bot.game.steps.cards import safe_action_for_hole
 from bot.game.state import ALL, INFO_KINDS, GameState
 from lab.players import PlayerCrashed, PlayerTimeout
 from variant.rules import DEFAULT_CONFIG, GameConfig  # noqa: F401  (GameConfig: type hints)
@@ -172,7 +173,7 @@ class Hand:
             seat.errors += 1
             if self.on_illegal == "forfeit":
                 raise Forfeit(role, f"illegal action {raw!r}")
-            action = safe_action(legal)   # auto check/fold
+            action = safe_action_for_hole(legal, st.hole[role])   # auto check/fold/discard
         return action
 
     # ---- whole hand

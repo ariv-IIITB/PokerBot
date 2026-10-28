@@ -16,7 +16,7 @@ options (special tokens offered). Final expectations: deltas {role: chips}, show
 (role), pot, muck (cards), hole {role: cards} (what each player still holds).
 
 run_scenario() also checks chip conservation, that every step was consumed and the hand is
-over, and that no player's view contains a card they may not know. A mismatch names the step.
+over (unless unfinished=True), and that no player's view contains a card they may not know. A mismatch names the step.
 """
 from __future__ import annotations
 
@@ -50,6 +50,7 @@ class Scenario:
     expect: dict[str, Any] = field(default_factory=dict)
     stacks: Optional[tuple[int, int]] = None      # default: the spec's starting stack, both
     hand_id: int = 0
+    unfinished: bool = False     # the scenario stops mid-hand on purpose (only the steps are checked)
 
 
 def load_spec(spec: str) -> VariantSpec:
@@ -128,6 +129,10 @@ def run_scenario(s: Scenario) -> GameState:
         except Exception as e:                      # an illegal scripted action is a test bug
             raise ScenarioError(f"{tag}: engine rejected the action: {e!r}") from e
     p = advance(st)
+    if s.unfinished:
+        if p is None:
+            raise ScenarioError("scenario says unfinished but the hand is over")
+        return st
     if p is not None:
         raise ScenarioError(f"scenario ended but {ROLE_NAMES[p]} still has to act "
                             f"(legal {sorted(legal_names(legal_actions(st, p)))})")

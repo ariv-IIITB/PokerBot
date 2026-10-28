@@ -83,7 +83,7 @@ from bot.protocols import ADAPTERS
 
 
 @pytest.mark.parametrize("adapter", sorted(ADAPTERS))
-@pytest.mark.parametrize("spec", ["holdem_nl", "pineapple", "exposed_hole",
+@pytest.mark.parametrize("spec", ["holdem_nl", "pineapple", "exposed_hole", "discard_holdem",
                                   str(FIXTURES.parent / "specs" / "public_discard.json")])
 def test_round_trip(adapter, spec) -> None:
     rep = check_round_trip(adapter, spec, hands=30, seed=1)

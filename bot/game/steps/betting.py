@@ -14,6 +14,8 @@ Optional restrictions:
                  (or all-in), snapped into the legal range
   bet_multiple   raise-to amounts must be multiples of this (or all-in)
   check_raise    False: a player who checked this round may not raise later in it
+  blind_counts_as_raise  the first round starts with one raise used (the big blind), so
+                 max_raises 4 allows 3 voluntary preflop raises and 4 per later round
 """
 from __future__ import annotations
 
@@ -45,7 +47,8 @@ class Betting(Step):
     def __init__(self, first_actor: str = "BB", max_raises: Optional[int] = None,
                  big_blind: int = 2, label: str = "", structure: str = "NL",
                  fixed_bet: Optional[int] = None, bet_sizes: Optional[tuple] = None,
-                 bet_multiple: Optional[int] = None, check_raise: bool = True) -> None:
+                 bet_multiple: Optional[int] = None, check_raise: bool = True,
+                 blind_counts_as_raise: bool = False) -> None:
         if structure == "FL" and max_raises is None:
             max_raises = 4
         super().__init__(first_actor=first_actor, max_raises=max_raises, label=label,
@@ -63,6 +66,7 @@ class Betting(Step):
         self.bet_sizes = tuple(bet_sizes) if bet_sizes else None
         self.bet_multiple = bet_multiple
         self.check_raise = check_raise
+        self.blind_raise = blind_counts_as_raise
 
     @classmethod
     def from_spec(cls, s, ctx):
@@ -72,7 +76,8 @@ class Betting(Step):
         fixed = b.fixed_bets[i] if b.structure == "FL" else None
         return cls(s.get("first") or default_first, b.max_raises, b.big_blind,
                    s.get("round") or street_label(i), structure=b.structure, fixed_bet=fixed,
-                   bet_sizes=b.bet_sizes, bet_multiple=b.bet_multiple, check_raise=b.check_raise)
+                   bet_sizes=b.bet_sizes, bet_multiple=b.bet_multiple, check_raise=b.check_raise,
+                   blind_counts_as_raise=b.blind_counts_as_raise and i == 0)
 
     def _bb(self, st) -> int:
         return st.level[1] if st.level else self.bb
@@ -82,6 +87,8 @@ class Betting(Step):
             st.bet = [0] * st.n_players
             st.last_raise = self._bb(st)
             st.raises = 0
+        elif self.blind_raise:                  # the big blind is the first raise of the cap
+            st.raises = 1
         needs = {p for p in range(st.n_players) if st.stack[p] > 0}
         # Nothing to decide if at most one player has chips and nobody faces a bet.
         if len(needs) < 2 and all(st.to_call(p) == 0 for p in needs):
@@ -167,6 +174,7 @@ class Betting(Step):
 
     def describe(self) -> str:
         cap = f", max {self.max_raises} raises" if self.max_raises is not None else ""
+        cap += " (the big blind counts as one)" if self.blind_raise else ""
         name = f"{self.label} " if self.label else ""
         kind = {"NL": "no-limit", "PL": "pot-limit",
                 "FL": f"fixed-limit ({self.fixed_bet})"}[self.structure]

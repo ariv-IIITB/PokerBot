@@ -22,8 +22,9 @@ import importlib
 from typing import Optional, TextIO
 
 from bot import log as botlog
-from bot.actions import Action, LegalActions, clamp, safe_action
+from bot.actions import Action, LegalActions, clamp, is_legal
 from bot.brains.base import Brain
+from bot.game.steps.cards import safe_action_for_hole
 from bot.protocol import ActRequest, MatchEnd, MatchInfo, Message, ProtocolError
 from bot.protocols import ADAPTERS, get_adapter
 from bot.state import GameState
@@ -106,7 +107,10 @@ class Bot:
         elif isinstance(msg, ActRequest):
             watch = Stopwatch()
             self.timer.observe_timeleft(msg.timeleft)
-            action = clamp(self.choose(msg.legal), msg.legal)
+            action = self.choose(msg.legal)
+            if not is_legal(action, msg.legal):
+                action = self.fallback(msg.legal) if self.discard_request(msg.legal) \
+                    else clamp(action, msg.legal)
             self.state.record_my_action(action)
             self.timer.add_used(watch.elapsed())
         try:
@@ -116,11 +120,20 @@ class Bot:
             botlog.warn(f"brain.observe failed: {e!r}")
         return action
 
+    @staticmethod
+    def discard_request(legal: LegalActions) -> bool:
+        return legal.can_special and legal.special.name == "discard"  # type: ignore[union-attr]
+
+    def fallback(self, legal: LegalActions) -> Action:
+        """Tier 0 with the hole cards at hand, so a discard follows the rules' fallback."""
+        hand = self.state.hand
+        return safe_action_for_hole(legal, hand.hole if hand is not None else ())
+
     def choose(self, legal: LegalActions) -> Action:
         """Ask the brain, with Tier 0 fallback on emergency, error or deadline."""
         if self.timer.emergency():
             self.emergency_decisions += 1
-            return safe_action(legal)
+            return self.fallback(legal)
         budget = self.timer.budget(self.state.hands_remaining)
         try:
             with hard_deadline(self.timer.hard_limit(budget)):
@@ -131,7 +144,7 @@ class Bot:
         except Exception as e:
             self.brain_errors += 1
             botlog.warn(f"brain error: {e!r}")
-        return safe_action(legal)
+        return self.fallback(legal)
 
 
 def main(argv: Optional[list[str]] = None) -> int:

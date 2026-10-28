@@ -58,7 +58,7 @@ def acts(msgs) -> int:
 
 
 F, K, C = Action.fold(), Action.check(), Action.call()
-S0 = Action.special("0")
+S0 = Action.special("1")   # the discard fallback: lowest card of the scripted hole Ah,Kd
 
 
 def test_tier0_full_match() -> None:

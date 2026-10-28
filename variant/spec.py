@@ -94,6 +94,7 @@ class BettingSpec:
     straddle: int = 0                   # 0 = none; else the straddle amount (posted by SB)
     fixed_bets: Optional[list[int]] = None   # FL: bet size per betting round
     max_raises: Optional[int] = None    # per round
+    blind_counts_as_raise: bool = False  # the big blind is the first raise of round 0 (cap)
     bet_sizes: Optional[list[float]] = None  # allowed bet/raise sizes as pot fractions
     bet_multiple: Optional[int] = None  # bets must be multiples of this
     check_raise: bool = True
@@ -291,6 +292,8 @@ def validate(spec: VariantSpec) -> list[str]:
                      f"({n_rounds})")
     if b.max_raises is not None and b.max_raises < 0:
         e.append("betting.max_raises cannot be negative")
+    if b.blind_counts_as_raise and b.max_raises is None:
+        e.append("betting.blind_counts_as_raise needs betting.max_raises")
     if b.bet_sizes is not None and (not b.bet_sizes or min(b.bet_sizes) <= 0):
         e.append("betting.bet_sizes must be positive pot fractions")
     for k in ("preflop_first", "postflop_first"):
@@ -414,6 +417,8 @@ def spec_hash(spec: VariantSpec) -> str:
     d["program"] = spec.full_program()            # shorthand and explicit programs agree
     d.pop("hole_cards", None)
     d.pop("streets", None)
+    if not d["betting"].get("blind_counts_as_raise"):
+        d["betting"].pop("blind_counts_as_raise", None)   # keep the hash of older specs
     return hashlib.sha256(json.dumps(d, sort_keys=True).encode()).hexdigest()[:16]
 
 
