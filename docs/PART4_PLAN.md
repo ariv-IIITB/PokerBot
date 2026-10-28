@@ -163,8 +163,10 @@ Parametrize it over adapters. It must pass for `placeholder`, `json` and `terse`
 ## Phase B — Discard Hold'em rules
 
 ### Check first
-- `variant/catalog/pineapple.json`: same program shape (3 hole cards, 3-card flop, simultaneous
-  discard to the muck after the flop). The differences are **visibility public** and the raise cap.
+- `variant/catalog/pineapple.json` is close but **not** the same program: it discards privately and
+  *before* flop betting. Discard Hold'em discards *after* flop betting, publicly, and has the raise
+  cap. `tests/fixtures/specs/public_discard.json` (Phase A) already covers public discards in the
+  round-trip.
 - `bot/game/steps/betting.py`:
   - `Betting.begin` resets `st.raises = 0` on later rounds, and round 0 starts at 0 (`bot/game/state.py`).
     So the BB does **not** count as a raise today.

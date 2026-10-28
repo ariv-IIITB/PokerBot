@@ -113,7 +113,7 @@ def active_rules() -> Rules:
         if path and os.path.isfile(path):
             try:
                 from variant.spec import VariantSpec
-                return to_rules(VariantSpec.load(path))
+                return to_rules(VariantSpec.load(path))  # sandbox-allow: variant/active.json, embedded in Phase D
             except Exception as e:  # bad spec: fall back, but say so
                 from bot.log import warn
                 warn(f"could not use variant spec {path}: {e!r}")

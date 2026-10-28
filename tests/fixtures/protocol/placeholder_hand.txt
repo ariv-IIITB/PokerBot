@@ -1,0 +1,21 @@
+# One hand in the placeholder format, SB (seat 0): raise, discard, check, win at showdown.
+E> MATCH hands=400 timebank=60.0 sb=1 bb=2 stack=400
+E> HAND id=0 seat=0 stack=400 oppstack=400 timeleft=60.0
+E> HOLE cards=As,Kd,7c
+E> ACT pot=3 tocall=1 mystack=399 oppstack=398 legal=F,C,R:4-400 timeleft=60.0 mybet=1 oppbet=2
+B> R 6
+E> OPP type=C
+E> BOARD street=1 cards=Ah,7d,2s
+E> ACT pot=12 tocall=0 mystack=394 oppstack=394 legal=S:discard:0|1|2 timeleft=59.0 mybet=0 oppbet=0
+B> S 1
+E> OPP type=S choice=0
+E> INFO kind=reveal who=opp cards=Qs
+E> INFO kind=reveal who=me cards=Kd
+E> HOLE cards=As,7c
+E> BOARD street=2 cards=Ah,7d,2s,3c
+E> ACT pot=12 tocall=0 mystack=394 oppstack=394 legal=K,R:2-394 timeleft=58.0 mybet=0 oppbet=0
+B> K
+E> OPP type=K
+E> SHOW oppcards=9h,9c
+E> END delta=12
+E> ENDMATCH
