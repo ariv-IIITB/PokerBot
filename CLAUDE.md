@@ -81,13 +81,13 @@ the shipped bot; CFR code stays lab-only (`lab/cfr/`), out of `bot/` and the pac
 Next: reduced 24 (tournament simulator, hackathon-day bot + realistic opponents, training /
 held-out pool split, tournament-points report; no LBR), then 21 rehearsals with
 self-written variants. Phases 25–32 are not pursued.
-Part 4 (official rules, Discard Hold'em, from 2026-10-28): 0 rules into `docs/rules/` ·
-1 docs update · 2 variant spec (`discard_holdem`) + rule tests · 3 real protocol adapter ·
-4 submission packaging (`bot.py`, ≤ 5 MB, no file reads) · 5 time and safety · 6 Tier 2 on
-the real game (PIMC discard, audits) · 7 LLM opponent pool for Discard Hold'em (some held
-out) · 8 **Tier 3: the "Phil Ivey" style** (initiative, MDF defence, floats, light 3-/4-bets,
-board-based sizing, mixed strategies, capped live adaptation) on top of Tier 2's inference and
-PIMC discard. It ships only if it beats Tier 2 in the lab.
+Part 4 (official rules, Discard Hold'em, from 2026-10-28). **The plan is `docs/PART4_PLAN.md`:
+read it before any Part 4 work.** Done: rules into `docs/rules/` and the docs update. Next, in
+order: A framework (scenario, transcript, round-trip and sandbox kits, embed generator, `lab.eval`) ·
+B Discard Hold'em rules · C real protocol adapter · D ship-safe (no file reads, `bot.py`,
+≤ 5 MB zip, 5 s reply cap, lock) → first upload · E Tier 2 on the real game · F LLM opponent pool
+(held-out split) · G **Tier 3: the "Phil Ivey" style** on top of Tier 2's inference and PIMC
+discard (ships only if it beats Tier 2) · H Problem Statement update (1 Nov) and the final freeze.
 
 Each phase ends with: all tests green on 3.11, a short report (what/tests/numbers),
 the list of files changed, and a commit `phase N: ...`. Stop after each phase and wait for OK.
