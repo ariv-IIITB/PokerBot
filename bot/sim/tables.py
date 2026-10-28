@@ -52,15 +52,15 @@ def load_tables(rules) -> Optional[Tables]:
         return None
     for d in _candidates(spec.name):
         try:
-            meta = json.loads((d / "meta.json").read_text())
+            meta = json.loads((d / "meta.json").read_text())  # sandbox-allow: data/<variant>/ tables, embedded in Phase D
             if meta.get("spec_hash") != want or not meta.get("complete", {}).get("equity_random"):
                 continue
-            table = np.load(d / "classes.npy", allow_pickle=False)
+            table = np.load(d / "classes.npy", allow_pickle=False)  # sandbox-allow: data/<variant>/ tables, embedded in Phase D
             ci = ClassIndex(rules.deck, int(meta["hole_size"]), table)
-            eq = np.load(d / "eq_random.npy", allow_pickle=False)
+            eq = np.load(d / "eq_random.npy", allow_pickle=False)  # sandbox-allow: data/<variant>/ tables, embedded in Phase D
             rng = None
             if meta.get("complete", {}).get("equity_range") and (d / "eq_range.npy").is_file():
-                rng = np.load(d / "eq_range.npy", allow_pickle=False)
+                rng = np.load(d / "eq_range.npy", allow_pickle=False)  # sandbox-allow: data/<variant>/ tables, embedded in Phase D
             if len(eq) != int(meta["n_classes"]):
                 continue
             log(f"loaded precomputed tables from {d}")

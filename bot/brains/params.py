@@ -19,7 +19,7 @@ def load_params(name: str, defaults: dict[str, Any], overrides: Optional[dict] =
     params = dict(defaults)
     path = (config_dir or CONFIG_DIR) / f"{name}.json"
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8") as f:  # sandbox-allow: bot/config/*.json, embedded in Phase D
             _merge(params, json.load(f), str(path))
     except FileNotFoundError:
         pass

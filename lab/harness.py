@@ -36,6 +36,7 @@ class PairResult:
     forfeit_reasons: tuple[str, ...]
     a_worst_s: float
     b_worst_s: float
+    track: Optional[dict] = None      # lab.opps.track data for this pair, when requested
 
 
 @dataclass
@@ -75,11 +76,24 @@ class DuplicateReport:
 
 def play_pair(a: PlayerSpec, b: PlayerSpec, cfg: GameConfig, seed: int,
               hands: Optional[int], on_illegal: str = "fold",
-              time_bank_s: Optional[float] = None) -> PairResult:
-    """One duplicate pair. Top-level so multiprocessing can pickle it."""
-    m1: MatchResult = play_match([a.build(), b.build()], cfg, seed, hands, on_illegal,
+              time_bank_s: Optional[float] = None, track: bool = False) -> PairResult:
+    """One duplicate pair. Top-level so multiprocessing can pickle it. track=True records
+    action profiles and chip accounting for in-process brains (PairResult.track)."""
+    tracker = None
+    if track:
+        from lab.opps.track import Tracker
+        tracker = Tracker()
+
+    def build(first: PlayerSpec, second: PlayerSpec) -> list:
+        players = [first.build(), second.build()]
+        if tracker is not None:
+            a_player, b_player = (players[0], players[1]) if first is a else (players[1], players[0])
+            tracker.hook(a_player, b_player)
+        return players
+
+    m1: MatchResult = play_match(build(a, b), cfg, seed, hands, on_illegal,
                                  time_bank_s=time_bank_s)
-    m2: MatchResult = play_match([b.build(), a.build()], cfg, seed, hands, on_illegal,
+    m2: MatchResult = play_match(build(b, a), cfg, seed, hands, on_illegal,
                                  time_bank_s=time_bank_s)
     ff_a = int(m1.forfeit == 0) + int(m2.forfeit == 1)
     ff_b = int(m1.forfeit == 1) + int(m2.forfeit == 0)
@@ -93,6 +107,7 @@ def play_pair(a: PlayerSpec, b: PlayerSpec, cfg: GameConfig, seed: int,
         forfeit_reasons=tuple(r for r in (m1.forfeit_reason, m2.forfeit_reason) if r),
         a_worst_s=max(m1.worst_decision_s[0], m2.worst_decision_s[1]),
         b_worst_s=max(m1.worst_decision_s[1], m2.worst_decision_s[0]),
+        track=tracker.to_plain() if tracker is not None else None,
     )
 
 
@@ -103,13 +118,13 @@ def _pair_task(args) -> PairResult:
 def run_duplicate(a: PlayerSpec, b: PlayerSpec, cfg: GameConfig = DEFAULT_CONFIG,
                   seeds: Sequence[int] = range(10), hands: Optional[int] = None,
                   processes: Optional[int] = None, on_illegal: str = "fold",
-                  time_bank_s: Optional[float] = None) -> DuplicateReport:
+                  time_bank_s: Optional[float] = None, track: bool = False) -> DuplicateReport:
     """Play every seed as a duplicate pair. processes=1 runs inline (no subprocesses);
     None uses all cores. `cfg` (and its hooks) must be picklable for processes > 1."""
     seeds = list(seeds)
     report = DuplicateReport(a.display, b.display,
                              hands_per_match=hands or cfg.hands_per_match)
-    tasks = [(a, b, cfg, s, hands, on_illegal, time_bank_s) for s in seeds]
+    tasks = [(a, b, cfg, s, hands, on_illegal, time_bank_s, track) for s in seeds]
     t0 = time.perf_counter()
     n_proc = processes or os.cpu_count() or 1
     if n_proc <= 1 or len(tasks) <= 1:

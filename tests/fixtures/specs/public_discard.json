@@ -1,0 +1,51 @@
+{
+  "name": "public_discard",
+  "description": "Test fixture: 3 hole cards, simultaneous public discard after the flop betting.",
+  "program": [
+    {
+      "type": "post_blinds"
+    },
+    {
+      "type": "deal_hole",
+      "n": 3
+    },
+    {
+      "type": "betting",
+      "round": "preflop"
+    },
+    {
+      "type": "deal_board",
+      "n": 3
+    },
+    {
+      "type": "betting",
+      "round": "flop"
+    },
+    {
+      "type": "discard",
+      "n": 1,
+      "order": "simultaneous",
+      "visibility": "public",
+      "destination": "muck"
+    },
+    {
+      "type": "deal_board",
+      "n": 1
+    },
+    {
+      "type": "betting",
+      "round": "turn"
+    },
+    {
+      "type": "deal_board",
+      "n": 1
+    },
+    {
+      "type": "betting",
+      "round": "river"
+    },
+    {
+      "type": "showdown"
+    }
+  ]
+}
