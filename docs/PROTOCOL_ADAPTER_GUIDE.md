@@ -1,6 +1,7 @@
 # Protocol adapter guide
 
-How to connect the bot to the real engine's wire format on reveal day. Expect 1–3 hours.
+How to connect the bot to an engine's wire format. The real format is now known: `docs/rules/protocol.pdf`
+(JSON lines; adapter planned in Part 4, phase 3).
 
 ## What an adapter is
 

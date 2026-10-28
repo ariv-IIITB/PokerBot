@@ -1,8 +1,9 @@
 # Part 3 — from heuristic to CFR (Tier 3): the approved roadmap
 
 (Condensed copy of the Part 3 brief, kept in the repo so the plan survives between sessions.
-`~/Desktop/pokerbots_synergy2` is the main repo since 2026-10-25; the original
-`~/Desktop/pokerbots_synergy` is an untouched archive.)
+Main repo since 2026-10-28: `/home/fioriv/synergy/PokerBot`. **2026-10-28: the variant is known,
+Discard Hold'em (`docs/rules/`), ~2 weeks before the deadline.** "Before the reveal" below
+means "before the rules were known"; current phases are Part 4 in `CLAUDE.md`.)
 
 ## CFR status (2026-10-25): no-go
 

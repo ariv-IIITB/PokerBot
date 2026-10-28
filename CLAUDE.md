@@ -1,29 +1,53 @@
 # CLAUDE.md — Synergy PokerBots toolkit
 
-**Main repo: `~/Desktop/pokerbots_synergy2`** (since 2026-10-25). The original
-`~/Desktop/pokerbots_synergy` is an untouched archive: never edit or commit there.
+**Main repo: `/home/fioriv/synergy/PokerBot`** (GitHub `ariv-IIITB/PokerBot`, branch `main`;
+canonical since 2026-10-28). The old `~/Desktop/pokerbots_synergy*` copies are not on this
+machine and are no longer used.
 
-Variant-agnostic poker bot toolkit. The real variant is revealed on day 1 of the
-competition; we then have ~3 days to fill in the variant-specific parts. Read this
-file before changing anything.
+Poker bot toolkit for the Synergy Pokerbots competition. **The variant is known: Discard
+Hold'em** (rules received 2026-10-28). The full Problem Statement with worked examples comes
+out on **1 Nov 2026**; the **deadline is 15 Nov 2026, 23:59 IST**. Official rules:
+`docs/rules/` (`rulebook.pdf`, `protocol.pdf`, and the summary in `SUMMARY.md`). Read this file before
+changing anything. The toolkit stays variant-agnostic, so the strategy principles carry over
+if the rules change.
 
 ## Hard constraints for the submitted bot (`bot/`)
 
-- **Python 3.11 only.** Stdlib + NumPy (+ SciPy only if truly needed, imported lazily).
-  No other imports in `bot/` — a test enforces this.
-- **Resources:** 1 vCPU, 1 GB RAM, read-only filesystem, no network.
-  The bot never writes files and never imports network modules.
-- **I/O:** stdin/stdout with the engine. **stdout = actions only**, flushed after each one.
-  All logging/debug goes to **stderr**.
-- **Time bank:** ~60 s cumulative per 400-hand match (~150 ms/hand, ~20–40 ms/decision).
-  Assume the server is ~2× slower than a laptop. Timeout or crash = forfeit.
-  Finals may be ~1000 hands: read hand count and bank from match info, never hardcode.
-- **Scoring:** duplicate deals (seats swapped). Match win = 1, draw = 0.5. Chip margin is
-  only a capped tie-breaker → we optimise for *winning matches*, not max chips.
-- **Data files:** `.npy` files may or may not be allowed. Every data dependency is
-  optional with a working in-memory fallback. Nothing is written to disk at runtime.
-- **Code review:** code is reviewed manually — clean, commented, original. No copied
-  third-party poker code.
+Source: `docs/rules/SUMMARY.md`. *(prov.)* = provisional, may change before the deadline.
+
+- **Python 3.11 only.** Stdlib + NumPy + SciPy (SciPy only if truly needed, imported lazily).
+  No other imports in `bot/`; a test enforces this. No installs at runtime.
+- **Resources:** 1 vCPU, 1 GB RAM *(prov.)*, no network, read-only filesystem.
+- **A bot may not read or write files, open sockets, or start other processes.** No
+  `multiprocessing`/`subprocess` in `bot/`. Config and tables must be embedded in source
+  (being fixed: today `bot/brains/params.py` reads `bot/config/*.json` and `bot/sim/tables.py`
+  reads optional `.npy` files).
+- **I/O:** JSON lines over stdin/stdout (`docs/rules/protocol.pdf`). **stdout = protocol
+  messages only**, flushed after every one. Debug output goes to **stderr** (64 KB per match cap,
+  never parsed).
+- **Time bank** *(prov.)*: 60 s per 400-hand Stage 1 match; 150 s per ~1000-hand Stage 2
+  match. It is charged from when a request is sent until the full reply arrives, for **both
+  action and discard** requests. Read `total_hands` and `time_bank_ms` from `init` and
+  `time_left_ms` from each request; never hardcode. Assume the server is ~2× slower than a laptop.
+- **Any single reply within 5 s** *(prov.)*. **Wall-clock kill:** 180 s per Stage 1 match,
+  450 s per Stage 2 match *(prov.)*.
+- **Start-up:** 5 s from launch to ready for `init`, not charged to the bank.
+- **Forfeit** (crash, exhausted bank, a reply over 5 s, or the wall-clock kill): a loss, and the
+  opponent's result is set to +C.
+- Randomness is allowed. No state is kept between matches (fresh process per match).
+- **Submission:** `python3.11 bot.py`; a single `bot.py`, or a `.zip` with `bot.py` at the top
+  level, ≤ 5 MB including any tables.
+- **Scoring:** every deal is played twice with seats swapped (the bot isn't told which deals are pairs).
+  The match is won by the bot with more net chips: win 1, draw 0.5, loss 0. Tie-break: capped chips
+  per hand Σ clip(Δm, −C, C) / Σ Hm, with C = 400 (Stage 1) and 1000 (Stage 2) *(prov.)*. We
+  optimise for *winning matches*, not maximum chips.
+- **Tournament:** Stage 1 is Swiss, 6 rounds (7–8 if >~1000 teams), 400 hands per match
+  (a round robin if <~64 bots, skipped if ≤ 32). Stage 2: the top 32 play a round robin of ~1000 hands
+  per match, scores reset; Stage 2 alone decides the prizes.
+- **Code review / originality:** prize-winning code is reviewed and similarity-checked.
+  Copying from other teams or public bot repos is prohibited. **Never copy code from `Opps/`
+  into `bot/`** (ideas only). Exploiting the engine or evaluation system is prohibited and must be
+  reported; exploiting other bots' play is fine.
 
 ## Architecture rules
 
@@ -57,10 +81,16 @@ the shipped bot; CFR code stays lab-only (`lab/cfr/`), out of `bot/` and the pac
 Next: reduced 24 (tournament simulator, hackathon-day bot + realistic opponents, training /
 held-out pool split, tournament-points report; no LBR), then 21 rehearsals with
 self-written variants. Phases 25–32 are not pursued.
+Part 4 (official rules, Discard Hold'em, from 2026-10-28): 0 rules into `docs/rules/` ·
+1 docs update · 2 variant spec (`discard_holdem`) + rule tests · 3 real protocol adapter ·
+4 submission packaging (`bot.py`, ≤ 5 MB, no file reads) · 5 time and safety · 6 Tier 2 on
+the real game (PIMC discard, audits) · 7 LLM opponent pool for Discard Hold'em (some held
+out) · 8 **Tier 3: the "Phil Ivey" style** (initiative, MDF defence, floats, light 3-/4-bets,
+board-based sizing, mixed strategies, capped live adaptation) on top of Tier 2's inference and
+PIMC discard. It ships only if it beats Tier 2 in the lab.
 
 Each phase ends with: all tests green on 3.11, a short report (what/tests/numbers),
-the exact list of files that change when the variant is revealed, and a commit
-`phase N: ...`. Stop after each phase and wait for OK.
+the list of files changed, and a commit `phase N: ...`. Stop after each phase and wait for OK.
 
 ## Working rules
 
@@ -78,8 +108,9 @@ the exact list of files that change when the variant is revealed, and a commit
 
 ## Team notes (from the original PokerBot repo setup, ariv-IIITB, 2026-10-20)
 
-Kept verbatim below. Where it differs from the sections above (for example the "Layout"
-and "Commands" placeholders), the sections above describe the code as it actually is.
+Kept as written, except "Open questions", "Commands", "Decisions made" and "Lessons", which
+were filled in from the official rules on 2026-10-28. Where the notes differ from the sections above
+(for example "Layout"), the sections above describe the code as it actually is.
 
 ### CLAUDE.md: Pokerbots bot
 
@@ -89,7 +120,7 @@ and "Commands" placeholders), the sections above describe the code as it actuall
 - Python 3.11. Standard library, NumPy, and SciPy only. No pip at runtime.
 - 1 vCPU, 1 GB RAM, read-only filesystem, no network.
 - Time bank: cumulative per match, about 60 s for 400 hands (roughly 0.15 s per hand on average), with a hard wall-clock kill. A crash or an exhausted bank forfeits the match.
-- The bot talks to the engine over a fixed stdin/stdout protocol. Read the starter code for the exact format.
+- The bot talks to the engine over a fixed stdin/stdout protocol. Read the starter code for the exact format. (Now: `docs/rules/protocol.pdf`.)
 - All matches use duplicate deals: every deal is played twice with seats swapped.
 - Stage 1: Swiss, 6 rounds of about 200 duplicate deals (400 hands). Win 1, draw 0.5, loss 0.
 - Stage 2: top 32, round-robin, about 500 duplicate deals each, scores reset.
@@ -104,16 +135,27 @@ and "Commands" placeholders), the sections above describe the code as it actuall
 6. **Read the rules yourself.** On the first session, read the rules and starter code in the repo, fill in "Open questions" and "Commands" below from them, and ask me only for what you cannot find. Do not guess.
 
 #### Open questions (find in the rules or starter code; do not guess)
-- Does import and table-loading time count against the time bank?
-- The cap in the capped chips-per-hand tie-breaker.
-- Game variant and engine API details; maximum submission size.
-- Entry point:
+Answered from `docs/rules/` (2026-10-28):
+- Import and table-loading time: **not charged** to the bank if the bot is ready within 5 s
+  of launch.
+- Tie-break cap C: **400 chips (Stage 1), 1000 chips (Stage 2)** (provisional).
+- Variant: **Discard Hold'em** (`docs/rules/SUMMARY.md`). Protocol: **JSON lines**
+  (`docs/rules/protocol.pdf`). Max submission size: a single `bot.py`, or a `.zip` with `bot.py` at
+  the top level, **≤ 5 MB**.
+- Entry point: **`python3.11 bot.py`**.
+Still open until the Problem Statement (1 Nov): the exact showdown rule (any 5 of 7?), edge cases,
+final values of the provisional limits, and the organisers' starter kit match runner.
 
 #### Commands (fill in from the starter repo, then keep current)
-- Run one match:
+- Setup: `uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r requirements-dev.txt`
+- Run one match: `.venv/bin/python -m lab.harness tier2 tier1 --variant <spec.json> --seeds 1 --hands 400`
 - Run match batch vs opponent pool (duplicate deals):
-- Tests:
-- Resource check (time bank and memory):
+  `.venv/bin/python -m lab.harness tier2 <opp ...> --variant <spec.json> --seeds 50 --hands 400`
+- Where the chips go: `.venv/bin/python -m lab.opps.accounting tier2 <opp> <pairs>`
+- Tests: `.venv/bin/python -m pytest -n auto` (slow: `-m slow`)
+- Resource check (time bank and memory): `.venv/bin/python -m lab.timing_bench --variant <spec.json> --hands 1000`
+  and `.venv/bin/python -m lab.memory_check --variant <spec.json>`
+- (The Discard Hold'em spec and real-protocol commands get added in Part 4 phases 2–4.)
 
 #### Layout
 - `bot/`: submission code and precomputed tables only
@@ -139,9 +181,19 @@ and "Commands" placeholders), the sections above describe the code as it actuall
 
 #### Decisions made (do not re-litigate)
 - 2026-10-20: strength first, then fit; memory, time bank, and library list are design constraints from day one.
+- 2026-10-28: official rules received (`docs/rules/`). The variant is Discard Hold'em, known ~2 weeks
+  before the deadline instead of on day 1. `/home/fioriv/synergy/PokerBot` is the canonical repo.
+  Tests run on Python 3.11 via uv (`.venv`).
+- 2026-10-28: the "Phil Ivey" style becomes a separate Tier 3 brain (Part 4, phase 8), built
+  after the bot plays the real game and protocol safely. Tier 2 stays the shipped bot until Tier 3
+  beats it in the lab.
 
 #### Lessons
-- (one line per solved bug or gotcha)
+- `Opps/opp4` was a symlink to `Opps/opp 4`: check `ls -la` before deleting "duplicate" folders.
+- Tier 2 vs opp3 (Hold'em) loses mostly in river showdowns (big pots lost, small pots won), not
+  preflop: measure with `lab.opps.accounting` before choosing a fix.
+- The betting step resets its raise counter each street, so the preflop BB does not count toward
+  `max_raises`. Discard Hold'em needs it to count (fix in Part 4, phase 2).
 
 #### Agent skills
 

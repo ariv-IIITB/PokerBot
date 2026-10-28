@@ -1,4 +1,9 @@
-# Reveal day checklist (3 days)
+# Variant setup checklist
+
+> **2026-10-28:** the variant is known: Discard Hold'em (`docs/rules/`), about 2 weeks before
+> the 15 Nov deadline, not on a day 1 with 3 days left. The steps below still apply when setting up
+> the variant or a rule change (the Problem Statement on 1 Nov). Ignore the "Day 1 / Day 2" time
+> boxes; the Part 4 phases in `CLAUDE.md` set the order now.
 
 Two people: **A** = rules & spec, **B** = protocol & infrastructure. All commands from the repo
 root. Keep a log of decisions in `docs/DAY1_LOG.md` as you go.

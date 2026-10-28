@@ -1,7 +1,8 @@
 # Synergy PokerBots toolkit
 
-> **Main repo:** `~/Desktop/pokerbots_synergy2` (since 2026-10-25). The original
-> `~/Desktop/pokerbots_synergy` is an untouched archive of the state before Part 3.
+> **Main repo:** this checkout, `/home/fioriv/synergy/PokerBot` (GitHub `ariv-IIITB/PokerBot`).
+> **Variant known: Discard Hold'em.** Official rules in `docs/rules/` (summary: `docs/rules/SUMMARY.md`).
+> Full Problem Statement 1 Nov 2026; deadline 15 Nov 2026, 23:59 IST.
 
 Variant-agnostic toolkit for the Synergy PokerBots competition. The variant-specific
 parts live in `variant/` (and the wire format in `bot/protocol.py`); everything else is
@@ -52,9 +53,10 @@ otherwise the built-in Hold'em config. Specs compile into a *hand program* of st
   print(compile_spec(VariantSpec.load('variant/catalog/omaha.json')).describe())"
 ```
 
-## Reveal day
+## Setting up a variant
 
-Follow `docs/DAY1_CHECKLIST.md`. The main tools:
+The variant is known (Discard Hold'em); `docs/DAY1_CHECKLIST.md` is now a checklist for setting it
+up and for any rule change. The main tools:
 
 ```bash
 .venv/bin/python -m lab.new_variant --from <preset>        # write + check variant/active.json
