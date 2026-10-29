@@ -111,7 +111,9 @@ def test_default_policy_redraws_a_dangerous_card() -> None:
     st.apply(BoardUpdate(2, P("2c,7h,9s,Ah")))               # an ace hit: bad for our kings
     rec = reconstruct(rules, st.hand, np.random.default_rng(0))
     legal = legal_actions(rec.state, rec.me)
-    picks = [decide_special(rec, legal, np.random.default_rng(s), 0.1).choice for s in range(3)]
+    # bounded by worlds, not the wall clock, so CPU load cannot change the sample count
+    picks = [decide_special(rec, legal, np.random.default_rng(s), 5.0, {"pimc_worlds": 200}).choice
+             for s in range(3)]
     assert picks.count("b3") >= 2, picks
 
 
