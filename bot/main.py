@@ -1,7 +1,7 @@
 """Bot entry point: stdin lines -> protocol -> state/brain -> one action line on stdout.
 
 Run as `python -m bot.main [--brain NAME] [--protocol NAME] [--verbose]` or
-`python bot/main.py ...`. The wire format comes from bot/protocols/ (default: placeholder,
+`python bot/main.py ...`. The wire format comes from bot/protocols/ (default: pokerbots,
 or $POKERBOT_PROTOCOL).
 
 Safety layers (see CLAUDE.md):
@@ -26,7 +26,8 @@ from bot.actions import Action, LegalActions, clamp, is_legal
 from bot.brains.base import Brain
 from bot.game.steps.cards import safe_action_for_hole
 from bot.protocol import ActRequest, MatchEnd, MatchInfo, Message, ProtocolError
-from bot.protocols import ADAPTERS, get_adapter
+from bot.protocols import ADAPTERS, DEFAULT, get_adapter
+from bot.protocols.base import as_messages
 from bot.state import GameState
 from bot.timing import DeadlineExceeded, Stopwatch, TimeManager, hard_deadline
 
@@ -84,18 +85,26 @@ class Bot:
     def handle_line(self, line: str) -> bool:
         """Process one engine line. Returns False when the match is over."""
         try:
-            msg = self.adapter.parse_line(line)
+            msgs = as_messages(self.adapter.parse_line(line))
         except ProtocolError as e:
             self.bad_lines += 1
             botlog.warn(f"malformed line {line.strip()!r}: {e}")
+            reply = self.adapter.recover(line)
+            if reply and self.out is not None:        # a broken request still gets an answer
+                self.out.write(reply + "\n")
+                self.out.flush()
             return True
-        if msg is None:
+        if not msgs:
             return True  # blank or unknown: ignore
-        action = self.on_message(msg)
+        action = None
+        for msg in msgs:                     # a line may carry several messages; one request at most
+            a = self.on_message(msg)
+            if a is not None:
+                action = a
         if action is not None and self.out is not None:
             self.out.write(self.adapter.encode_action(action) + "\n")
             self.out.flush()
-        return not isinstance(msg, MatchEnd)
+        return not any(isinstance(m, MatchEnd) for m in msgs)
 
     def on_message(self, msg: Message) -> Optional[Action]:
         """Apply one neutral message; returns our (legal) action if it was an ACT.
@@ -182,8 +191,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     try:
         adapter = get_adapter(protocol)
     except Exception as e:
-        botlog.warn(f"could not load protocol {protocol!r} ({e!r}); using placeholder")
-        adapter = get_adapter("placeholder")
+        botlog.warn(f"could not load protocol {protocol!r} ({e!r}); using the default")
+        adapter = get_adapter(DEFAULT)
     try:
         return Bot(brain, out, adapter=adapter).run(sys.stdin)
     except BaseException as e:  # including KeyboardInterrupt / stray DeadlineExceeded

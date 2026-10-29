@@ -1,7 +1,23 @@
 # Protocol adapter guide
 
 How to connect the bot to an engine's wire format. The real format is now known: `docs/rules/protocol.pdf`
-(JSON lines; adapter planned in Part 4, phase 3).
+(JSON lines). Its adapter is `bot/protocols/pokerbots.py` (Part 4, phase C) and the default; the other
+formats are mock formats for tests (the test suite defaults to `placeholder` in `tests/conftest.py`).
+
+The real format is the one that needs state: opponent actions arrive only in `history`, so the adapter
+keeps per-hand state and turns each wire message into **several** neutral messages (or none), in the order
+the lab engine would have sent them. Things worth knowing:
+
+- `parse_line` may return a list, `encode_message` may return `""` or a list of lines (see below).
+- `discard_request` does not list the opponent's last flop action: it is inferred (they called our bet or
+  raise, or checked behind our check when we are the big blind), emitted before the flop, and skipped when
+  `history` lists it later. After an all-in preflop the opponent's call is inferred the same way.
+- The opponent's discard arrives as a card, never as an index into their hidden hand: `OppAction(special)`
+  carries the placeholder `"0"` and the `reveal` `Info` carries the real card (`hides_opponent_choice`).
+- `discard_result` is turned into the engine's own per-seat message order; `bot/sim/replay.py` aligns card
+  messages by order, so it must match.
+- Test it with the kits in `tests/kit/`: the round trip (`check_round_trip("pokerbots", "discard_holdem")`)
+  and transcripts (`tests/fixtures/protocol/example_hand.txt` is Protocol section 10).
 
 ## What an adapter is
 
@@ -26,9 +42,9 @@ tokens, or a numeric range `lo..hi`).
 An adapter implements four methods (`bot/protocols/base.py`):
 
 ```python
-parse_line(line) -> Message | None    # bot side; None = ignore; raise ProtocolError if malformed
+parse_line(line) -> None | Message | [Message, ...]   # bot side; None = ignore; ProtocolError if malformed
 encode_action(action) -> str          # bot side: our reply
-encode_message(msg) -> str            # engine side (the lab's SubprocessPlayer)
+encode_message(msg) -> "" | str | [str, ...]   # engine side (the lab's SubprocessPlayer); "" = send nothing
 parse_action(line) -> Action          # engine side
 ```
 

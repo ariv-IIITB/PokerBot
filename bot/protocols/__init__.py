@@ -1,9 +1,9 @@
 """Wire-format adapters. bot/protocol.py defines the neutral messages; each adapter here
 maps one wire format onto them, for both sides:
 
-    bot side     parse_line(line) -> Message | None (raise ProtocolError if malformed)
+    bot side     parse_line(line) -> None | Message | [Message, ...] (ProtocolError if malformed)
                  encode_action(action) -> reply line
-    engine side  encode_message(msg) -> line      (the lab engine's SubprocessPlayer)
+    engine side  encode_message(msg) -> "" | line | [line, ...]   (the lab's SubprocessPlayer)
                  parse_action(line) -> Action
 
 Adapters may keep state (e.g. the last ACT, to convert "raise BY" replies). Select one
@@ -21,8 +21,9 @@ ADAPTERS = {
     "placeholder": "bot.protocols.placeholder:PlaceholderAdapter",
     "json": "bot.protocols.jsonl:JsonLinesAdapter",
     "terse": "bot.protocols.terse:TerseAdapter",
+    "pokerbots": "bot.protocols.pokerbots:PokerbotsAdapter",
 }
-DEFAULT = "placeholder"
+DEFAULT = "pokerbots"          # the official wire format; the others are mock formats for tests
 
 
 def get_adapter(name: str | None = None) -> Adapter:

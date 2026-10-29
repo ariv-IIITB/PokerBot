@@ -155,7 +155,11 @@ final values of the provisional limits, and the organisers' starter kit match ru
 - Tests: `.venv/bin/python -m pytest -n auto` (slow: `-m slow`)
 - Resource check (time bank and memory): `.venv/bin/python -m lab.timing_bench --variant <spec.json> --hands 1000`
   and `.venv/bin/python -m lab.memory_check --variant <spec.json>`
-- (The Discard Hold'em spec and real-protocol commands get added in Part 4 phases 2–4.)
+- Discard Hold'em, in the lab: `--variant discard_holdem` (catalog name) on `lab.harness` / `lab.eval`;
+  `.venv/bin/python -m lab.eval tier2 --pool tier1,calling_station,starter --pairs 8 --locks off --variant discard_holdem`
+- Real protocol, any bot: seat it as `SubprocessPlayer([...], protocol="pokerbots")` (see `tests/test_pokerbots.py`);
+  the organisers' starter bot is `lab/sparring/starter_bot.py` (`--pool starter`).
+- The test suite defaults to the mock `placeholder` format (`tests/conftest.py`); the bot's default is `pokerbots`.
 
 #### Layout
 - `bot/`: submission code and precomputed tables only

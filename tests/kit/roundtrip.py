@@ -17,6 +17,7 @@ from bot.actions import Action, LegalActions
 from bot.cards import format_cards
 from bot.protocol import ActRequest, Message
 from bot.protocols import get_adapter
+from bot.protocols.base import as_lines, as_messages as as_msgs
 from bot.state import GameState
 from kit.scenario import load_spec
 from lab.engine import play_match
@@ -24,20 +25,6 @@ from lab.engine import play_match
 
 class RoundTripError(AssertionError):
     pass
-
-
-def as_lines(encoded) -> list[str]:
-    """encode_message may return a line, "" (send nothing) or a list of lines."""
-    if not encoded:
-        return []
-    return [encoded] if isinstance(encoded, str) else [x for x in encoded if x]
-
-
-def as_msgs(parsed) -> list[Message]:
-    """parse_line may return None, one message or a list of them."""
-    if parsed is None:
-        return []
-    return list(parsed) if isinstance(parsed, (list, tuple)) else [parsed]
 
 
 def snapshot(st: GameState) -> dict[str, Any]:
@@ -54,6 +41,15 @@ def snapshot(st: GameState) -> dict[str, Any]:
         "info": [(i.kind, i.who, i.cards, i.value) for i in h.info],
         "dead": sorted(h.dead_cards),
     }
+
+
+def hide_opponent_choice(snap: dict) -> dict:
+    """For formats that never say WHICH hidden card the opponent discarded: forget the index
+    of the opponent's special actions (the revealed card itself is still compared)."""
+    out = dict(snap)
+    out["history"] = [(s, a, k, amt, None if (a == "opp" and k == "S") else ch)
+                      for s, a, k, amt, ch in snap["history"]]
+    return out
 
 
 class Recorder:
@@ -130,6 +126,8 @@ def check_round_trip(adapter: str, spec: str = "holdem_nl", hands: int = 50, see
                         continue
                     _, req, action, want = ev
                     got = snapshot(st)
+                    if bot.hides_opponent_choice:
+                        want, got = hide_opponent_choice(want), hide_opponent_choice(got)
                     bad = [key for key in want if want[key] != got[key]]
                     if m.legal != req.legal:
                         bad.append("legal")

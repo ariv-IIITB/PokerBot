@@ -86,6 +86,8 @@ from bot.protocols import ADAPTERS
 @pytest.mark.parametrize("spec", ["holdem_nl", "pineapple", "exposed_hole", "discard_holdem",
                                   str(FIXTURES.parent / "specs" / "public_discard.json")])
 def test_round_trip(adapter, spec) -> None:
+    if adapter == "pokerbots" and spec in ("pineapple", "exposed_hole"):
+        pytest.skip("the official format carries Discard Hold'em only")
     rep = check_round_trip(adapter, spec, hands=30, seed=1)
     assert rep.requests > 30
 

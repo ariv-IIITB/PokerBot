@@ -22,7 +22,9 @@ from lab.players import PlayerSpec, SubprocessPlayer
 from variant.spec import load_catalog
 
 ROOT = Path(__file__).resolve().parent.parent
-NAMES = sorted(ADAPTERS)
+# The official format is stateful (opponent actions arrive only in `history`), so it cannot be
+# checked one message at a time: tests/test_pokerbots.py and the round-trip kit cover it.
+NAMES = sorted(n for n in ADAPTERS if n != "pokerbots")
 
 # Every message shape the engine produces (ACTs always carry both street bets).
 LEGALS = [

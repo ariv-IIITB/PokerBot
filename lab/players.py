@@ -28,6 +28,7 @@ from bot.main import BRAINS as BOT_BRAINS
 from bot.main import Bot
 from bot.protocol import ActRequest, Message
 from bot.protocols import get_adapter
+from bot.protocols.base import as_lines
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -116,12 +117,14 @@ class SubprocessPlayer:
             raise PlayerCrashed(f"{self.name} closed stdin") from None
 
     def notify(self, msg: Message) -> None:
-        self._send(self.adapter.encode_message(msg))
+        for line in as_lines(self.adapter.encode_message(msg)):    # may be none, or several
+            self._send(line)
 
     def act(self, req: ActRequest, timeout: Optional[float] = None) -> Union[Action, str]:
         """The bot's reply decoded through the adapter (an Action), or the raw line if it
         can't be decoded (the engine then counts it as illegal)."""
-        self._send(self.adapter.encode_message(req))
+        for line in as_lines(self.adapter.encode_message(req)):
+            self._send(line)
         limit = req.timeleft if timeout is None else timeout
         line = self._read_line(max(0.0, limit if limit is not None else 60.0))
         try:
@@ -175,6 +178,7 @@ class PlayerSpec:
     cmd: Optional[tuple[str, ...]] = None
     cwd: Optional[str] = None
     label: str = ""
+    protocol: Optional[str] = None         # wire format for subprocess players (adapter name)
 
     @staticmethod
     def brain(name: str, config: Optional[dict] = None, label: str = "") -> "PlayerSpec":
@@ -183,8 +187,9 @@ class PlayerSpec:
 
     @staticmethod
     def subprocess(cmd: Optional[list[str]] = None, cwd: Optional[str] = None,
-                   label: str = "subprocess") -> "PlayerSpec":
-        return PlayerSpec("subprocess", label, None, tuple(cmd) if cmd else None, cwd, label)
+                   label: str = "subprocess", protocol: Optional[str] = None) -> "PlayerSpec":
+        return PlayerSpec("subprocess", label, None, tuple(cmd) if cmd else None, cwd, label,
+                          protocol)
 
     @property
     def display(self) -> str:
@@ -195,7 +200,8 @@ class PlayerSpec:
             cfg = dict(self.config) if self.config else None
             return InProcessPlayer(load_brain(self.name, cfg), self.display)
         if self.kind == "subprocess":
-            return SubprocessPlayer(list(self.cmd) if self.cmd else None, self.cwd, self.display)
+            return SubprocessPlayer(list(self.cmd) if self.cmd else None, self.cwd, self.display,
+                                    protocol=self.protocol)
         if self.kind == "factory":
             module, _, fn = self.name.partition(":")
             return getattr(importlib.import_module(module), fn)()
