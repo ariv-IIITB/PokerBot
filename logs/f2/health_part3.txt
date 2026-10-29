@@ -1,0 +1,3 @@
+d_new_exploiter    vs starter       10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.05s | bank used max 46% avg 46% | stderr max 500 B | first reply 0.36s | ok
+d_new_exploiter    vs tier2         10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.04s | bank used max 36% avg 28% | stderr max 504 B | first reply 0.37s | ok
+d_new_exploiter    vs starter @2x    6 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.12s | bank used max 87% avg 87% | stderr max 500 B | first reply 0.32s | ok
