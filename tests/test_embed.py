@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 
 from tools import embed_data
+from variant.spec import spec_hash
 
 ROOT = Path(__file__).resolve().parent.parent
 FIX = "python -m tools.embed_data"
@@ -33,7 +34,7 @@ def _fake_tables(root: Path, spec, n: int = 3) -> None:
     np.save(d / "classes.npy", np.arange(n, dtype=np.int16))
     np.save(d / "eq_random.npy", np.linspace(0.3, 0.7, n))
     (d / "meta.json").write_text(json.dumps({
-        "spec_hash": embed_data.spec_hash(spec), "n_classes": n, "hole_size": 2,
+        "spec_hash": spec_hash(spec), "n_classes": n, "hole_size": 2,
         "complete": {"equity_random": True}}))
 
 
