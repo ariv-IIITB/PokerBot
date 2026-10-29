@@ -44,3 +44,21 @@ def test_spec_without_hands_uses_the_spec_hand_count() -> None:
     spec = replace(spec, match=replace(spec.match, hands=6))
     rep = run_duplicate(T0, T0, spec, seeds=range(1), processes=1)
     assert rep.hands_per_match == 6 and rep.total_hands == 12
+
+
+def test_subprocess_player_learns_the_match_variant() -> None:
+    # play_match calls set_rules on every player; a subprocess gets the spec at launch
+    # (before, `lab.harness --subprocess --variant X` silently played the embedded variant).
+    import sys
+
+    from lab.engine import to_rules
+    from lab.players import SubprocessPlayer
+    from variant.spec import load_catalog
+    echo = "import os, json; print(json.loads(os.environ['POKERBOT_VARIANT_JSON'])['name'], flush=True)"
+    p = SubprocessPlayer([sys.executable, "-c", echo])
+    assert p.proc is None                                   # not started until the match begins
+    p.set_rules(to_rules(load_catalog()["holdem_nl"]))
+    try:
+        assert p._read_line(10.0) == "holdem_nl"
+    finally:
+        p.close()

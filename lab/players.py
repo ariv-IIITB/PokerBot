@@ -6,8 +6,8 @@ Every player implements:
     close()
 
 InProcessPlayer   runs a brain directly through bot.main.Bot (fast, no text).
-SubprocessPlayer  runs a bot as a separate process over stdin/stdout using the placeholder
-                  protocol, and enforces the time bank (timeout / crash -> exceptions the
+SubprocessPlayer  runs a bot as a separate process over stdin/stdout (any protocol adapter),
+                  learns the variant through set_rules like the in-process player, and enforces the time bank (timeout / crash -> exceptions the
                   engine turns into a forfeit, as in the competition).
 """
 from __future__ import annotations
@@ -70,7 +70,7 @@ class InProcessPlayer:
         self.bot = Bot(brain, out=None)
 
     def set_rules(self, rules) -> None:
-        """Tell the brain which variant this match uses (the real bot reads variant/active.json)."""
+        """Tell the brain which variant this match uses (the real bot plays bot/embedded.py's spec)."""
         self.bot.brain.set_rules(rules)
 
     def notify(self, msg: Message) -> None:
@@ -90,30 +90,40 @@ class SubprocessPlayer:
 
     def __init__(self, cmd: Optional[list[str]] = None, cwd: Optional[str] = None,
                  name: str = "subprocess", stderr_to: Optional[str] = None,
-                 variant_path: Optional[str] = None, protocol: Optional[str] = None,
-                 brain_config: Optional[dict] = None) -> None:
-        """variant_path: a spec JSON the bot should play (its JSON text goes to $POKERBOT_VARIANT_JSON).
-        protocol: wire format (an adapter name; default $POKERBOT_PROTOCOL or placeholder).
-        The bot process is started with the same $POKERBOT_PROTOCOL."""
+                 protocol: Optional[str] = None, brain_config: Optional[dict] = None) -> None:
+        """protocol: wire format (an adapter name; default $POKERBOT_PROTOCOL or placeholder).
+        The bot process is started with the same $POKERBOT_PROTOCOL, on set_rules (play_match
+        calls it with the match's variant) or on the first message, whichever comes first."""
         self.name = name
         self.cmd = cmd or [sys.executable, "-m", "bot.main"]
+        self.cwd = cwd or str(ROOT)
         self.adapter = get_adapter(protocol)
         self._err = open(stderr_to, "ab") if stderr_to else subprocess.DEVNULL
-        env = dict(os.environ)
-        env["POKERBOT_PROTOCOL"] = self.adapter.name
+        self.env = dict(os.environ)
+        self.env["POKERBOT_PROTOCOL"] = self.adapter.name
         if brain_config:
-            env["POKERBOT_BRAIN_CONFIG"] = json.dumps(brain_config)
-        if variant_path:
-            env["POKERBOT_VARIANT_JSON"] = Path(variant_path).read_text()
-        self.proc = subprocess.Popen(self.cmd, cwd=cwd or str(ROOT), stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE, stderr=self._err, bufsize=0,
-                                     env=env)
+            self.env["POKERBOT_BRAIN_CONFIG"] = json.dumps(brain_config)
+        self.proc: Optional[subprocess.Popen] = None
         self._buf = b""
         self.dead = False
+
+    def set_rules(self, rules) -> None:
+        """The match's variant. A process learns it only at launch ($POKERBOT_VARIANT_JSON,
+        read by bot.game.rules_spec.active_rules), so this starts the process."""
+        if self.proc is None and getattr(rules, "spec", None) is not None:
+            self.env["POKERBOT_VARIANT_JSON"] = rules.spec.to_json()
+        self._start()
+
+    def _start(self) -> None:
+        if self.proc is None:
+            self.proc = subprocess.Popen(self.cmd, cwd=self.cwd, stdin=subprocess.PIPE,
+                                         stdout=subprocess.PIPE, stderr=self._err, bufsize=0,
+                                         env=self.env)
 
     def _send(self, line: str) -> None:
         if self.dead:
             raise PlayerCrashed(f"{self.name} is dead")
+        self._start()
         try:
             self.proc.stdin.write(line.encode() + b"\n")  # type: ignore[union-attr]
         except (BrokenPipeError, OSError):
@@ -155,6 +165,10 @@ class SubprocessPlayer:
         return line.decode(errors="replace").strip()
 
     def close(self) -> None:
+        if self.proc is None:                       # never started
+            if self._err is not subprocess.DEVNULL:
+                self._err.close()
+            return
         try:
             if self.proc.stdin and not self.proc.stdin.closed:
                 self.proc.stdin.close()

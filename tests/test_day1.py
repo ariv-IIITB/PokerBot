@@ -69,7 +69,7 @@ def test_package_with_other_protocol_and_side_plugins(tmp_path) -> None:
     pkg.build(pkg.ROOT / "variant" / "catalog" / "auction_card.json", "tier2", "json", out)
     assert (out / "bot" / "game" / "steps" / "side.py").is_file()
     assert (out / "bot" / "protocols" / "jsonl.py").is_file()
-    assert 'DEFAULT = "json"' in (out / "bot" / "protocols" / "__init__.py").read_text()
+    assert '["--brain", "tier2", "--protocol", "json"]' in (out / "bot.py").read_text()
     bot = SubprocessPlayer([sys.executable, "bot.py"], cwd=str(out), protocol="json")
     m = play_match([bot, PlayerSpec.brain("maniac").build()], load_catalog()["auction_card"],
                    seed=2, hands=10, audit=True)

@@ -24,7 +24,7 @@ import time
 from dataclasses import dataclass
 from typing import Optional
 
-from lab.engine import play_match
+from lab.engine import play_match, to_rules
 from lab.players import ROOT, PlayerSpec, SubprocessPlayer
 from variant.rules import DEFAULT_CONFIG
 
@@ -98,24 +98,22 @@ def _opponent(spec: str):
 def run_timing(brain: str = "tier2", opponent: str = "maniac", hands: Optional[int] = None,
                bank_s: Optional[float] = None, slowdown: float = 2.0, seed: int = 0,
                variant: Optional[str] = None, cwd=None, protocol: Optional[str] = None,
-               bot_variant_path: Optional[str] = None, cmd: Optional[list[str]] = None,
+               cmd: Optional[list[str]] = None,
                max_frac: float = 0.5, max_reply_s: float = 0.5, lock: bool = False) -> TimingReport:
-    """variant: catalog name or spec path for the engine. The bot process plays the variant
-    embedded in its own bot/embedded.py unless bot_variant_path names a spec JSON for it.
+    """variant: catalog name or spec path; the engine and the bot process both play it.
     cmd: how to launch the bot (default `python -m bot.main --brain BRAIN`); cwd: where.
     lock: leave the endgame lock on. Off by default: the lock turns a won match into check/folds
     and hides what the full strategy costs."""
-    spec, path = DEFAULT_CONFIG, None
+    spec = DEFAULT_CONFIG
     if variant:
         from lab.harness import load_variant
         spec = load_variant(variant)
-        path = variant if variant.endswith(".json") else str(ROOT / "variant" / "catalog" / f"{variant}.json")
-    hands = hands or DEFAULT_CONFIG.hands_per_match
-    bank = bank_s or DEFAULT_CONFIG.time_bank_s
+    rules = to_rules(spec)
+    hands = hands or rules.hands_per_match
+    bank = bank_s or rules.time_bank_s
     startup = measure_startup(brain, cwd=cwd, protocol=protocol, cmd=cmd)
     bot = SubprocessPlayer(cmd or [sys.executable, "-m", "bot.main", "--brain", brain], name=brain,
                            brain_config=None if lock else {"lock_enabled": False},
-                           variant_path=bot_variant_path or (path if cwd is None and cmd is None else None),
                            cwd=str(cwd) if cwd else None, protocol=protocol)
     m = play_match([bot, _opponent(opponent)], spec, seed=seed, hands=hands, time_bank_s=bank,
                    reply_limit_s=5.0)

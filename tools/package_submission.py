@@ -66,7 +66,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from bot.main import main  # noqa: E402
 
 if __name__ == "__main__":
-    sys.exit(main(["--protocol", "%(protocol)s"]))
+    sys.exit(main(["--brain", "%(brain)s", "--protocol", "%(protocol)s"]))
 '''
 EXAMPLE_HAND = ROOT / "tests" / "fixtures" / "protocol" / "example_hand.txt"
 SANDBOX_RUN = ROOT / "tests" / "kit" / "sandbox_run.py"
@@ -136,22 +136,13 @@ def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
         shutil.copyfile(src, dst)
     # The embedded data: generated for THIS spec (not the repo's committed copy).
     (out / "bot" / "embedded.py").write_text(embed_data.render(str(spec_path)))
-    # Trimmed registries: unused plugins are absent, so point the defaults at what we ship.
-    _patch(out / "bot" / "main.py", 'DEFAULT_BRAIN = "tier2"', f'DEFAULT_BRAIN = "{brain}"')
-    _patch(out / "bot" / "protocols" / "__init__.py", 'DEFAULT = "pokerbots"',
-           f'DEFAULT = "{protocol}"')
-    (out / "bot.py").write_text(BOT_PY % {"protocol": protocol})
+    # The registries name plugins we don't ship, so bot.py names the brain and protocol we do.
+    (out / "bot.py").write_text(BOT_PY % {"brain": brain, "protocol": protocol})
     embedded = (out / "bot" / "embedded.py").read_text()
     info = {"variant": spec.name, "brain": brain, "protocol": protocol,
             "modules": sorted(mods), "data": "TABLES = None" not in embedded}
     (out / "PACKAGE.json").write_text(json.dumps(info, indent=2))
     return info
-
-
-def _patch(path: Path, old: str, new: str) -> None:
-    text = path.read_text()
-    if old in text:
-        path.write_text(text.replace(old, new))
 
 
 def make_zip(pkg: Path, zip_path: Path) -> str:
