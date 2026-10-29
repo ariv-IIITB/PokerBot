@@ -84,7 +84,7 @@ def test_snapshot_from_working_tree_runs(tmp_path) -> None:
 def test_snapshot_from_git_ref(tmp_path) -> None:
     create_snapshot("v_git", ref="HEAD", root=tmp_path)
     assert (tmp_path / "v_git" / "bot" / "main.py").is_file()
-    assert (tmp_path / "v_git" / "variant" / "rules.py").is_file()
+    assert (tmp_path / "v_git" / "variant" / "spec.py").is_file()
     assert "git HEAD" in (tmp_path / "v_git" / "META.txt").read_text()
 
 

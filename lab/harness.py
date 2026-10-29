@@ -22,7 +22,6 @@ from typing import Optional, Sequence
 from lab.engine import MatchResult, play_match, to_rules
 from lab.players import PlayerSpec
 from lab.stats import fmt_pm, mean_se
-from variant.rules import DEFAULT_CONFIG, GameConfig
 
 
 @dataclass
@@ -74,7 +73,7 @@ class DuplicateReport:
                 f"{self.total_hands} hands in {self.elapsed_s:.1f}s ({rate:,.0f}/s)")
 
 
-def play_pair(a: PlayerSpec, b: PlayerSpec, cfg: GameConfig, seed: int,
+def play_pair(a: PlayerSpec, b: PlayerSpec, cfg, seed: int,
               hands: Optional[int], on_illegal: str = "fold",
               time_bank_s: Optional[float] = None, track: bool = False) -> PairResult:
     """One duplicate pair. Top-level so multiprocessing can pickle it. track=True records
@@ -115,12 +114,12 @@ def _pair_task(args) -> PairResult:
     return play_pair(*args)
 
 
-def run_duplicate(a: PlayerSpec, b: PlayerSpec, cfg: GameConfig = DEFAULT_CONFIG,
+def run_duplicate(a: PlayerSpec, b: PlayerSpec, cfg=None,
                   seeds: Sequence[int] = range(10), hands: Optional[int] = None,
                   processes: Optional[int] = None, on_illegal: str = "fold",
                   time_bank_s: Optional[float] = None, track: bool = False) -> DuplicateReport:
     """Play every seed as a duplicate pair. processes=1 runs inline (no subprocesses);
-    None uses all cores. `cfg` (and its hooks) must be picklable for processes > 1."""
+    None uses all cores. `cfg`: a VariantSpec (picklable) or None for plain Hold'em."""
     seeds = list(seeds)
     report = DuplicateReport(a.display, b.display,
                              hands_per_match=hands or to_rules(cfg).hands_per_match)
@@ -147,7 +146,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     ap.add_argument("--bank", type=float, default=None,
                     help="time bank per match in seconds (smaller = faster, weaker brains)")
     ap.add_argument("--variant", default=None,
-                    help="catalog variant name or path to a spec JSON (default: GameConfig)")
+                    help="catalog variant name or path to a spec JSON (default: plain Hold'em)")
     ap.add_argument("--subprocess", action="store_true",
                     help="run A as a real subprocess bot (uses `--brain A`)")
     args = ap.parse_args(argv)
@@ -157,7 +156,7 @@ def main(argv: Optional[list[str]] = None) -> None:
                                        label=f"{args.a}(proc)")
     else:
         spec_a = PlayerSpec.brain(args.a)
-    variant = load_variant(args.variant) if args.variant else DEFAULT_CONFIG
+    variant = load_variant(args.variant) if args.variant else None
     for b in args.b:
         rep = run_duplicate(spec_a, PlayerSpec.brain(b), variant,
                             seeds=range(args.first_seed, args.first_seed + args.seeds),

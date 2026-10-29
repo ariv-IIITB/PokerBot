@@ -5,7 +5,7 @@
 
 The package contains only what the variant needs: `bot.py` at the top level, the bot/ modules
 reachable from bot/main.py (imports scanned with ast) plus the brain, the protocol adapter and
-the step plugins the spec uses, variant/spec.py, rules.py and evaluator_hook.py, and a
+the step plugins the spec uses, variant/spec.py, and a
 freshly generated bot/embedded.py (the spec, hyperparameters and tables: the bot reads no files).
 The repo itself is never modified: everything is copied into --out (a fresh folder).
 
@@ -48,7 +48,7 @@ from tools.sandbox_scan import SHIPPED_ALLOW, sandbox_violations  # noqa: E402
 from variant.spec import VariantSpec  # noqa: E402
 
 ALWAYS = ["bot.main", "bot.embedded", "bot.protocols.placeholder", "bot.brains.tier0",
-          "variant.spec", "variant.rules", "variant.evaluator_hook"]
+          "variant.spec"]
 ZIP_CAP_BYTES = 5 * 1024 * 1024
 ZIP_DATE = (2026, 1, 1, 0, 0, 0)                    # fixed, so equal sources give equal zips
 FORBIDDEN = {"socket", "ssl", "http", "urllib", "ftplib", "smtplib", "poplib", "imaplib",

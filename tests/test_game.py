@@ -5,13 +5,13 @@ import pytest
 
 from bot.actions import Action
 from bot.game.observation import hidden_from, observe
-from bot.game.rules_spec import Rules, rules_from_config
+from bot.game.rules_spec import Rules, to_rules
 from bot.game.runner import act, advance, legal_actions, play_out
 from bot.game.state import GameState, VisibilityError
 from bot.game.steps import STEP_TYPES, Step
 from lab.engine import deck_for
 from lab.example_variants import EXAMPLES
-from variant.rules import GameConfig
+from variant.spec import VariantSpec
 
 
 def random_policy(seed: int):
@@ -33,13 +33,13 @@ def random_policy(seed: int):
     return policy
 
 
-def new_state(cfg: GameConfig, seed: int, audit: bool = True) -> GameState:
-    rules = rules_from_config(cfg)
-    return GameState(rules, deck_for(seed, 0), [cfg.starting_stack] * 2, audit=audit)
+def new_state(spec: VariantSpec, seed: int, audit: bool = True) -> GameState:
+    rules = to_rules(spec)
+    return GameState(rules, deck_for(seed, 0), [rules.starting_stack] * 2, audit=audit)
 
 
 def test_holdem_is_a_hand_program() -> None:
-    rules = rules_from_config(GameConfig())
+    rules = to_rules(VariantSpec())
     names = [s.type_name for s in rules.program]
     assert names == ["post_blinds", "deal_hole", "betting", "deal_board", "betting",
                      "deal_board", "betting", "deal_board", "betting", "showdown"]
@@ -48,9 +48,9 @@ def test_holdem_is_a_hand_program() -> None:
     assert set(STEP_TYPES) >= {"post_blinds", "deal_hole", "deal_board", "betting", "showdown"}
 
 
-def test_discard_hook_placed_before_flop_betting() -> None:
-    names = [s.type_name for s in rules_from_config(EXAMPLES["discard3"]).program]
-    assert names[3:6] == ["deal_board", "hook", "betting"]
+def test_discard_placed_before_flop_betting() -> None:
+    names = [s.type_name for s in to_rules(EXAMPLES["discard3"]).program]
+    assert names[3:6] == ["deal_board", "discard", "betting"]
 
 
 @pytest.mark.parametrize("variant", sorted(EXAMPLES))
@@ -89,7 +89,7 @@ class LeakyStep(Step):
 
 
 def test_leak_is_detected() -> None:
-    base = rules_from_config(GameConfig())
+    base = to_rules(VariantSpec())
     leaky = Rules(base.program[:2] + (LeakyStep(),) + base.program[2:], base.evaluator)
     st = GameState(leaky, deck_for(0, 0), [400, 400], audit=True)
     with pytest.raises(VisibilityError):
@@ -101,7 +101,7 @@ def test_leak_is_detected() -> None:
 
 
 def test_copy_is_independent_and_replays() -> None:
-    st = new_state(GameConfig(), 3, audit=False)
+    st = new_state(VariantSpec(), 3, audit=False)
     p = advance(st)
     act(st, p, Action.call())
     p = advance(st)
@@ -118,12 +118,12 @@ def test_copy_is_independent_and_replays() -> None:
 
 
 def test_same_deck_same_result() -> None:
-    a = play_out(new_state(GameConfig(), 5), random_policy(1))
-    b = play_out(new_state(GameConfig(), 5), random_policy(1))
+    a = play_out(new_state(VariantSpec(), 5), random_policy(1))
+    b = play_out(new_state(VariantSpec(), 5), random_policy(1))
     assert a == b
 
 
 def test_no_record_mode_has_no_events() -> None:
-    st = GameState(rules_from_config(GameConfig()), deck_for(1, 0), [400, 400], record=False)
+    st = GameState(to_rules(VariantSpec()), deck_for(1, 0), [400, 400], record=False)
     play_out(st, random_policy(2))
     assert st.events == [] and st.done

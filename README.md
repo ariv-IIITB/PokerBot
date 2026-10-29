@@ -33,7 +33,7 @@ Runtime dependencies of the submitted bot: `numpy` (and `scipy`, optional).
 
 | Path | Purpose |
 |------|---------|
-| `variant/` | ★ Variant-specific: `rules.py` (GameConfig + hooks), `evaluator_hook.py` |
+| `variant/` | ★ Variant specs: `spec.py` (VariantSpec), `catalog/` presets, `active.json` |
 | `bot/` | The submitted bot (stdlib + numpy only) |
 | `lab/` | Offline engine, harness, sparring bots, fuzz/timing/memory/sweep tools |
 | `snapshots/` | Frozen copies of past bot versions for sparring |

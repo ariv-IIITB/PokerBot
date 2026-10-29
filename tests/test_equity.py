@@ -6,7 +6,7 @@ import pytest
 from bot.cards import parse_cards as P
 from bot.equity import (equity, equity_exact, equity_scalar, equity_vectorized,
                         sample_without_replacement)
-from variant.rules import GameConfig
+from variant.spec import EvalSpec, VariantSpec
 
 
 def rng(seed: int = 0) -> np.random.Generator:
@@ -70,7 +70,7 @@ def test_dead_cards_removed() -> None:
 
 
 def test_variant_config_omaha() -> None:
-    cfg = GameConfig(hole_cards=4, hole_cards_used=2)
+    cfg = VariantSpec(hole_cards=4, evaluation=EvalSpec(hole_exact=2))
     r = equity(P("Ah,Ad,Kh,Kd"), (), cfg, max_samples=4000, rng=rng(5))
     assert 0.6 < r.equity < 0.8  # AAKK double-suited is ~70% vs a random Omaha hand
 

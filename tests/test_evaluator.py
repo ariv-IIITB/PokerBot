@@ -9,8 +9,6 @@ from reference_eval import ref_best
 from bot.cards import parse_cards as P
 from bot.evaluator import (CATEGORY_NAMES, FLUSH, FULL_HOUSE, HIGH_CARD, STRAIGHT,
                            STRAIGHT_FLUSH, TRIPS, GenericEvaluator, category)
-from variant.evaluator_hook import make_evaluator
-from variant.rules import GameConfig
 
 EV = GenericEvaluator()
 
@@ -157,20 +155,3 @@ def test_all_5_card_hands_exhaustive() -> None:
                 1: 1098240, 0: 1302540}
     assert dict(counts) == expected
     assert len(np.unique(vals)) == 7462  # number of distinct 5-card hand ranks
-
-
-# --------------------------------------------------------------------------- hook
-
-def test_hook_uses_config() -> None:
-    ev = make_evaluator(GameConfig(hole_cards=4, hole_cards_used=2))
-    assert ev.hole_cards_used == 2 and ev.hand_size == 5
-    assert isinstance(make_evaluator(), GenericEvaluator)
-
-
-def test_game_config_validation() -> None:
-    cfg = GameConfig()
-    assert cfg.board_cards == 5 and cfg.board_after(1) == 3 and cfg.num_streets == 4
-    with pytest.raises(ValueError):
-        GameConfig(hole_cards=2, hole_cards_used=3)
-    with pytest.raises(ValueError):
-        GameConfig(hole_cards=1, streets=(0, 2), hand_size=5)

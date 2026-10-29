@@ -59,7 +59,7 @@ Source: `docs/rules/SUMMARY.md`. *(prov.)* = provisional, may change before the 
 - A variant is a JSON spec (`variant/spec.py`; presets in `variant/catalog/`; the bot plays
   `variant/active.json`, embedded into `bot/embedded.py`; the lab overrides it with the spec JSON
   *text* in `$POKERBOT_VARIANT_JSON`). It compiles into a **hand program** of step
-  plugins (`bot/game/compile.py`). `variant/rules.py` GameConfig is the legacy fallback.
+  plugins (`bot/game/compile.py`). No spec = plain Hold'em (`to_rules(None)`).
   Never hardcode Hold'em numbers (2 hole cards, 5 board cards, 3/1/1).
 - `bot/game/` = the rules, pure and submit-safe (state, steps, payoffs, scoring). The lab
   engine and the bot's simulator (`bot/sim/`) run the same code. Information only flows

@@ -101,8 +101,8 @@ def test_runtime_key_equals_training_key(name, fractions) -> None:
     for h in range(150):
         labels.clear()
         seats = [Seat(probe, 60.0), Seat(other, 60.0)] if h % 2 == 0 else [Seat(other, 60.0), Seat(probe, 60.0)]
-        hand = Hand(spec, seats, [rules.starting_stack] * 2, deck_for(5, h, rules.deck), h, None,
-                    rules=rules, rng=np.random.default_rng([5, h]))
+        hand = Hand(rules, seats, [rules.starting_stack] * 2, deck_for(5, h, rules.deck), h,
+                    rng=np.random.default_rng([5, h]))
         probe.hand = other.hand = hand
         probe.role, other.role = (0, 1) if h % 2 == 0 else (1, 0)
         hand.play()

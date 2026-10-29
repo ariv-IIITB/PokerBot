@@ -1,33 +1,27 @@
-"""Example GameConfigs for fuzzing and tests (lab only).
-
-Hook functions are top-level so configs can be pickled into harness workers.
-"""
+"""Example variant specs for fuzzing and tests (lab only)."""
 from __future__ import annotations
 
-from variant.rules import GameConfig, SpecialStep
+from variant.spec import BettingSpec, EvalSpec, MatchSpec, VariantSpec, default_program
 
 
-def discard_choices(hand, role) -> tuple[str, ...]:
-    """After the flop each player with 3 hole cards discards one (choice = card index)."""
-    n = len(hand.hole[role])
-    return tuple(str(i) for i in range(n)) if n == 3 else ()
+def _discard3() -> VariantSpec:
+    """3 hole cards; after the flop is dealt (before its betting) BB then SB discard one
+    card face up onto the board."""
+    prog = default_program(3)
+    prog.insert(4, {"type": "discard", "n": 1, "order": "BB_first", "visibility": "public",
+                    "destination": "board"})
+    return VariantSpec(name="discard3", program=prog)
 
 
-def discard_apply(hand, role, choice: str) -> None:
-    """The discarded card goes face up onto the board."""
-    hand.board.append(hand.hole[role].pop(int(choice)))
-
-
-DISCARD_STEP = SpecialStep(street=1, name="discard", choices=discard_choices,
-                           apply=discard_apply, order=("BB", "SB"))
-
-EXAMPLES: dict[str, GameConfig] = {
-    "holdem": GameConfig(),
-    "discard3": GameConfig(hole_cards=3, special_steps=(DISCARD_STEP,)),
-    "omaha": GameConfig(hole_cards=4, hole_cards_used=2),
-    "short_stacks": GameConfig(starting_stack=25),
-    "raise_cap": GameConfig(max_raises_per_street=2),
-    "persistent": GameConfig(reset_stacks_each_hand=False, starting_stack=200),
-    "big_blinds": GameConfig(small_blind=5, big_blind=10, starting_stack=300),
-    "extra_street": GameConfig(streets=(0, 3, 1, 1, 0)),
+EXAMPLES: dict[str, VariantSpec] = {
+    "holdem": VariantSpec(name="holdem"),
+    "discard3": _discard3(),
+    "omaha": VariantSpec(name="omaha", hole_cards=4, evaluation=EvalSpec(hole_exact=2)),
+    "short_stacks": VariantSpec(name="short_stacks", match=MatchSpec(starting_stack=25)),
+    "raise_cap": VariantSpec(name="raise_cap", betting=BettingSpec(max_raises=2)),
+    "persistent": VariantSpec(name="persistent",
+                              match=MatchSpec(reset_stacks=False, starting_stack=200)),
+    "big_blinds": VariantSpec(name="big_blinds", betting=BettingSpec(small_blind=5, big_blind=10),
+                              match=MatchSpec(starting_stack=300)),
+    "extra_street": VariantSpec(name="extra_street", streets=[0, 3, 1, 1, 0]),
 }

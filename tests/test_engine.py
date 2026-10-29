@@ -9,12 +9,10 @@ from bot.cards import parse_cards as P
 from bot.protocol import ActRequest, BoardUpdate, HoleCards, OppAction, Showdown
 from lab.engine import BB, SB, Hand, Seat, deck_for, play_match
 from lab.players import InProcessPlayer, SubprocessPlayer
-from variant.evaluator_hook import make_evaluator
 from lab.example_variants import EXAMPLES
-from variant.rules import GameConfig
+from variant.spec import BettingSpec, MatchSpec, VariantSpec
 
-CFG = GameConfig()
-EV = make_evaluator(CFG)
+CFG = VariantSpec()                       # plain Hold'em
 
 
 class ScriptPlayer:
@@ -66,7 +64,7 @@ def make_deck(sb: str, bb: str, board: str) -> list[int]:
 def play_hand(sb_replies, bb_replies, deck=None, cfg=CFG, stacks=(400, 400)):
     p = [ScriptPlayer(sb_replies), ScriptPlayer(bb_replies)]
     hand = Hand(cfg, [Seat(p[0], 60), Seat(p[1], 60)], list(stacks),
-                deck or deck_for(0, 0), 0, make_evaluator(cfg))
+                deck or deck_for(0, 0), 0)
     return hand, hand.play(), p
 
 
@@ -112,7 +110,7 @@ def test_short_all_in_is_refunded() -> None:
 
 
 def test_raise_cap() -> None:
-    cfg = GameConfig(max_raises_per_street=1)
+    cfg = VariantSpec(betting=BettingSpec(max_raises=1))
     _, _, (sb, bb) = play_hand(["R 6"], ["C"], cfg=cfg)
     assert not bb.requests[0].legal.can_raise
 
@@ -154,13 +152,12 @@ def test_illegal_reply_forfeit_mode() -> None:
 # --------------------------------------------------------------------------- random play
 
 def test_chip_conservation_random_play() -> None:
-    ev = EV
     for seed in range(300):
         rng = random.Random(seed)
         stacks = [rng.randint(1, 400), rng.randint(1, 400)]
         players = [InProcessPlayer(RandomBrain(seed)), InProcessPlayer(RandomBrain(seed + 1))]
         hand = Hand(CFG, [Seat(players[0], 60), Seat(players[1], 60)], stacks,
-                    deck_for(seed, 0), 0, ev)
+                    deck_for(seed, 0), 0)
         res = hand.play()
         assert sum(res.deltas) == 0
         assert sum(hand.stack) == sum(stacks) and min(hand.stack) >= 0
@@ -193,7 +190,7 @@ def test_duplicate_seat_swap_gets_same_cards() -> None:
 
 
 def test_persistent_stacks_end_on_bust() -> None:
-    cfg = GameConfig(reset_stacks_each_hand=False, starting_stack=20)
+    cfg = VariantSpec(match=MatchSpec(reset_stacks=False, starting_stack=20))
 
     class Shover(ScriptPlayer):
         def act(self, req):
@@ -204,14 +201,14 @@ def test_persistent_stacks_end_on_bust() -> None:
     assert m.hands_played < 100 and sorted(m.chips) == [-20, 20]
 
 
-# --------------------------------------------------------------------------- special-step hook
+# --------------------------------------------------------------------------- special step
 
-# The example hook lives in lab/example_variants.py (shared with the fuzzer):
+# The example lives in lab/example_variants.py (shared with the fuzzer):
 # after the flop each player discards 1 of 3 hole cards face up onto the board, BB first.
 DISCARD_CFG = EXAMPLES["discard3"]
 
 
-def test_discard_hook_example() -> None:
+def test_discard_example() -> None:
     hand, res, (sb, bb) = play_hand(["C", "S 2"] + ["K"] * 3, ["K", "S 0"] + ["K"] * 3,
                                     deck=deck_for(3, 0), cfg=DISCARD_CFG)
     assert len(hand.hole[SB]) == 2 and len(hand.hole[BB]) == 2
@@ -228,7 +225,7 @@ def test_discard_hook_example() -> None:
     assert sum(res.deltas) == 0
 
 
-def test_discard_hook_with_real_bot_brains() -> None:
+def test_discard_with_real_bot_brains() -> None:
     m = play_match([InProcessPlayer(RandomBrain(3)), InProcessPlayer(RandomBrain(4))],
                    DISCARD_CFG, seed=9, hands=200)
     assert m.errors == [0, 0] and m.hands_played == 200

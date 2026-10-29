@@ -11,10 +11,8 @@ from typing import Optional
 from bot.actions import Action, LegalActions, pot_fraction_raise, safe_action
 from bot.brains.base import Brain
 from bot.cards import rank_of, suit_of
-from bot.evaluator import PAIR, TWO_PAIR, category
+from bot.evaluator import PAIR, TWO_PAIR, GenericEvaluator, category
 from bot.state import GameState
-from variant.evaluator_hook import make_evaluator
-from variant.rules import DEFAULT_CONFIG
 
 
 class _Sparring(Brain):
@@ -97,7 +95,7 @@ class Tight(_Sparring):
 
     def __init__(self, config: Optional[dict] = None) -> None:
         super().__init__(config)
-        self.ev = make_evaluator(DEFAULT_CONFIG)
+        self.ev = GenericEvaluator()                   # best 5 of any cards
 
     @staticmethod
     def preflop_score(hole) -> int:
