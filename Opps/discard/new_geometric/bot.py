@@ -430,6 +430,7 @@ class Bot:
                      "post_bet": [1.8, 6.0], "post_raise": [0.9, 6.0]}
         self.sizes = {k: [0.5] * 5 for k in self.node}
         self.fold_to_bet = [2.4, 6.4]  # [folds, bets faced] postflop
+        self.fold_to_raise_pre = [2.4, 5.0]  # [folds, raises faced] preflop
         self._perms = list(itertools.permutations(range(4)))
 
     # ---------------------------------------------------------------- message dispatch
@@ -570,11 +571,12 @@ class Bot:
                     self.node[node][0] += 1.0
                     ratio = e["added"] / max(1.0, e["pot_before"])
                     self.sizes[node][size_bucket(ratio)] += 1.0
-            elif e["action"] == "raise" and e["street"] != "preflop":
+            elif e["action"] == "raise":
                 if i + 1 < len(ev) and ev[i + 1]["actor"] == "opp" and ev[i + 1]["street"] == e["street"]:
-                    self.fold_to_bet[1] += 1.0
+                    stat = self.fold_to_raise_pre if e["street"] == "preflop" else self.fold_to_bet
+                    stat[1] += 1.0
                     if ev[i + 1]["action"] == "fold":
-                        self.fold_to_bet[0] += 1.0
+                        stat[0] += 1.0
 
     # ---------------------------------------------------------------- strength
     def canon_key(self, hand):
@@ -639,9 +641,10 @@ class Bot:
         extra_real = max(1, amount - req["opp_bet"])
         return amount, extra_real, pot2
 
-    def bet_multipliers(self, B, pot2):
+    def bet_multipliers(self, B, pot2, street="flop"):
         alpha = B / float(pot2 + B)
-        fold_est = self.fold_to_bet[0] / self.fold_to_bet[1]
+        stat = self.fold_to_raise_pre if street == "preflop" else self.fold_to_bet
+        fold_est = stat[0] / stat[1]
         bluffmult = clamp(fold_est / max(alpha, 1e-6), 0.35, 2.0)
         valmult = clamp(1.0 + 0.8 * (alpha - fold_est), 0.85, 1.4)
         return alpha, bluffmult, valmult
@@ -722,7 +725,7 @@ class Bot:
         amount, B, pot2 = plan
         street = req["street"]
         mdf = pot2 / float(pot2 + B)
-        alpha, bluffmult, valmult = self.bet_multipliers(B, pot2)
+        alpha, bluffmult, valmult = self.bet_multipliers(B, pot2, street)
         v = 0.5 * mdf * valmult  # fraction of the range that bets for value
         value_cut = 1.0 - v
         bluff_total = v * alpha * bluffmult  # bluffs : value = B : (P + B)
@@ -734,7 +737,8 @@ class Bot:
         weak = st.hs if st.hs is not None else rank
         draw = max(0.0, (st.eq - st.hs) if st.hs is not None else 0.0)
         bl_cut = min(0.45, bluff_total + 0.6 * max(0.0, draw - 0.03))
-        if weak < bl_cut and self.py.random() < 0.9:
+        lo = 0.10 if street == "preflop" else 0.0  # preflop: bluff with playable low hands
+        if lo <= weak < lo + bl_cut and self.py.random() < 0.9:
             return "raise", amount
         return "check", None
 
@@ -777,7 +781,7 @@ class Bot:
                 amount, B, pot2 = plan
                 my_raises = sum(1 for e in cur if e["actor"] == "me" and e["action"] == "raise")
                 m = pot2 / float(pot2 + B)
-                alpha, bluffmult, valmult = self.bet_multipliers(B, pot2)
+                alpha, bluffmult, valmult = self.bet_multipliers(B, pot2, street)
                 cont = max(0.0, 1.0 - thresh)
                 v = 0.5 * m * cont * valmult
                 cut = 1.0 - v
@@ -786,8 +790,12 @@ class Bot:
                 if my_raises == 0 and req.get("raises_left", 0) >= 2 and rank < thresh:
                     weak = st.hs if st.hs is not None else rank
                     draw = max(0.0, (st.eq - st.hs) if st.hs is not None else 0.0)
-                    bl_cut = v * alpha * bluffmult + 0.4 * max(0.0, draw - 0.05)
-                    if weak < min(0.3, bl_cut) and self.py.random() < 0.8:
+                    bl_cut = min(0.3, v * alpha * bluffmult + 0.4 * max(0.0, draw - 0.05))
+                    if street == "preflop":  # the best of the folding hands, just under the call line
+                        lo, hi = max(0.0, thresh - bl_cut), thresh
+                    else:
+                        lo, hi = 0.0, bl_cut
+                    if lo <= weak < hi and self.py.random() < 0.8:
                         return "raise", amount
         if rank >= thresh:
             self.range_frac = min(self.range_frac, max(0.05, 1.0 - thresh))
@@ -820,7 +828,7 @@ class Bot:
         cards = req["hole_cards"]
         hole = [c2i(c) for c in cards]
         board = [c2i(c) for c in req.get("board", [])]
-        if len(hole) != 3:
+        if len(hole) != 3 or len(board) < 3:
             return _discard_fallback(cards)
         eqs = None
         dc = self.disc_choice
