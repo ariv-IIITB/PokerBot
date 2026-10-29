@@ -1,4 +1,4 @@
-# Status (updated 2026-10-29)
+# Status (updated 2026-10-29, after Phase D)
 
 Read this after `CLAUDE.md` to know where the project stands. Plan: `docs/PART4_PLAN.md`.
 Rules: `docs/rules/` (`SUMMARY.md` first).
@@ -11,12 +11,13 @@ Rules: `docs/rules/` (`SUMMARY.md` first).
 | Part 4 plan (`docs/PART4_PLAN.md`) | done | `04d5a62` |
 | **A** framework (scenario/transcript/round-trip kits, sandbox guard, embed generator, `lab.eval`) | done | `d3146b1` |
 | **B** Discard Hold'em rules (`discard_holdem` spec is active, BB counts as a raise, fallback discard) | done, reviewed | `a44e234`, logs `57ed850` |
-| **C** real protocol adapter (`bot/protocols/pokerbots.py`, now the default) | done; review = Phase D step D1 | `d131932`, `dd51c98` |
-| **D** ship-safe → first upload | **next** | — |
-| E Tier 2 on the real game · F LLM opponent pool · G Tier 3 "Ivey" · H Problem Statement / freeze | to do | — |
+| **C** real protocol adapter (`bot/protocols/pokerbots.py`, now the default) | done, reviewed in D1 | `d131932`, `dd51c98` |
+| **D** ship-safe → first upload | done; **upload #1 = `dist/upload1_phaseD.zip`** (the user uploads) | `accb344` |
+| **E** Tier 2 on the real game (discard, tables, oppstats, bluff-catch, EV sizing) | in progress | — |
+| F LLM opponent pool · G Tier 3 "Ivey" · H Problem Statement / freeze | to do | — |
 
-Tests on Python 3.11 (`.venv`): fast suite all green (1 expected failure: the runtime sandbox test,
-an xfail until Phase D). The slow suite passed at Phase C (261 tests, incl. a 400-hand match over the real protocol).
+Tests on Python 3.11 (`.venv`): fast suite 1063 passed, 2 skipped; slow suite 267 passed (21 min with
+`-n 3`) at Phase D (`accb344`). The runtime sandbox test passes (no xfail left).
 
 ## How the work is done
 
@@ -38,8 +39,8 @@ an xfail until Phase D). The slow suite passed at Phase C (261 tests, incl. a 40
   Tier 2 beats tier0, the sparring bots, opp1 and opp2. It loses to opp3 (−0.53 chips/hand) and opp4
   (−2.05). The opp bots were built for 2 hole cards and play through a makeshift adapter, so these
   numbers are indicative only; Phase F replaces them with real Discard Hold'em LLM bots.
-- **Tier 2 is slower on this variant** (30–50 hands/s here vs 58–190 in Hold'em). It is still inside
-  the bank (~9 s of 60 s per 400 hands locally); Phases D/E budget it properly.
+- **Time** (fixed in D): Tier 2 now uses ~22–24 % of the bank (projected 44–49 % on a 2× slower
+  server; limit 50 %) with ~5.5 decisions per hand. Every E/G change must re-pass `tests/test_timing_slow.py`.
 - Tier 2 is **not deterministic run to run** (its sample counts depend on wall-clock time), so equal
   seeds don't give equal chips. Compare with enough pairs and SEs.
 
@@ -48,14 +49,8 @@ an xfail until Phase D). The slow suite passed at Phase C (261 tests, incl. a 40
 The plan was finalized on 2026-10-29 (`docs/PART4_PLAN.md`): done phases are marked, and every
 phase starts by reviewing the previous one.
 
-- **Phase D (next):**
-  - D1: review Phase C first (it was merged unreviewed). That covers the inference fixes, the
-    "blind safe reply" to malformed requests, and the test counts.
-  - **Timing red flag:** one Tier 2 used ~34 s of its 60 s bank in a 400-hand self-play match
-    here. On a 2× slower server that forfeits. D5 adds a slow-machine test.
-  - Remove the three file-reading loaders (`bot/brains/params.py`, `bot/sim/tables.py`,
-    `bot/game/rules_spec.py`). The hard deadline can reach 15 s; replies must be under 5 s.
-  - Upload #1 (the user uploads).
+- **Phase D (done):** see the "Done" box in `docs/PART4_PLAN.md`. Upload #1 is
+  `dist/upload1_phaseD.zip` (sha256 in `docs/SUBMISSIONS.md`); the user uploads it on Unstop.
 - **Phase E:** Tier 2 gets the lessons from the Hold'em LLM bots: an `oppstats` module, a
   **river bluff index** (aimed at the river leak), **EV bet sizing**, and no awkward leftovers.
   Each is kept only on the numbers. Then ask the user about CFR (don't start it). Upload #2.

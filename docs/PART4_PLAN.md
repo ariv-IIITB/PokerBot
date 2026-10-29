@@ -33,7 +33,7 @@ Current state: `docs/STATUS.md`.
 | **A** | Framework: the shared tools every later phase uses | — | ✅ done `d3146b1` |
 | **B** | Discard Hold'em rules in the engine | A | ✅ done `a44e234` |
 | **C** | Real protocol adapter (both directions) | A, B | ✅ done `d131932`, `dd51c98` (review in D1) |
-| **D** | Ship-safe: no file reads, `bot.py`, package, timing, lock → **upload #1** | C | Oct 30–31 |
+| **D** | Ship-safe: no file reads, `bot.py`, package, timing, lock → **upload #1** | C | ✅ done `accb344` (user uploads) |
 | **E** | Tier 2 plays the real game well: discard, tables, **lessons from the LLM bots** → **upload #2** | D | Nov 1–3 |
 | **F** | Opponent pool: the user's LLM bots, train/held-out split, baseline report | C (+ user's bots) | when the bots arrive (target Nov 3) |
 | **G** | Tier 3: the "Ivey" style, built one behaviour at a time → **upload #3** if it ships | E, F | Nov 4–12 |
@@ -376,6 +376,32 @@ All of the above pass, and the old adapters still pass A3.
 ---
 
 ## Phase D — Ship-safe (no file reads, `bot.py`, package, timing, lock) → first upload
+
+> **Done (`accb344`, zip `dist/upload1_phaseD.zip`, sha256 `2dab3f52…`).** As built, differing from the text below:
+> - **D1 found:** a request that fails *after* parsing (not in the parser) got no reply and would
+>   have forfeited: `Bot.handle_line` now always answers a request (blind safe reply). A broken
+>   `discard_request` is answered from its own `hole_cards` when they can be read. New
+>   `tests/test_pokerbots_spec.py` checks the engine-side wire lines against the PDF independently of
+>   our parser (6 seeds). The round trip also held on 40 extra seeds (55k requests, both seats, all-ins).
+> - The two load-sensitive tests: start-up is judged on the child's CPU time (wall bound loose), and
+>   the match test counts deadline hits instead of banning `WARN`.
+> - **Loaders removed:** `load_params` reads `bot.embedded.PARAMS`, `load_tables` reads
+>   `bot.embedded.TABLES` (`np.lib.format.read_array` on base64, no `np.load`), `active_rules` reads
+>   `bot.embedded.SPEC` or `$POKERBOT_VARIANT_JSON` (spec JSON *text*). The sandbox allow-list is empty
+>   (only three marked lab helpers in `variant/spec.py`, never called by the bot); the runtime audit test
+>   passes, also over the real protocol. `bot.py` sets `sys.dont_write_bytecode` so a read-only disk
+>   sees no `.pyc` write attempts.
+> - **Timing (the red flag):** measured 5.1–5.6 decisions per hand, not 3. Pacing is now 5.5 decisions,
+>   safety 4.5, budgets capped at 1.2× the opening pace (before, savings were spent late: budgets grew
+>   10× by hand 350 and a match used ~50 % of the bank), hard limit ≤ 0.3 × `per_response` (1.5 s, was up
+>   to 15 s), rollout/PIMC batches sized to the budget. Real use ≈ 22–24 % of the bank, projected at 2×
+>   44–49 % (limit 50 %), worst reply < 0.1 s (one 263 ms outlier in 1000 hands). Slow-machine tests:
+>   `lab.engine.play_match(clock_scale=2)` charges every reply double (`tests/test_timing_slow.py`).
+> - `lab.timing_bench` / `lab.memory_check` take `--cmd`, run over the real protocol, lock off by default
+>   (`POKERBOT_BRAIN_CONFIG`, lab only), and fail above 50 % projected or a 0.5 s reply.
+> - `tools/package_submission.py` builds `bot.py` + `bot/` + `variant/` + a fresh `bot/embedded.py`,
+>   zips reproducibly (sorted, fixed timestamps), and runs every check on the **unpacked zip**.
+> - Peak memory is 40 MB (no tables yet).
 
 ### Check first
 - File reads in `bot/`:
