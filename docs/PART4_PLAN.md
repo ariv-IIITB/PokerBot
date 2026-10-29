@@ -398,6 +398,15 @@ All of the above pass, and the old adapters still pass A3.
    - check what the "blind safe reply" sends for a malformed `discard_request`: it must be a
      `discard` message or nothing the engine would treat as worse than its own fallback;
    - rerun the fast and slow suites and report the counts. Fix what you find before step 2.
+   - **Two load-sensitive tests** (found 2026-10-29, both pass alone; they fail under
+     `pytest -n auto` on 14 workers):
+     - `test_bot_subprocess.py::test_startup_time` (2.08 s under load);
+     - `test_pokerbots.py::test_full_match_tier1_vs_tier2_over_the_real_protocol`, which asserts no
+       stderr `WARN`, but under load the brain overruns its ~20 ms hard deadline ("brain exceeded
+       hard deadline") and falls back to Tier 0.
+     Make them robust: run them serially or mark them `slow`, and assert no errors or forfeits, not
+     "no WARN". Count deadline hits and report them instead. **Treat the deadline hits as timing
+     data for step 5:** a slower server looks like this load.
 2. **Embed and switch the loaders** (A5):
    - `load_params` = defaults ← `bot/embedded.PARAMS[name]` ← overrides. The `config_dir`
      argument is removed; `tests/test_tier1.py` passes dicts instead.
