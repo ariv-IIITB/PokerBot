@@ -2,9 +2,18 @@
 
 Reports: bot startup (process start -> ready, measured separately), total bank used over
 a match as the engine sees it, mean and worst single decision, and the projected server
-numbers (x slowdown, default 2). Fails (exit 1) if the projection exceeds the bank.
+numbers (x slowdown, default 2). Fails (exit 1) if the projection exceeds --max-frac of the
+bank (default 0.5, the Phase D rule), or if any single reply took more than --max-reply
+seconds (default 0.5) or the bot forfeited.
+
+The bot runs as a subprocess over the real wire format ($POKERBOT_PROTOCOL / --protocol,
+default pokerbots); --cmd runs something else, e.g. a packaged `bot.py`. The opponent is any
+lab brain, `NAME:{json}` (see lab.eval.parse_brain), `tier2-nolock`, or `starter` (the
+organisers' starter bot as a subprocess). Locks are off for tier2 opponents: the lock
+shortens matches and hides the real cost.
 
 CLI:  .venv/bin/python -m lab.timing_bench --hands 400 --brain tier2 --opponent maniac
+      .venv/bin/python -m lab.timing_bench --hands 1000 --bank 150 --variant discard_holdem
 """
 from __future__ import annotations
 
@@ -31,6 +40,8 @@ class TimingReport:
     first_s: float             # first decision (overlaps the bot's own start-up)
     slowdown: float
     forfeit: str
+    max_frac: float = 0.5      # the projected bank use must stay under this share of the bank
+    max_reply_s: float = 0.5   # ...and no single reply may take longer than this
 
     @property
     def mean_s(self) -> float:
@@ -42,7 +53,8 @@ class TimingReport:
 
     @property
     def ok(self) -> bool:
-        return not self.forfeit and self.projected_used_s < self.bank_s
+        return (not self.forfeit and self.projected_used_s <= self.max_frac * self.bank_s
+                and self.worst_s <= self.max_reply_s)
 
     def summary(self) -> str:
         x = self.slowdown
@@ -56,7 +68,8 @@ class TimingReport:
                 + (f"\nFORFEIT: {self.forfeit}" if self.forfeit else ""))
 
 
-def measure_startup(brain: str, repeats: int = 3, cwd=None, protocol: Optional[str] = None) -> float:
+def measure_startup(brain: str, repeats: int = 3, cwd=None, protocol: Optional[str] = None,
+                    cmd: Optional[list[str]] = None) -> float:
     """Best-of-N wall time for the bot to start, load its brain, and exit at end of match."""
     import os
     from bot.protocol import MatchEnd
@@ -66,19 +79,32 @@ def measure_startup(brain: str, repeats: int = 3, cwd=None, protocol: Optional[s
     best = float("inf")
     for _ in range(repeats):
         t0 = time.perf_counter()
-        subprocess.run([sys.executable, "-m", "bot.main", "--brain", brain], cwd=cwd or ROOT,
+        subprocess.run(cmd or [sys.executable, "-m", "bot.main", "--brain", brain], cwd=cwd or ROOT,
                        input=(a.encode_message(MatchEnd()) + "\n").encode(),
                        capture_output=True, timeout=60, env=env)
         best = min(best, time.perf_counter() - t0)
     return best
 
 
+def _opponent(spec: str):
+    """A player for `spec`: 'starter', 'NAME', 'NAME:json', optionally '-nolock' suffixed."""
+    from lab.eval import opponent_spec, parse_brain
+    if spec == "starter":
+        return opponent_spec(spec, "on").build()
+    nolock = spec.endswith("-nolock")
+    return parse_brain(spec.removesuffix("-nolock"), "off" if nolock else "on").build()
+
+
 def run_timing(brain: str = "tier2", opponent: str = "maniac", hands: Optional[int] = None,
                bank_s: Optional[float] = None, slowdown: float = 2.0, seed: int = 0,
                variant: Optional[str] = None, cwd=None, protocol: Optional[str] = None,
-               bot_variant_path: Optional[str] = None) -> TimingReport:
-    """variant: catalog name or spec path; the bot process plays it via $POKERBOT_VARIANT
-    (or, with cwd = a submission package, its own active.json: bot_variant_path=None)."""
+               bot_variant_path: Optional[str] = None, cmd: Optional[list[str]] = None,
+               max_frac: float = 0.5, max_reply_s: float = 0.5, lock: bool = False) -> TimingReport:
+    """variant: catalog name or spec path for the engine. The bot process plays the variant
+    embedded in its own bot/embedded.py unless bot_variant_path names a spec JSON for it.
+    cmd: how to launch the bot (default `python -m bot.main --brain BRAIN`); cwd: where.
+    lock: leave the endgame lock on. Off by default: the lock turns a won match into check/folds
+    and hides what the full strategy costs."""
     spec, path = DEFAULT_CONFIG, None
     if variant:
         from lab.harness import load_variant
@@ -86,16 +112,19 @@ def run_timing(brain: str = "tier2", opponent: str = "maniac", hands: Optional[i
         path = variant if variant.endswith(".json") else str(ROOT / "variant" / "catalog" / f"{variant}.json")
     hands = hands or DEFAULT_CONFIG.hands_per_match
     bank = bank_s or DEFAULT_CONFIG.time_bank_s
-    startup = measure_startup(brain, cwd=cwd, protocol=protocol)
-    bot = SubprocessPlayer([sys.executable, "-m", "bot.main", "--brain", brain], name=brain,
-                           variant_path=path if cwd is None else bot_variant_path,
+    startup = measure_startup(brain, cwd=cwd, protocol=protocol, cmd=cmd)
+    bot = SubprocessPlayer(cmd or [sys.executable, "-m", "bot.main", "--brain", brain], name=brain,
+                           brain_config=None if lock else {"lock_enabled": False},
+                           variant_path=bot_variant_path or (path if cwd is None and cmd is None else None),
                            cwd=str(cwd) if cwd else None, protocol=protocol)
-    m = play_match([bot, PlayerSpec.brain(opponent).build()], spec, seed=seed, hands=hands,
-                   time_bank_s=bank)
+    m = play_match([bot, _opponent(opponent)], spec, seed=seed, hands=hands, time_bank_s=bank,
+                   reply_limit_s=5.0)
     # Bank used = our decisions' wall time as the engine measured it.
     used = bank - m.bank_left[0]
     return TimingReport(startup, m.hands_played, m.decisions[0], bank, used,
-                        m.worst_after_first_s[0], m.first_decision_s[0], slowdown, m.forfeit_reason if m.forfeit == 0 else "")
+                        m.worst_after_first_s[0], m.first_decision_s[0], slowdown,
+                        m.forfeit_reason if m.forfeit == 0 else "",
+                        max_frac=max_frac, max_reply_s=max_reply_s)
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -106,9 +135,19 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--bank", type=float, default=None)
     ap.add_argument("--slowdown", type=float, default=2.0)
     ap.add_argument("--variant", default=None, help="catalog name or spec JSON path")
+    ap.add_argument("--protocol", default=None, help="wire format (default: the bot's default)")
+    ap.add_argument("--cmd", default=None, help="launch command, e.g. 'python bot.py' (with --cwd)")
+    ap.add_argument("--cwd", default=None)
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--lock", action="store_true", help="leave the bot's endgame lock on")
+    ap.add_argument("--max-frac", type=float, default=0.5)
+    ap.add_argument("--max-reply", type=float, default=0.5)
     args = ap.parse_args(argv)
+    import shlex
     rep = run_timing(args.brain, args.opponent, args.hands, args.bank, args.slowdown,
-                     variant=args.variant)
+                     seed=args.seed, variant=args.variant, cwd=args.cwd, protocol=args.protocol,
+                     cmd=shlex.split(args.cmd) if args.cmd else None,
+                     max_frac=args.max_frac, max_reply_s=args.max_reply, lock=args.lock)
     print(rep.summary())
     return 0 if rep.ok else 1
 

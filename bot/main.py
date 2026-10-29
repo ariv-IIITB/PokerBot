@@ -19,6 +19,7 @@ if __package__ in (None, ""):  # allow `python bot/main.py` as well as `-m bot.m
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import importlib
+import json
 from typing import Optional, TextIO
 
 from bot import log as botlog
@@ -41,8 +42,17 @@ DEFAULT_BRAIN = "tier2"
 
 
 def load_brain(name: str) -> Brain:
+    """The brain `name`. $POKERBOT_BRAIN_CONFIG (JSON text, set by the lab only) overrides its
+    hyperparameters, e.g. to time Tier 2 with the endgame lock off. Unset in the real match."""
     module, _, cls = BRAINS[name].partition(":")
-    return getattr(importlib.import_module(module), cls)()
+    config = None
+    if os.environ.get("POKERBOT_BRAIN_CONFIG"):
+        try:
+            config = json.loads(os.environ["POKERBOT_BRAIN_CONFIG"])
+        except ValueError as e:
+            botlog.warn(f"ignoring a broken $POKERBOT_BRAIN_CONFIG: {e}")
+    cls_ = getattr(importlib.import_module(module), cls)
+    return cls_(config) if config else cls_()
 
 
 class Bot:
@@ -119,7 +129,8 @@ class Bot:
         self.state.apply(msg)
         action = None
         if isinstance(msg, MatchInfo):
-            self.timer.configure(msg.timebank, msg.hands)
+            self.timer.configure(msg.timebank, msg.hands,
+                                 getattr(self.adapter, "per_response_s", None))
         elif isinstance(msg, ActRequest):
             watch = Stopwatch()
             self.timer.observe_timeleft(msg.timeleft)

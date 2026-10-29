@@ -13,6 +13,7 @@ SubprocessPlayer  runs a bot as a separate process over stdin/stdout using the p
 from __future__ import annotations
 
 import importlib
+import json
 import os
 import select
 import subprocess
@@ -89,7 +90,8 @@ class SubprocessPlayer:
 
     def __init__(self, cmd: Optional[list[str]] = None, cwd: Optional[str] = None,
                  name: str = "subprocess", stderr_to: Optional[str] = None,
-                 variant_path: Optional[str] = None, protocol: Optional[str] = None) -> None:
+                 variant_path: Optional[str] = None, protocol: Optional[str] = None,
+                 brain_config: Optional[dict] = None) -> None:
         """variant_path: a spec JSON the bot should play (its JSON text goes to $POKERBOT_VARIANT_JSON).
         protocol: wire format (an adapter name; default $POKERBOT_PROTOCOL or placeholder).
         The bot process is started with the same $POKERBOT_PROTOCOL."""
@@ -99,6 +101,8 @@ class SubprocessPlayer:
         self._err = open(stderr_to, "ab") if stderr_to else subprocess.DEVNULL
         env = dict(os.environ)
         env["POKERBOT_PROTOCOL"] = self.adapter.name
+        if brain_config:
+            env["POKERBOT_BRAIN_CONFIG"] = json.dumps(brain_config)
         if variant_path:
             env["POKERBOT_VARIANT_JSON"] = Path(variant_path).read_text()
         self.proc = subprocess.Popen(self.cmd, cwd=cwd or str(ROOT), stdin=subprocess.PIPE,

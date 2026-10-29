@@ -158,11 +158,22 @@ def _batch_worlds(rec, rng, batch, inference):
     return [rec.world_from(cols, i) for i in range(batch)], lw
 
 
+def _next_batch(done: int, started: float, batch_started: float, size: int, budget_s: float,
+                cap: int, remaining: int) -> int:
+    """Worlds for the next batch: as many as fit in what is left of the budget at the rate just
+    measured (a batch is the unit of overshoot, so it must shrink with the budget)."""
+    now = time.perf_counter()
+    per_world = max((now - batch_started) / max(1, size), 1e-6)
+    left = budget_s - (now - started)
+    return int(max(2, min(cap, remaining, left / per_world * 0.8)))
+
+
 def rollout_share(rec: Reconstruction, rng: np.random.Generator, time_budget_s: float,
-                  max_worlds: int = 2000, runouts: int = 16, batch: int = 12,
+                  max_worlds: int = 2000, runouts: int = 16, batch: int = 48,
                   inference=None) -> RolloutShare:
     """Expected showdown share by check-down rollouts (works for any rules). Worlds are
-    rolled and scored in small batches so the time budget is overshot by one batch at most."""
+    rolled and scored in batches that start small and are sized to fit the time left, so a
+    tight budget is overshot by a couple of worlds, not by a fixed dozen."""
     from bot.sim.share import weighted_mean
     t0 = time.perf_counter()
     me = rec.me
@@ -171,9 +182,11 @@ def rollout_share(rec: Reconstruction, rng: np.random.Generator, time_budget_s: 
     weights: list[int] = []
     n = 0
     scorer = rec.state.rules.evaluator
+    size = min(batch, 4)
     while n < max_worlds and (n == 0 or time.perf_counter() - t0 < time_budget_s):
         pend: list[_Pending] = []
-        ws, lw = _batch_worlds(rec, rng, batch, inference)
+        b0 = time.perf_counter()
+        ws, lw = _batch_worlds(rec, rng, size, inference)
         lw_pend = []
         for j, w in enumerate(ws):
             r = np.random.default_rng(int(rng.integers(2**62)))
@@ -191,6 +204,7 @@ def rollout_share(rec: Reconstruction, rng: np.random.Generator, time_budget_s: 
             vals += score_pending(pend, scorer, rng, runouts)
             logws += lw_pend
             weights += [runouts] * len(pend)
+        size = _next_batch(n, t0, b0, size, time_budget_s, batch, max_worlds - n)
     min_ess = inference.params["min_ess"] if inference is not None else 0.0
     mean, se = weighted_mean(np.asarray(vals), np.asarray(logws), min_ess)
     return RolloutShare(mean, int(sum(weights)), se)
@@ -207,7 +221,7 @@ class PimcResult:
 
 
 def pimc(rec: Reconstruction, candidates: Sequence[Action], rng: np.random.Generator,
-         time_budget_s: float, max_worlds: int = 400, runouts: int = 12, batch: int = 4,
+         time_budget_s: float, max_worlds: int = 400, runouts: int = 12, batch: int = 24,
          value_fn: Optional[Callable] = None, apply_fn: Optional[Callable] = None,
          inference=None) -> PimcResult:
     """Pick the candidate with the best mean value for us over shared worlds.
@@ -224,9 +238,11 @@ def pimc(rec: Reconstruction, candidates: Sequence[Action], rng: np.random.Gener
     worlds = rollouts = 0
     apply_fn = apply_fn or (lambda w, a: act(w, me, a))
     scorer = rec.state.rules.evaluator
+    size = min(batch, 2)
     while worlds < max_worlds and (worlds == 0 or time.perf_counter() - t0 < time_budget_s):
         pend: list[_Pending] = []
-        bases, lw = _batch_worlds(rec, rng, batch, inference)
+        b0 = time.perf_counter()
+        bases, lw = _batch_worlds(rec, rng, size, inference)
         for j, base in enumerate(bases):
             seed = int(rng.integers(2**62))
             row = [0.0] * k
@@ -248,6 +264,7 @@ def pimc(rec: Reconstruction, candidates: Sequence[Action], rng: np.random.Gener
             for it, sh in zip(pend, score_pending(pend, scorer, rng, runouts)):
                 wi, ci = it.key
                 per_world[wi][ci] = it.stack + sh * it.pot
+        size = _next_batch(worlds, t0, b0, size, time_budget_s, batch, max_worlds - worlds)
     vals = np.asarray(per_world)
     logw = np.asarray(logw_all)
     w = np.ones(len(vals))

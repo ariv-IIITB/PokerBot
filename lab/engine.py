@@ -59,9 +59,12 @@ class HandResult:
 class Seat:
     """Per-player bookkeeping the engine keeps across a match."""
 
-    def __init__(self, player, bank_s: float) -> None:
+    def __init__(self, player, bank_s: float, clock_scale: float = 1.0,
+                 reply_limit_s: Optional[float] = None) -> None:
         self.player = player
         self.bank = bank_s
+        self.clock_scale = clock_scale   # >1 simulates a slower machine: every reply is charged x
+        self.reply_limit_s = reply_limit_s   # a single reply over this forfeits (None = no cap)
         self.errors = 0          # illegal / unparseable replies
         self.decisions = 0
         self.worst_decision_s = 0.0
@@ -155,7 +158,7 @@ class Hand:
             raise Forfeit(role, "timeout") from None
         except PlayerCrashed as e:
             raise Forfeit(role, f"crash: {e}") from None
-        dt = time.perf_counter() - t0
+        dt = (time.perf_counter() - t0) * seat.clock_scale
         seat.bank -= dt
         seat.decisions += 1
         seat.worst_decision_s = max(seat.worst_decision_s, dt)
@@ -163,6 +166,8 @@ class Hand:
             seat.first_decision_s = dt
         else:
             seat.worst_after_first_s = max(seat.worst_after_first_s, dt)
+        if seat.reply_limit_s is not None and dt > seat.reply_limit_s:
+            raise Forfeit(role, f"reply took {dt:.2f}s > {seat.reply_limit_s:g}s")
         if seat.bank < 0:
             raise Forfeit(role, "time bank exhausted")
         try:
@@ -223,14 +228,17 @@ class MatchResult:
 def play_match(players: Sequence, cfg=DEFAULT_CONFIG, seed: int = 0,
                hands: Optional[int] = None, on_illegal: str = "fold",
                evaluator=None, time_bank_s: Optional[float] = None,
-               audit: bool = False) -> MatchResult:
+               audit: bool = False, clock_scale: float = 1.0,
+               reply_limit_s: Optional[float] = None) -> MatchResult:
     """Play one match between players[0] and players[1]. Player (h % 2) is SB in hand h.
     `cfg` may be a GameConfig, a VariantSpec or compiled Rules. audit=True checks every
-    event's visibility and chip conservation in every hand (AssertionError on failure)."""
+    event's visibility and chip conservation in every hand (AssertionError on failure).
+    clock_scale charges every reply that many times its real duration (a slower machine);
+    reply_limit_s forfeits a single reply that takes longer (the real engine's 5 s rule)."""
     rules = to_rules(cfg, evaluator)
     hands = rules.hands_per_match if hands is None else hands
     bank = rules.time_bank_s if time_bank_s is None else time_bank_s
-    seats = [Seat(p, bank) for p in players]
+    seats = [Seat(p, bank, clock_scale, reply_limit_s) for p in players]
     info = MatchInfo(hands, bank, rules.small_blind, rules.big_blind, rules.starting_stack)
     start = rules.starting_stack
     stacks = [start, start]
