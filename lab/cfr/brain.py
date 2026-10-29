@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from bot.actions import Action, LegalActions
-from bot.brains.tier2 import Tier2Brain, lock_margin
+from bot.brains.tier2 import Tier2Brain
 from bot.log import log
 from bot.abstraction import Bucketer, abstract_actions, extend_history, infoset_key, observed_label
 from bot.state import GameState
@@ -86,7 +86,7 @@ class CFRBrain(Tier2Brain):
         h = state.hand
         if self.strategy is None or legal.can_special or h is None or not h.hole:
             return super().decide(state, legal, budget_s)
-        if self.p["lock_enabled"] and (lock_margin(state, True, self.rules) or 0) > 0:
+        if self.situation(state).locked():                  # Tier 2's own rule and params
             self.stats["lock"] += 1
             return super().decide(state, legal, budget_s)
         found = self.table_key(state, legal)
@@ -116,7 +116,7 @@ class CFRBrain(Tier2Brain):
         the trainer (lab/cfr/abstract_game.py) would see it; None if the hand can't be
         rebuilt. The key is (street, bucket of our real cards, abstract betting history)."""
         h = state.hand
-        rec = self.reconstruct(state)
+        rec = self.situation(state).rec                    # shared with the Tier 2 fallback
         if rec is None or h is None:
             return None
         fr = self.fractions
