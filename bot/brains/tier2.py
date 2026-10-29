@@ -44,7 +44,7 @@ DEFAULTS.update({
     "ev_called_discount": 0.10,    # our equity when called = equity - discount x size (a call is informative)
     "ev_margin": 0.04,             # sizes within this x pot of the best EV are picked by a seeded draw
     "leftover_frac": 0.0,          # a value raise leaving less than this share of the new pot behind shoves (0 = off)
-    "river_bluff_slope": 0.0,      # (E4 unmeasured: off) extra equity needed to call a turn/river bet, per point the
+    "river_bluff_slope": 0.5,      # (E4 kept) extra equity needed to call a turn/river bet, per point the
     "bluff_ref": 0.22,             # bluff index sits below this (0 slope = the old rule)
 })
 
