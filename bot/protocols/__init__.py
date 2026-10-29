@@ -21,8 +21,9 @@ ADAPTERS = {
     "placeholder": "bot.protocols.placeholder:PlaceholderAdapter",
     "json": "bot.protocols.jsonl:JsonLinesAdapter",
     "terse": "bot.protocols.terse:TerseAdapter",
+    "pokerbots": "bot.protocols.pokerbots:PokerbotsAdapter",
 }
-DEFAULT = "placeholder"
+DEFAULT = "pokerbots"          # the official wire format; the others are mock formats for tests
 
 
 def get_adapter(name: str | None = None) -> Adapter:

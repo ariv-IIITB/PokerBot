@@ -119,7 +119,7 @@ def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
         shutil.copyfile(src, dst)
     # Trimmed registries: unused plugins are absent, so point the defaults at what we ship.
     _patch(out / "bot" / "main.py", 'DEFAULT_BRAIN = "tier2"', f'DEFAULT_BRAIN = "{brain}"')
-    _patch(out / "bot" / "protocols" / "__init__.py", 'DEFAULT = "placeholder"',
+    _patch(out / "bot" / "protocols" / "__init__.py", 'DEFAULT = "pokerbots"',
            f'DEFAULT = "{protocol}"')
     shutil.copyfile(spec_path, out / "variant" / "active.json")
     cfg = out / "bot" / "config"

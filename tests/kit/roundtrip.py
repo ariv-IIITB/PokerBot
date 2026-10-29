@@ -43,6 +43,15 @@ def snapshot(st: GameState) -> dict[str, Any]:
     }
 
 
+def hide_opponent_choice(snap: dict) -> dict:
+    """For formats that never say WHICH hidden card the opponent discarded: forget the index
+    of the opponent's special actions (the revealed card itself is still compared)."""
+    out = dict(snap)
+    out["history"] = [(s, a, k, amt, None if (a == "opp" and k == "S") else ch)
+                      for s, a, k, amt, ch in snap["history"]]
+    return out
+
+
 class Recorder:
     """An in-process player: random legal moves, and a log of everything it was sent."""
 
@@ -117,6 +126,8 @@ def check_round_trip(adapter: str, spec: str = "holdem_nl", hands: int = 50, see
                         continue
                     _, req, action, want = ev
                     got = snapshot(st)
+                    if bot.hides_opponent_choice:
+                        want, got = hide_opponent_choice(want), hide_opponent_choice(got)
                     bad = [key for key in want if want[key] != got[key]]
                     if m.legal != req.legal:
                         bad.append("legal")

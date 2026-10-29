@@ -100,6 +100,9 @@ def _pool_file(which: str, final: bool) -> list[str]:
 
 
 def opponent_spec(name: str, locks: str) -> PlayerSpec:
+    if name == "starter":                       # the organisers' starter bot, over the real protocol
+        return PlayerSpec.subprocess([sys.executable, str(ROOT / "lab" / "sparring" / "starter_bot.py")],
+                                     label="starter", protocol="pokerbots")
     return PlayerSpec.brain(name, OPP_CONFIG.get(name),
                             label=f"{name}-nolock" if locks == "off" else name)
 

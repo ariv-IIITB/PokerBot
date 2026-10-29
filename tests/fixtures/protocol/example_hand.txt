@@ -1,0 +1,22 @@
+# Protocol section 10: the bot is on the button in hand 1 and wins 12. The PDF elides history
+# entries ('...'); they are filled in here. B> lines are exactly the PDF's replies.
+E> {"type":"init","protocol_version":"1.0","total_hands":400,"starting_stack":200,"small_blind":1,"big_blind":2,"time_bank_ms":60000,"per_response_ms":5000}
+E> {"type":"new_hand","hand_id":1,"seat":"button","hole_cards":["As","Kd","7c"],"stack":200,"opp_stack":200}
+E> {"type":"action_request","hand_id":1,"street":"preflop","board":[],"pot":3,"my_bet":1,"opp_bet":2,"to_call":1,"my_stack":199,"opp_stack":198,"legal_actions":["fold","call","raise"],"min_raise":4,"max_raise":200,"raises_left":3,"history":[],"time_left_ms":60000}
+B> {"type":"action","action":"raise","amount":6}
+# opponent calls, the flop is dealt, opponent checks
+E> {"type":"action_request","hand_id":1,"street":"flop","board":["Ah","7d","2s"],"pot":12,"my_bet":0,"opp_bet":0,"to_call":0,"my_stack":194,"opp_stack":194,"legal_actions":["check","raise"],"min_raise":2,"max_raise":194,"raises_left":4,"history":[{"street":"preflop","actor":"me","action":"raise","amount":6},{"street":"preflop","actor":"opp","action":"call","amount":6},{"street":"flop","actor":"opp","action":"check"}],"time_left_ms":59940}
+B> {"type":"action","action":"raise","amount":6}
+# opponent calls; flop betting is over (the discard request lists no history)
+E> {"type":"discard_request","hand_id":1,"hole_cards":["As","Kd","7c"],"board":["Ah","7d","2s"],"pot":24,"my_stack":188,"opp_stack":188,"time_left_ms":59900}
+B> {"type":"discard","card":"Kd"}
+E> {"type":"discard_result","hand_id":1,"my_discard":"Kd","opp_discard":"Qs","hole_cards":["As","7c"]}
+# turn card 3c is dealt, opponent checks
+E> {"type":"action_request","hand_id":1,"street":"turn","board":["Ah","7d","2s","3c"],"pot":24,"my_bet":0,"opp_bet":0,"to_call":0,"my_stack":188,"opp_stack":188,"legal_actions":["check","raise"],"min_raise":2,"max_raise":188,"raises_left":4,"history":[{"street":"preflop","actor":"me","action":"raise","amount":6},{"street":"preflop","actor":"opp","action":"call","amount":6},{"street":"flop","actor":"opp","action":"check"},{"street":"flop","actor":"me","action":"raise","amount":6},{"street":"flop","actor":"opp","action":"call","amount":6},{"street":"turn","actor":"opp","action":"check"}],"time_left_ms":59860}
+B> {"type":"action","action":"check"}
+# river card 4h is dealt, opponent checks
+E> {"type":"action_request","hand_id":1,"street":"river","board":["Ah","7d","2s","3c","4h"],"pot":24,"my_bet":0,"opp_bet":0,"to_call":0,"my_stack":188,"opp_stack":188,"legal_actions":["check","raise"],"min_raise":2,"max_raise":188,"raises_left":4,"history":[{"street":"preflop","actor":"me","action":"raise","amount":6},{"street":"preflop","actor":"opp","action":"call","amount":6},{"street":"flop","actor":"opp","action":"check"},{"street":"flop","actor":"me","action":"raise","amount":6},{"street":"flop","actor":"opp","action":"call","amount":6},{"street":"turn","actor":"opp","action":"check"},{"street":"turn","actor":"me","action":"check"},{"street":"river","actor":"opp","action":"check"}],"time_left_ms":59820}
+B> {"type":"action","action":"raise","amount":10}
+# opponent folds
+E> {"type":"hand_result","hand_id":1,"result":"fold","net":12,"board":["Ah","7d","2s","3c","4h"],"my_hole_cards":["As","7c"],"opp_hole_cards":null,"opp_discard":"Qs","history":[{"street":"preflop","actor":"me","action":"raise","amount":6},{"street":"preflop","actor":"opp","action":"call","amount":6},{"street":"flop","actor":"opp","action":"check"},{"street":"flop","actor":"me","action":"raise","amount":6},{"street":"flop","actor":"opp","action":"call","amount":6},{"street":"turn","actor":"opp","action":"check"},{"street":"turn","actor":"me","action":"check"},{"street":"river","actor":"opp","action":"check"},{"street":"river","actor":"me","action":"raise","amount":10},{"street":"river","actor":"opp","action":"fold"}]}
+E> {"type":"match_end","reason":"complete"}

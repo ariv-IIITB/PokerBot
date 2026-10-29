@@ -44,6 +44,11 @@ class Adapter:
     def encode_action(self, action: Action) -> str:
         raise NotImplementedError
 
+    def recover(self, line: str) -> Optional[str]:
+        """A reply to send when `line` could not be parsed but looks like a request (so the
+        engine is waiting for us). None = say nothing."""
+        return None
+
     # ---- engine side (lab)
     def encode_message(self, msg: Message) -> Union[str, list]:
         raise NotImplementedError

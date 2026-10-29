@@ -178,6 +178,7 @@ class PlayerSpec:
     cmd: Optional[tuple[str, ...]] = None
     cwd: Optional[str] = None
     label: str = ""
+    protocol: Optional[str] = None         # wire format for subprocess players (adapter name)
 
     @staticmethod
     def brain(name: str, config: Optional[dict] = None, label: str = "") -> "PlayerSpec":
@@ -186,8 +187,9 @@ class PlayerSpec:
 
     @staticmethod
     def subprocess(cmd: Optional[list[str]] = None, cwd: Optional[str] = None,
-                   label: str = "subprocess") -> "PlayerSpec":
-        return PlayerSpec("subprocess", label, None, tuple(cmd) if cmd else None, cwd, label)
+                   label: str = "subprocess", protocol: Optional[str] = None) -> "PlayerSpec":
+        return PlayerSpec("subprocess", label, None, tuple(cmd) if cmd else None, cwd, label,
+                          protocol)
 
     @property
     def display(self) -> str:
@@ -198,7 +200,8 @@ class PlayerSpec:
             cfg = dict(self.config) if self.config else None
             return InProcessPlayer(load_brain(self.name, cfg), self.display)
         if self.kind == "subprocess":
-            return SubprocessPlayer(list(self.cmd) if self.cmd else None, self.cwd, self.display)
+            return SubprocessPlayer(list(self.cmd) if self.cmd else None, self.cwd, self.display,
+                                    protocol=self.protocol)
         if self.kind == "factory":
             module, _, fn = self.name.partition(":")
             return getattr(importlib.import_module(module), fn)()

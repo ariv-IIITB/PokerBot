@@ -83,7 +83,7 @@ def test_no_leaks_random_play() -> None:
 
 
 # 4. protocol: the step's tokens survive every adapter
-@pytest.mark.parametrize("name", sorted(ADAPTERS))
+@pytest.mark.parametrize("name", sorted(n for n in ADAPTERS if n != "pokerbots"))
 def test_tokens_round_trip(name) -> None:
     st, seen = play([])
     legal = [l for _, l in seen if l.can_special][0]
