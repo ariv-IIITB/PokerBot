@@ -53,7 +53,10 @@ phase starts by reviewing the previous one.
   `dist/upload1_phaseD.zip` (sha256 in `docs/SUBMISSIONS.md`); the user uploads it on Unstop.
 - **Phase E:** Tier 2 gets the lessons from the Hold'em LLM bots: an `oppstats` module, a
   **river bluff index** (aimed at the river leak), **EV bet sizing**, and no awkward leftovers.
-  Each is kept only on the numbers. Then ask the user about CFR (don't start it). Upload #2.
+  Each is kept only on the numbers. Upload #2.
+- **CFR (Tier 4), decided 2026-10-29:** a separate track, `docs/CFR_PLAN.md`. K1–K3 (abstraction,
+  trainers, river solver) are lab work and can run in their own session alongside E–G. Gate A
+  (blueprint vs Tier 2 and opp3) ~3–4 Nov; if it fails, Tier 3 ships.
 - **Phase F:** the user is generating Discard Hold'em LLM bots (the prompt is in the plan, Phase F)
   into `Opps/discard/<model>/bot.py` and picks 2 held-out bots before seeing results.
 - **Phase G:** Tier 3 ("Ivey") builds on Phase E's Tier 2. On the river, the bluff index decides

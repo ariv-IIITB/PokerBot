@@ -596,6 +596,9 @@ Phase F's LLM bots may not exist yet, so E measures on what is available:
      now met, and the raise cap shrinks the tree, but the main reason CFR lost (coarse card
      buckets) still stands;
    - **do not start CFR work.** Ask the user.
+   - **2026-10-29: the user decided.** CFR goes ahead as a separate track, Tier 4, planned in
+     `docs/CFR_PLAN.md` (blueprint + live river solver + the Tier 3 adaptation layer, gate A ~3–4 Nov).
+     Phase E only adds the dated note above; the CFR work itself follows `docs/CFR_PLAN.md`.
 10. **Upload #2:** if Tier 2 improved, build the zip (Phase D checks) and hand it to the user.
 
 **Not taken from the bots** (decided, don't revisit): push/fold charts (stacks reset every hand),
