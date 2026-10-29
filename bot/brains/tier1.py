@@ -25,10 +25,10 @@ from bot.brains.base import Brain
 from bot.brains.params import load_params, per_street
 from bot.equity import equity
 from bot.log import warn
-from bot.protocol import MatchInfo, Message, Showdown
+from bot.opponent import Opponent
+from bot.protocol import MatchInfo, Message
 from bot.state import ME, GameState
 from bot.game.rules_spec import active_rules, to_rules
-from bot.sim.inference import Inference, Trust
 from bot.sim.policies import decide_special
 from bot.sim.replay import reconstruct
 from bot.sim.share import expected_share
@@ -73,12 +73,12 @@ class Tier1Brain(Brain):
         self._cache: dict = {}
         self._cache_hand: Optional[int] = None
         self.tables = load_tables(self.rules) if self.p.get("use_tables", True) else None
-        self.trust = Trust()
-        self._last_rec = None                 # (hand id, Reconstruction) of our last decision
-        self.inference = Inference({"enabled": bool(self.p["inference"]),
-                                    "beta": float(self.p["inference_beta"]),
-                                    "gamma": float(self.p["inference_gamma"]),
-                                    "ref_hands": 120, "min_ess": 0.08})
+        self.opponent = Opponent(self.rng, self.p.get("priors"), float(self.p.get("prior_k", 15.0)),
+                                 inference=bool(self.p["inference"]),
+                                 beta=float(self.p["inference_beta"]),
+                                 gamma=float(self.p["inference_gamma"]),
+                                 use_trust=bool(self.p["inference_trust"]))
+        self.inference = self.opponent.inference          # sample weights for simulations
 
     @classmethod
     def defaults(cls) -> dict[str, Any]:
@@ -91,23 +91,7 @@ class Tier1Brain(Brain):
     def observe(self, state: GameState, msg: Message) -> None:
         if isinstance(msg, MatchInfo):
             self.warm_up()
-        elif isinstance(msg, Showdown) and self.inference.enabled and self.p["inference_trust"]:
-            self._score_showdown(state, msg)
-
-    def _score_showdown(self, state: GameState, msg) -> None:
-        """Opponent cards revealed: how well did the model explain their decisions?"""
-        last = self._last_rec
-        if last is None or state.hand is None or last[0] != state.hand.hand_id:
-            return
-        try:
-            self.trust.update(self.inference.decision_llr(last[1], list(msg.oppcards), self.rng))
-        except Exception as e:
-            warn(f"trust update failed: {e!r}")
-
-    def _apply_trust(self) -> None:
-        if self.p["inference_trust"]:
-            self.inference.params["gamma"] = float(self.p["inference_gamma"]) * self.trust.level("bet")
-            self.inference.params["beta"] = float(self.p["inference_beta"]) * self.trust.level("discard")
+        self.opponent.observe(state, msg)
 
     def warm_up(self) -> None:
         """Build evaluator tables and NumPy code paths before the first timed decision
@@ -125,8 +109,7 @@ class Tier1Brain(Brain):
         h = state.hand
         try:
             rec = reconstruct(self.rules, h, self.rng, level=self._level(h))
-            self._last_rec = (h.hand_id, rec)
-            self._apply_trust()
+            self.opponent.saw_hand(h.hand_id, rec)
             return rec
         except Exception as e:
             warn(f"reconstruction failed: {e!r}")

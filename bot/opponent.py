@@ -1,4 +1,14 @@
-"""Opponent statistics with shrinkage toward priors.
+"""Everything we learn about the opponent, in one place.
+
+`Opponent` (what the brains hold):
+  in   observe(state, msg)     every engine message (stats; trust at showdowns)
+       saw_hand(hand_id, rec)  the reconstruction behind each decision of ours (scored at
+                               the showdown, if there is one)
+  out  get(name) / stats       shrunk frequencies (below)
+       inference               sample weights for simulated opponent hands
+                               (bot/sim/inference.py), scaled by trust in that model
+
+Opponent statistics with shrinkage toward priors.
 
 Each stat is a frequency estimated as (count + prior * k) / (n + k): with little data it
 stays near the prior, and it moves to the observed rate as evidence accumulates.
@@ -10,14 +20,17 @@ Stats (all from the opponent's point of view):
   aggression_all raises / (raises + calls), every street (catches preflop shovers)
   fold_to_raise  folded directly after one of our raises
   wtsd           reached showdown, per hand they saw a flop
-Fed from neutral messages via `update(state, msg)` (called from Brain.observe).
+Fed from neutral messages via `update(state, msg)` (Opponent.observe calls it).
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Optional
 
 from bot.actions import CALL, FOLD, RAISE
+from bot.log import warn
 from bot.protocol import HandEnd, HandStart, Message, OppAction, Showdown
+from bot.sim.inference import Inference, Trust
 from bot.state import ME, GameState
 
 DEFAULT_PRIORS = {"vpip": 0.55, "pfr": 0.25, "aggression": 0.35, "fold_to_raise": 0.40,
@@ -90,3 +103,39 @@ class OpponentModel:
                 self.stats["pfr"].add(self._pfr)
             if self._saw_flop or (h is not None and h.street > 0):
                 self.stats["wtsd"].add(self._showdown)
+
+
+class Opponent(OpponentModel):
+    """Stats + inference + trust. `rng` is the brain's generator (trust scoring samples)."""
+
+    def __init__(self, rng, priors: Optional[dict] = None, k: float = 15.0,
+                 inference: bool = True, beta: float = 6.0, gamma: float = 3.0,
+                 use_trust: bool = True) -> None:
+        super().__init__(priors=dict(DEFAULT_PRIORS, **(priors or {})), k=k)
+        self.rng = rng
+        self.beta, self.gamma, self.use_trust = beta, gamma, use_trust
+        self.inference = Inference({"enabled": inference, "beta": beta, "gamma": gamma,
+                                    "ref_hands": 120, "min_ess": 0.08})
+        self.trust = Trust()
+        self._last = None                       # (hand id, Reconstruction) of our last decision
+
+    def observe(self, state: GameState, msg: Message) -> None:
+        self.update(state, msg)
+        if isinstance(msg, Showdown) and self.inference.enabled and self.use_trust:
+            self._score_showdown(state, msg)
+
+    def saw_hand(self, hand_id: int, rec) -> None:
+        self._last = (hand_id, rec)
+        if self.use_trust:
+            self.inference.params["gamma"] = self.gamma * self.trust.level("bet")
+            self.inference.params["beta"] = self.beta * self.trust.level("discard")
+
+    def _score_showdown(self, state: GameState, msg: Showdown) -> None:
+        """Opponent cards revealed: how well did the model explain their decisions?"""
+        last = self._last
+        if last is None or state.hand is None or last[0] != state.hand.hand_id:
+            return
+        try:
+            self.trust.update(self.inference.decision_llr(last[1], list(msg.oppcards), self.rng))
+        except Exception as e:
+            warn(f"trust update failed: {e!r}")

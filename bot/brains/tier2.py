@@ -16,8 +16,7 @@ from typing import Any, Optional
 from bot.actions import Action, LegalActions, safe_action
 from bot.brains.tier1 import DEFAULTS as TIER1_DEFAULTS
 from bot.brains.tier1 import Tier1Brain
-from bot.opponent import DEFAULT_PRIORS, OpponentModel
-from bot.protocol import Message
+from bot.opponent import DEFAULT_PRIORS
 from bot.state import GameState
 
 DEFAULTS: dict[str, Any] = dict(TIER1_DEFAULTS)
@@ -77,26 +76,19 @@ class Tier2Brain(Tier1Brain):
     param_file = "tier2"
 
     def __init__(self, config: Optional[dict] = None, **kw) -> None:
-        super().__init__(config, **kw)
-        priors = dict(DEFAULT_PRIORS)
-        priors.update(self.p.get("priors") or {})
-        self.opp = OpponentModel(priors=priors, k=float(self.p["prior_k"]))
+        super().__init__(config, **kw)          # Tier 1 builds self.opponent from priors / prior_k
         self.locked_decisions = 0
 
     @classmethod
     def defaults(cls) -> dict[str, Any]:
         return {k: (dict(v) if isinstance(v, dict) else v) for k, v in DEFAULTS.items()}
 
-    def observe(self, state: GameState, msg: Message) -> None:
-        super().observe(state, msg)
-        self.opp.update(state, msg)
-
     def adjusted(self) -> dict[str, Any]:
         """Copy of the parameters, shifted by the opponent model."""
         p = dict(self.p)
-        pri = self.opp.priors
-        ftr, vpip, aggr = (self.opp.get("fold_to_raise"), self.opp.get("vpip"),
-                           self.opp.get("aggression"))
+        opp = self.opponent
+        pri = opp.priors
+        ftr, vpip, aggr = opp.get("fold_to_raise"), opp.get("vpip"), opp.get("aggression")
         scale = min(p["bluff_scale_max"], ftr / max(pri["fold_to_raise"], 1e-6))
         p["bluff_freq"] = p["bluff_freq"] * scale
         drop = p["value_shift"] * max(0.0, vpip - pri["vpip"])
@@ -108,7 +100,7 @@ class Tier2Brain(Tier1Brain):
         # Big bets from someone who raises nearly always say little about their hand.
         # Normal bots measure ~0.40-0.45 here, so they keep the full penalty; maniacs ~0.85,
         # always-shove bots ~0.97.
-        a_all, start = self.opp.get("aggression_all"), p["pressure_aggr_from"]
+        a_all, start = opp.get("aggression_all"), p["pressure_aggr_from"]
         excess = max(0.0, a_all - start) / max(1e-6, 1.0 - start)       # 0 below start, 1 at always
         p["bet_pressure"] = p["bet_pressure"] * min(1.0, max(0.0, 1.0 - p["pressure_aggr_shift"] * excess))
         return p

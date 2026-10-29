@@ -70,21 +70,21 @@ def test_model_counts() -> None:
 
 def test_adjustments_vs_station_and_bluffable() -> None:
     station = Tier2Brain()
-    station.opp.stats["fold_to_raise"].count, station.opp.stats["fold_to_raise"].n = 0, 200
-    station.opp.stats["vpip"].count, station.opp.stats["vpip"].n = 190, 200
+    station.opponent.stats["fold_to_raise"].count, station.opponent.stats["fold_to_raise"].n = 0, 200
+    station.opponent.stats["vpip"].count, station.opponent.stats["vpip"].n = 190, 200
     p = station.adjusted()
     assert p["bluff_freq"] < 0.1 * DEFAULTS["bluff_freq"]
     assert p["raise_equity"][1] < DEFAULTS["raise_equity"][1]
     assert p["value_frac"] > DEFAULTS["value_frac"]
 
     folder = Tier2Brain()
-    folder.opp.stats["fold_to_raise"].count, folder.opp.stats["fold_to_raise"].n = 180, 200
+    folder.opponent.stats["fold_to_raise"].count, folder.opponent.stats["fold_to_raise"].n = 180, 200
     assert folder.adjusted()["bluff_freq"] > DEFAULTS["bluff_freq"]
 
 
 def _with_aggression(rate: float) -> Tier2Brain:
     b = Tier2Brain()
-    b.opp.stats["aggression_all"].count, b.opp.stats["aggression_all"].n = int(rate * 400), 400
+    b.opponent.stats["aggression_all"].count, b.opponent.stats["aggression_all"].n = int(rate * 400), 400
     return b
 
 
@@ -96,7 +96,7 @@ def test_bet_pressure_relaxes_only_vs_extreme_aggression() -> None:
     shover = _with_aggression(1.0).adjusted()["bet_pressure"]
     assert 0 < shover < maniac < base and shover < 0.1 * base
     off = Tier2Brain({"pressure_aggr_shift": 0.0})
-    off.opp.stats["aggression_all"].count = off.opp.stats["aggression_all"].n = 400
+    off.opponent.stats["aggression_all"].count = off.opponent.stats["aggression_all"].n = 400
     assert off.adjusted()["bet_pressure"] == base                     # switch works
 
 
