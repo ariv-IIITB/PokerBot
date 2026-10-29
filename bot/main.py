@@ -27,6 +27,7 @@ from bot.brains.base import Brain
 from bot.game.steps.cards import safe_action_for_hole
 from bot.protocol import ActRequest, MatchEnd, MatchInfo, Message, ProtocolError
 from bot.protocols import ADAPTERS, get_adapter
+from bot.protocols.base import as_messages
 from bot.state import GameState
 from bot.timing import DeadlineExceeded, Stopwatch, TimeManager, hard_deadline
 
@@ -84,18 +85,22 @@ class Bot:
     def handle_line(self, line: str) -> bool:
         """Process one engine line. Returns False when the match is over."""
         try:
-            msg = self.adapter.parse_line(line)
+            msgs = as_messages(self.adapter.parse_line(line))
         except ProtocolError as e:
             self.bad_lines += 1
             botlog.warn(f"malformed line {line.strip()!r}: {e}")
             return True
-        if msg is None:
+        if not msgs:
             return True  # blank or unknown: ignore
-        action = self.on_message(msg)
+        action = None
+        for msg in msgs:                     # a line may carry several messages; one request at most
+            a = self.on_message(msg)
+            if a is not None:
+                action = a
         if action is not None and self.out is not None:
             self.out.write(self.adapter.encode_action(action) + "\n")
             self.out.flush()
-        return not isinstance(msg, MatchEnd)
+        return not any(isinstance(m, MatchEnd) for m in msgs)
 
     def on_message(self, msg: Message) -> Optional[Action]:
         """Apply one neutral message; returns our (legal) action if it was an ACT.

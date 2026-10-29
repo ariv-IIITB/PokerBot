@@ -28,6 +28,7 @@ from bot.main import BRAINS as BOT_BRAINS
 from bot.main import Bot
 from bot.protocol import ActRequest, Message
 from bot.protocols import get_adapter
+from bot.protocols.base import as_lines
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -116,12 +117,14 @@ class SubprocessPlayer:
             raise PlayerCrashed(f"{self.name} closed stdin") from None
 
     def notify(self, msg: Message) -> None:
-        self._send(self.adapter.encode_message(msg))
+        for line in as_lines(self.adapter.encode_message(msg)):    # may be none, or several
+            self._send(line)
 
     def act(self, req: ActRequest, timeout: Optional[float] = None) -> Union[Action, str]:
         """The bot's reply decoded through the adapter (an Action), or the raw line if it
         can't be decoded (the engine then counts it as illegal)."""
-        self._send(self.adapter.encode_message(req))
+        for line in as_lines(self.adapter.encode_message(req)):
+            self._send(line)
         limit = req.timeleft if timeout is None else timeout
         line = self._read_line(max(0.0, limit if limit is not None else 60.0))
         try:

@@ -17,6 +17,7 @@ from bot.actions import Action, LegalActions
 from bot.cards import format_cards
 from bot.protocol import ActRequest, Message
 from bot.protocols import get_adapter
+from bot.protocols.base import as_lines, as_messages as as_msgs
 from bot.state import GameState
 from kit.scenario import load_spec
 from lab.engine import play_match
@@ -24,20 +25,6 @@ from lab.engine import play_match
 
 class RoundTripError(AssertionError):
     pass
-
-
-def as_lines(encoded) -> list[str]:
-    """encode_message may return a line, "" (send nothing) or a list of lines."""
-    if not encoded:
-        return []
-    return [encoded] if isinstance(encoded, str) else [x for x in encoded if x]
-
-
-def as_msgs(parsed) -> list[Message]:
-    """parse_line may return None, one message or a list of them."""
-    if parsed is None:
-        return []
-    return list(parsed) if isinstance(parsed, (list, tuple)) else [parsed]
 
 
 def snapshot(st: GameState) -> dict[str, Any]:
