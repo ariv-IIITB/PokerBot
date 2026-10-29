@@ -12,8 +12,6 @@ Information: a step reveals things ONLY through state.emit(kind, player, visible
 `visible` is ALL or the single player allowed to see the event (see state.py).
 
 Other hooks:
-    default_policy(view, legal, rules, budget_s)  a generic bot decision for this step
-    encode_choice(action) / decode_choice(text)    protocol tokens (None = standard F/K/C/R/S)
     describe()                                     one line of plain English
 """
 from __future__ import annotations
@@ -21,7 +19,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from bot.actions import Action, LegalActions, safe_action
+from bot.actions import Action, LegalActions
 
 
 @dataclass
@@ -65,16 +63,7 @@ class Step:
     def end(self, st) -> None:
         pass
 
-    # ---- bot / protocol / docs
-    def default_policy(self, view, legal: LegalActions, rules, budget_s: float) -> Action:
-        return safe_action(legal)
-
-    def encode_choice(self, action: Action) -> Optional[str]:
-        return None
-
-    def decode_choice(self, text: str) -> Optional[Action]:
-        return None
-
+    # ---- docs
     def describe(self) -> str:
         args = ", ".join(f"{k}={v}" for k, v in self.params.items())
         return f"{self.type_name}({args})"

@@ -19,7 +19,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Optional, Sequence
 
-from lab.engine import MatchResult, play_match
+from lab.engine import MatchResult, play_match, to_rules
 from lab.players import PlayerSpec
 from lab.stats import fmt_pm, mean_se
 from variant.rules import DEFAULT_CONFIG, GameConfig
@@ -123,7 +123,7 @@ def run_duplicate(a: PlayerSpec, b: PlayerSpec, cfg: GameConfig = DEFAULT_CONFIG
     None uses all cores. `cfg` (and its hooks) must be picklable for processes > 1."""
     seeds = list(seeds)
     report = DuplicateReport(a.display, b.display,
-                             hands_per_match=hands or cfg.hands_per_match)
+                             hands_per_match=hands or to_rules(cfg).hands_per_match)
     tasks = [(a, b, cfg, s, hands, on_illegal, time_bank_s, track) for s in seeds]
     t0 = time.perf_counter()
     n_proc = processes or os.cpu_count() or 1

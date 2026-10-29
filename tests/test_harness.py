@@ -34,3 +34,13 @@ def test_stats() -> None:
     assert mean_se([]) == (0.0, 0.0) and mean_se([5]) == (5.0, 0.0)
     assert win_rate([1, 0, 0.5, 1])[0] == 0.625
     assert z_score(1.0, 0.5) == 2.0
+
+
+def test_spec_without_hands_uses_the_spec_hand_count() -> None:
+    # A VariantSpec has no hands_per_match; the harness must read it via the compiled rules.
+    from dataclasses import replace
+    from lab.harness import load_variant
+    spec = load_variant("discard_holdem")
+    spec = replace(spec, match=replace(spec.match, hands=6))
+    rep = run_duplicate(T0, T0, spec, seeds=range(1), processes=1)
+    assert rep.hands_per_match == 6 and rep.total_hands == 12
