@@ -53,7 +53,7 @@ def audit(strategy: str, variant: str, opponent: str, seeds: int, hands: int,
     for r in rows:
         for k, v in r["stats"].items():
             stats[k] = stats.get(k, 0) + v
-    decisions = sum(stats.get(k, 0) for k in ("lock", "no_rec", "hit", "miss_key", "miss_len"))
+    decisions = sum(stats.get(k, 0) for k in ("no_rec", "hit", "miss_key", "miss_len"))
     frac = {k: v / max(1, decisions) for k, v in stats.items()}
     return {"strategy": strategy, "variant": variant, "opponent": opponent,
             "hands": sum(r["hands"] for r in rows), "chips_per_hand": cph, "se": se,

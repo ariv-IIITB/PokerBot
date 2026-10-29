@@ -4,7 +4,9 @@ from pathlib import Path
 import pytest
 
 from bot.actions import Action, LegalActions
-from bot.brains.tier2 import DEFAULTS, Tier2Brain, lock_margin
+from bot.brains.tier2 import DEFAULTS, Tier2Brain
+from bot.lock import lock_margin
+from bot.main import Bot
 from bot.cards import parse_cards as P
 from bot.game.rules_spec import to_rules
 from bot.opponent import OpponentModel, shrink
@@ -72,14 +74,14 @@ def test_adjustments_vs_station_and_bluffable() -> None:
     station = Tier2Brain()
     station.opponent.stats["fold_to_raise"].count, station.opponent.stats["fold_to_raise"].n = 0, 200
     station.opponent.stats["vpip"].count, station.opponent.stats["vpip"].n = 190, 200
-    p = station.adjusted()
+    p = station.params()
     assert p["bluff_freq"] < 0.1 * DEFAULTS["bluff_freq"]
     assert p["raise_equity"][1] < DEFAULTS["raise_equity"][1]
     assert p["value_frac"] > DEFAULTS["value_frac"]
 
     folder = Tier2Brain()
     folder.opponent.stats["fold_to_raise"].count, folder.opponent.stats["fold_to_raise"].n = 180, 200
-    assert folder.adjusted()["bluff_freq"] > DEFAULTS["bluff_freq"]
+    assert folder.params()["bluff_freq"] > DEFAULTS["bluff_freq"]
 
 
 def _with_aggression(rate: float) -> Tier2Brain:
@@ -90,14 +92,14 @@ def _with_aggression(rate: float) -> Tier2Brain:
 
 def test_bet_pressure_relaxes_only_vs_extreme_aggression() -> None:
     base = DEFAULTS["bet_pressure"]
-    assert Tier2Brain().adjusted()["bet_pressure"] == base           # unknown opponent
-    assert _with_aggression(0.45).adjusted()["bet_pressure"] == base  # normal bots (~0.4-0.45)
-    maniac = _with_aggression(0.85).adjusted()["bet_pressure"]
-    shover = _with_aggression(1.0).adjusted()["bet_pressure"]
+    assert Tier2Brain().params()["bet_pressure"] == base           # unknown opponent
+    assert _with_aggression(0.45).params()["bet_pressure"] == base  # normal bots (~0.4-0.45)
+    maniac = _with_aggression(0.85).params()["bet_pressure"]
+    shover = _with_aggression(1.0).params()["bet_pressure"]
     assert 0 < shover < maniac < base and shover < 0.1 * base
     off = Tier2Brain({"pressure_aggr_shift": 0.0})
     off.opponent.stats["aggression_all"].count = off.opponent.stats["aggression_all"].n = 400
-    assert off.adjusted()["bet_pressure"] == base                     # switch works
+    assert off.params()["bet_pressure"] == base                     # switch works
 
 
 def test_shipped_config_matches_known_keys() -> None:
@@ -135,8 +137,10 @@ def test_lock_forces_check_fold() -> None:
     st = lock_state(10, 9, 50, 0, 1)            # last hand, +50 up
     st.apply(HoleCards(P("Ah,Ad")))
     legal = LegalActions(fold=True, call=True, raise_min=4, raise_max=400)
-    assert brain.decide(st, legal, 0.02) == Action.fold()
-    assert brain.locked_decisions == 1
+    bot = Bot(brain, out=None)
+    bot.state = st
+    assert bot.choose(legal) == Action.fold()
+    assert bot.locked_decisions == 1
 
 
 @pytest.mark.parametrize("opp", ["all_in", "maniac", "random_legal"])
@@ -154,7 +158,7 @@ def test_lock_guarantees_win_in_real_match(opp: str, first_seat_player: int) -> 
     m = play_match(players, seed=3, hands=30)
     my_index = players.index(me)
     assert lead + m.chips[my_index] > 0
-    assert me.bot.brain.locked_decisions > 0
+    assert me.bot.locked_decisions > 0
 
 
 def test_tier2_plays_legally() -> None:
@@ -196,23 +200,25 @@ def test_it_never_locks_without_a_lead(hands: int, lead: int) -> None:
         for seat in (0, 1):
             st = lock_state(hands, played, lead, seat, 1 if seat == 0 else 2)
             assert lock_margin(st, rules=DH_RULES) < 0
-            brain = Tier2Brain({"bluff_freq": 0.0})
+            bot = Bot(Tier2Brain({"bluff_freq": 0.0}), out=None)
             st.apply(HoleCards(P("Ah,Ad,Ac")))
-            brain.decide(st, LegalActions(fold=True, call=True, raise_min=4, raise_max=200), 0.005)
-            assert brain.locked_decisions == 0
+            bot.state = st
+            assert not bot.locked()
+            assert bot.locked_decisions == 0
 
 
 def test_the_lock_lifts_as_soon_as_the_lead_is_gone() -> None:
     """The lock is re-evaluated at every decision: it holds only while the lead covers the worst
     case, and a shrinking lead hands the decision back to the normal strategy."""
-    brain = Tier2Brain({"bluff_freq": 0.0})
+    bot = Bot(Tier2Brain({"bluff_freq": 0.0}), out=None)
     legal = LegalActions(fold=True, call=True, raise_min=4, raise_max=200)
     for bankroll, locked in ((60, True), (4, True), (3, False), (-20, False)):
         st = lock_state(10, 8, bankroll, 0, 1)            # hand 8 of 10: one future hand, as BB (2)
         st.apply(HoleCards(P("Ah,Ad,Ac")))
-        before = brain.locked_decisions
-        brain.decide(st, legal, 0.005)
-        assert (brain.locked_decisions == before + 1) == locked, bankroll
+        bot.state = st
+        before = bot.locked_decisions
+        bot.choose(legal)
+        assert (bot.locked_decisions == before + 1) == locked, bankroll
 
 
 @pytest.mark.parametrize("hands", [400, 1000])
@@ -231,4 +237,4 @@ def test_a_locked_match_cannot_be_lost_on_discard_holdem(hands: int, opp: str, f
     m = play_match(players, load_catalog()["discard_holdem"], seed=11, hands=hands)
     assert m.errors == [0, 0] and m.forfeit is None
     assert lead + m.chips[players.index(me)] > 0
-    assert me.bot.brain.locked_decisions > 0
+    assert me.bot.locked_decisions > 0

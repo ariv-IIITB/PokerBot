@@ -23,7 +23,7 @@ class ProbeBrain(CFRBrain):
     """Records its table key, then plays a random abstract action."""
 
     def decide(self, state, legal, budget_s):
-        found = self.table_key(state, legal)
+        found = self.table_key(self.kit.situation(state, legal, budget_s))
         self.records.append(found)
         _, acts, _ = found
         return acts[int(self.rng.integers(len(acts)))][1]

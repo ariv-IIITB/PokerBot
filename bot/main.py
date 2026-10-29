@@ -8,6 +8,8 @@ Safety layers (see CLAUDE.md):
   1. the brain runs inside try/except; any error -> Tier 0 action
   2. every action is clamped to the legal set before it is sent
   3. hard deadline / emergency mode -> Tier 0 without calling the brain
+Above every brain that turns it on, the endgame lock (bot/lock.py) check/folds a match that
+is already won.
 The loop never lets an exception escape; it exits cleanly on EOF or ENDMATCH.
 """
 from __future__ import annotations
@@ -23,9 +25,10 @@ import json
 from typing import Optional, TextIO
 
 from bot import log as botlog
-from bot.actions import Action, LegalActions, clamp, is_legal
+from bot.actions import Action, LegalActions, clamp, is_legal, safe_action
 from bot.brains.base import Brain
 from bot.game.steps.cards import safe_action_for_hole
+from bot.lock import lock_margin
 from bot.protocol import ActRequest, MatchEnd, MatchInfo, Message, ProtocolError
 from bot.protocols import ADAPTERS, DEFAULT, get_adapter
 from bot.protocols.base import as_messages
@@ -67,6 +70,7 @@ class Bot:
         self.brain_errors = 0
         self.deadline_hits = 0
         self.emergency_decisions = 0
+        self.locked_decisions = 0
         self.bad_lines = 0
 
     # ---- main loop
@@ -147,6 +151,18 @@ class Bot:
             botlog.warn(f"brain.observe failed: {e!r}")
         return action
 
+    def locked(self) -> bool:
+        """The brain wants the lock and the match is won by check/folding from here."""
+        b = self.brain
+        if not getattr(b, "lock_enabled", False):
+            return False
+        try:
+            margin = lock_margin(self.state, bool(b.lock_assume_alternating), b.rules)
+        except Exception as e:
+            botlog.warn(f"lock check failed: {e!r}")
+            return False
+        return margin is not None and margin > 0
+
     @staticmethod
     def discard_request(legal: LegalActions) -> bool:
         return legal.can_special and legal.special.name == "discard"  # type: ignore[union-attr]
@@ -157,11 +173,15 @@ class Bot:
         return safe_action_for_hole(legal, hand.hole if hand is not None else ())
 
     def choose(self, legal: LegalActions) -> Action:
-        """Ask the brain, with Tier 0 fallback on emergency, error or deadline."""
+        """Ask the brain, with Tier 0 fallback on emergency, error or deadline, and
+        check/fold once the endgame lock holds."""
         if self.timer.emergency():
             self.emergency_decisions += 1
             return self.fallback(legal)
         budget = self.timer.budget(self.state.hands_remaining)
+        if self.locked():
+            self.locked_decisions += 1
+            return safe_action(legal)
         try:
             with hard_deadline(self.timer.hard_limit(budget)):
                 return self.brain.decide(self.state, legal, budget)

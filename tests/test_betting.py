@@ -2,7 +2,7 @@
 import pytest
 
 from bot.actions import Action, LegalActions, clamp, is_legal, pot_fraction_raise
-from bot.brains.tier2 import lock_margin
+from bot.lock import lock_margin
 from bot.game.compile import compile_spec
 from bot.game.payoffs import side_pots
 from bot.game.runner import act, advance, legal_actions

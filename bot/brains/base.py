@@ -11,6 +11,9 @@ from bot.state import GameState
 class Brain(ABC):
     name = "base"
     rules = None      # compiled bot.game Rules of the variant being played, if known
+    # Endgame lock (bot/lock.py), applied by Bot.choose before the brain is asked.
+    lock_enabled = False
+    lock_assume_alternating = True    # blinds alternate each hand (False = assume BB always)
 
     def set_rules(self, rules) -> None:
         """Called by the lab before a match; the submitted bot uses its active variant."""

@@ -9,10 +9,11 @@ other sizes use the pseudo-harmonic mapping, bot/abstraction.py), looks up (stre
 hand-strength bucket, abstract history) in the strategy table and samples an abstract
 action. The runtime key equals the trainer's key (tests/test_cfr_runtime.py). Outside the
 table (or for any non-betting decision, or when the table is missing or for another
-variant) it plays exactly like Tier 2, endgame lock included.
+variant) it plays exactly like Tier 2 on the same Situation (the hand is rebuilt once). The
+endgame lock is Bot.choose's, with Tier 2's settings.
 Strategy file: data/<variant>/cfr_strategy.json (lab/cfr/train.py), loaded read-only; the
 `strategy_file` parameter points at another file (lab experiments). `stats` counts how
-each betting decision was made (table hit, off-tree, endgame lock, ...).
+each betting decision was made (table hit, off-tree, ...).
 """
 from __future__ import annotations
 
@@ -21,11 +22,11 @@ import os
 from pathlib import Path
 from typing import Any, Optional
 
-from bot.actions import Action, LegalActions
-from bot.brains.tier2 import Tier2Brain, lock_margin
-from bot.log import log
 from bot.abstraction import Bucketer, abstract_actions, extend_history, infoset_key, label_of
-from bot.state import GameState
+from bot.actions import Action
+from bot.brains.tier2 import Tier2Brain
+from bot.log import log
+from bot.situation import Situation
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -47,7 +48,7 @@ class CFRBrain(Tier2Brain):
         self.fractions: Optional[dict] = None    # raise sizes of the trained abstraction
         self.hits = self.misses = 0
         # Why betting decisions did / didn't use the table (diagnostics, lab reports).
-        self.stats = {"lock": 0, "no_rec": 0, "hit": 0, "miss_key": 0, "miss_len": 0,
+        self.stats = {"no_rec": 0, "hit": 0, "miss_key": 0, "miss_len": 0,
                       "translated": 0}
         self.on_rules()
 
@@ -82,24 +83,21 @@ class CFRBrain(Tier2Brain):
             log(f"no CFR strategy: {e!r}")
         return None, None
 
-    def decide(self, state: GameState, legal: LegalActions, budget_s: float) -> Action:
-        h = state.hand
-        if self.strategy is None or legal.can_special or h is None or not h.hole:
-            return super().decide(state, legal, budget_s)
-        if self.p["lock_enabled"] and (lock_margin(state, True, self.rules) or 0) > 0:
-            self.stats["lock"] += 1
-            return super().decide(state, legal, budget_s)
-        found = self.table_key(state, legal)
+    def act(self, sit: Situation) -> Action:
+        h = sit.hand
+        if self.strategy is None or sit.legal.can_special or h is None or not h.hole:
+            return super().act(sit)
+        found = self.table_key(sit)
         if found is None:
             self.stats["no_rec"] += 1
-            return super().decide(state, legal, budget_s)
+            return super().act(sit)
         key, acts, translated = found
         probs = self.strategy.get(key)
         self.stats["translated"] += int(translated)
         if probs is None or len(probs) != len(acts):
             self.misses += 1
             self.stats["miss_key" if probs is None else "miss_len"] += 1
-            return super().decide(state, legal, budget_s)
+            return super().act(sit)
         self.hits += 1
         self.stats["hit"] += 1
         # Tables hold uint8 weights summing to 255, or floats (lab exports): sample by weight.
@@ -111,12 +109,12 @@ class CFRBrain(Tier2Brain):
                 return action
         return acts[-1][1]
 
-    def table_key(self, state: GameState, legal: LegalActions):
+    def table_key(self, sit: Situation):
         """(infoset key, abstract actions, opponent-bet-translated?) for this decision, as
         the trainer (lab/cfr/abstract_game.py) would see it; None if the hand can't be
         rebuilt. The key is (street, bucket of our real cards, abstract betting history)."""
-        h = state.hand
-        rec = self.reconstruct(state)
+        h, legal = sit.hand, sit.legal
+        rec = sit.rec
         if rec is None or h is None:
             return None
         fr = self.fractions
