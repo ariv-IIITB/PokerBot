@@ -1,0 +1,6 @@
+d_new_eqrandom     vs starter       10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.12s | bank used max 44% avg 43% | stderr max 0 B | first reply 0.48s | ok
+d_new_eqrandom     vs tier2         10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.10s | bank used max 37% avg 23% | stderr max 0 B | first reply 0.41s | ok
+d_new_eqrandom     vs starter @2x    6 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.19s | bank used max 78% avg 77% | stderr max 0 B | first reply 0.46s | ok
+d_new_geometric    vs starter       10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.07s | bank used max 44% avg 42% | stderr max 0 B | first reply 0.26s | ok
+d_new_geometric    vs tier2         10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.07s | bank used max 37% avg 30% | stderr max 0 B | first reply 0.24s | ok
+d_new_geometric    vs starter @2x    6 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.15s | bank used max 82% avg 80% | stderr max 0 B | first reply 0.27s | ok
