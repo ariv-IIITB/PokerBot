@@ -1,7 +1,7 @@
 """The active variant as an abstract game for MCCFR, using bot/game for the rules.
 
 State = (GameState, history string). Betting decisions offer the abstract actions of
-lab/cfr/abstraction.py; non-betting decisions (card steps, bids, ...) are resolved
+bot/abstraction.py; non-betting decisions (card steps, bids, ...) are resolved
 automatically with the first legal option (an abstraction limitation: MCCFR here learns
 betting only). The infoset is (street, hand-strength bucket, betting history this hand).
 """
@@ -11,7 +11,7 @@ from __future__ import annotations
 from bot.actions import Action
 from bot.game.runner import act, advance, legal_actions
 from bot.game.state import GameState
-from lab.cfr.abstraction import Bucketer, abstract_actions, infoset_key
+from bot.abstraction import Bucketer, abstract_actions, extend_history, infoset_key
 
 
 class AbstractGame:
@@ -67,8 +67,7 @@ class AbstractGame:
         p = self.to_act(s)
         act(g, p, concrete)
         self._settle(g)
-        sep = "/" if g.street != st.street else ""
-        return (g, hist + label + sep)
+        return (g, extend_history(hist, label, st.street, g.street))
 
     def infoset(self, s, p: int):
         st, hist = s

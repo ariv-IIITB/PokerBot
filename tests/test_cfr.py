@@ -5,7 +5,7 @@ import numpy as np
 
 from bot.actions import LegalActions
 from bot.game.compile import compile_spec
-from lab.cfr.abstraction import Bucketer, abstract_actions, raise_label
+from bot.abstraction import Bucketer, abstract_actions, raise_label
 from lab.cfr.abstract_game import AbstractGame
 from lab.cfr.kuhn import Kuhn
 from lab.cfr.mccfr import MCCFR, expected_value, exploitability, export_uint8

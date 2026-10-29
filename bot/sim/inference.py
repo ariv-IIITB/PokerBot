@@ -26,6 +26,7 @@ from typing import Optional
 
 import numpy as np
 
+from bot.abstraction import strength_percentile
 from bot.actions import CALL, CHECK, FOLD, RAISE
 
 DEFAULTS = {
@@ -64,15 +65,8 @@ class Inference:
         ev = rec.state.rules.evaluator
         if len(board) >= 3:
             try:
-                vals = ev.evaluate_batch(holes, board)
-                dead = set(board) | set(np.unique(holes).tolist())
-                pool = np.array([c for c in rec.state.rules.deck if c not in dead])
-                k = holes.shape[1]
-                if len(pool) >= k:
-                    n = int(self.params["ref_hands"])
-                    idx = np.argsort(rng.random((n, len(pool))), axis=1)[:, :k]
-                    ref = np.sort(ev.evaluate_batch(pool[idx], board))
-                    return np.searchsorted(ref, vals, side="right") / len(ref)
+                return strength_percentile(ev, rec.state.rules.deck, holes, board,
+                                           int(self.params["ref_hands"]), rng)
             except ValueError:
                 pass
         faces = holes % 64

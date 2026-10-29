@@ -23,6 +23,7 @@ from typing import Optional, Protocol, Sequence
 
 import numpy as np
 
+from bot.abstraction import showdown_share
 from bot.game.rules_spec import to_rules
 
 
@@ -113,9 +114,7 @@ def _score_batch(ev, hole, board, deck_np, n_opp, n_run, rng, n) -> np.ndarray:
         full = np.concatenate([np.broadcast_to(board, (n, len(board))), draw[:, n_opp:]], axis=1)
     else:
         full = np.broadcast_to(board, (n, len(board)))
-    mine = ev.evaluate_batch(np.broadcast_to(hole, (n, len(hole))), full)
-    theirs = ev.evaluate_batch(draw[:, :n_opp], full)
-    return (mine > theirs) + 0.5 * (mine == theirs)
+    return showdown_share(ev, np.broadcast_to(hole, (n, len(hole))), draw[:, :n_opp], full)
 
 
 def equity_vectorized(hole: Sequence[int], board: Sequence[int],
@@ -184,6 +183,5 @@ def equity_exact(hole: Sequence[int], board: Sequence[int],
     m = len(opp_a)
     full = np.concatenate([np.broadcast_to(np.asarray(board, dtype=np.intp), (m, len(board))),
                            run_a], axis=1)
-    mine = ev.evaluate_batch(np.broadcast_to(np.asarray(hole, dtype=np.intp), (m, len(hole))), full)
-    theirs = ev.evaluate_batch(opp_a, full)
-    return EquityResult(float(((mine > theirs) + 0.5 * (mine == theirs)).mean()), m, 0.0)
+    mine = np.broadcast_to(np.asarray(hole, dtype=np.intp), (m, len(hole)))
+    return EquityResult(float(showdown_share(ev, mine, opp_a, full).mean()), m, 0.0)

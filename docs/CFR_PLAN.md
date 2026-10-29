@@ -40,7 +40,7 @@ anything off-tree / any error    Tier 2 decision
 ```
 
 The opponent's real bet sizes are mapped onto the tree with the pseudo-harmonic rule already in
-`lab/cfr/abstraction.py`. On the river the solver uses the real size, so no mapping is needed there.
+`bot/abstraction.py`. On the river the solver uses the real size, so no mapping is needed there.
 
 ## 2. K1 — the abstraction
 

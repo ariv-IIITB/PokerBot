@@ -12,6 +12,7 @@ from pathlib import Path
 
 import numpy as np
 
+from bot.abstraction import showdown_share
 from bot.equity import sample_without_replacement
 
 BINS = 10
@@ -28,9 +29,8 @@ def _hist_cdf(rules, hole, board, rng, runouts: int = 16, opps: int = 48) -> np.
         full = np.concatenate([np.array(board, dtype=np.intp), run]).astype(np.intp)
         rest = np.array([c for c in deck if c not in set(run.tolist())])
         opp = sample_without_replacement(rng, rest, opps, len(hole))
-        mine = ev.evaluate_batch(np.broadcast_to(np.array(hole), (opps, len(hole))), full)
-        theirs = ev.evaluate_batch(opp, full)
-        eqs.append(float(((mine > theirs) + 0.5 * (mine == theirs)).mean()))
+        mine = np.broadcast_to(np.array(hole), (opps, len(hole)))
+        eqs.append(float(showdown_share(ev, mine, opp, full).mean()))
     h, _ = np.histogram(eqs, bins=BINS, range=(0, 1))
     return np.cumsum(h) / max(1, h.sum())
 
