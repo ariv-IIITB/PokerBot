@@ -28,6 +28,7 @@ from bot.log import warn
 from bot.protocol import MatchInfo, Message, Showdown
 from bot.state import ME, GameState
 from bot.game.rules_spec import active_rules, to_rules
+from bot.game.steps.cards import safe_action_for_hole
 from bot.sim.inference import Inference, Trust
 from bot.sim.policies import decide_special
 from bot.sim.replay import reconstruct
@@ -52,11 +53,14 @@ DEFAULTS: dict[str, Any] = {
     "use_sim": True,               # False: old equity only (and first option for specials)
     "rollout_worlds": 2000,        # caps (the time budget usually binds first)
     "pimc_worlds": 400,
+    "discard_mode": "fast",        # one-card discards: fast | pimc | lowest | highest2 (bot/sim/policies.py)
+    "smart_rollout_discard": False,# (E1: +3 vs stations, -1.3 vs tier1: off until retuned) rollouts keep the best two cards instead of discarding at random
     "inference": True,             # weight opponent hands by their visible choices
     "inference_beta": 6.0,
     "inference_gamma": 3.0,
     "inference_trust": True,       # scale inference by how well it predicted past showdowns
     "use_tables": True,            # precomputed start-of-hand shares, if valid data exists
+    "table_range_weight": 0.0,     # facing a preflop raise: blend in the share vs a top-range opponent
 }
 
 
@@ -125,6 +129,7 @@ class Tier1Brain(Brain):
         h = state.hand
         try:
             rec = reconstruct(self.rules, h, self.rng, level=self._level(h))
+            rec.smart_discard = bool(self.p["smart_rollout_discard"])
             self._last_rec = (h.hand_id, rec)
             self._apply_trust()
             return rec
@@ -153,6 +158,11 @@ class Tier1Brain(Brain):
                     and len(h.hole) == self.tables.classes.size and len(h.card_log) == 1):
                 try:
                     eq = self.tables.start_share(h.hole)      # precomputed, no sampling
+                    w = float(self.p["table_range_weight"])
+                    if (w > 0 and self.tables.eq_range is not None
+                            and any(r.actor != ME and r.action.kind == RAISE for r in h.history)):
+                        vs_range = float(self.tables.eq_range[self.tables.classes.class_of(h.hole)])
+                        eq = (1 - w) * eq + w * vs_range      # a raiser's range is stronger than random
                 except Exception:
                     eq = None
             if eq is None and self.p["use_sim"]:
@@ -192,10 +202,21 @@ class Tier1Brain(Brain):
                     return decide_special(rec, legal, self.rng,
                                           budget_s * self.p["special_budget_frac"],
                                           {"pimc_worlds": int(self.p["pimc_worlds"]),
+                                           "discard_mode": str(self.p["discard_mode"]),
                                            "_inference": self.inference})
                 except Exception as e:
                     warn(f"special-step policy failed: {e!r}")
-        return Action.special(legal.special.default())  # type: ignore[union-attr]
+        # No simulation (or it failed): the rules' own discard fallback, else the first option.
+        hole = state.hand.hole if state.hand is not None else ()
+        return safe_action_for_hole(legal, hole)
+
+    def sized_raise(self, frac: float, kind: str, eq: float, state: GameState,
+                    legal: LegalActions, p: dict) -> Optional[Action]:
+        """The raise for a decision already taken: `frac` x pot (kind: "value" or "bluff").
+        Tier 2 overrides this to size by expected value."""
+        h = state.hand
+        assert h is not None
+        return pot_fraction_raise(frac, h.pot, h.tocall if kind == "value" else 0, h.my_bet, legal)
 
     def choose(self, state: GameState, legal: LegalActions, eq: float, p: dict) -> Action:
         """Equity -> action, using parameter dict `p` (Tier 2 passes adjusted copies)."""
@@ -206,15 +227,16 @@ class Tier1Brain(Brain):
 
         if legal.can_raise and eq >= per_street(p["raise_equity"], street):
             if my_raises < p["max_own_raises"] or eq >= p["strong_equity"]:
-                frac = p["strong_frac"] if eq >= p["strong_equity"] else p["value_frac"]
-                r = pot_fraction_raise(frac, pot, to_call, h.my_bet, legal)
+                strong = eq >= p["strong_equity"]
+                r = self.sized_raise(p["strong_frac"] if strong else p["value_frac"], "value",
+                                     eq, state, legal, p)
                 if r is not None:
                     return r
 
         if to_call == 0:
             if (street > 0 and legal.can_raise and eq < p["bluff_max_equity"]
                     and self.pyrng.random() < p["bluff_freq"]):
-                r = pot_fraction_raise(p["bluff_frac"], pot, 0, h.my_bet, legal)
+                r = self.sized_raise(p["bluff_frac"], "bluff", eq, state, legal, p)
                 if r is not None:
                     return r
             return Action.check() if legal.check else safe_action(legal)

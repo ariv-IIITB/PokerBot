@@ -232,3 +232,120 @@ def test_a_locked_match_cannot_be_lost_on_discard_holdem(hands: int, opp: str, f
     assert m.errors == [0, 0] and m.forfeit is None
     assert lead + m.chips[players.index(me)] > 0
     assert me.bot.brain.locked_decisions > 0
+
+
+# --------------------------------------------------------------------------- phase E: bluff-catching and sizing
+
+from bot.actions import RAISE  # noqa: E402
+from bot.protocol import BoardUpdate  # noqa: E402
+
+
+def test_the_river_call_rule_starts_value_heavy_and_follows_the_bluff_index() -> None:
+    brain = Tier2Brain({"river_bluff_slope": 0.5})
+    assert brain.adjusted(1)["call_margin"] == pytest.approx(brain.adjusted(0)["call_margin"])   # before the turn: no rule
+    v_heavy = brain.adjusted(3)["call_margin"]
+    assert v_heavy == pytest.approx(brain.adjusted(1)["call_margin"] + 0.5 * (0.22 - 0.15))
+    for _ in range(300):                                                  # they bluff a lot at showdown
+        brain.stats.spots["bluff_index"].add(True)
+    over_bluffer = brain.adjusted(3)["call_margin"]
+    assert over_bluffer < brain.adjusted(1)["call_margin"] < v_heavy      # calls wider than the old rule
+    brain2 = Tier2Brain({"river_bluff_slope": 0.5})
+    for _ in range(300):                                                  # never a bluff
+        brain2.stats.spots["bluff_index"].add(False)
+    assert brain2.adjusted(2)["call_margin"] > v_heavy                    # the cap keeps it bounded
+    assert brain2.adjusted(2)["call_margin"] - brain.p["call_margin"] <= 0.5 * 0.22 + 1e-9
+
+
+def test_the_rule_is_off_at_zero_slope() -> None:
+    brain = Tier2Brain({"river_bluff_slope": 0.0})
+    assert brain.adjusted(3)["call_margin"] == pytest.approx(brain.adjusted(1)["call_margin"])
+
+
+def raise_state(pot: int, my_stack: int, my_bet: int = 0, tocall: int = 0, street: int = 3):
+    st = GameState()
+    st.apply(MatchInfo(hands=400, sb=1, bb=2, stack=200))
+    st.apply(HandStart(0, 1, 200, 200))
+    st.apply(HoleCards(P("As,Kd")))
+    st.apply(BoardUpdate(street, P("2c,7d,9h,Jd,Qs")[:{1: 3, 2: 4, 3: 5}[street]]))
+    st.apply(ActRequest(pot, tocall, my_stack, 200 - 20, LegalActions(
+        fold=tocall > 0, check=tocall == 0, call=tocall > 0, raise_min=my_bet + tocall + 2,
+        raise_max=my_bet + my_stack), None, my_bet, my_bet + tocall))
+    return st
+
+
+def test_a_raise_that_leaves_crumbs_goes_all_in() -> None:
+    st = raise_state(pot=40, my_stack=60)
+    h = st.hand
+    legal = LegalActions(check=True, raise_min=2, raise_max=60)
+    crumbs = Tier2Brain.no_leftovers(Action.raise_to(50), h, legal, 0.25)    # 10 behind < 25% of 90
+    assert crumbs == Action.raise_to(60)
+    kept = Tier2Brain.no_leftovers(Action.raise_to(30), h, legal, 0.25)      # 30 behind >= 25% of 70
+    assert kept == Action.raise_to(30)
+    assert Tier2Brain.no_leftovers(Action.raise_to(60), h, legal, 0.25) == Action.raise_to(60)  # already all-in
+
+
+def test_the_leftover_rule_is_off_by_default_and_only_for_value_raises() -> None:
+    st = raise_state(pot=40, my_stack=60)
+    legal = LegalActions(check=True, raise_min=2, raise_max=60)
+    off = Tier2Brain()
+    assert off.p["leftover_frac"] == 0.0
+    on = Tier2Brain({"leftover_frac": 0.25})
+    big = on.sized_raise(1.1, "value", 0.9, st, legal, on.adjusted(3))      # 1.1 x 40 = 44: leaves 16 < 25% of 84
+    assert big == Action.raise_to(60)
+    bluff = on.sized_raise(1.1, "bluff", 0.1, st, legal, on.adjusted(3))
+    assert bluff == Action.raise_to(44)                                      # bluffs are not rounded up
+
+
+def test_ev_sizing_picks_a_legal_candidate_and_follows_the_fold_rates() -> None:
+    st = raise_state(pot=40, my_stack=150)
+    legal = LegalActions(check=True, raise_min=2, raise_max=150)
+    brain = Tier2Brain({"ev_sizing": True})
+    p = brain.adjusted(3)
+    for eq in (0.9, 0.1):
+        a = brain.sized_raise(0.66, "value" if eq > 0.5 else "bluff", eq, st, legal, p)
+        assert a.kind == RAISE and legal.raise_min <= a.amount <= legal.raise_max
+    # a strong hand against an opponent who never folds wants a size it gets paid at;
+    # a pure bluff against one who folds a lot to everything wants the cheapest size
+    for b in ("fold_small", "fold_mid", "fold_big"):
+        brain.stats.spots[b].hits, brain.stats.spots[b].n = 0, 400            # never folds
+    value = brain.sized_raise(0.66, "value", 0.95, st, legal, brain.adjusted(3))
+    for b in ("fold_small", "fold_mid", "fold_big"):
+        brain.stats.spots[b].hits, brain.stats.spots[b].n = 400, 400          # always folds
+    bluff = brain.sized_raise(0.66, "bluff", 0.1, st, legal, brain.adjusted(3))
+    assert value.amount > bluff.amount
+    assert bluff.amount <= 40 * 0.66 + 2                                       # the small candidate
+
+
+def test_a_raise_is_noted_for_the_fold_statistics() -> None:
+    brain = Tier2Brain({"lock_enabled": False, "bluff_freq": 0.0})
+    st = raise_state(pot=40, my_stack=150)
+    st.apply(ActRequest(40, 0, 150, 150, LegalActions(check=True, raise_min=2, raise_max=150), None, 0, 0))
+    a = brain.decide(st, LegalActions(check=True, raise_min=2, raise_max=150), 0.02)
+    if a.kind == RAISE:
+        assert brain.stats._pending is not None
+
+
+# --------------------------------------------------------------------------- phase E2: embedded tables
+
+def test_the_embedded_tables_load_and_rank_hands() -> None:
+    brain = Tier2Brain()
+    assert brain.tables is not None and brain.tables.meta["variant"] == "discard_holdem"
+    assert brain.tables.classes.size == 3 and len(brain.tables.eq_random) == 1755
+    assert brain.tables.eq_range is not None
+    share = brain.tables.start_share
+    assert share(P("As,Ah,Kd")) > share(P("9c,9d,2h")) > share(P("Ks,Qs,Js")) > share(P("Ts,9s,8s")) > share(P("7c,2d,3h"))
+    assert 0.25 < share(P("7c,2d,3h")) < 0.45 and 0.75 < share(P("As,Ah,Ad")) < 0.9
+
+
+def test_preflop_equity_comes_from_the_table_without_sampling() -> None:
+    import time
+    brain = Tier2Brain({"lock_enabled": False})
+    st = GameState()
+    st.apply(MatchInfo(hands=400, sb=1, bb=2, stack=200))
+    st.apply(HandStart(0, 0, 200, 200))
+    st.apply(HoleCards(P("As,Ah,Kd")))
+    st.apply(ActRequest(3, 1, 199, 198, LegalActions(fold=True, call=True, raise_min=4, raise_max=200), None, 1, 2))
+    t0 = time.perf_counter()
+    eq = brain.equity(st, 0.5)
+    assert time.perf_counter() - t0 < 0.01                       # a lookup, not a simulation
+    assert eq == brain.tables.start_share(P("As,Ah,Kd"))

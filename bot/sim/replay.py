@@ -41,6 +41,7 @@ class Reconstruction:
     unknown: list                    # placeholders still hidden
     pool: list                       # real cards not seen: candidates for the unknowns
     sampled_opp_choices: int = 0     # opponent choices we had to guess
+    smart_discard: bool = True       # rollouts keep the best two cards (False: a random discard)
     tries: int = 1
     opp_decisions: list = field(default_factory=list)   # visible opponent choices (inference)
     bet_log: list = field(default_factory=list)         # (player, action, pot, to_call, bet,
