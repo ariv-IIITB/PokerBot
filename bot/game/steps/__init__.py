@@ -11,7 +11,6 @@ import importlib
 from bot.game.steps.base import CompileContext, Step
 from bot.game.steps.basic import DealBoard, DealHole, PostBlinds
 from bot.game.steps.betting import Betting
-from bot.game.steps.hook import HookStep
 from bot.game.steps.showdown import ShowdownStep
 
 STEP_TYPES: dict[str, str] = {
@@ -19,7 +18,6 @@ STEP_TYPES: dict[str, str] = {
     "deal_hole": "bot.game.steps.basic:DealHole",
     "deal_board": "bot.game.steps.basic:DealBoard",
     "betting": "bot.game.steps.betting:Betting",
-    "hook": "bot.game.steps.hook:HookStep",
     "showdown": "bot.game.steps.showdown:ShowdownStep",
     "discard": "bot.game.steps.cards:Discard",
     "draw": "bot.game.steps.cards:Draw",
@@ -44,4 +42,4 @@ def step_module(name: str) -> str:
 
 
 __all__ = ["STEP_TYPES", "CompileContext", "Step", "step_class", "step_module", "PostBlinds",
-           "DealHole", "DealBoard", "Betting", "HookStep", "ShowdownStep"]
+           "DealHole", "DealBoard", "Betting", "ShowdownStep"]

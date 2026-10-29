@@ -13,8 +13,7 @@ from bot.brains.base import Brain
 from bot.cards import rank_of, suit_of
 from bot.evaluator import PAIR, TWO_PAIR, category
 from bot.state import GameState
-from variant.evaluator_hook import make_evaluator
-from variant.rules import DEFAULT_CONFIG
+from bot.game.rules_spec import holdem_rules
 
 
 class _Sparring(Brain):
@@ -97,7 +96,10 @@ class Tight(_Sparring):
 
     def __init__(self, config: Optional[dict] = None) -> None:
         super().__init__(config)
-        self.ev = make_evaluator(DEFAULT_CONFIG)
+        self.ev = holdem_rules().evaluator
+
+    def on_rules(self) -> None:
+        self.ev = self.rules.evaluator        # the variant's own hand rankings
 
     @staticmethod
     def preflop_score(hole) -> int:

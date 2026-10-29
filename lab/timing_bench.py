@@ -26,7 +26,7 @@ from typing import Optional
 
 from lab.engine import play_match
 from lab.players import ROOT, PlayerSpec, SubprocessPlayer
-from variant.rules import DEFAULT_CONFIG
+from bot.game.rules_spec import holdem_rules, to_rules
 
 
 @dataclass
@@ -105,13 +105,14 @@ def run_timing(brain: str = "tier2", opponent: str = "maniac", hands: Optional[i
     cmd: how to launch the bot (default `python -m bot.main --brain BRAIN`); cwd: where.
     lock: leave the endgame lock on. Off by default: the lock turns a won match into check/folds
     and hides what the full strategy costs."""
-    spec, path = DEFAULT_CONFIG, None
+    spec, path = holdem_rules(), None
     if variant:
         from lab.harness import load_variant
         spec = load_variant(variant)
         path = variant if variant.endswith(".json") else str(ROOT / "variant" / "catalog" / f"{variant}.json")
-    hands = hands or DEFAULT_CONFIG.hands_per_match
-    bank = bank_s or DEFAULT_CONFIG.time_bank_s
+    rules = to_rules(spec)
+    hands = hands or rules.hands_per_match
+    bank = bank_s or rules.time_bank_s
     startup = measure_startup(brain, cwd=cwd, protocol=protocol, cmd=cmd)
     bot = SubprocessPlayer(cmd or [sys.executable, "-m", "bot.main", "--brain", brain], name=brain,
                            brain_config=None if lock else {"lock_enabled": False},

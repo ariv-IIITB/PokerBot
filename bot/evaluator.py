@@ -29,7 +29,7 @@ from collections import Counter
 from dataclasses import dataclass
 from functools import lru_cache
 from math import comb
-from typing import Optional, Sequence
+from typing import Optional, Protocol, Sequence
 
 import numpy as np
 
@@ -44,6 +44,13 @@ MAX_HAND_SIZE = 5
 LOW_BASE = 10 << CATEGORY_SHIFT          # low value = LOW_BASE - high-style value
 NOT_QUALIFIED = -1
 
+
+
+class Evaluator(Protocol):
+    """What the equity code, the engine and the bot need from a hand evaluator."""
+    def evaluate(self, hole: Sequence[int], board: Sequence[int]) -> int: ...
+
+    def evaluate_batch(self, hole: np.ndarray, board: np.ndarray) -> np.ndarray: ...
 
 def category(value: int) -> int:
     """Hand category (HIGH_CARD..FIVE_KIND, after any re-ordering) of a high value."""

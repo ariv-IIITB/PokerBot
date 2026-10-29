@@ -1,4 +1,4 @@
-"""Heads-up rules engine driven entirely by GameConfig (+ its special-step hooks).
+"""Heads-up rules engine driven entirely by a variant spec (compiled into bot.game Rules).
 
 Roles: role 0 = small blind (protocol seat 0), role 1 = big blind. Within a match the
 small blind alternates every hand: player index (hand % 2) is the SB.
@@ -24,12 +24,11 @@ from bot.cards import FULL_DECK
 from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, Info,
                           MatchEnd, MatchInfo, OppAction, ProtocolError, Showdown,
                           parse_action)
-from bot.game.rules_spec import Rules, to_rules
+from bot.game.rules_spec import Rules, holdem_rules, to_rules
 from bot.game.runner import LazyRng, act, advance, legal_actions
 from bot.game.steps.cards import safe_action_for_hole
 from bot.game.state import ALL, INFO_KINDS, GameState
 from lab.players import PlayerCrashed, PlayerTimeout
-from variant.rules import DEFAULT_CONFIG, GameConfig  # noqa: F401  (GameConfig: type hints)
 
 SB, BB = 0, 1
 
@@ -77,12 +76,11 @@ class Hand:
     in bot/game/; this class adds players, the time bank and the protocol messages.
     `seats[role]` gives the player for each role (0 = SB, 1 = BB)."""
 
-    def __init__(self, cfg: GameConfig, seats: Sequence[Seat], stacks: Sequence[int],
-                 deck: list[int], hand_id: int, evaluator, on_illegal: str = "fold",
-                 rules: Optional[Rules] = None, rng=None, audit: bool = False) -> None:
-        self.cfg = cfg
+    def __init__(self, variant, seats: Sequence[Seat], stacks: Sequence[int],
+                 deck: list[int], hand_id: int, on_illegal: str = "fold",
+                 rng=None, audit: bool = False) -> None:
         self.seats = list(seats)
-        self.rules = rules or to_rules(cfg, evaluator)
+        self.rules = to_rules(variant)                  # a VariantSpec or compiled Rules
         self.st = GameState(self.rules, deck, list(stacks), hand_id, audit=audit)
         self.announce_level = bool(getattr(self.rules, "has_schedule", False)
                                    or getattr(self.rules, "ante", 0))
@@ -225,17 +223,17 @@ class MatchResult:
         return 1.0 if c > 0 else (0.5 if c == 0 else 0.0)
 
 
-def play_match(players: Sequence, cfg=DEFAULT_CONFIG, seed: int = 0,
+def play_match(players: Sequence, cfg=None, seed: int = 0,
                hands: Optional[int] = None, on_illegal: str = "fold",
-               evaluator=None, time_bank_s: Optional[float] = None,
+               time_bank_s: Optional[float] = None,
                audit: bool = False, clock_scale: float = 1.0,
                reply_limit_s: Optional[float] = None) -> MatchResult:
     """Play one match between players[0] and players[1]. Player (h % 2) is SB in hand h.
-    `cfg` may be a GameConfig, a VariantSpec or compiled Rules. audit=True checks every
+    `cfg` may be a VariantSpec or compiled Rules (default: Hold'em). audit=True checks every
     event's visibility and chip conservation in every hand (AssertionError on failure).
     clock_scale charges every reply that many times its real duration (a slower machine);
     reply_limit_s forfeits a single reply that takes longer (the real engine's 5 s rule)."""
-    rules = to_rules(cfg, evaluator)
+    rules = holdem_rules() if cfg is None else to_rules(cfg)
     hands = rules.hands_per_match if hands is None else hands
     bank = rules.time_bank_s if time_bank_s is None else time_bank_s
     seats = [Seat(p, bank, clock_scale, reply_limit_s) for p in players]
@@ -259,8 +257,8 @@ def play_match(players: Sequence, cfg=DEFAULT_CONFIG, seed: int = 0,
             by_role = [seats[sb_player], seats[1 - sb_player]]
             role_stacks = ([start, start] if rules.reset_stacks_each_hand
                            else [stacks[sb_player], stacks[1 - sb_player]])
-            hand = Hand(cfg, by_role, role_stacks, deck_for(seed, h, rules.deck), h, None,
-                        on_illegal, rules, rng=LazyRng([seed, h, 1]), audit=audit)
+            hand = Hand(rules, by_role, role_stacks, deck_for(seed, h, rules.deck), h,
+                        on_illegal, rng=LazyRng([seed, h, 1]), audit=audit)
             try:
                 res = hand.play()
                 if audit:

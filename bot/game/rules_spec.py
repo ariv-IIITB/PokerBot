@@ -1,21 +1,21 @@
 """Compiled rules: the hand program (a tuple of steps) plus the numbers every step needs.
 
-`rules_from_config(GameConfig)` turns the classic config into a program. Standard Hold'em:
+Rules come from a variant spec (variant/spec.py, compiled by bot/game/compile.py). Standard
+Hold'em compiles to:
 
     post_blinds, deal_hole(2), betting(SB first),
     deal_board(3), betting(BB first), deal_board(1), betting, deal_board(1), betting,
     showdown
 
-Special-step hooks are inserted on their street, before or after its betting round.
 Rules are built once per match and never re-interpreted inside hot loops.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Any, Optional
 
 from bot.cards import FULL_DECK
-from bot.game.steps import Betting, DealBoard, DealHole, HookStep, PostBlinds, ShowdownStep
 from bot.game.steps.base import Step
 
 STREET_NAMES = ("preflop", "flop", "turn", "river")
@@ -69,40 +69,27 @@ def street_label(i: int) -> str:
     return STREET_NAMES[i] if i < len(STREET_NAMES) else f"street {i}"
 
 
-def rules_from_config(cfg, evaluator: Optional[Any] = None) -> Rules:
-    """Compile a variant.rules.GameConfig into Rules."""
-    if evaluator is None:
-        from variant.evaluator_hook import make_evaluator
-        evaluator = make_evaluator(cfg)
-    prog: list[Step] = [PostBlinds(cfg.small_blind, cfg.big_blind), DealHole(cfg.hole_cards)]
-    for street, n_new in enumerate(cfg.streets):
-        if street > 0:
-            prog.append(DealBoard(n_new))
-        hooks = [h for h in cfg.special_steps if h.street == street]
-        prog += [HookStep(h) for h in hooks if h.timing == "before_betting"]
-        first = cfg.preflop_first_actor if street == 0 else cfg.postflop_first_actor
-        prog.append(Betting(first, cfg.max_raises_per_street, cfg.big_blind, street_label(street)))
-        prog += [HookStep(h) for h in hooks if h.timing == "after_betting"]
-    prog.append(ShowdownStep())
-    return Rules(tuple(prog), evaluator, 2, cfg.hole_cards, cfg.small_blind, cfg.big_blind,
-                 cfg.starting_stack, cfg.reset_stacks_each_hand, cfg.hands_per_match,
-                 cfg.time_bank_s, FULL_DECK, tuple(cfg.streets), "config")
-
-
-def to_rules(variant: Any, evaluator: Optional[Any] = None) -> Rules:
-    """Rules from a Rules, a variant.spec.VariantSpec or a legacy GameConfig."""
+def to_rules(variant: Any) -> Rules:
+    """Rules from a Rules or a variant.spec.VariantSpec."""
     if isinstance(variant, Rules):
         return variant
     if hasattr(variant, "full_program"):            # VariantSpec
         from bot.game.compile import compile_spec
         return compile_spec(variant)
-    return rules_from_config(variant, evaluator)
+    raise TypeError(f"expected Rules or VariantSpec, got {type(variant).__name__}")
+
+
+@lru_cache(maxsize=1)
+def holdem_rules() -> Rules:
+    """Plain heads-up no-limit Hold'em (the default when no variant is given)."""
+    from variant.spec import VariantSpec
+    return to_rules(VariantSpec(name="holdem_nl"))
 
 
 def active_rules() -> Rules:
     """The variant the bot plays: the spec JSON *text* in $POKERBOT_VARIANT_JSON (the lab's way
     to pick a variant without a file read), else the spec embedded in bot/embedded.py, else the
-    built-in GameConfig. Never raises."""
+    plain Hold'em. Never raises."""
     import json
     import os
     from variant.spec import VariantSpec
@@ -116,9 +103,4 @@ def active_rules() -> Rules:
         except Exception as e:  # bad spec: fall back, but say so
             from bot.log import warn
             warn(f"could not use variant spec from {label}: {e!r}")
-    from variant.rules import DEFAULT_CONFIG, GameConfig
-    if DEFAULT_CONFIG == GameConfig():
-        # The built-in default is plain Hold'em: use its spec so precomputed data can match.
-        from variant.spec import VariantSpec
-        return to_rules(VariantSpec(name="holdem_nl"))
-    return rules_from_config(DEFAULT_CONFIG)
+    return holdem_rules()

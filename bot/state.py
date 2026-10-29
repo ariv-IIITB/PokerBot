@@ -31,7 +31,7 @@ class HandState:
     opp_start_stack: int
     hole: tuple[int, ...] = ()
     board: tuple[int, ...] = ()
-    street: int = 0                 # 0 = preflop; index into GameConfig.streets
+    street: int = 0                 # 0 = preflop; index into Rules.streets
     pot: int = 0
     tocall: int = 0
     my_stack: int = 0

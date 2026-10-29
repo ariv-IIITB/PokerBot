@@ -25,6 +25,7 @@ from typing import Optional, Union
 
 from bot.actions import Action
 from bot.brains.base import Brain
+from bot.game.rules_spec import to_rules
 from bot.main import BRAINS as BOT_BRAINS
 from bot.main import Bot
 from bot.protocol import ActRequest, Message
@@ -91,8 +92,9 @@ class SubprocessPlayer:
     def __init__(self, cmd: Optional[list[str]] = None, cwd: Optional[str] = None,
                  name: str = "subprocess", stderr_to: Optional[str] = None,
                  variant_path: Optional[str] = None, protocol: Optional[str] = None,
-                 brain_config: Optional[dict] = None) -> None:
-        """variant_path: a spec JSON the bot should play (its JSON text goes to $POKERBOT_VARIANT_JSON).
+                 brain_config: Optional[dict] = None, variant_json: Optional[str] = None) -> None:
+        """variant_path / variant_json: a spec file or spec JSON text the bot should play (the text
+        goes to $POKERBOT_VARIANT_JSON; without either the bot plays its embedded variant).
         protocol: wire format (an adapter name; default $POKERBOT_PROTOCOL or placeholder).
         The bot process is started with the same $POKERBOT_PROTOCOL."""
         self.name = name
@@ -104,7 +106,9 @@ class SubprocessPlayer:
         if brain_config:
             env["POKERBOT_BRAIN_CONFIG"] = json.dumps(brain_config)
         if variant_path:
-            env["POKERBOT_VARIANT_JSON"] = Path(variant_path).read_text()
+            variant_json = Path(variant_path).read_text()
+        if variant_json:
+            env["POKERBOT_VARIANT_JSON"] = variant_json
         self.proc = subprocess.Popen(self.cmd, cwd=cwd or str(ROOT), stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE, stderr=self._err, bufsize=0,
                                      env=env)
@@ -199,13 +203,17 @@ class PlayerSpec:
     def display(self) -> str:
         return self.label or self.name
 
-    def build(self):
+    def build(self, variant=None):
+        """The player. `variant` (a VariantSpec or Rules) is the game it will play: in-process
+        brains get it from play_match (set_rules); subprocess bots need it at launch."""
         if self.kind == "brain":
             cfg = dict(self.config) if self.config else None
             return InProcessPlayer(load_brain(self.name, cfg), self.display)
         if self.kind == "subprocess":
+            spec = getattr(to_rules(variant), "spec", None) if variant is not None else None
             return SubprocessPlayer(list(self.cmd) if self.cmd else None, self.cwd, self.display,
-                                    protocol=self.protocol)
+                                    protocol=self.protocol,
+                                    variant_json=spec.to_json() if spec is not None else None)
         if self.kind == "factory":
             module, _, fn = self.name.partition(":")
             return getattr(importlib.import_module(module), fn)()

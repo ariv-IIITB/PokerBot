@@ -7,7 +7,6 @@ from lab import eval as ev
 from lab.harness import run_duplicate
 from lab.opps import track
 from lab.players import PlayerSpec
-from variant.rules import DEFAULT_CONFIG
 
 
 def test_parse_brain_variants(tmp_path) -> None:
@@ -76,7 +75,7 @@ def test_check_profile_lines_pass_and_fail() -> None:
 
 def test_tracking_does_not_change_the_match() -> None:
     a, b = PlayerSpec.brain("calling_station"), PlayerSpec.brain("tight")
-    kw = dict(cfg=DEFAULT_CONFIG, seeds=range(2), hands=40, processes=1)
+    kw = dict(cfg=None, seeds=range(2), hands=40, processes=1)
     plain, tracked = run_duplicate(a, b, **kw), run_duplicate(a, b, track=True, **kw)
     assert [p.a_chips for p in plain.pairs] == [p.a_chips for p in tracked.pairs]
     merged = track.merge([p.track for p in tracked.pairs])

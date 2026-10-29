@@ -252,7 +252,7 @@ def _hand(p_sb, p_bb, holes=HOLES, board=BOARD, on_illegal="fold") -> tuple:
     rules = to_rules(load_catalog()[SPEC])
     deck = rigged_deck(rules, holes, board)
     seats = [Seat(p_sb, 60.0), Seat(p_bb, 60.0)]
-    res = Hand(None, seats, [200, 200], deck, 0, None, on_illegal, rules, audit=True).play()
+    res = Hand(rules, seats, [200, 200], deck, 0, on_illegal, audit=True).play()
     return res, seats
 
 

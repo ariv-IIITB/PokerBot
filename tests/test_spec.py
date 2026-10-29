@@ -102,7 +102,8 @@ def test_active_rules_env_override(monkeypatch) -> None:
     assert active_rules().name == "discard_holdem"
 
 
-def test_to_rules_accepts_everything() -> None:
-    from variant.rules import GameConfig
+def test_to_rules_accepts_specs_and_rules_only() -> None:
     r = to_rules(VariantSpec())
-    assert to_rules(r) is r and to_rules(GameConfig()).streets == (0, 3, 1, 1)
+    assert to_rules(r) is r and r.streets == (0, 3, 1, 1)
+    with pytest.raises(TypeError):
+        to_rules({"name": "holdem"})

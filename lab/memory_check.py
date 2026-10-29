@@ -26,8 +26,7 @@ def peak_rss_mb(brain: str = "tier2", hands: int = 400, opponent: str = "maniac"
                 protocol: Optional[str] = None, cmd: Optional[list[str]] = None) -> float:
     """Peak RSS (MB) of any child process run so far, after playing one match."""
     from lab.harness import load_variant
-    from variant.rules import DEFAULT_CONFIG
-    spec = load_variant(variant) if variant else DEFAULT_CONFIG
+    spec = load_variant(variant) if variant else None
     bot = SubprocessPlayer(cmd or [sys.executable, "-m", "bot.main", "--brain", brain], name=brain,
                            cwd=cwd, protocol=protocol, brain_config={"lock_enabled": False})
     play_match([bot, PlayerSpec.brain(opponent).build()], spec, seed=seed, hands=hands)

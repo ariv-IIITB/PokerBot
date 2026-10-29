@@ -13,7 +13,11 @@ class Brain(ABC):
     rules = None      # compiled bot.game Rules of the variant being played, if known
 
     def set_rules(self, rules) -> None:
-        """Called by the lab before a match; the submitted bot uses its active variant."""
+        """Called by the lab before a match; the submitted bot uses its active variant.
+        The same variant again is a no-op (brains load tables in on_rules)."""
+        spec = getattr(rules, "spec", None)
+        if spec is not None and spec == getattr(self.rules, "spec", None):
+            return
         self.rules = rules
         self.on_rules()
 

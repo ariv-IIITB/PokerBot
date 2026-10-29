@@ -2,7 +2,7 @@
 
 equity = P(win) + 0.5 * P(tie), estimated by dealing random opponent hole cards and a
 random completion of the board, then comparing best hands. Card counts come from
-the config (a GameConfig or compiled Rules: hole cards, board size, deck, evaluator), so
+the config (compiled Rules: hole cards, board size, deck, evaluator; default Hold'em), so
 this works for any variant whose showdown is "best hand wins".
 
 Two implementations:
@@ -24,8 +24,7 @@ from typing import Optional, Sequence
 import numpy as np
 
 from bot.cards import FULL_DECK
-from variant.evaluator_hook import Evaluator, make_evaluator
-from variant.rules import DEFAULT_CONFIG, GameConfig
+from bot.evaluator import Evaluator
 
 
 @dataclass(frozen=True)
@@ -35,16 +34,11 @@ class EquityResult:
     stderr: float       # standard error of the estimate (0 for exact)
 
 
-@lru_cache(maxsize=8)
-def _default_evaluator(config: GameConfig) -> Evaluator:
-    return make_evaluator(config)
-
-
 def _setup(hole, board, config, evaluator, dead, opp_cards=None, runout=None):
-    if evaluator is not None:
-        ev = evaluator
-    else:
-        ev = getattr(config, "evaluator", None) or _default_evaluator(config)
+    if config is None:
+        from bot.game.rules_spec import holdem_rules
+        config = holdem_rules()
+    ev = evaluator if evaluator is not None else config.evaluator
     known = set(hole) | set(board) | set(dead)
     deck = [c for c in getattr(config, "deck", FULL_DECK) if c not in known]
     n_opp = config.hole_cards if opp_cards is None else opp_cards
@@ -67,7 +61,7 @@ def _result(total: float, total_sq: float, n: int) -> EquityResult:
 # --------------------------------------------------------------------------- scalar
 
 def equity_scalar(hole: Sequence[int], board: Sequence[int],
-                  config: GameConfig = DEFAULT_CONFIG, evaluator: Optional[Evaluator] = None,
+                  config=None, evaluator: Optional[Evaluator] = None,
                   *, time_budget_s: Optional[float] = None, max_samples: int = 2000,
                   rng: Optional[np.random.Generator] = None, dead: Sequence[int] = (),
                   opp_cards: Optional[int] = None, runout: Optional[int] = None) -> EquityResult:
@@ -121,7 +115,7 @@ def _score_batch(ev, hole, board, deck_np, n_opp, n_run, rng, n) -> np.ndarray:
 
 
 def equity_vectorized(hole: Sequence[int], board: Sequence[int],
-                      config: GameConfig = DEFAULT_CONFIG, evaluator: Optional[Evaluator] = None,
+                      config=None, evaluator: Optional[Evaluator] = None,
                       *, time_budget_s: Optional[float] = None, max_samples: int = 20000,
                       rng: Optional[np.random.Generator] = None, dead: Sequence[int] = (),
                       first_chunk: int = 128, max_chunk: int = 4096,
@@ -129,7 +123,7 @@ def equity_vectorized(hole: Sequence[int], board: Sequence[int],
     """NumPy Monte Carlo in chunks. The first chunk measures speed; later chunks are sized
     to fit the remaining budget, so the deadline is overshot by at most ~one small chunk.
     opp_cards / runout override the opponent's hole-card count and the number of board
-    cards still to come (defaults: from GameConfig)."""
+    cards still to come (defaults: from the rules)."""
     ev, deck, n_opp, n_run = _setup(hole, board, config, evaluator, dead, opp_cards, runout)
     rng = rng if rng is not None else np.random.default_rng()
     hole_np = np.asarray(hole, dtype=np.intp)
@@ -158,7 +152,7 @@ def equity_vectorized(hole: Sequence[int], board: Sequence[int],
     return _result(total, total_sq, n)
 
 
-def equity(hole: Sequence[int], board: Sequence[int], config=DEFAULT_CONFIG,
+def equity(hole: Sequence[int], board: Sequence[int], config=None,
            evaluator: Optional[Evaluator] = None, **kw) -> EquityResult:
     """Default entry point (vectorized)."""
     return equity_vectorized(hole, board, config, evaluator, **kw)
@@ -167,7 +161,7 @@ def equity(hole: Sequence[int], board: Sequence[int], config=DEFAULT_CONFIG,
 # --------------------------------------------------------------------------- exact
 
 def equity_exact(hole: Sequence[int], board: Sequence[int],
-                 config: GameConfig = DEFAULT_CONFIG, evaluator: Optional[Evaluator] = None,
+                 config=None, evaluator: Optional[Evaluator] = None,
                  dead: Sequence[int] = (), max_cases: int = 3_000_000,
                  opp_cards: Optional[int] = None, runout: Optional[int] = None) -> EquityResult:
     """Enumerate every opponent hand and board completion (small spots only)."""

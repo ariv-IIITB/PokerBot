@@ -9,8 +9,8 @@ from reference_eval import ref_best
 from bot.cards import parse_cards as P
 from bot.evaluator import (CATEGORY_NAMES, FLUSH, FULL_HOUSE, HIGH_CARD, STRAIGHT,
                            STRAIGHT_FLUSH, TRIPS, GenericEvaluator, category)
-from variant.evaluator_hook import make_evaluator
-from variant.rules import GameConfig
+from bot.game.rules_spec import to_rules
+from variant.spec import EvalSpec, VariantSpec
 
 EV = GenericEvaluator()
 
@@ -159,18 +159,15 @@ def test_all_5_card_hands_exhaustive() -> None:
     assert len(np.unique(vals)) == 7462  # number of distinct 5-card hand ranks
 
 
-# --------------------------------------------------------------------------- hook
+# --------------------------------------------------------------------------- spec
 
-def test_hook_uses_config() -> None:
-    ev = make_evaluator(GameConfig(hole_cards=4, hole_cards_used=2))
+def test_spec_configures_the_evaluator() -> None:
+    ev = to_rules(VariantSpec(hole_cards=4, evaluation=EvalSpec(hole_exact=2))).evaluator.high
     assert ev.hole_cards_used == 2 and ev.hand_size == 5
-    assert isinstance(make_evaluator(), GenericEvaluator)
 
 
-def test_game_config_validation() -> None:
-    cfg = GameConfig()
-    assert cfg.board_cards == 5 and cfg.board_after(1) == 3 and cfg.num_streets == 4
-    with pytest.raises(ValueError):
-        GameConfig(hole_cards=2, hole_cards_used=3)
-    with pytest.raises(ValueError):
-        GameConfig(hole_cards=1, streets=(0, 2), hand_size=5)
+def test_spec_validation() -> None:
+    rules = to_rules(VariantSpec())
+    assert rules.board_cards == 5 and len(rules.streets) == 4
+    assert VariantSpec(evaluation=EvalSpec(hole_exact=3)).validate()       # 3 of 2 hole cards
+    assert VariantSpec(hole_cards=1, streets=[0, 2]).validate()            # too few cards
