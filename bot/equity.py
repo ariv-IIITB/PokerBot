@@ -18,7 +18,6 @@ import math
 import random
 import time
 from dataclasses import dataclass
-from functools import lru_cache
 from typing import Optional, Sequence
 
 import numpy as np
@@ -50,6 +49,15 @@ def _setup(hole, board, config, evaluator, dead, opp_cards=None, runout=None):
     return ev, deck, n_opp, n_run
 
 
+def showdown_share(ev, mine: np.ndarray, opp: np.ndarray, board: np.ndarray) -> np.ndarray:
+    """Our pot share per row (1 win, 0.5 tie, 0 loss; hi-lo splits when the scorer has them).
+    mine (B, h), opp (B, h2), board (B, b). The one showdown rule for every equity estimate."""
+    if hasattr(ev, "shares_batch"):
+        return ev.shares_batch(mine, opp, [board])
+    v0, v1 = ev.evaluate_batch(mine, board), ev.evaluate_batch(opp, board)
+    return (v0 > v1) + 0.5 * (v0 == v1)
+
+
 def _result(total: float, total_sq: float, n: int) -> EquityResult:
     if n == 0:
         return EquityResult(0.5, 0, 0.5)
@@ -78,8 +86,9 @@ def equity_scalar(hole: Sequence[int], board: Sequence[int],
             break
         draw = pyrng.sample(deck, n_opp + n_run)
         full = board + draw[n_opp:]
-        mine, theirs = ev.evaluate(hole, full), ev.evaluate(draw[:n_opp], full)
-        s = 1.0 if mine > theirs else (0.5 if mine == theirs else 0.0)
+        s = float(showdown_share(ev, np.array([hole], dtype=np.intp),
+                                 np.array([draw[:n_opp]], dtype=np.intp),
+                                 np.array([full], dtype=np.intp))[0])
         total += s
         total_sq += s * s
         n += 1
@@ -109,9 +118,7 @@ def _score_batch(ev, hole, board, deck_np, n_opp, n_run, rng, n) -> np.ndarray:
         full = np.concatenate([np.broadcast_to(board, (n, len(board))), draw[:, n_opp:]], axis=1)
     else:
         full = np.broadcast_to(board, (n, len(board)))
-    mine = ev.evaluate_batch(np.broadcast_to(hole, (n, len(hole))), full)
-    theirs = ev.evaluate_batch(draw[:, :n_opp], full)
-    return (mine > theirs) + 0.5 * (mine == theirs)
+    return showdown_share(ev, np.broadcast_to(hole, (n, len(hole))), draw[:, :n_opp], full)
 
 
 def equity_vectorized(hole: Sequence[int], board: Sequence[int],
@@ -180,6 +187,5 @@ def equity_exact(hole: Sequence[int], board: Sequence[int],
     m = len(opp_a)
     full = np.concatenate([np.broadcast_to(np.asarray(board, dtype=np.intp), (m, len(board))),
                            run_a], axis=1)
-    mine = ev.evaluate_batch(np.broadcast_to(np.asarray(hole, dtype=np.intp), (m, len(hole))), full)
-    theirs = ev.evaluate_batch(opp_a, full)
-    return EquityResult(float(((mine > theirs) + 0.5 * (mine == theirs)).mean()), m, 0.0)
+    mine = np.broadcast_to(np.asarray(hole, dtype=np.intp), (m, len(hole)))
+    return EquityResult(float(showdown_share(ev, mine, opp_a, full).mean()), m, 0.0)

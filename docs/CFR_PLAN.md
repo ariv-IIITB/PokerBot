@@ -40,12 +40,13 @@ anything off-tree / any error    Tier 2 decision
 ```
 
 The opponent's real bet sizes are mapped onto the tree with the pseudo-harmonic rule already in
-`lab/cfr/abstraction.py`. On the river the solver uses the real size, so no mapping is needed there.
+`bot/abstraction.py`. On the river the solver uses the real size, so no mapping is needed there.
 
 ## 2. K1 — the abstraction
 
-The abstraction decides the ceiling. Keep it in one place (`lab/cfr/dh_abstraction.py`) and use the
-same code for training and at runtime (as `tests/test_cfr_runtime.py` does today).
+The abstraction decides the ceiling. Keep it in one place, `bot/abstraction.py` (moved out of
+`lab/` on 2026-10-29 so the runtime can import it), and use the same code for training and at
+runtime (as `tests/test_cfr_runtime.py` does today).
 
 **Infoset key** = (street, card bucket, board texture class, betting history this hand).
 
@@ -207,7 +208,8 @@ Tier 3 is built.
 
 ## 11. Files
 
-New (lab): `lab/cfr/dh_abstraction.py`, `lab/cfr/count_infosets.py`, `lab/cfr/vec_cfr.py` (K2b,
+Changed (bot): `bot/abstraction.py` (Discard Hold'em buckets, sizes, texture).
+New (lab): `lab/cfr/count_infosets.py`, `lab/cfr/vec_cfr.py` (K2b,
 PyTorch), changes to `lab/cfr/mccfr.py` and `lab/cfr/train.py`.
 New (bot): `bot/cfr/blueprint.py` (lookup), `bot/cfr/river_solver.py`, `bot/brains/tier4.py`,
 shared adaptation module (moved from Tier 3).

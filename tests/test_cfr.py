@@ -5,7 +5,7 @@ import numpy as np
 
 from bot.actions import LegalActions
 from bot.game.compile import compile_spec
-from lab.cfr.abstraction import Bucketer, abstract_actions, raise_label
+from bot.abstraction import Bucketer, abstract_actions, raise_label
 from lab.cfr.abstract_game import AbstractGame
 from lab.cfr.kuhn import Kuhn
 from lab.cfr.mccfr import MCCFR, expected_value, exploitability, export_uint8
@@ -142,3 +142,30 @@ def test_train_cli_snapshots_and_resume(tmp_path) -> None:
     first = doc["iterations"]
     train.main(argv[:-4] + ["--out", str(out)])                    # resumes from the checkpoint
     assert json.loads(out.read_text())["iterations"] > first
+
+
+def test_history_and_observed_labels() -> None:
+    # One history rule for trainer and runtime: label, then "/" when the action closed the street.
+    from bot.abstraction import extend_history, observed_label
+    from bot.actions import Action, LegalActions
+    assert extend_history("", "C", 0, 0) == "C" and extend_history("C", "C", 0, 1) == "CC/"
+    legal = LegalActions(fold=True, call=True, raise_min=4, raise_max=200)
+    assert observed_label(Action.fold(), legal, 3, 1, 1, False) == ("F", False)
+    assert observed_label(Action.check(), legal, 3, 1, 1, False) == ("C", False)
+    exact = dict(abstract_actions(legal, 3, 1, 1))["P"]
+    assert observed_label(exact, legal, 3, 1, 1, False) == ("P", False)
+    assert observed_label(Action.raise_to(200), legal, 3, 1, 1, True)[0] == "A"
+
+
+def test_showdown_share_splits_hilo() -> None:
+    # Equity goes through the scorer's split rules: a scooped hi-lo pot is worth 1, half is 0.5.
+    import numpy as np
+    from bot.equity import showdown_share
+    from bot.game.rules_spec import to_rules
+    from variant.spec import load_catalog
+    from bot.cards import parse_cards as P
+    ev = to_rules(load_catalog()["omaha_hilo"]).evaluator
+    board = np.array([P("Ah,2d,3c,9s,Kd")])
+    nut_low_only = np.array([P("4h,5h,Tc,Jc")])         # wheel straight: best high and low
+    junk = np.array([P("Qh,Qs,8c,8d")])
+    assert showdown_share(ev, nut_low_only, junk, board)[0] == 1.0

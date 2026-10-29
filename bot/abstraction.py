@@ -1,9 +1,10 @@
-"""Game abstraction shared by the MCCFR trainer and the lab-only CFR brain (lab/cfr/).
+"""Betting abstraction shared by the CFR trainer (lab/cfr/) and any brain that plays a trained
+strategy. It lives in bot/ so the runtime keys a decision exactly as the trainer did.
 
-Buckets: hand strength = percentile of our hand vs random hands on the current board
-(deterministic: the reference hands are seeded from the cards), cut into `n_buckets`.
-Preflop uses the same percentile against random hands with no board... i.e. a cheap
-equity-vs-random estimate, also seeded.
+Buckets: our equity vs a random hand (bot.equity, the one showdown rule), estimated with an
+rng seeded from the cards, so the same cards always get the same bucket; cut into `n_buckets`.
+History: abstract action labels, "/" after the last action of each street (extend_history).
+Infoset key: "street|bucket|history".
 Actions: fold, check/call, raise to ~0.5 pot, ~1 pot, all-in ("F", "C", "H", "P", "A"),
 filtered to what is legal and de-duplicated by amount.
 Opponent bets that are not exactly an abstract size are mapped to the neighbouring sizes
@@ -13,11 +14,12 @@ fractions), P(map to A) = (B - x)(1 + A) / ((B - A)(1 + x)).
 from __future__ import annotations
 
 import zlib
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 
 from bot.actions import Action, LegalActions, pot_fraction_raise
+from bot.equity import equity_vectorized
 
 FRACTIONS = {"H": 0.5, "P": 1.0}
 ORDER = ("F", "C", "H", "P", "A")
@@ -80,21 +82,11 @@ class Bucketer:
         return b
 
     def _compute(self, hole, board) -> int:
-        ev = self.rules.evaluator
         seed = zlib.crc32(bytes(str((sorted(hole), sorted(board))), "ascii"))
-        rng = np.random.default_rng(seed)
-        dead = set(hole) | set(board)
-        pool = np.array([c for c in self.rules.deck if c not in dead])
-        k = len(hole)
-        need = max(0, self.rules.board_cards - len(board))
         try:
-            idx = np.argsort(rng.random((self.ref, len(pool))), axis=1)[:, :k + need]
-            draw = pool[idx]
-            full = np.concatenate([np.broadcast_to(np.array(board, dtype=np.intp), (self.ref, len(board))),
-                                   draw[:, k:]], axis=1).astype(np.intp)
-            mine = ev.evaluate_batch(np.broadcast_to(np.array(hole), (self.ref, k)), full)
-            theirs = ev.evaluate_batch(draw[:, :k], full)
-            eq = float(((mine > theirs) + 0.5 * (mine == theirs)).mean())
+            eq = equity_vectorized(hole, board, self.rules, max_samples=self.ref,
+                                   rng=np.random.default_rng(seed), first_chunk=self.ref,
+                                   opp_cards=len(hole)).equity      # same count as ours (post-discard)
         except (ValueError, IndexError):
             eq = 0.5
         return min(self.n - 1, int(eq * self.n))
@@ -102,3 +94,25 @@ class Bucketer:
 
 def infoset_key(player_street: int, bucket: int, history: str) -> str:
     return f"{player_street}|{bucket}|{history}"
+
+
+def extend_history(history: str, label: str, street_before: int, street_after: int) -> str:
+    """The abstract history after one more action: its label, then "/" if it closed the street."""
+    return history + label + ("/" if street_after != street_before else "")
+
+
+def observed_label(action: Action, legal_before: LegalActions, pot: int, to_call: int,
+                   bet: int, all_in: bool, rng: Optional[np.random.Generator] = None,
+                   fractions: Optional[dict] = None) -> Tuple[str, bool]:
+    """(label, translated?) for an action seen at run time. A raise the abstraction could have
+    made (same amount) gets exactly its training label; other sizes are translated
+    pseudo-harmonically (translated = True)."""
+    if action.kind == "F":
+        return "F", False
+    if action.kind in ("C", "K"):
+        return "C", False
+    exact = [name for name, x in abstract_actions(legal_before, pot, to_call, bet, fractions)
+             if x.kind == action.kind and x.amount == action.amount]
+    if exact:
+        return exact[0], False
+    return raise_label(action.amount, pot, to_call, bet, rng, all_in, fractions), True

@@ -5,7 +5,7 @@ never packaged. Run it with `lab.harness tier2 cfr` or `lab.run_brain cfr`.
 
 At a betting decision it rebuilds the hand (bot/sim), maps the hand's betting so far onto
 the abstraction (a raise the abstraction could have made gets exactly its training label;
-other sizes use the pseudo-harmonic mapping, lab/cfr/abstraction.py), looks up (street,
+other sizes use the pseudo-harmonic mapping, bot/abstraction.py), looks up (street,
 hand-strength bucket, abstract history) in the strategy table and samples an abstract
 action. The runtime key equals the trainer's key (tests/test_cfr_runtime.py). Outside the
 table (or for any non-betting decision, or when the table is missing or for another
@@ -24,7 +24,7 @@ from typing import Any, Optional
 from bot.actions import Action, LegalActions
 from bot.brains.tier2 import Tier2Brain, lock_margin
 from bot.log import log
-from lab.cfr.abstraction import Bucketer, abstract_actions, infoset_key, raise_label
+from bot.abstraction import Bucketer, abstract_actions, extend_history, infoset_key, observed_label
 from bot.state import GameState
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -120,27 +120,13 @@ class CFRBrain(Tier2Brain):
         if rec is None or h is None:
             return None
         fr = self.fractions
-        hist, street, translated = "", 0, False
-        for p, a, pot, call, bet, all_in, st_street, was_legal in rec.bet_log:
-            if st_street != street:
-                hist += "/" * (st_street - street) if hist else ""
-                street = st_street
-            if a.kind == "F":
-                hist += "F"
-            elif a.kind in ("C", "K"):
-                hist += "C"
-            else:
-                # A raise the abstraction could have made (same amount) gets that label,
-                # exactly as in training; anything else is translated pseudo-harmonically.
-                exact = [name for name, x in abstract_actions(was_legal, pot, call, bet, fr)
-                         if x.kind == a.kind and x.amount == a.amount]
-                if exact:
-                    hist += exact[0]
-                else:
-                    hist += raise_label(a.amount, pot, call, bet, self.rng, all_in, fr)
-                    translated |= p != rec.me
-        if rec.state.street != street and hist:
-            hist += "/"
+        hist, translated = "", False
+        log = rec.bet_log
+        for i, (p, a, pot, call, bet, all_in, st_street, was_legal) in enumerate(log):
+            label, moved = observed_label(a, was_legal, pot, call, bet, all_in, self.rng, fr)
+            translated |= moved and p != rec.me
+            after = log[i + 1][6] if i + 1 < len(log) else rec.state.street
+            hist = extend_history(hist, label, st_street, after)
         real = [rec.mapping.get(t, t) for t in rec.state.hole[rec.me]]
         board = [rec.mapping.get(t, t) for t in rec.state.board]
         key = infoset_key(rec.state.street, self.bucketer.bucket(real, board), hist)

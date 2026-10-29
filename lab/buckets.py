@@ -12,7 +12,7 @@ from pathlib import Path
 
 import numpy as np
 
-from bot.equity import sample_without_replacement
+from bot.equity import equity_vectorized, sample_without_replacement
 
 BINS = 10
 
@@ -21,16 +21,12 @@ def _hist_cdf(rules, hole, board, rng, runouts: int = 16, opps: int = 48) -> np.
     """CDF of our final equity over `runouts` completions of the board."""
     deck = np.array([c for c in rules.deck if c not in set(hole) | set(board)])
     need = rules.board_cards - len(board)
-    ev = rules.evaluator
     eqs = []
     for _ in range(runouts):
         run = sample_without_replacement(rng, deck, 1, need)[0] if need else np.zeros(0, int)
-        full = np.concatenate([np.array(board, dtype=np.intp), run]).astype(np.intp)
-        rest = np.array([c for c in deck if c not in set(run.tolist())])
-        opp = sample_without_replacement(rng, rest, opps, len(hole))
-        mine = ev.evaluate_batch(np.broadcast_to(np.array(hole), (opps, len(hole))), full)
-        theirs = ev.evaluate_batch(opp, full)
-        eqs.append(float(((mine > theirs) + 0.5 * (mine == theirs)).mean()))
+        full = list(board) + run.tolist()
+        eqs.append(equity_vectorized(hole, full, rules, max_samples=opps, rng=rng, runout=0,
+                                     opp_cards=len(hole), first_chunk=opps).equity)
     h, _ = np.histogram(eqs, bins=BINS, range=(0, 1))
     return np.cumsum(h) / max(1, h.sum())
 
