@@ -7,18 +7,18 @@ The sandbox gives the bot no file reads, so the active variant spec, the hyperpa
 (bot/config/*.json) and the precomputed tables (data/<variant>/) are written into one Python
 module with three names:
 
-    SPEC     the variant spec as a dict (variant/active.json, else the catalog's holdem_nl)
-    PARAMS   {"tier1": {...}, "tier2": {...}}
-    TABLES   None, or {"meta": {...}, "files": {"classes": <base64 of the .npy file>, ...}}
+    SPEC       the variant spec as a dict (variant/active.json, else the catalog's holdem_nl)
+    PARAMS     {"tier1": {...}, "tier2": {...}}
+    ARTIFACTS  {name: {"meta": {...}, "files": {file: <base64 of the .npy file>, ...}}}
+               (bot/artifacts.py); today only "tables" (data/<variant>/, bot/sim/tables.py)
 
-Tables are embedded only when meta.json's spec hash matches the spec and the equity table is
-complete. The file is capped at 3 MB (the submission limit is 5 MB). --check exits 1 if the
+An artifact is embedded only when it was built for the spec (spec hash) and is ready (the
+consumer's own rule, e.g. bot.sim.tables.ready). The file is capped at 3 MB (the submission limit is 5 MB). --check exits 1 if the
 committed file is out of date. tests/test_embed.py runs the same check.
 """
 from __future__ import annotations
 
 import argparse
-import base64
 import hashlib
 import json
 import pprint
@@ -29,14 +29,16 @@ from typing import Optional
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from variant.spec import VariantSpec, load_catalog, spec_hash  # noqa: E402
+from bot.artifacts import built_for, encode_npy  # noqa: E402
+from bot.sim import tables as tables_mod  # noqa: E402
+from variant.spec import VariantSpec, load_catalog, spec_hash  # noqa: E402,F401
 
 OUT = ROOT / "bot" / "embedded.py"
 CONFIG_DIR = ROOT / "bot" / "config"
 DATA_DIR = ROOT / "data"
 ACTIVE = ROOT / "variant" / "active.json"
 MAX_BYTES = 3_000_000
-TABLE_FILES = ("classes", "eq_random", "eq_range")     # what bot/sim/tables.py reads
+TABLE_FILES = tables_mod.REQUIRED + tables_mod.OPTIONAL   # what bot/sim/tables.py reads
 CHUNK = 96                                             # base64 characters per source line
 
 
@@ -66,25 +68,27 @@ def _params(config_dir: Path) -> tuple[dict, dict]:
 
 
 def _tables(spec: VariantSpec, data_dir: Path) -> tuple[Optional[dict], dict]:
-    """(TABLES or None, {source: hash}). Only tables that match the spec are embedded."""
+    """(the "tables" artifact or None, {source: hash}). Embedded only if built for the spec
+    and ready by bot/sim/tables.py's own rule."""
     d = data_dir / spec.name
     try:
         meta = json.loads((d / "meta.json").read_text())
     except (OSError, ValueError):
         return None, {}
-    if meta.get("spec_hash") != spec_hash(spec) or not meta.get("complete", {}).get("equity_random"):
+    if not built_for(meta, spec) or not tables_mod.ready(meta):
         return None, {}
     files, sources = {}, {f"data/{spec.name}/meta.json": _sha((d / "meta.json").read_bytes())}
     for name in TABLE_FILES:
         f = d / f"{name}.npy"
-        if name == "eq_range" and not meta.get("complete", {}).get("equity_range"):
+        optional = name in tables_mod.OPTIONAL
+        if optional and not tables_mod.ready(meta, name):
             continue
         if not f.is_file():
-            if name == "eq_range":
+            if optional:
                 continue
             return None, {}
         raw = f.read_bytes()
-        files[name] = base64.b64encode(raw).decode("ascii")
+        files[name] = encode_npy(raw)
         sources[f"data/{spec.name}/{f.name}"] = _sha(raw)
     return {"meta": meta, "files": files}, sources
 
@@ -93,16 +97,19 @@ def _literal(value) -> str:
     return pprint.pformat(value, width=100, sort_dicts=False)
 
 
-def _tables_literal(tables: Optional[dict]) -> str:
-    if tables is None:
-        return "None"
-    out = ["{", f'    "meta": {_literal(tables["meta"])},', '    "files": {']
-    for name, b64 in tables["files"].items():
-        chunks = [b64[i:i + CHUNK] for i in range(0, len(b64), CHUNK)] or [""]
-        out.append(f'        "{name}": (')
-        out += [f'            "{c}"' for c in chunks]
-        out.append("        ),")
-    out += ["    },", "}"]
+def _artifacts_literal(artifacts: dict) -> str:
+    if not artifacts:
+        return "{}"
+    out = ["{"]
+    for art_name, art in artifacts.items():
+        out += [f'    "{art_name}": {{', f'        "meta": {_literal(art["meta"])},', '        "files": {']
+        for name, b64 in art["files"].items():
+            chunks = [b64[i:i + CHUNK] for i in range(0, len(b64), CHUNK)] or [""]
+            out.append(f'            "{name}": (')
+            out += [f'                "{c}"' for c in chunks]
+            out.append("            ),")
+        out += ["        },", "    },"]
+    out.append("}")
     return "\n".join(out)
 
 
@@ -112,6 +119,7 @@ def render(variant: Optional[str] = None, config_dir: Path = CONFIG_DIR,
     spec, label = load_spec(variant)
     params, src = _params(config_dir)
     tables, tsrc = _tables(spec, data_dir)
+    artifacts = {"tables": tables} if tables is not None else {}
     sources = {f"spec ({label})": _sha(json.dumps(spec.to_dict(), sort_keys=True).encode()),
                **src, **tsrc}
     arg = "" if variant is None else f" --variant {variant}"
@@ -123,7 +131,7 @@ def render(variant: Optional[str] = None, config_dir: Path = CONFIG_DIR,
         f"SOURCES = {_literal(sources)}\n\n"
         f"SPEC = {_literal(spec.to_dict())}\n\n"
         f"PARAMS = {_literal(params)}\n\n"
-        f"TABLES = {_tables_literal(tables)}\n"
+        f"ARTIFACTS = {_artifacts_literal(artifacts)}\n"
     )
     if len(text.encode()) > MAX_BYTES:
         raise SystemExit(f"bot/embedded.py would be {len(text) / 1e6:.1f} MB > cap "
@@ -153,9 +161,9 @@ def problems(path: Path = OUT, variant: Optional[str] = None, config_dir: Path =
     changed = sorted(k for k in set(old_src) | set(new_src) if old_src.get(k) != new_src.get(k))
     if changed:
         out.append("source files changed: " + ", ".join(changed))
-    if ns_new["TABLES"] is not None and ns_old.get("TABLES") != ns_new["TABLES"]:
-        out.append("TABLES differ from data/ on this machine")
-    if ns_new["TABLES"] is None and ns_old.get("TABLES") is None and not out:
+    if ns_new["ARTIFACTS"] and ns_old.get("ARTIFACTS") != ns_new["ARTIFACTS"]:
+        out.append("ARTIFACTS differ from data/ on this machine")
+    if not ns_new["ARTIFACTS"] and not ns_old.get("ARTIFACTS") and not out:
         out.append("formatting differs from the generator's output")
     return out
 

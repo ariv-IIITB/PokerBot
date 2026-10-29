@@ -92,3 +92,15 @@ def test_missing_or_corrupt_data_falls_back() -> None:
     assert load_tables(rules, None) is None                   # nothing embedded
     assert load_tables(rules, {"meta": "{not a dict}", "files": {}}) is None   # unreadable
     assert load_tables(rules, {"meta": {"spec_hash": "x"}, "files": {}}) is None
+
+
+def test_artifact_lookup_rejects_other_variants() -> None:
+    # One staleness rule for every embedded artifact (bot/artifacts.py).
+    from bot.artifacts import embedded
+    from bot.game.rules_spec import to_rules
+    from variant.spec import VariantSpec, spec_hash
+    spec = VariantSpec(name="holdem_nl")
+    art = {"meta": {"spec_hash": spec_hash(spec)}, "files": {}}
+    assert embedded("tables", to_rules(spec), art) is art
+    assert embedded("tables", to_rules(VariantSpec(name="omaha", hole_cards=4)), art) is None
+    assert embedded("tables", to_rules(spec), None) is None

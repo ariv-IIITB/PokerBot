@@ -43,11 +43,9 @@ def test_tables_are_embedded_when_they_match(tmp_path) -> None:
     text = embed_data.render("holdem_nl", data_dir=tmp_path)
     ns: dict = {}
     exec(compile(text, "embedded", "exec"), ns)
-    import base64
-    import io
-    eq = np.load(io.BytesIO(base64.b64decode("".join(ns["TABLES"]["files"]["eq_random"]))),
-                 allow_pickle=False)
-    assert eq.shape == (3,) and set(ns["TABLES"]["files"]) == {"classes", "eq_random"}
+    from bot.artifacts import decode_npy
+    files = ns["ARTIFACTS"]["tables"]["files"]
+    assert decode_npy(files["eq_random"]).shape == (3,) and set(files) == {"classes", "eq_random"}
     assert not embed_data.problems(_write(tmp_path, text), "holdem_nl", data_dir=tmp_path)
 
 
@@ -56,7 +54,7 @@ def test_stale_tables_are_not_embedded(tmp_path) -> None:
     _fake_tables(tmp_path, spec)
     meta = tmp_path / spec.name / "meta.json"
     meta.write_text(json.dumps({**json.loads(meta.read_text()), "spec_hash": "0" * 16}))
-    assert "TABLES = None" in embed_data.render("holdem_nl", data_dir=tmp_path)
+    assert "ARTIFACTS = {}" in embed_data.render("holdem_nl", data_dir=tmp_path)
 
 
 def test_stale_file_is_reported(tmp_path) -> None:

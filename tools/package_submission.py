@@ -143,7 +143,7 @@ def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
     (out / "bot.py").write_text(BOT_PY % {"protocol": protocol})
     embedded = (out / "bot" / "embedded.py").read_text()
     info = {"variant": spec.name, "brain": brain, "protocol": protocol,
-            "modules": sorted(mods), "data": "TABLES = None" not in embedded}
+            "modules": sorted(mods), "data": "ARTIFACTS = {}" not in embedded}
     (out / "PACKAGE.json").write_text(json.dumps(info, indent=2))
     return info
 

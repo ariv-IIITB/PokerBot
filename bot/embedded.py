@@ -101,4 +101,4 @@ PARAMS = {'tier1': {'equity_budget_frac': 0.7,
            'lock_enabled': True,
            'lock_assume_alternating': True}}
 
-TABLES = None
+ARTIFACTS = {}
