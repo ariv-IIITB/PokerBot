@@ -24,8 +24,9 @@ from typing import Optional
 import numpy as np
 
 from bot.actions import SPECIAL, Action, clamp
+from bot.game.observation import card_entry, message_for
 from bot.game.runner import act, advance, legal_actions
-from bot.game.state import ALL, INFO_KINDS, GameState
+from bot.game.state import GameState
 from bot.state import ME, OPP, HandState
 
 
@@ -67,18 +68,8 @@ class Reconstruction:
 
 def _visible_card_events(st: GameState, me: int) -> list[tuple[str, tuple]]:
     """Replayed events that the engine would have turned into card messages for `me`."""
-    out = []
-    for e in st.events:
-        if e.visible != ALL and e.visible != me:
-            continue
-        cards = e.data.get("cards", ())
-        if e.kind == "hole" and e.player == me:
-            out.append(("hole", tuple(cards)))
-        elif e.kind == "board":
-            out.append(("board", tuple(cards)))
-        elif e.kind in INFO_KINDS and cards:
-            out.append(("info:" + e.kind, tuple(cards)))
-    return out
+    entries = (card_entry(m) for m in (message_for(e, me) for e in st.events) if m is not None)
+    return [c for c in entries if c is not None]
 
 
 def _sample_hidden_choice(legal, shown: Optional[str], rng) -> Action:

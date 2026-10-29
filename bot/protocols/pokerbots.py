@@ -31,6 +31,7 @@ from typing import Optional
 from bot.actions import (CALL, CHECK, FOLD, RAISE, SPECIAL, Action, LegalActions,
                          SpecialOption, is_legal)
 from bot.cards import format_card, parse_card
+from bot.game.observation import HIDDEN_CHOICE
 from bot.game.steps.cards import fallback_discard, safe_action_for_hole
 from bot.log import warn
 from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, Info,
@@ -45,7 +46,7 @@ ACTION_NAMES = {FOLD: "fold", CHECK: "check", CALL: "call", RAISE: "raise"}
 NAME_ACTIONS = {v: k for k, v in ACTION_NAMES.items()}
 MAX_RAISES = 4                                           # per street; preflop the BB is the first
 PER_RESPONSE_MS = 5000
-HIDDEN_INDEX = "0"                                       # placeholder for the opponent's slot
+HIDDEN_INDEX = HIDDEN_CHOICE          # the opponent's discard slot is not sent: bot/game/observation.py
 
 
 def _compact(obj: dict) -> str:

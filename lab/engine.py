@@ -21,13 +21,13 @@ import numpy as np
 
 from bot.actions import Action, LegalActions, is_legal
 from bot.cards import FULL_DECK
-from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, Info,
-                          MatchEnd, MatchInfo, OppAction, ProtocolError, Showdown,
+from bot.protocol import (ActRequest, HandStart, MatchEnd, MatchInfo, ProtocolError,
                           parse_action)
+from bot.game.observation import message_for
 from bot.game.rules_spec import to_rules
 from bot.game.runner import LazyRng, act, advance, legal_actions
 from bot.game.steps.cards import safe_action_for_hole
-from bot.game.state import ALL, INFO_KINDS, GameState
+from bot.game.state import GameState
 from lab.players import PlayerCrashed, PlayerTimeout
 
 SB, BB = 0, 1
@@ -122,26 +122,10 @@ class Hand:
         while self._flushed < len(events):
             e = events[self._flushed]
             self._flushed += 1
-            k = e.kind
-            viewers = (SB, BB) if e.visible == ALL else (e.visible,)
-            if k == "hole":
-                self.notify(e.visible, HoleCards(e.data["cards"]))
-            elif k == "board":
-                self.broadcast(BoardUpdate(e.data["street"], e.data["cards"], e.data.get("index")))
-            elif k in ("action", "special"):
-                for r in viewers:
-                    if r != e.player:          # the actor already knows its own choice
-                        self.notify(r, OppAction(e.data["action"]))
-            elif k == "showdown":
-                self.notify(e.visible, Showdown(e.data["cards"]))
-            elif k in INFO_KINDS:
-                for r in viewers:
-                    who = "none" if e.player < 0 else ("me" if e.player == r else "opp")
-                    value = e.data.get("value")
-                    self.notify(r, Info(k, who, e.data.get("cards", ()),
-                                        int(value) if value is not None else None))
-            elif k == "end":
-                self.notify(e.visible, HandEnd(e.data["delta"]))
+            for r in (SB, BB):
+                msg = message_for(e, r)        # bot/game/observation.py decides who sees what
+                if msg is not None:
+                    self.notify(r, msg)
 
     # ---- asking a player
     def ask(self, role: int, legal: LegalActions) -> Action:
