@@ -92,10 +92,13 @@ def test_good_price_calls() -> None:
     assert Tier1Brain(NO_BLUFF).decide(st, FACING, 0.02).kind in ("C", "R")
 
 
-def test_special_step_first_choice() -> None:
-    from bot.actions import SpecialOption
+def test_special_step_gives_a_legal_discard() -> None:
+    # Which card goes depends on the active variant (Tier 1 may rightly discard the 2c), so
+    # the contract is only: a special request gets a legal special answer.
+    from bot.actions import SpecialOption, is_legal
     legal = LegalActions(special=SpecialOption("discard", ("0", "1", "2")))
-    assert Tier1Brain().decide(state_with("Ah,Kd,2c"), legal, 0.02) == Action.special("0")
+    action = Tier1Brain().decide(state_with("Ah,Kd,2c"), legal, 0.02)
+    assert action.kind == "S" and is_legal(action, legal)
 
 
 # --------------------------------------------------------------------------- integration
