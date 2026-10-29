@@ -27,7 +27,8 @@ for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMEXP
 import json
 import sys
 import time
-from itertools import permutations
+from itertools import combinations_with_replacement, permutations
+from math import comb
 
 import numpy as np
 
@@ -107,8 +108,8 @@ def _straight_high(pres):
     return np.where(idx >= 0, idx + 3, -1).astype(np.int8)
 
 
-def eval_cards(cards):
-    """Score hands. cards: (n, m) int array, 5 <= m <= 7. Returns (n,) int32."""
+def _eval_slow(cards):
+    """Direct evaluation. cards: (n, m) int array, 5 <= m <= 7. Returns (n,) int32."""
     cards = np.asarray(cards)
     ranks = cards >> 2
     suits = cards & 3
@@ -169,6 +170,62 @@ def eval_cards(cards):
         cur = np.where(sfscore > cur, sfscore, cur)
         best[fidx] = cur
     return best
+
+
+# Fast path: for hands without a flush the score depends only on the multiset of
+# ranks (50,388 multisets of 7 ranks), so it is a table lookup on the colex index of
+# the sorted ranks. Tables are built once at start-up with the direct evaluator.
+# Rows with 5+ cards of one suit go through the direct evaluator.
+_TABLES = {}
+_BIN = {}
+_ARM = {}
+AR4 = np.arange(4, dtype=np.int32)
+
+
+def _build_table(m):
+    combos = np.array(list(combinations_with_replacement(range(13), m)), dtype=np.int8)
+    # give every card a suit so that no 5 share one (round robin keeps equal ranks apart)
+    cards = combos * 4 + (np.arange(m, dtype=np.int8) & 3)
+    scores = _eval_slow(cards)
+    binom = np.zeros((m, 13 + m - 1), dtype=np.int64)
+    for i in range(m):
+        for sv in range(13 + m - 1):
+            binom[i, sv] = comb(sv, i + 1)
+    _BIN[m] = binom
+    _ARM[m] = np.arange(m)
+    idx = _multiset_index(combos, m)
+    table = np.zeros(comb(12 + m, m), dtype=np.int32)
+    table[idx] = scores
+    _TABLES[m] = table
+
+
+def _multiset_index(ranks, m):
+    s = np.sort(ranks, axis=1).astype(np.intp) + _ARM[m]
+    return _BIN[m][_ARM[m], s].sum(axis=1)
+
+
+def build_tables():
+    for m in (5, 7):
+        if m not in _TABLES:
+            _build_table(m)
+
+
+def eval_cards(cards):
+    """Score hands. cards: (n, m) int array, 5 <= m <= 7. Returns (n,) int32.
+    score = category * 13^5 + kickers; larger is better; equal score = tie."""
+    cards = np.asarray(cards)
+    m = cards.shape[1]
+    table = _TABLES.get(m)
+    if table is None:
+        return _eval_slow(cards)
+    score = table[_multiset_index(cards >> 2, m)]
+    packed = (np.int32(1) << ((cards & 3).astype(np.int32) << 2)).sum(axis=1)
+    fl = (((packed & 15) >= 5) | (((packed >> 4) & 15) >= 5)
+          | (((packed >> 8) & 15) >= 5) | (((packed >> 12) & 15) >= 5))
+    fidx = np.flatnonzero(fl)
+    if fidx.size:
+        score[fidx] = _eval_slow(cards[fidx])
+    return score
 
 
 # --------------------------------------------------------------------------
@@ -568,6 +625,10 @@ def quick_equity(hole, board):
 # --------------------------------------------------------------------------
 # Strategy constants
 # --------------------------------------------------------------------------
+# sample caps (the time budget is the other limit)
+MAX_SAMPLES_FLOP = 10000
+MAX_SAMPLES_POST = 12000
+
 # preflop (equity vs a random 3-card hand with modelled discards)
 PRE_OPEN = 0.495      # button: raise first in (about the top half of hands)
 PRE_LIMP = 0.430      # button: complete the small blind (else fold)
@@ -618,13 +679,14 @@ class Bot:
         self.dead = []
         self.rng = np.random.default_rng()
         # seconds per sample estimates (seeded by warmup)
-        self.est = {"post": 8e-6, "flop": 2.2e-5, "pre": 2.6e-5}
+        self.est = {"post": 3e-6, "flop": 5e-6, "pre": 5e-6}
         self.errors = 0
 
     # ---- warm-up (inside the 5 s start-up window, not charged) ----
     def warmup(self):
         """Touch every code path once with tiny batches so first use is not slow."""
         rng = self.rng
+        build_tables()
         my = [c2i("As"), c2i("Kd"), c2i("7c")]
         flop = [c2i("Ah"), c2i("7d"), c2i("2s")]
         chunk_preflop(32, my, make_pool(my), rng)
@@ -642,8 +704,9 @@ class Bot:
         usable = time_left_ms - 1500.0 - 12.0 * remaining
         if usable <= 0:
             return 0.0
-        per = usable * 0.60 / (remaining * 5.0) * weight  # ms
-        return min(per, 70.0 * weight) / 1000.0
+        # worst case ~4 plain decisions + 1 discard (weight 1.6) per hand = 5.6 units
+        per = usable * 0.55 / (remaining * 5.6) * weight  # ms
+        return min(per, 60.0 * weight) / 1000.0
 
     # ---- message dispatch ----
     def handle(self, msg):
@@ -715,7 +778,7 @@ class Bot:
         deadline = time.perf_counter() + budget
         n0 = int(min(1024, max(128, budget * 0.4 / max(self.est["flop"], 1e-7))))
         sums, total, per = run_chunks(
-            lambda n: chunk_flop(n, hole, board, pool, self.rng), 3, deadline, n0, 6000)
+            lambda n: chunk_flop(n, hole, board, pool, self.rng), 3, deadline, n0, MAX_SAMPLES_FLOP)
         self.est["flop"] = 0.5 * self.est["flop"] + 0.5 * per
         return sums, total, per
 
@@ -733,7 +796,7 @@ class Bot:
             pool = make_pool(hole)
             n0 = int(min(1024, max(128, budget * 0.4 / max(self.est["pre"], 1e-7))))
             sums, total, per = run_chunks(
-                lambda n: chunk_preflop(n, hole, pool, self.rng), 1, deadline, n0, 6000)
+                lambda n: chunk_preflop(n, hole, pool, self.rng), 1, deadline, n0, MAX_SAMPLES_FLOP)
             self.est["pre"] = 0.5 * self.est["pre"] + 0.5 * per
             return float(sums[0] / total)
         if len(hole) == 3 and len(board) == 3:
@@ -749,7 +812,7 @@ class Bot:
             return exact_river(hole, board, pool)
         n0 = int(min(1024, max(128, budget * 0.4 / max(self.est["post"], 1e-7))))
         sums, total, per = run_chunks(
-            lambda n: chunk_post(n, hole, board, pool, self.rng), 1, deadline, n0, 8000)
+            lambda n: chunk_post(n, hole, board, pool, self.rng), 1, deadline, n0, MAX_SAMPLES_POST)
         self.est["post"] = 0.5 * self.est["post"] + 0.5 * per
         return float(sums[0] / total)
 
