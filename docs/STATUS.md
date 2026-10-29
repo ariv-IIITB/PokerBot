@@ -13,7 +13,7 @@ Rules: `docs/rules/` (`SUMMARY.md` first).
 | **B** Discard Hold'em rules (`discard_holdem` spec is active, BB counts as a raise, fallback discard) | done, reviewed | `a44e234`, logs `57ed850` |
 | **C** real protocol adapter (`bot/protocols/pokerbots.py`, now the default) | done, reviewed in D1 | `d131932`, `dd51c98` |
 | **D** ship-safe → first upload | done; **upload #1 = `dist/upload1_phaseD.zip`** (the user uploads) | `accb344` |
-| **E** Tier 2 on the real game (discard, tables, oppstats, bluff-catch, EV sizing) | in progress | — |
+| **E** Tier 2 on the real game (discard, tables, oppstats, bluff-catch, EV sizing) | **in progress**: E1 fast discard + E2 tables kept (`docs/reports/TIER2_DISCARD.md`); E4-E6 measuring; E7 baseline, E8 timing, upload #2 still to do | `706b3cb` |
 | F LLM opponent pool · G Tier 3 "Ivey" · H Problem Statement / freeze | to do | — |
 
 Tests on Python 3.11 (`.venv`): fast suite 1063 passed, 2 skipped; slow suite 267 passed (21 min with
