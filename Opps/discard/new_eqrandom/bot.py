@@ -741,7 +741,10 @@ class Bot:
         tl = req.get("time_left_ms")
         if tl is not None:
             self.time_left_ms = float(tl)
-        hole = [c2i(c) for c in req["hole_cards"]]
+        hc = req.get("hole_cards")
+        hole = [c2i(c) for c in hc] if hc else list(self.hole)
+        if not hole:
+            return None  # nothing sensible to say; the engine discards for us
         board = [c2i(c) for c in req.get("board", [])]
         self.hole = hole
         try:
@@ -977,12 +980,12 @@ def main():
         log("warmup error", repr(e))
     while True:
         try:
-            line = sys.stdin.readline()
+            raw = sys.stdin.buffer.readline()
         except Exception:
             break
-        if not line:
-            break
-        line = line.strip()
+        if not raw:
+            break  # EOF: the engine is gone
+        line = raw.decode("utf-8", "replace").strip()
         if not line:
             continue
         try:
