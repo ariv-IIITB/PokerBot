@@ -26,6 +26,7 @@ DEFAULTS.update({
     "prior_k": 15.0,
     "priors": dict(DEFAULT_PRIORS),
     "bluff_scale_max": 2.0,        # bluff_freq x (fold_to_raise / prior), capped
+    "adapt_bluffs": True,          # False: bluff_freq stays at its Tier 1 value (ablation switch)
     "value_shift": 0.15,           # raise threshold drop per unit of (vpip - prior)
     "value_size_shift": 0.6,       # size boost per unit of (prior_ftr - ftr)
     "aggr_call_shift": 0.10,       # call margin drop per unit of (aggression - prior)
@@ -78,7 +79,8 @@ class Tier2Brain(Tier1Brain):
         pri = opp.priors
         ftr, vpip, aggr = opp.get("fold_to_raise"), opp.get("vpip"), opp.get("aggression")
         scale = min(p["bluff_scale_max"], ftr / max(pri["fold_to_raise"], 1e-6))
-        p["bluff_freq"] = p["bluff_freq"] * scale
+        if p["adapt_bluffs"]:
+            p["bluff_freq"] = p["bluff_freq"] * scale
         drop = p["value_shift"] * max(0.0, vpip - pri["vpip"])
         thr = p["raise_equity"]
         p["raise_equity"] = ([t - drop for t in thr] if isinstance(thr, list) else thr - drop)
