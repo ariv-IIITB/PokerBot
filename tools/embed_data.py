@@ -9,16 +9,16 @@ module with three names:
 
     SPEC     the variant spec as a dict (variant/active.json, else the catalog's holdem_nl)
     PARAMS   {"tier1": {...}, "tier2": {...}}
-    TABLES   None, or {"meta": {...}, "files": {"classes": <base64 of the .npy file>, ...}}
+    TABLES   None, or an artifact {"meta": {...}, "files": {"classes": <base64 .npy>, ...}}
 
-Tables are embedded only when meta.json's spec hash matches the spec and the equity table is
-complete. The file is capped at 3 MB (the submission limit is 5 MB). --check exits 1 if the
+Artifacts follow bot/artifacts.py: one Layout (bot/sim/tables.TABLES) says which files make
+the artifact, and it is embedded only when meta.json's spec hash matches the spec and its
+required part is complete (the same check the bot runs when it loads it). The file is capped at 3 MB (the submission limit is 5 MB). --check exits 1 if the
 committed file is out of date. tests/test_embed.py runs the same check.
 """
 from __future__ import annotations
 
 import argparse
-import base64
 import hashlib
 import json
 import pprint
@@ -29,14 +29,16 @@ from typing import Optional
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from variant.spec import VariantSpec, load_catalog, spec_hash  # noqa: E402
+from bot.artifacts import Layout, encode, usable, wanted  # noqa: E402
+from bot.sim.tables import TABLES  # noqa: E402
+from variant.spec import VariantSpec, load_catalog  # noqa: E402
 
 OUT = ROOT / "bot" / "embedded.py"
 CONFIG_DIR = ROOT / "bot" / "config"
 DATA_DIR = ROOT / "data"
 ACTIVE = ROOT / "variant" / "active.json"
 MAX_BYTES = 3_000_000
-TABLE_FILES = ("classes", "eq_random", "eq_range")     # what bot/sim/tables.py reads
+TABLE_FILES = tuple(TABLES.files)                      # what bot/sim/tables.py reads
 CHUNK = 96                                             # base64 characters per source line
 
 
@@ -65,28 +67,32 @@ def _params(config_dir: Path) -> tuple[dict, dict]:
     return params, sources
 
 
-def _tables(spec: VariantSpec, data_dir: Path) -> tuple[Optional[dict], dict]:
-    """(TABLES or None, {source: hash}). Only tables that match the spec are embedded."""
+def _artifact(layout: Layout, spec: VariantSpec, data_dir: Path) -> tuple[Optional[dict], dict]:
+    """(artifact or None, {source: hash}) from data/<variant>/: only one built for this spec."""
     d = data_dir / spec.name
     try:
         meta = json.loads((d / "meta.json").read_text())
     except (OSError, ValueError):
         return None, {}
-    if meta.get("spec_hash") != spec_hash(spec) or not meta.get("complete", {}).get("equity_random"):
+    if not usable(meta, spec, layout):
         return None, {}
     files, sources = {}, {f"data/{spec.name}/meta.json": _sha((d / "meta.json").read_bytes())}
-    for name in TABLE_FILES:
-        f = d / f"{name}.npy"
-        if name == "eq_range" and not meta.get("complete", {}).get("equity_range"):
+    for stem, key in layout.files.items():
+        f = d / f"{stem}.npy"
+        if not wanted(meta, layout, stem):
             continue
         if not f.is_file():
-            if name == "eq_range":
-                continue
-            return None, {}
+            if key is None:
+                return None, {}                     # a required file is missing
+            continue
         raw = f.read_bytes()
-        files[name] = base64.b64encode(raw).decode("ascii")
+        files[stem] = encode(raw)
         sources[f"data/{spec.name}/{f.name}"] = _sha(raw)
     return {"meta": meta, "files": files}, sources
+
+
+def _tables(spec: VariantSpec, data_dir: Path) -> tuple[Optional[dict], dict]:
+    return _artifact(TABLES, spec, data_dir)
 
 
 def _literal(value) -> str:
