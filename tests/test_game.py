@@ -127,3 +127,21 @@ def test_no_record_mode_has_no_events() -> None:
     st = GameState(to_rules(VariantSpec()), deck_for(1, 0), [400, 400], record=False)
     play_out(st, random_policy(2))
     assert st.events == [] and st.done
+
+
+def test_messages_for_is_the_one_visibility_rule() -> None:
+    # The engine sends, and replay expects, exactly messages_for(e, viewer); card_entry aligns them.
+    from bot.game.observation import card_entry, messages_for
+    from bot.protocol import HoleCards, OppAction
+    st = new_state(VariantSpec(), 1)
+    p = advance(st)
+    act(st, p, Action.call())
+    holes = [e for e in st.events if e.kind == "hole"]
+    for e in holes:
+        assert messages_for(e, 1 - e.player) == []                 # never the opponent's cards
+        (msg,) = messages_for(e, e.player)
+        assert isinstance(msg, HoleCards) and card_entry(msg) == ("hole", tuple(msg.cards))
+    call = next(e for e in st.events if e.kind == "action")
+    assert messages_for(call, call.player) == []                    # the actor already knows
+    assert messages_for(call, 1 - call.player) == [OppAction(Action.call())]
+    assert card_entry(OppAction(Action.call())) is None

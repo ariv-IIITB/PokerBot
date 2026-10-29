@@ -25,7 +25,9 @@ import numpy as np
 
 from bot.actions import SPECIAL, Action, clamp
 from bot.game.runner import act, advance, legal_actions
-from bot.game.state import ALL, INFO_KINDS, GameState
+from bot.game.observation import card_entry, messages_for
+from bot.game.state import GameState
+from bot.protocol import HIDDEN_CHOICE
 from bot.state import ME, OPP, HandState
 
 
@@ -66,19 +68,8 @@ class Reconstruction:
 
 
 def _visible_card_events(st: GameState, me: int) -> list[tuple[str, tuple]]:
-    """Replayed events that the engine would have turned into card messages for `me`."""
-    out = []
-    for e in st.events:
-        if e.visible != ALL and e.visible != me:
-            continue
-        cards = e.data.get("cards", ())
-        if e.kind == "hole" and e.player == me:
-            out.append(("hole", tuple(cards)))
-        elif e.kind == "board":
-            out.append(("board", tuple(cards)))
-        elif e.kind in INFO_KINDS and cards:
-            out.append(("info:" + e.kind, tuple(cards)))
-    return out
+    """The card entries `me` received for the replayed events (the engine's own rule)."""
+    return [c for e in st.events for m in messages_for(e, me) if (c := card_entry(m))]
 
 
 def _sample_hidden_choice(legal, shown: Optional[str], rng) -> Action:
@@ -146,7 +137,12 @@ def replay_once(rules, hand: HandState, rng, level=None) -> Reconstruction:
             if a.kind == SPECIAL and not legal.can_special:
                 raise ReplayError("opponent special action out of place")
             genuine = True
-            if a.kind == SPECIAL and not legal.special.allows(a.choice):
+            if a.kind == SPECIAL and a.choice == HIDDEN_CHOICE and legal.can_special:
+                # The format hides WHICH slot they chose (e.g. which card they discarded). Slots
+                # hold interchangeable placeholders and the reveal that follows maps the chosen
+                # one to the real card, so the first slot is exact, and still evidence.
+                a = Action.special(legal.special.choices[0])
+            elif a.kind == SPECIAL and not legal.special.allows(a.choice):
                 a = _sample_hidden_choice(legal, a.choice, rng)
                 guessed += 1
                 genuine = False

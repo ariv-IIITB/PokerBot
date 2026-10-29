@@ -87,6 +87,12 @@ class BoardUpdate:
     index: Optional[int] = None     # which board, when several are dealt
 
 
+# OppAction(Action.special(HIDDEN_CHOICE)): the opponent made a special choice the wire format
+# does not identify (pokerbots: WHICH slot they discarded). The card itself arrives separately as
+# Info("reveal", "opp", ...). Replay (bot/sim/replay.py) handles it explicitly.
+HIDDEN_CHOICE = "?"
+
+
 @dataclass(frozen=True)
 class OppAction:
     action: Action

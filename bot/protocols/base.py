@@ -32,7 +32,7 @@ def as_lines(encoded: Union[None, str, list, tuple]) -> list[str]:
 class Adapter:
     name = "base"
     # True if the wire format never tells us WHICH hidden card the opponent discarded (only
-    # the card itself), so the neutral OppAction(special) carries a placeholder index.
+    # the card itself), so the neutral OppAction(special) carries bot.protocol.HIDDEN_CHOICE.
     hides_opponent_choice = False
     # Seconds allowed per reply, from the engine's init message, when the format has one.
     per_response_s: Optional[float] = None

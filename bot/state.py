@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from bot.actions import Action
+from bot.game.observation import card_entry
 from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, Info,
                           MatchEnd, MatchInfo, Message, OppAction, Showdown)
 
@@ -98,9 +99,9 @@ class GameState:
             return  # hand-level message outside a hand: ignore
         elif isinstance(msg, HoleCards):
             self.hand.hole = msg.cards
-            self.hand.card_log.append(("hole", msg.cards))
+            self.hand.card_log.append(card_entry(msg))
         elif isinstance(msg, BoardUpdate):
-            self.hand.card_log.append(("board", msg.cards))
+            self.hand.card_log.append(card_entry(msg))
             if msg.index is not None:
                 self.hand.boards[msg.index] = msg.cards
                 if msg.index == 0:
@@ -120,7 +121,7 @@ class GameState:
         elif isinstance(msg, Info):
             self.hand.info.append(msg)
             if msg.cards:
-                self.hand.card_log.append(("info:" + msg.kind, msg.cards))
+                self.hand.card_log.append(card_entry(msg))
             if msg.kind == "offer":
                 self.hand.offer = msg.cards
         elif isinstance(msg, HandEnd):

@@ -1,14 +1,50 @@
 """What one player knows: built ONLY from events visible to that player.
 
-`observe(st, p)` replays the event log through p's eyes. Because nothing is read from
-the hidden parts of the state, a step that emits an event with the wrong visibility shows
-up as a leak in tests (see tests/test_game.py).
+`messages_for(e, p)` is the one rule for what player p receives for game event e: the lab
+engine sends exactly these messages, and the bot's replay (bot/sim/replay.py) expects exactly
+these, matched through `card_entry` (also what bot/state.py logs). `observe(st, p)` replays the
+event log through p's eyes. Because nothing is read from the hidden parts of the state, a step
+that emits an event with the wrong visibility shows up as a leak in tests (tests/test_game.py).
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from bot.game.state import ALL, REVEAL_KINDS
+from bot.game.state import ALL, INFO_KINDS, REVEAL_KINDS
+from bot.protocol import BoardUpdate, HandEnd, HoleCards, Info, OppAction, Showdown
+
+
+def messages_for(e, viewer: int) -> list:
+    """The neutral protocol messages `viewer` receives for event `e` ([] = nothing)."""
+    if e.visible != ALL and e.visible != viewer:
+        return []
+    k, d = e.kind, e.data
+    if k == "hole":
+        return [HoleCards(d["cards"])] if e.player == viewer else []
+    if k == "board":
+        return [BoardUpdate(d["street"], d["cards"], d.get("index"))]
+    if k in ("action", "special"):
+        return [OppAction(d["action"])] if e.player != viewer else []   # the actor knows
+    if k == "showdown":
+        return [Showdown(d["cards"])]
+    if k in INFO_KINDS:
+        who = "none" if e.player < 0 else ("me" if e.player == viewer else "opp")
+        value = d.get("value")
+        return [Info(k, who, d.get("cards", ()), int(value) if value is not None else None)]
+    if k == "end":
+        return [HandEnd(d["delta"])]
+    return []
+
+
+def card_entry(msg):
+    """(kind, cards) for a message that shows cards, else None: how a hand is re-aligned."""
+    if isinstance(msg, HoleCards):
+        return ("hole", tuple(msg.cards))
+    if isinstance(msg, BoardUpdate):
+        return ("board", tuple(msg.cards))
+    if isinstance(msg, Info) and msg.cards:
+        return ("info:" + msg.kind, tuple(msg.cards))
+    return None
 
 
 @dataclass

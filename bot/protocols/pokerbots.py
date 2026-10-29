@@ -33,8 +33,8 @@ from bot.actions import (CALL, CHECK, FOLD, RAISE, SPECIAL, Action, LegalActions
 from bot.cards import format_card, parse_card
 from bot.game.steps.cards import fallback_discard, safe_action_for_hole
 from bot.log import warn
-from bot.protocol import (ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards, Info,
-                          MatchEnd, MatchInfo, Message, OppAction, ProtocolError, Showdown)
+from bot.protocol import (HIDDEN_CHOICE, ActRequest, BoardUpdate, HandEnd, HandStart, HoleCards,
+                          Info, MatchEnd, MatchInfo, Message, OppAction, ProtocolError, Showdown)
 from bot.protocols.base import Adapter
 
 PROTOCOL_VERSION = "1.0"
@@ -45,7 +45,6 @@ ACTION_NAMES = {FOLD: "fold", CHECK: "check", CALL: "call", RAISE: "raise"}
 NAME_ACTIONS = {v: k for k, v in ACTION_NAMES.items()}
 MAX_RAISES = 4                                           # per street; preflop the BB is the first
 PER_RESPONSE_MS = 5000
-HIDDEN_INDEX = "0"                                       # placeholder for the opponent's slot
 
 
 def _compact(obj: dict) -> str:
@@ -251,7 +250,7 @@ class PokerbotsAdapter(Adapter):
         self.hole = list(_cards(m, "hole_cards"))
         hole = HoleCards(tuple(self.hole))
         me, opp = Info("reveal", "me", (mine,)), Info("reveal", "opp", (theirs,))
-        chose = OppAction(Action.special(HIDDEN_INDEX))
+        chose = OppAction(Action.special(HIDDEN_CHOICE))
         # The engine applies the button's discard first: each seat hears it in this order.
         return [hole, me, chose, opp] if self.seat == 0 else [chose, opp, hole, me]
 

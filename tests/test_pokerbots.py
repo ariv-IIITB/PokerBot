@@ -257,6 +257,8 @@ def test_the_opponents_discard_is_dead_in_the_reconstruction() -> None:
         bot.handle_line(text)
     rec, qs = found["rec"], parse_card("Qs")
     assert qs in rec.mapping.values() and qs not in rec.pool
+    # The hidden slot (HIDDEN_CHOICE) is still kept as discard evidence for inference.
+    assert [d.kind for d in rec.opp_decisions].count("discard") == 1
     for _ in range(50):
         world = rec.world(rng)
         opp = world.hole[1 - rec.me]
