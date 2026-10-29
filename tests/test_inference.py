@@ -112,3 +112,25 @@ def test_trust_levels() -> None:
     t2 = Trust()
     t2.update({"bet": (0.25 * 40, 40), "discard": (0.0, 10)})
     assert t2.level("bet") == 1.0 and t2.level("discard") < 0.5
+
+
+def test_opponent_range_weights_over_explicit_hands() -> None:
+    # The opponent module answers "how likely is each hand" with the same likelihood the
+    # sampled worlds use, so a river solver needs no second copy of it.
+    from bot.opponent import Opponent
+    rules = compile_spec(load_catalog()["holdem_nl"])
+    st = BotState()
+    st.apply(HandStart(0, 1, 400, 400))
+    st.apply(HoleCards(P("2c,3d")))
+    st.apply(OppAction(Action.call()))
+    st.record_my_action(Action.check())
+    st.apply(BoardUpdate(1, P("Ks,Kh,7d")))
+    st.record_my_action(Action.check())
+    st.apply(OppAction(Action.raise_to(6)))
+    rec = reconstruct(rules, st.hand, np.random.default_rng(0))
+    opp = Opponent(dict(ON), use_trust=False)
+    combos = np.array([P("Kd,Qc"), P("5c,4s"), P("2c,9h")])  # strong, weak, holds our 2c
+    w = opp.range_weights(rec, combos, np.random.default_rng(1))
+    assert abs(w.sum() - 1.0) < 1e-9 and w[0] > w[1] and w[2] == 0.0
+    flat = Opponent({"enabled": False}).range_weights(rec, combos[:2], np.random.default_rng(1))
+    assert np.allclose(flat, [0.5, 0.5])                     # nothing informative: uniform

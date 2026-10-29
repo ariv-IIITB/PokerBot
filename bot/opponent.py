@@ -10,14 +10,25 @@ Stats (all from the opponent's point of view):
   aggression_all raises / (raises + calls), every street (catches preflop shovers)
   fold_to_raise  folded directly after one of our raises
   wtsd           reached showdown, per hand they saw a flop
-Fed from neutral messages via `update(state, msg)` (called from Brain.observe).
+Fed from neutral messages via `update(state, msg)`.
+
+`Opponent` is what brains use: these stats, the card-inference model (bot/sim/inference.py)
+and the trust in that model, behind one interface. Feed it every message (`observe`) and every
+hand reconstruction (`saw`); ask it for a stat (`get`), for the trust-scaled inference model to
+weight sampled worlds with (`model`), or for a range over explicit hands (`range_weights`).
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Optional
+
+import numpy as np
 
 from bot.actions import CALL, FOLD, RAISE
+from bot.log import warn
 from bot.protocol import HandEnd, HandStart, Message, OppAction, Showdown
+from bot.sim.inference import DEFAULTS as INFERENCE_DEFAULTS
+from bot.sim.inference import Inference, Trust
 from bot.state import ME, GameState
 
 DEFAULT_PRIORS = {"vpip": 0.55, "pfr": 0.25, "aggression": 0.35, "fold_to_raise": 0.40,
@@ -90,3 +101,59 @@ class OpponentModel:
                 self.stats["pfr"].add(self._pfr)
             if self._saw_flop or (h is not None and h.street > 0):
                 self.stats["wtsd"].add(self._showdown)
+
+
+class Opponent:
+    """Everything we learn about the opponent (see the module docstring)."""
+
+    def __init__(self, inference: Optional[dict] = None, use_trust: bool = True,
+                 priors: Optional[dict] = None, k: float = 15.0) -> None:
+        self.base = {**INFERENCE_DEFAULTS, **(inference or {})}
+        self.model = Inference(dict(self.base))     # params scaled by trust after each `saw`
+        self.trust = Trust()
+        self.use_trust = use_trust
+        self.stats = OpponentModel(priors={**DEFAULT_PRIORS, **(priors or {})}, k=k)
+        self._last = None                            # (hand id, Reconstruction) we decided on
+
+    @property
+    def priors(self) -> dict:
+        return self.stats.priors
+
+    def get(self, name: str) -> float:
+        """A shrunk frequency stat (OpponentModel)."""
+        return self.stats.get(name)
+
+    def saw(self, hand_id: int, rec) -> None:
+        """Our latest reconstruction of this hand: kept for scoring at showdown, and the
+        inference model is re-scaled by the current trust."""
+        self._last = (hand_id, rec)
+        if self.use_trust:
+            self.model.params["gamma"] = float(self.base["gamma"]) * self.trust.level("bet")
+            self.model.params["beta"] = float(self.base["beta"]) * self.trust.level("discard")
+
+    def observe(self, state: GameState, msg: Message, rng) -> None:
+        self.stats.update(state, msg)
+        if isinstance(msg, Showdown) and self.model.enabled and self.use_trust:
+            last = self._last
+            if last is None or state.hand is None or last[0] != state.hand.hand_id:
+                return
+            try:      # their cards are shown: how well did the model explain their choices?
+                self.trust.update(self.model.decision_llr(last[1], list(msg.oppcards), rng))
+            except Exception as e:
+                warn(f"trust update failed: {e!r}")
+
+    def range_weights(self, rec, combos: np.ndarray, rng) -> np.ndarray:
+        """Probability of each explicit opponent hand given their visible choices (sums to 1).
+        combos (n, k): real cards for the opponent's k still-hidden hole tokens, in hole order.
+        Hands holding a card we have seen get 0; uniform over the rest if nothing is informative."""
+        combos = np.asarray(combos, dtype=np.intp)
+        n = len(combos)
+        hidden = [t for t in rec.state.hole[1 - rec.me] if t not in rec.mapping]
+        if n == 0 or combos.shape[1] != len(hidden):
+            raise ValueError(f"combos need {len(hidden)} cards per row")
+        logw = self.model.log_weights(rec, {t: combos[:, i] for i, t in enumerate(hidden)}, n, rng)
+        w = np.ones(n) if logw is None else np.exp(logw - logw.max())
+        seen = np.array(sorted(set(rec.mapping.values())), dtype=np.intp)
+        w[np.isin(combos, seen).any(axis=1)] = 0.0
+        total = w.sum()
+        return w / total if total > 0 else w
