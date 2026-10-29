@@ -23,13 +23,13 @@ def _maxrss_mb(usage) -> float:
 
 def peak_rss_mb(brain: str = "tier2", hands: int = 400, opponent: str = "maniac",
                 seed: int = 0, cwd: Optional[str] = None, variant: Optional[str] = None,
-                protocol: Optional[str] = None) -> float:
+                protocol: Optional[str] = None, cmd: Optional[list[str]] = None) -> float:
     """Peak RSS (MB) of any child process run so far, after playing one match."""
     from lab.harness import load_variant
     from variant.rules import DEFAULT_CONFIG
     spec = load_variant(variant) if variant else DEFAULT_CONFIG
-    bot = SubprocessPlayer([sys.executable, "-m", "bot.main", "--brain", brain], name=brain,
-                           cwd=cwd, protocol=protocol)
+    bot = SubprocessPlayer(cmd or [sys.executable, "-m", "bot.main", "--brain", brain], name=brain,
+                           cwd=cwd, protocol=protocol, brain_config={"lock_enabled": False})
     play_match([bot, PlayerSpec.brain(opponent).build()], spec, seed=seed, hands=hands)
     return _maxrss_mb(resource.getrusage(resource.RUSAGE_CHILDREN))
 
@@ -43,9 +43,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--cwd", default=None, help="run the bot from this folder (a package)")
     ap.add_argument("--variant", default=None, help="catalog name or spec path for the engine")
     ap.add_argument("--protocol", default=None)
+    ap.add_argument("--cmd", default=None, help="launch command, e.g. 'python bot.py' (with --cwd)")
     args = ap.parse_args(argv)
+    import shlex
     mb = peak_rss_mb(args.brain, args.hands, args.opponent, cwd=args.cwd, variant=args.variant,
-                     protocol=args.protocol)
+                     protocol=args.protocol, cmd=shlex.split(args.cmd) if args.cmd else None)
     print(f"bot peak RSS: {mb:.1f} MB (limit {args.limit_mb:g} MB)")
     return 0 if mb < args.limit_mb else 1
 

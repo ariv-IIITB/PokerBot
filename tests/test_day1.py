@@ -37,15 +37,19 @@ def test_package_contains_only_what_the_variant_needs(tmp_path) -> None:
     out = tmp_path / "submission"
     info = pkg.build(spec_path, "tier2", "placeholder", out)
     files = {str(p.relative_to(out)) for p in out.rglob("*.py")}
-    assert "bot/main.py" in files and "bot/game/steps/cards.py" in files
+    assert "bot.py" in files and "bot/main.py" in files and "bot/game/steps/cards.py" in files
     assert "bot/game/steps/side.py" not in files            # no auctions/markets here
     assert "bot/protocols/jsonl.py" not in files and "bot/game/steps/redraw.py" not in files
     assert not any(f.startswith(("lab/", "tests/")) for f in files)
-    assert json.loads((out / "variant" / "active.json").read_text())["name"] == "mit2026_discard"
+    assert not (out / "bot" / "config").exists() and not (out / "data").exists()   # embedded instead
     assert pkg.check_imports(out) == []
+    assert pkg.check_sandbox(out, "placeholder") == []
     assert info["protocol"] == "placeholder"
-    # The packaged bot plays the variant from its own folder (its own active.json).
-    bot = SubprocessPlayer([sys.executable, "-m", "bot.main"], cwd=str(out), protocol="placeholder")
+    # The packaged bot plays the variant embedded in its own bot/embedded.py.
+    ns: dict = {}
+    exec(compile((out / "bot" / "embedded.py").read_text(), "embedded", "exec"), ns)
+    assert ns["SPEC"]["name"] == "mit2026_discard"
+    bot = SubprocessPlayer([sys.executable, "bot.py"], cwd=str(out), protocol="placeholder")
     m = play_match([bot, PlayerSpec.brain("random_legal").build()], load_catalog()["mit2026_discard"],
                    seed=1, hands=15, audit=True)
     assert m.forfeit is None and m.errors[0] == 0
@@ -66,15 +70,34 @@ def test_package_with_other_protocol_and_side_plugins(tmp_path) -> None:
     assert (out / "bot" / "game" / "steps" / "side.py").is_file()
     assert (out / "bot" / "protocols" / "jsonl.py").is_file()
     assert 'DEFAULT = "json"' in (out / "bot" / "protocols" / "__init__.py").read_text()
-    bot = SubprocessPlayer([sys.executable, "-m", "bot.main"], cwd=str(out), protocol="json")
+    bot = SubprocessPlayer([sys.executable, "bot.py"], cwd=str(out), protocol="json")
     m = play_match([bot, PlayerSpec.brain("maniac").build()], load_catalog()["auction_card"],
                    seed=2, hands=10, audit=True)
     assert m.forfeit is None and m.errors[0] == 0
 
 
+def test_zip_has_bot_py_at_the_top_is_small_and_reproducible(tmp_path) -> None:
+    import zipfile
+    spec = pkg.ROOT / "variant" / "active.json"
+    hashes = []
+    for name in ("a", "b"):                                  # two builds of the same sources
+        out = tmp_path / name
+        pkg.build(spec, "tier2", "pokerbots", out)
+        (out / "bot" / "__pycache__").mkdir(exist_ok=True)   # never shipped
+        (out / "bot" / "__pycache__" / "x.pyc").write_bytes(b"junk")
+        hashes.append(pkg.make_zip(out, tmp_path / f"{name}.zip"))
+    assert hashes[0] == hashes[1]
+    z = tmp_path / "a.zip"
+    assert z.stat().st_size <= pkg.ZIP_CAP_BYTES
+    with zipfile.ZipFile(z) as zf:
+        names = zf.namelist()
+    assert names[0] == "bot.py" and "bot/main.py" in names and "bot/embedded.py" in names
+    assert not any("__pycache__" in n or n == "PACKAGE.json" for n in names)
+
+
 @pytest.mark.slow
 def test_full_package_checks(tmp_path) -> None:
-    rc = pkg.main(["--variant", "mit2026_discard", "--out", str(tmp_path / "s"), "--hands", "150"])
+    rc = pkg.main(["--out", str(tmp_path / "s"), "--zip", "--opponents", "starter"])
     assert rc == 0
 
 
@@ -87,8 +110,5 @@ def test_cfr_is_lab_only_and_never_packaged(tmp_path) -> None:
     assert not [p for p in (pkg.ROOT / "bot").rglob("*.py") if "cfr" in p.name]
     with pytest.raises(SystemExit):
         pkg.main(["--brain", "cfr", "--out", str(tmp_path / "never")])
-    data = tmp_path / "data"
-    data.mkdir()
-    for name in ("meta.json", "eq_random.npy", "cfr_strategy.json", "cfr_strategy.ckpt"):
-        (data / name).write_text("x")
-    assert [f.name for f in pkg.runtime_data_files(data)] == ["eq_random.npy", "meta.json"]
+    from tools import embed_data
+    assert set(embed_data.TABLE_FILES) == {"classes", "eq_random", "eq_range"}   # never a CFR strategy

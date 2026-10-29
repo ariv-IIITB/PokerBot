@@ -3,6 +3,8 @@ import ast
 import sys
 from pathlib import Path
 
+from tools.sandbox_scan import ALLOW_MARK, SHIPPED_ALLOW, sandbox_violations
+
 ROOT = Path(__file__).resolve().parent.parent
 BOT_FILES = sorted((ROOT / "bot").rglob("*.py"))
 
@@ -67,54 +69,17 @@ def test_no_file_writes() -> None:
 # Calls below are flagged by name; a temporary allow-list holds the loaders that still read
 # files. Each allowed line must carry a `# sandbox-allow: <reason>` comment; Phase D removes
 # the allow-list.
-READ_CALLS = {"open", "load", "fromfile", "read_text", "read_bytes", "listdir", "scandir",
-              "glob", "rglob", "iterdir", "system", "fork", "popen", "Popen", "spawn",
-              "posix_spawn", "Thread", "Timer", "start_new_thread", "ThreadPoolExecutor"}
-FLAGGED_PREFIXES = ("exec",)                       # os.execv, os.execvp, ...
 SANDBOX_ALLOW: set[str] = set()   # Phase D removed the loaders' allow-list: nothing may read files
-ALLOW_MARK = "# sandbox-allow:"
-
-
-def _call_name(node: ast.Call) -> str:
-    fn = node.func
-    return fn.attr if isinstance(fn, ast.Attribute) else getattr(fn, "id", "")
-
-
-def sandbox_violations(path: Path, source: str, allow: set[str]) -> list[str]:
-    """Calls in `source` that read files or start processes/threads, minus the allowed ones."""
-    rel = path.relative_to(ROOT).as_posix() if path.is_absolute() else path.as_posix()
-    lines = source.splitlines()
-    out = []
-    for node in ast.walk(ast.parse(source)):
-        if not isinstance(node, ast.Call):
-            continue
-        name = _call_name(node)
-        if name not in READ_CALLS and not name.startswith(FLAGGED_PREFIXES):
-            continue
-        if name == "load" and not _is_file_load(node):
-            continue
-        line = lines[node.lineno - 1]
-        if rel in allow:
-            if ALLOW_MARK not in line:
-                out.append(f"{rel}:{node.lineno}: {name}() in an allowed file lacks "
-                           f"'{ALLOW_MARK} <reason>'")
-        else:
-            out.append(f"{rel}:{node.lineno}: {name}() is not allowed in the submitted bot")
-    return out
-
-
-def _is_file_load(node: ast.Call) -> bool:
-    """`load` is only a file read for np.load / VariantSpec.load (json.load takes a handle,
-    and a handle needs open(), which is flagged on its own)."""
-    fn = node.func
-    return (isinstance(fn, ast.Attribute) and isinstance(fn.value, ast.Name)
-            and fn.value.id in {"np", "numpy", "VariantSpec"})
 
 
 def test_sandbox_no_file_reads_or_processes() -> None:
+    """bot/ (nothing allowed) and the variant/ modules that ship with it (only the marked
+    lab helpers in variant/spec.py)."""
     bad = []
     for f in BOT_FILES:
         bad += sandbox_violations(f, f.read_text(), SANDBOX_ALLOW)
+    for f in sorted((ROOT / "variant").glob("*.py")):
+        bad += sandbox_violations(f, f.read_text(), SHIPPED_ALLOW)
     assert not bad, "\n".join(bad)
 
 
@@ -133,6 +98,6 @@ def test_sandbox_guard_catches_violations() -> None:
 
 def test_sandbox_allow_list_is_not_stale() -> None:
     # Every allowed file really contains a flagged call (so the list shrinks as files are fixed).
-    for rel in SANDBOX_ALLOW:
+    for rel in SANDBOX_ALLOW | SHIPPED_ALLOW:
         marked = [ln for ln in (ROOT / rel).read_text().splitlines() if ALLOW_MARK in ln]
         assert marked, f"{rel} is allow-listed but has no '{ALLOW_MARK}' line"

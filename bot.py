@@ -4,6 +4,7 @@ Everything lives in the `bot/` package next to this file (a package wins over th
 import os
 import sys
 
+sys.dont_write_bytecode = True   # the filesystem is read-only: don't even try to cache .pyc files
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from bot.main import main  # noqa: E402

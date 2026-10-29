@@ -1,6 +1,7 @@
 """Run the bot under an audit hook that reports everything a sandbox would forbid.
 
     python tests/kit/sandbox_run.py [bot.main args...] < engine_lines
+    SANDBOX_ROOT=<package dir> python tests/kit/sandbox_run.py ...   (audit a packaged bot)
 
 Allowed: opening .py/.pyc/.so/.pth files (the import machinery). Reported on stderr as
 `SANDBOX-VIOLATION <event> <args>`: any other open(), socket.*, subprocess.Popen, os.system,
@@ -33,7 +34,9 @@ def _hook(event: str, args: tuple) -> None:
 
 
 if __name__ == "__main__":
+    sys.dont_write_bytecode = True       # as bot.py does: a read-only disk takes no .pyc files
     sys.addaudithook(_hook)
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    sys.path.insert(0, os.environ.get("SANDBOX_ROOT") or
+                    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     from bot.main import main
     sys.exit(main(sys.argv[1:]))
