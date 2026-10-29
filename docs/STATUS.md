@@ -11,11 +11,12 @@ Rules: `docs/rules/` (`SUMMARY.md` first).
 | Part 4 plan (`docs/PART4_PLAN.md`) | done | `04d5a62` |
 | **A** framework (scenario/transcript/round-trip kits, sandbox guard, embed generator, `lab.eval`) | done | `d3146b1` |
 | **B** Discard Hold'em rules (`discard_holdem` spec is active, BB counts as a raise, fallback discard) | done, reviewed | `a44e234`, logs `57ed850` |
-| **C** real protocol adapter | **next** | — |
-| D ship-safe → first upload · E Tier 2 on the real game · F LLM opponent pool · G Tier 3 "Ivey" · H Problem Statement / freeze | to do | — |
+| **C** real protocol adapter (`bot/protocols/pokerbots.py`, now the default) | done, awaiting review | `d131932`, `dd51c98` |
+| **D** ship-safe → first upload | **next** | — |
+| E Tier 2 on the real game · F LLM opponent pool · G Tier 3 "Ivey" · H Problem Statement / freeze | to do | — |
 
 Tests on Python 3.11 (`.venv`): fast suite all green (1 expected failure: the runtime sandbox test,
-an xfail until Phase D). The slow suite passed at Phase B.
+an xfail until Phase D). The slow suite passed at Phase C (261 tests, incl. a 400-hand match over the real protocol).
 
 ## How the work is done
 
@@ -44,8 +45,10 @@ an xfail until Phase D). The slow suite passed at Phase B.
 
 ## Open items for the next phases
 
-- **Phase C:** the full-match smoke test must run over the real `pokerbots` protocol. Phase B's ran
-  over the placeholder protocol.
+- **Phase C notes:** the test suite defaults to the mock `placeholder` format (`tests/conftest.py`); the
+  bot's default is `pokerbots`. Full 400-hand matches over the real protocol: tier2 vs tier2 and tier2 vs the
+  organisers' starter bot, 0 errors / 0 forfeits / 0 stderr warnings. Phase D flips `tools/package_submission.py`
+  to the new default and builds `bot.py`.
 - **Phase D:** three file-reading loaders to remove (`bot/brains/params.py`, `bot/sim/tables.py`,
   `bot/game/rules_spec.py`). The hard deadline can currently reach 15 s, and replies must be under 5 s.
 - **Phase E:** ask the user about CFR (plan, Phase E step 5). Don't start it.
