@@ -1,7 +1,9 @@
 # Part 4 plan: Discard Hold'em, from rules to a shipped "Ivey-style" bot
 
-Written 2026-10-28 for the implementing model (Sonnet). The person who runs it reviews after
-every phase.
+Written 2026-10-28 for the implementing model (Sonnet). **Finalized 2026-10-29** after phases A–C:
+done phases are marked, what the build changed is recorded, and Phase E now carries the lessons
+from the Hold'em LLM bots into Tier 2. The person who runs it reviews after every phase.
+Current state: `docs/STATUS.md`.
 
 ## How to use this plan
 
@@ -12,7 +14,11 @@ every phase.
     phase says so);
   - a short report (what was built, tests, numbers, files changed);
   - a commit `phase 4X: ...`;
+  - **merge into `main` and push `main`** (the next session only sees GitHub);
+  - update `docs/STATUS.md`;
   - then **stop and wait for OK**.
+- **Each phase starts by reviewing the previous one** against the code and tests (the reports
+  have missed things before). The first numbered step of every phase below is that review.
 - **Never copy code from `Opps/`** into `bot/` (ideas only; similarity checks run on submissions).
 - **Never tune on held-out opponents** (Phase F sets the list).
 - If three fixes in a row fail, stop and report. Don't guess file contents, signatures or rules:
@@ -22,16 +28,20 @@ every phase.
 
 ### Phase overview
 
-| Phase | What | Depends on | Target date |
+| Phase | What | Depends on | Status / target |
 |---|---|---|---|
-| **A** | Framework: the shared tools every later phase uses | — | Oct 29 |
-| **B** | Discard Hold'em rules in the engine | A | Oct 29 |
-| **C** | Real protocol adapter (both directions) | A, B | Oct 30 |
-| **D** | Ship-safe: no file reads, `bot.py`, package, timing, lock → **first upload** | C | Oct 31–Nov 1 |
-| **E** | Tier 2 plays the real game well (discard, inference, tables) | D | Nov 2–3 |
-| **F** | Opponent pool: the user's LLM bots, train/held-out split, baseline report | C (+ user's bots) | when the bots arrive |
-| **G** | Tier 3: the "Ivey" style, built one behaviour at a time | E, F | Nov 4–12 |
-| **H** | Problem Statement update (1 Nov) and final freeze (Nov 13–15) | any | Nov 1, Nov 13–15 |
+| **A** | Framework: the shared tools every later phase uses | — | ✅ done `d3146b1` |
+| **B** | Discard Hold'em rules in the engine | A | ✅ done `a44e234` |
+| **C** | Real protocol adapter (both directions) | A, B | ✅ done `d131932`, `dd51c98` (review in D1) |
+| **D** | Ship-safe: no file reads, `bot.py`, package, timing, lock → **upload #1** | C | Oct 30–31 |
+| **E** | Tier 2 plays the real game well: discard, tables, **lessons from the LLM bots** → **upload #2** | D | Nov 1–3 |
+| **F** | Opponent pool: the user's LLM bots, train/held-out split, baseline report | C (+ user's bots) | when the bots arrive (target Nov 3) |
+| **G** | Tier 3: the "Ivey" style, built one behaviour at a time → **upload #3** if it ships | E, F | Nov 4–12 |
+| **H** | Problem Statement update (1 Nov, inserted when it lands) and final freeze | any | Nov 1, Nov 13–15 |
+
+**Uploads.** A valid upload must exist at all times. Upload after D (safe Tier 2), after E (better
+Tier 2), after G if Tier 3 ships, and the final one at H. Each is recorded in `docs/SUBMISSIONS.md`.
+Only the user can upload (Unstop).
 
 The framework (A) is built once. B–G then become "add data and cases to the framework", not
 one-off scripts. Each later phase names the framework pieces it uses.
@@ -39,6 +49,15 @@ one-off scripts. Each later phase names the framework pieces it uses.
 ---
 
 ## Phase A — Framework
+
+> **Done (`d3146b1`).** As built:
+> - `lab.eval` matches the old loop exactly only for brains that don't depend on wall-clock time.
+>   Tier 2's sample counts depend on speed, so equal seeds don't give equal chips. Always compare
+>   with SEs.
+> - `lab/opps/accounting.py` is a thin front over `lab.eval --report accounting` (bookkeeping in
+>   `lab/opps/track.py`).
+> - The sandbox allow-list has a third file, `bot/game/rules_spec.py` (it reads
+>   `variant/active.json`). Phase D removes all three.
 
 Goal: six small tools that turn every later change into "add a case, run the check". No bot
 behaviour changes in this phase.
@@ -162,6 +181,14 @@ Parametrize it over adapters. It must pass for `placeholder`, `json` and `terse`
 
 ## Phase B — Discard Hold'em rules
 
+> **Done (`a44e234`, reviewed).** As built:
+> - `discard_holdem` is the active variant.
+> - `betting.blind_counts_as_raise` (default off) makes the BB count toward the cap.
+> - `bot/game/steps/cards.py:fallback_discard` and `safe_action_for_hole` are the rules' discard
+>   fallback, used by the lab engine, Tier 0 and the bot's emergency/error paths.
+> - 30 tests in `tests/test_discard_holdem.py`.
+> - Baseline on this game: `logs/discard_holdem_tier{1,2}_vs_bots.txt`.
+
 ### Check first
 - `variant/catalog/pineapple.json` is close but **not** the same program: it discards privately and
   *before* flop betting. Discard Hold'em discards *after* flop betting, publicly, and has the raise
@@ -256,6 +283,20 @@ the one engine change (`blind_counts_as_raise`).
 
 ## Phase C — Real protocol adapter
 
+> **Done (`d131932`, `dd51c98`); reviewed as step D1.** As built, differing from the text below:
+> - **Missing-action inference was generalized.**
+>   - All-in preflop: the opponent's call only shows in `hand_result`. It is emitted first and
+>     skipped when `history` lists it later.
+>   - The button's check closes the flop round. "They checked behind" applies only when we are the BB.
+> - **A malformed request gets a blind safe reply** instead of silence (silence would forfeit by
+>   timeout; the engine corrects illegal replies).
+> - **The test suite defaults to the mock `placeholder` format** (`tests/conftest.py`). The bot's
+>   default is `pokerbots`. The real format is tested explicitly.
+> - `pokerbots` round trips skip `pineapple` and `exposed_hole` (not this game).
+> - The starter bot is `lab/sparring/starter_bot.py`, seated with `lab.eval --pool starter`.
+> - **Smoke matches** over the real protocol (400 hands): tier2 vs tier2 and tier2 vs starter, with
+>   0 errors and 0 forfeits. But one tier2 used **~34 s of its 60 s bank** on this laptop (see D5).
+
 ### Check first
 - `bot/protocols/base.py` (the interface), `bot/protocols/jsonl.py` (the mock JSON adapter; field
   names differ from the real ones), `bot/protocol.py` (the neutral messages), and
@@ -349,7 +390,15 @@ All of the above pass, and the old adapters still pass A3.
   a smoke match, timing and memory.
 
 ### Build
-1. **Embed and switch the loaders** (A5):
+1. **D1. Review Phase C first** (it was merged without review):
+   - read `bot/protocols/pokerbots.py` and the multi-message interface change against
+     `docs/rules/protocol.pdf` sections 4–7 and 9;
+   - check the two generalized inference rules (see the Phase C box) with the round-trip kit on
+     extra seeds, including all-in hands and both seats;
+   - check what the "blind safe reply" sends for a malformed `discard_request`: it must be a
+     `discard` message or nothing the engine would treat as worse than its own fallback;
+   - rerun the fast and slow suites and report the counts. Fix what you find before step 2.
+2. **Embed and switch the loaders** (A5):
    - `load_params` = defaults ← `bot/embedded.PARAMS[name]` ← overrides. The `config_dir`
      argument is removed; `tests/test_tier1.py` passes dicts instead.
    - `load_tables` reads `bot/embedded.TABLES` via `np.load(io.BytesIO(...), allow_pickle=False)`.
@@ -358,10 +407,10 @@ All of the above pass, and the old adapters still pass A3.
      `lab/players.py` sets it from `variant_path`.
    - `bot/config/*.json` and `data/` stay as the **sources** for `tools/embed_data.py`.
    - Remove the A4 allow-list. The runtime sandbox test must now **pass** (drop the xfail).
-2. **`bot.py` at the repo root:** it puts its own folder on `sys.path` and calls
+3. **`bot.py` at the repo root:** it puts its own folder on `sys.path` and calls
    `bot.main.main(["--protocol", "pokerbots"])`. Nothing else. `python3.11 bot.py` must work from
    any cwd.
-3. **Packaging** (`tools/package_submission.py`):
+4. **Packaging** (`tools/package_submission.py`):
    - Build a zip with `bot.py` at the **top level**, plus the needed `bot/` and `variant/` modules and
      `bot/embedded.py`.
    - **Fail if the zip is over 5 MB.**
@@ -370,7 +419,10 @@ All of the above pass, and the old adapters still pass A3.
      match over the real protocol, timing, and memory.
    - Startup (launch → ready, including imports) must be under **1.0 s** here (the 5 s limit, with a
      2× slower server and margin).
-4. **Timing** (`bot/timing.py`, `bot/main.py`):
+5. **Timing** (`bot/timing.py`, `bot/main.py`). **Red flag from Phase C:** in a 400-hand
+   tier2-vs-tier2 match one bot used ~34 s of its 60 s bank on this laptop. On a server ~2× slower
+   that is past the bank, i.e. a forfeit, unless the budget adapts in time. Fix the budget so the worst
+   realistic case fits, not the average:
    - Hard limit per reply = `min(per_response_s * 0.3, 1.5 s, budget * hard_mult,
      hard_bank_frac * bank_left)`, where `per_response_s` comes from `init` (default 5).
    - Budget = (`time_left` from the engine, minus the reserve) / (hands left × expected decisions per hand),
@@ -382,17 +434,24 @@ All of the above pass, and the old adapters still pass A3.
    - Never hardcode 400/60: everything comes from `init`.
    - Wall-clock kill: our own time is bounded by the bank (60 s / 150 s), well under 180 s / 450 s.
      Startup and init warm-up count toward the wall clock, so keep warm-up under 0.5 s.
-5. **Endgame lock** (`bot/brains/tier2.py:lock_margin`): it uses the rules' blinds and
+   - Measure where Tier 2's time goes (decisions per hand, ms per street, discard ms) in the
+     self-play match, and against `maniac`/`all_in` (the most decisions). Cut samples
+     (`max_samples`, `rollout_worlds`, `pimc_worlds`) before cutting logic.
+   - Add a **slow-machine test**: run the 400-hand self-play match with the timer told the machine is
+     2× slower (scale measured time by 2 in `TimeManager`, test-only flag). The bank must never run
+     out, and emergency mode must not trigger before hand 380.
+6. **Endgame lock** (`bot/brains/tier2.py:lock_margin`): it uses the rules' blinds and
    `state.hands_remaining`.
    - Test it with `discard_holdem` at 400 and 1000 hands.
    - Test that it never locks with a negative or zero lead.
    - Lock only while we lead (net chips decide the match).
-6. **Benchmarks:**
+7. **Benchmarks:**
    - `lab.timing_bench --variant variant/catalog/discard_holdem.json --hands 400` and
-     `--hands 1000 --bank 150`, over the real protocol, as a subprocess.
+     `--hands 1000 --bank 150`, over the real protocol, as a subprocess, against `tier2` (self-play),
+     `maniac` and `starter`.
    - Projected 2× time must be **≤ 50 % of the bank**, and the worst single reply **≤ 0.5 s**.
    - `lab.memory_check` peak must be ≤ 500 MB.
-7. **First upload:** build the zip and hand it to the user to upload on Unstop (Claude cannot
+8. **Upload #1:** build the zip and hand it to the user to upload on Unstop (Claude cannot
    upload). Record the zip hash and date in `docs/SUBMISSIONS.md`.
 
 ### Tests
@@ -404,61 +463,139 @@ All of the above pass, and the old adapters still pass A3.
   - the budget follows `time_left_ms`;
   - emergency mode triggers at a low bank.
 - Lock tests at 400 and 1000 hands.
+- The slow-machine self-play test (step 5).
 
 ### Done when
-The zip passes every check, the numbers are in the report, and the user has uploaded it (a valid
+The Phase C review is reported, the zip passes every check, the numbers are in the report, and the user has uploaded it (a valid
 upload exists).
 
 ---
 
-## Phase E — Tier 2 on the real game
+## Phase E — Tier 2 on the real game, with the lessons from the LLM bots
+
+Goal: a stronger Tier 2 that is a good bot in its own right. It is upload #2, the fallback if
+Tier 3 doesn't ship, and the bar Tier 3 has to beat. Three parts: play the real game well (discard,
+tables), plug the measured river leak, and take the ideas the Hold'em LLM bots did better
+(`docs/reports/OPPS_ANALYSIS.md` section 8). **Ideas only, written in our own code. Never copy from
+`Opps/`, and never reuse their Hold'em numbers.**
 
 ### Check first
+- Review Phase D (zip, timing numbers, the slow-machine test) before building.
 - `bot/brains/tier1.py:Tier1Brain.special` calls `bot/sim/policies.py:decide_special` (PIMC over
   hidden worlds). Check that it handles `discard` with simultaneous order and public visibility.
 - `bot/sim/inference.py` has decision kind `"discard"` (it weights opponent hands by the discard
   they made). Check it is fed by the Phase C messages (opponent special + reveal).
 - `lab/precompute.py` builds `data/<variant>/` tables for any hole size (`bot/sim/canonical.py`
   handles 3-card classes).
+- `bot/opponent.py:OpponentModel` and `bot/brains/tier2.py:Tier2Brain.adjusted`: what Tier 2
+  already tracks and how it shifts thresholds. Extend them; don't duplicate them.
+- The leak: `logs/accounting_tier2_vs_opp3_10pairs.txt` (Hold'em) and the river-showdown lines in
+  `logs/discard_holdem_tier2_vs_bots.txt`.
 
-### Build
-1. **Discard quality:**
-   - Make sure the discard decision uses the full remaining hand: the best 2 cards against the
-     inferred opponent range, with turn and river to come.
-   - Use the opponent's revealed discard as both a dead card and inference evidence.
-   - Add a cheap fast path for obvious cases: a pair plus a kicker, or a made flush/straight using
-     2 hole cards.
-2. **Tables:**
+### Evaluation pool for this phase
+Phase F's LLM bots may not exist yet, so E measures on what is available:
+- `tier1`, `random_legal`, `calling_station`, `tight`, `maniac`, `all_in`, `starter`;
+- `opp1`–`opp4` (Hold'em bots on a makeshift adapter, so indicative only; opp3 and opp4 are the
+  only current bots that beat Tier 2);
+- the Phase F **training** bots, if they already exist. Never the held-out ones.
+
+**Keep rule for every step:**
+- `lab.eval tier2:variant=<json> --compare tier2` on that pool, 50 pairs, locks off;
+- keep a change only if the pool aggregate improves and **no opponent drops by more than 2 SE**;
+- record every result (kept or dropped) in `docs/reports/TIER2_DISCARD.md`.
+
+### Build (one commit per step, measured before the next)
+1. **E1. Discard quality:**
+   - the discard decision uses the full remaining hand: the best 2 cards against the inferred
+     opponent range, with turn and river to come;
+   - the opponent's revealed discard counts as both a dead card and inference evidence;
+   - a cheap fast path for obvious cases: a pair plus a kicker, or a made flush/straight using 2
+     hole cards.
+   - **Ablation:** PIMC discard vs `fallback_discard` (lowest card) vs "keep the best pair of cards
+     by preflop equity", 50 pairs each. Keep PIMC only if it wins by more than 2 SE.
+2. **E2. Tables:**
    - `lab.precompute --variant variant/catalog/discard_holdem.json` gives start-of-hand classes
      (3-card, suit-isomorphic, ~1,755 classes) and equities vs random and vs a top range.
    - Run it overnight if needed. It is resumable.
-   - Embed it (A5); check the size guard.
-3. **Baselines:**
-   - `lab.sparring_audit` on `discard_holdem`.
-   - `lab.eval tier2 --pool tier1,random_legal,calling_station,tight,maniac,starter --pairs 50 --locks off`.
-     `starter` is the official starter bot from Phase C.
-   - Tier 2 must beat all of them.
-4. **Ablation:** compare PIMC discard against `fallback_discard` (lowest card) and against "keep the
-   best pair of cards by preflop equity", 50 pairs each. Keep PIMC only if it wins by more than 2 SE.
-5. **CFR question:**
-   - Add a dated note to `docs/PART3_ROADMAP.md`: condition 4 ("a free week before the reveal") is
-     now met, and the raise cap shrinks the tree. The main reason CFR lost (coarse card buckets)
-     still stands.
-   - **Do not start CFR work.** Ask the user.
+   - Embed it (A5) and check the size guard. Faster preflop also frees time for later streets.
+3. **E3. Opponent stats module, `bot/strategy/oppstats.py`** (built here so Tier 3 reuses it, not in G):
+   - per-spot Beta counts with a **population prior** (LLM bots: value-heavy bettors, over-callers),
+     prior strength ~15 observations;
+   - a spot changes play only after **≥ 20 samples**, and each shift is capped at **±15 points**;
+   - E uses three spots: the **river/turn bluff index**, **fold rate per bet-size bucket**, and
+     fold-to-bet per street. Phase G adds the rest.
+   - Unit tests: the prior dominates early, the gate holds below 20 samples, the cap holds.
+4. **E4. River bluff-catch stat** (idea from opp3's `river_bluff`; it aims straight at the
+   measured leak):
+   - after every showdown where the opponent bet or raised the turn or river, record whether
+     their hand was **weak**, meaning below what a value bet needs. Use the equity of their shown
+     hand against the range we represented, or simply "they lost to a hand we would check".
+     Pick the simplest measure that works and document it.
+   - this gives the **bluff index**, the share of their shown big bets that were weak.
+   - Tier 2's call rule vs a turn/river bet: the needed equity rises when the bluff index is low
+     (a value-heavy bettor: fold more bluff-catchers) and falls when it is high (an over-bluffer:
+     call wider). Use a CONFIG slope; the default prior means "value-heavy", per the leak.
+   - **Accounting check:** river showdown losses vs opp3/opp4 must shrink, without losing more to
+     folds than it saves.
+5. **E5. Bet size chosen by expected value** (idea from opp4's `evaluate_bet_candidates`; its fold
+   model was broken, ours is measured):
+   - candidates 33 %, 66 %, 110 % of the pot, and all-in;
+   - EV(size) ≈ P(fold | size) × pot + (1 − P(fold | size)) × (equity when called × final pot −
+     cost). P(fold | size) comes from E3's per-size fold stats (population prior until 20 samples);
+     "equity when called" = our equity vs their range narrowed by a call, from inference, or a CONFIG
+     discount;
+   - use it for value bets and for bluffs. To avoid tells, when two sizes are within a CONFIG margin
+     of EV, pick by a seeded random draw.
+   - It replaces `value_frac` / `strong_frac` / `bluff_frac` only if it passes the keep rule.
+6. **E6. No awkward leftovers** (idea from opp3's `_raise_amount`): when a value raise would leave
+   less than a CONFIG share (~25 %) of the resulting pot behind, raise all-in instead. Unit tests
+   plus the keep rule.
+7. **E7. Baselines and accounting:**
+   - `lab.sparring_audit` on `discard_holdem`;
+   - `lab.eval tier2 --pool <the whole E pool> --pairs 50 --locks off --report accounting,profile`;
+   - Tier 2 must beat tier1, every sparring bot and `starter`. Report opp1–4 with the caveat.
+8. **E8. Timing re-check:** `lab.timing_bench` at 400 and 1000 hands and the Phase D slow-machine
+   test, with E1–E6 in. They must stay inside the Phase D limits.
+9. **E9. CFR question:**
+   - add a dated note to `docs/PART3_ROADMAP.md`: condition 4 ("a free week before the reveal") is
+     now met, and the raise cap shrinks the tree, but the main reason CFR lost (coarse card
+     buckets) still stands;
+   - **do not start CFR work.** Ask the user.
+10. **Upload #2:** if Tier 2 improved, build the zip (Phase D checks) and hand it to the user.
+
+**Not taken from the bots** (decided, don't revisit): push/fold charts (stacks reset every hand),
+opp4's match-utility formula (monotone in EV, so it changes nothing), opp1's draw bonus (our
+simulation already counts draws), opp3's preflop structure (that is Tier 3's job, in G2; an earlier
+Hold'em test of "raise more preflop" alone made Tier 2 worse).
 
 ### Done when
-Tier 2 beats every baseline on `discard_holdem`, PIMC discard is shown to beat the simple discards,
-tables are embedded, and the CFR question is in the report for the user.
+- Tier 2 beats every baseline on `discard_holdem`;
+- PIMC discard is shown to beat the simple discards;
+- the tables are embedded;
+- each of E4–E6 is kept or dropped on the numbers, recorded in `docs/reports/TIER2_DISCARD.md`;
+- timing passes;
+- the CFR question is in the report for the user, and upload #2 is built.
 
 ---
 
 ## Phase F — Opponent pool (the user's LLM bots)
 
 ### Setup
-- The user puts bots in `Opps/discard/<name>/bot.py` (generated from the two PDFs with one fixed
-  prompt) and names the **held-out** ones.
-- Write the split to `lab/opps/discard_pool.json`:
-  `{"train": [...], "heldout": [...], "prompt": "...", "date": "..."}`.
+- The user generates bots with several LLMs, with **both PDFs attached** and this exact prompt
+  (same for every model; no extra hints):
+
+  > Build a bot for this poker competition. The two attached PDFs are the official rules and
+  > protocol. It must never crash or time out, and it should win as many matches as possible.
+  > Deliver a complete bot.py (or a folder with bot.py at the top level) that runs with
+  > `python3.11 bot.py`, uses only the standard library, numpy and scipy, and speaks the protocol
+  > exactly as specified. Give me the full code, no placeholders.
+
+- They go in `Opps/discard/<model>/bot.py` (extra files in the same folder), committed and pushed to
+  `main`. **Their code is not fixed**: crashes and protocol errors are part of what the field
+  looks like.
+- The user picks **2 held-out bots before any results are seen**. Write the split to
+  `lab/opps/discard_pool.json`: `{"train": [...], "heldout": [...], "prompt": "<the prompt above>",
+  "models": {...}, "date": "..."}`.
 
 ### Build
 1. **Auto-register** every `Opps/discard/*/bot.py` in `lab/players.py` as `d_<name>`:
@@ -474,9 +611,14 @@ tables are embedded, and the CFR question is in the report for the user.
    - the common pattern across bots;
    - where Tier 2 loses.
    - Held-out bots: a **health check only**. No results are read until Phase G's final check.
+4. **Re-check Phase E on the real pool:** rerun `--compare` for each kept E change (E1, E4–E6) on the
+   training bots. A change that now drops a training bot by more than 2 SE goes back to the user
+   with the numbers; don't silently revert it.
+5. `opp1`–`opp4` are retired from decisions (Hold'em bots). Keep them runnable; report them only
+   as context.
 
 ### Done when
-The report is committed and the user has seen it.
+The report is committed, the E re-check is reported, and the user has seen both.
 
 ---
 
@@ -492,8 +634,15 @@ The style, from the user's spec:
 - mixed (randomised) decisions;
 - capped live adaptation.
 
-It is built on top of Tier 2's equity, inference, PIMC discard, endgame lock and legality checks,
-**all kept**. No CFR, no solving at runtime.
+It is built on top of **Phase E's Tier 2**: its equity, inference, PIMC discard, endgame lock,
+legality checks, `oppstats` (with the bluff index) and EV sizing, **all kept**. The bar is that
+improved Tier 2, not the old one. No CFR, no solving at runtime.
+
+**A known tension, decided up front.** The style says "defend by MDF / call down more", but the
+measured leak is losing big river showdowns to value-heavy bettors. Resolution: MDF sets the
+*base* continue range only on the flop and turn. River bluff-catching follows the bluff index
+(E4), whose prior is value-heavy, until ≥ 20 samples say the opponent over-bluffs. Do not let MDF
+override that on the river.
 
 ### Structure (small modules, all numbers in one CONFIG)
 - `bot/brains/tier3.py`: `Tier3Brain(Tier2Brain)` and `DEFAULTS` (the CONFIG).
@@ -515,8 +664,8 @@ It is built on top of Tier 2's equity, inference, PIMC discard, endgame lock and
   - Sample the hands we would have played this way (preflop class percentile from the tables,
     filtered by our line), and rank our hand among them by equity.
   - This is what "continue with the top MDF slice of our range" uses.
-- `bot/strategy/oppstats.py`: per-spot Beta counts.
-  - Spots: fold-to-open, raise-vs-limp, 3-bet %, fold-to-3-bet, c-bet %, fold-to-c-bet,
+- `bot/strategy/oppstats.py` (**exists from E3**; extend it, keep its prior/gate/cap rules): per-spot Beta counts.
+  - Add the spots: fold-to-open, raise-vs-limp, 3-bet %, fold-to-3-bet, c-bet %, fold-to-c-bet,
     check-raise %, turn/river bet %, fold-to-turn/river bet, **bluff index** (the share of their
     bets later shown at showdown as weak, i.e. below the 40th percentile of their range).
   - Priors are the population of LLM bots (value-heavy bettors, over-callers), with strength
@@ -610,9 +759,11 @@ says least about our holding. Gate it behind a CONFIG flag and A/B it.
 - Cut samples before cutting logic. Run `lab.timing_bench` after every G step.
 
 ### Build order (each step = one commit, measured before the next)
-1. **G1:** CONFIG + `math.py` + `texture.py` + `oppstats.py`, with unit tests. Tier 3 = Tier 2
-   behaviour (no change yet). Check it plays identically to Tier 2 on 2 pairs.
-2. **G2:** preflop (button and BB policies, 3-bet/4-bet, raise-cap aware).
+1. **G1:** review Phase F, then CONFIG + `math.py` + `texture.py` + the new `oppstats` spots, with
+   unit tests. Tier 3 = Tier 2 behaviour (no change yet). Check it plays like Tier 2 on 2 pairs.
+2. **G2:** preflop (button and BB policies, 3-bet/4-bet, raise-cap aware). Ideas from opp3's
+   `preflop()` (a percentile cutoff that moves with the opponent's fold-to-open and 3-bet rates; BB
+   iso-raises; light 3-bets vs openers who fold to 3-bets), in our own code with 3-card tables.
 3. **G3:** flop as the preflop raiser (c-bet frequencies and sizes by texture, check-backs).
 4. **G4:** flop defence (MDF continue, check-raise, floats).
 5. **G5:** turn and river (barrels, floats, value/bluff ratios, bluff-catching with the bluff index).
@@ -627,6 +778,10 @@ For each step:
   2 SE**;
 - record the numbers in `docs/reports/TIER3.md`;
 - if a step makes things worse, set its CONFIG to Tier 2's behaviour and move on (don't spiral).
+
+**Sizing in Tier 3.** The style says "size by board and range, never by hand strength", while E5
+picks the size per hand by EV. Tier 3 uses texture-based sizes (G3/G5) by default, with a CONFIG
+switch to E5's EV sizing. A/B them in G5 and keep the winner.
 
 ### Action-profile targets (`lab.eval --check-profile`)
 - Button open raise / limp / fold: 65–75 / 20–28 / ≤ 7.
@@ -645,14 +800,14 @@ when they conflict, the eval numbers win, and the report says so.
 3. One run on the **held-out** pool (`--final`, 100 pairs) is not worse than Tier 2.
 4. Timing and memory are within the Phase D limits at 400 and 1000 hands.
 
-Otherwise Tier 2 ships, and Tier 3's best individual behaviours may be ported into Tier 2's
-CONFIG one at a time, with the same checks.
+If it ships: **upload #3**. Otherwise the Phase E Tier 2 ships, and Tier 3's best individual
+behaviours may be ported into Tier 2's CONFIG one at a time, with the same checks.
 
 ---
 
 ## Phase H — Problem Statement (1 Nov) and final freeze
 
-### On 1 Nov (insert between phases as soon as it is released)
+### On 1 Nov (insert between phases as soon as it is released; it may land during D or E)
 - Save it as `docs/rules/problem_statement.pdf` and diff it against `docs/rules/SUMMARY.md`.
 - Settle the showdown rule (any 5 of 7?), and every edge case and worked example. Turn each
   worked example into an A1 scenario or A2 transcript.
@@ -665,17 +820,25 @@ CONFIG one at a time, with the same checks.
   and a 2,000-hand fuzz on the **final zip**.
 - The user uploads the final zip and records its hash in `docs/SUBMISSIONS.md`.
 - Keep the previous zip as the fallback.
+- Last check, on a fresh clone of `main`: `python3.11 bot.py` against the starter bot through the
+  real protocol for a full 400-hand match.
 
 ---
 
 ## Risks to watch
 
-- **Opponent discard index (Phase C):** the real protocol gives the card, not its index. The
-  adapter's placeholder-index approach must be proven by the reconstruct test. If it fails, stop
-  and report; don't patch around it in the brain.
-- **Missing opponent flop action at the discard:** the inference rule (our check → they checked,
-  our bet → they called) is exact only because a fold would have ended the hand. A3 must cover
-  both cases.
+- **Time bank (open, Phase D):** one Tier 2 used ~34 s of 60 s locally in self-play. Projected on a
+  2× slower server that forfeits. Phase D's slow-machine test is the guard; re-run it after every
+  E and G step.
+- **The river leak vs the style (E4, G):** "call down more" is exactly what lost chips. The bluff
+  index decides river calls, not MDF.
+- **Stale GitHub:** sessions only see pushed work. Merge and push `main` after every phase, and
+  start each phase by reviewing the last one.
+- **The Hold'em bots mislead:** opp1–4 numbers on `discard_holdem` are indicative only. Decisions
+  from F onward use the Discard Hold'em LLM pool.
+
+- **Opponent discard index and missing flop action (Phase C): resolved.** The dead-card reconstruct
+  test and the round-trip kit cover them; D1 re-checks them on more seeds.
 - **5 s per reply:** the current hard-deadline maths allows 15 s. Phase D fixes it, and a test
   guards it.
 - **File reads:** the bot must not read config, tables or the spec from disk on the server.

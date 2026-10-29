@@ -83,7 +83,7 @@ held-out pool split, tournament-points report; no LBR), then 21 rehearsals with
 self-written variants. Phases 25–32 are not pursued.
 Part 4 (official rules, Discard Hold'em, from 2026-10-28). **The plan is `docs/PART4_PLAN.md`:
 read it before any Part 4 work. Where we are now: `docs/STATUS.md`.** Done: rules into
-`docs/rules/`, the docs update, A and B. **Next: C.** In order: A framework (scenario, transcript, round-trip and sandbox kits, embed generator, `lab.eval`) ·
+`docs/rules/`, the docs update, A, B and C. **Next: D** (it starts by reviewing C). In order: A framework (scenario, transcript, round-trip and sandbox kits, embed generator, `lab.eval`) ·
 B Discard Hold'em rules · C real protocol adapter · D ship-safe (no file reads, `bot.py`,
 ≤ 5 MB zip, 5 s reply cap, lock) → first upload · E Tier 2 on the real game · F LLM opponent pool
 (held-out split) · G **Tier 3: the "Phil Ivey" style** on top of Tier 2's inference and PIMC

@@ -11,7 +11,7 @@ Rules: `docs/rules/` (`SUMMARY.md` first).
 | Part 4 plan (`docs/PART4_PLAN.md`) | done | `04d5a62` |
 | **A** framework (scenario/transcript/round-trip kits, sandbox guard, embed generator, `lab.eval`) | done | `d3146b1` |
 | **B** Discard Hold'em rules (`discard_holdem` spec is active, BB counts as a raise, fallback discard) | done, reviewed | `a44e234`, logs `57ed850` |
-| **C** real protocol adapter (`bot/protocols/pokerbots.py`, now the default) | done, awaiting review | `d131932`, `dd51c98` |
+| **C** real protocol adapter (`bot/protocols/pokerbots.py`, now the default) | done; review = Phase D step D1 | `d131932`, `dd51c98` |
 | **D** ship-safe → first upload | **next** | — |
 | E Tier 2 on the real game · F LLM opponent pool · G Tier 3 "Ivey" · H Problem Statement / freeze | to do | — |
 
@@ -45,15 +45,24 @@ an xfail until Phase D). The slow suite passed at Phase C (261 tests, incl. a 40
 
 ## Open items for the next phases
 
-- **Phase C notes:** the test suite defaults to the mock `placeholder` format (`tests/conftest.py`); the
-  bot's default is `pokerbots`. Full 400-hand matches over the real protocol: tier2 vs tier2 and tier2 vs the
-  organisers' starter bot, 0 errors / 0 forfeits / 0 stderr warnings. Phase D flips `tools/package_submission.py`
-  to the new default and builds `bot.py`.
-- **Phase D:** three file-reading loaders to remove (`bot/brains/params.py`, `bot/sim/tables.py`,
-  `bot/game/rules_spec.py`). The hard deadline can currently reach 15 s, and replies must be under 5 s.
-- **Phase E:** ask the user about CFR (plan, Phase E step 5). Don't start it.
-- **Phase F:** the user is generating LLM bots for Discard Hold'em (same prompt per model, both PDFs
-  attached), saved under `Opps/discard/<model>/bot.py`. The user picks the held-out ones.
+The plan was finalized on 2026-10-29 (`docs/PART4_PLAN.md`): done phases are marked, and every
+phase starts by reviewing the previous one.
+
+- **Phase D (next):**
+  - D1: review Phase C first (it was merged unreviewed). That covers the inference fixes, the
+    "blind safe reply" to malformed requests, and the test counts.
+  - **Timing red flag:** one Tier 2 used ~34 s of its 60 s bank in a 400-hand self-play match
+    here. On a 2× slower server that forfeits. D5 adds a slow-machine test.
+  - Remove the three file-reading loaders (`bot/brains/params.py`, `bot/sim/tables.py`,
+    `bot/game/rules_spec.py`). The hard deadline can reach 15 s; replies must be under 5 s.
+  - Upload #1 (the user uploads).
+- **Phase E:** Tier 2 gets the lessons from the Hold'em LLM bots: an `oppstats` module, a
+  **river bluff index** (aimed at the river leak), **EV bet sizing**, and no awkward leftovers.
+  Each is kept only on the numbers. Then ask the user about CFR (don't start it). Upload #2.
+- **Phase F:** the user is generating Discard Hold'em LLM bots (the prompt is in the plan, Phase F)
+  into `Opps/discard/<model>/bot.py` and picks 2 held-out bots before seeing results.
+- **Phase G:** Tier 3 ("Ivey") builds on Phase E's Tier 2. On the river, the bluff index decides
+  calls, not MDF.
 - **1 Nov:** the Problem Statement comes out → Phase H checks (showdown rule, provisional limits).
 
 ## Environment
