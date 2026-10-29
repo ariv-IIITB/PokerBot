@@ -113,7 +113,8 @@ steadily (`lab/cfr/exact.py`); K2a and K2b agree on Leduc and on a small Discard
    so gate A compares two versions.
 
 **Export.** Average strategy → uint8 probabilities per infoset, drop infosets visited < N times
-(they fall back to Tier 2), zlib + base64 into `bot/embedded.py` via `tools/embed_data.py`.
+(they fall back to Tier 2), zlib + base64 into `bot/embedded.py` via `tools/embed_data.py`, as a
+`"blueprint"` entry of `ARTIFACTS` (`bot/artifacts.py` checks it was built for the spec).
 The embed cap is 3 MB today and the zip limit is 5 MB: measure the existing tables first and
 raise the cap only as far as the zip check allows.
 
@@ -122,7 +123,7 @@ raise the cap only as far as the zip check allows.
 - **Inputs:** our range and the opponent's range over 2-card combos (minus board, both discards and
   our cards), pot, stacks, bets so far, raises left.
   - Our range: the blueprint's probability of our own line (we know our strategy).
-  - Opponent range: Tier 2 inference weights, blended with "they played the blueprint" (a CONFIG
+  - Opponent range: `Opponent.range_weights(rec, combos)` (`bot/opponent.py`), blended with "they played the blueprint" (a CONFIG
     weight, tuned in the lab).
 - **Tree:** the real current bet plus 33 / 75 / 125 % / all-in, raises up to the cap.
 - **Algorithm:** full-width vectorized CFR (DCFR) over ~1,000 combos per side; showdown values by
@@ -148,7 +149,8 @@ raise the cap only as far as the zip check allows.
 
 ## 6. K5 — the brain
 
-- `bot/brains/tier4.py`: `Tier4Brain`, built on Tier 2/3 parts (discard, inference, oppstats, lock,
+- `bot/brains/tier4.py`: `Tier4Brain`, a policy over `bot/situation.py` (reconstruction, PIMC
+  discard, equity fallback, endgame lock) and `bot/opponent.py`, plus Tier 2/3 parts (oppstats, lock,
   timing). All numbers in one `DEFAULTS` dict so `lab.eval tier4:...` can change them.
 - Register `tier4` in `bot/main.py:BRAINS`; the default brain stays as is until section 8 passes.
 - Strategy table decoded once at start-up (inside the 5 s; measure), held in memory (≤ 1 GB total;

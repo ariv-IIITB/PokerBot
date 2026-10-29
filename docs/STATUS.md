@@ -28,6 +28,20 @@ Tests on Python 3.11 (`.venv`): fast suite 1063 passed, 2 skipped; slow suite 26
   into `main` and pushed.
 - Review each phase report against the code. The Phase B report missed one flaky test (now fixed).
 
+## Architecture refactor (2026-10-29, branch `refactor/architecture`)
+
+Seven changes from an architecture review, one commit each, play unchanged (Tier 2 vs Tier 1 with
+sample caps binding gives the same chips as before): legacy `GameConfig` retired (specs only);
+`bot/artifacts.py`; the CFR abstraction moved to `bot/abstraction.py` with one showdown rule;
+`messages_for` as the one visibility rule plus `HIDDEN_CHOICE`; one `Opponent` module;
+`bot/situation.py` under the brains. Bug fixed on the way: `lab.harness --variant X` without
+`--hands` crashed, and `--subprocess --variant X` played the embedded variant.
+**Phase E must start from this branch (or main once it is merged).** Load-sensitive tests can
+still fail under `-n auto` on this laptop (timing-bench, Tier 1 vs random); they pass on rerun.
+The package timing check is borderline on this laptop **with or without the refactor**
+(projected 42–61 % of the bank vs the 50 % limit; it was well under at Phase D): Phase E has to
+look at it.
+
 ## Findings so far
 
 - **Tier 2's main leak is river showdowns** (it loses big pots and wins small ones). This was seen in

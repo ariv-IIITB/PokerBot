@@ -65,6 +65,13 @@ Source: `docs/rules/SUMMARY.md`. *(prov.)* = provisional, may change before the 
 - `bot/game/` = the rules, pure and submit-safe (state, steps, payoffs, scoring). The lab
   engine and the bot's simulator (`bot/sim/`) run the same code. Information only flows
   through `state.emit(..., visible=...)`; hidden-information correctness is tested.
+  What a player receives for each event is `bot/game/observation.messages_for` (engine and
+  replay both use it).
+- Shared modules a brain builds on (terms in `GLOSSARY.md`): `bot/situation.py` (per decision:
+  reconstruction, equity, special-step policy, endgame lock), `bot/opponent.py` (stats +
+  inference + trust, `range_weights`), `bot/artifacts.py` (embedded precomputed data),
+  `bot/abstraction.py` (the CFR abstraction, shared with the lab trainer). New brains are
+  policies over these; don't subclass Tier 1 just to get them.
 - Wire formats live only in `bot/protocol.py` (neutral messages) and `bot/protocols/`
   (one adapter per format). Brains see only neutral objects (state, legal actions, budget).
 - `lab/` is offline tooling, never submitted; it may use anything in the dev venv.
