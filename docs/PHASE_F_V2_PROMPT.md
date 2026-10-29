@@ -15,7 +15,7 @@ and **stop for the user's review at the end. Do not merge to `main` yourself.**
 
 Tier 2 is tuned against Hold'em bots (`Opps/opp1`–`opp4`) running through a makeshift adapter. Those
 numbers say little about the real field: Discard Hold'em bots that other teams (and their LLMs)
-will submit. We need a **pool of 6 realistic Discard Hold'em opponents** that speak the real
+will submit. We need a **pool of realistic Discard Hold'em opponents (2 converted + as many new ones as needed for coverage, at most 12 in all)** that speak the real
 protocol, to (a) measure Tier 2 honestly, (b) re-check the Phase E changes, and (c) give Phase G
 (Tier 3) a training set and a held-out set.
 
@@ -52,7 +52,7 @@ run as `python3.11 bot.py`. Keep the original play style, port it:
 - Original code only inside `bot/`. These bots live in `Opps/`; **never copy anything from `Opps/`
   into `bot/`** (the originality rule in `CLAUDE.md`).
 
-### 3. Write 4 new bots, as a good LLM would
+### 3. Design the pool and write the new bots, as a good LLM would
 
 Imagine a user asks a strong LLM, with both PDFs attached, this prompt (use it verbatim as the brief,
 and store it in the pool file under `"prompt"`):
@@ -63,14 +63,30 @@ and store it in the pool file under `"prompt"`):
 > `python3.11 bot.py`, uses only the standard library, numpy and scipy, and speaks the protocol
 > exactly as specified. Give me the full code, no placeholders.
 
-Write 4 different bots that answer that prompt plausibly. They should differ in how a capable but
-single-shot LLM answer would differ (equity + pot odds, simple stats, fixed sizes, some bugs and
-blind spots), not in being secretly strong. Suggested spread (adjust if the evidence says
-otherwise): (a) tight-aggressive, Monte Carlo equity with a cheap discard heuristic; (b) loose-aggressive,
-bluffs a lot, light 3-bets, discard by sampled equity; (c) balanced/"GTO-ish", mixed frequencies,
-sizing by pot geometry, careful time management; (d) adaptive exploiter: tracks VPIP/fold-to-bet
-and shifts ranges, calls down wider vs bluffy opponents. Each is a **complete, runnable** bot (tests
-or a fuzz run included in its folder is welcome, not required).
+**You decide how many new bots to write and what kinds**, to cover as much of the plausible field as
+possible. Do not default to a fixed number. First write down (in the report, section "Pool design") the
+axes along which real submissions will differ, check which axes the two converted bots already cover,
+and add one bot per **uncovered** corner. Axes to consider, not a checklist:
+- playing style: tight vs loose, passive vs aggressive, bluff frequency, 3-bet/4-bet appetite, trappy
+  slow-play vs fast-play;
+- how it estimates strength: random-hand equity (the weak pattern in `OPPS_ANALYSIS.md`), Monte Carlo
+  vs a weighted range, hand-strength heuristics or fixed charts, no equity at all;
+- how it handles the discard: lowest card, highest pair/draw logic, sampled equity, using the
+  opponent's revealed discard or ignoring it;
+- sizing: fixed fractions, pot-geometry, EV-chosen, polarised vs merged;
+- adaptation: none, simple stats (VPIP, fold-to-bet), range narrowing, exploiting a detected nit/station;
+- engineering quality: careful time management, versus a bot that burns its bank or is near-crash-prone
+  (a few weak-but-valid bots are realistic; the field has them);
+- degenerate but plausible bots: calling station, always-raise/shove, min-raise grinder, pure
+  check/fold nit. Cheap to write; include the ones the sparring pool lacks.
+
+Aim for breadth over polish: each added bot must differ from the others in a way that changes how Tier 2
+should play against it. Typical size is 4-8 new bots; fewer if the axes are already covered, more only if a
+corner is clearly missing. Cap the total pool (converted + new) at 12, because evals are slow
+(Tier 2 plays ~22 hands/s per core). Justify the final list in a table: bot, style, which axis it adds.
+Each bot must answer the prompt plausibly as a capable single-shot LLM answer would (equity + pot odds,
+some blind spots), not be secretly strong, and be a **complete, runnable** bot (tests or a fuzz run
+in its folder are welcome, not required).
 
 **Independence rule (important):** build each new bot **in a fresh sub-agent** (Agent tool) that is
 given only `docs/rules/`, the prompt above, and its one-line style brief. The sub-agent must not read
@@ -79,8 +95,7 @@ pool independent of our bot (otherwise we would build a pool Tier 2 happens to b
 sub-agent's bot is poor, **keep it**; the real field has poor bots too. Only fix crashes and protocol
 errors if the bot cannot finish a match at all, and say so in the report.
 
-Names: `Opps/discard/<name>/bot.py`, e.g. `conv_opp3`, `conv_opp4`, `new_tag`, `new_lag`, `new_gto`,
-`new_adapt`.
+Names: `Opps/discard/<name>/bot.py`, e.g. `conv_opp3`, `conv_opp4`, `new_<style>`.
 
 ### 4. Wire them into the lab
 
@@ -96,8 +111,8 @@ Names: `Opps/discard/<name>/bot.py`, e.g. `conv_opp3`, `conv_opp4`, `new_tag`, `
 
 ### 5. Gate: ask the user for the held-out split
 
-When the 6 bots exist and pass the health check, but **before running any Tier 2 vs pool matches**,
-stop and ask the user (AskUserQuestion) which **2 of the 6** are held out. They pick before seeing
+When the bots exist and pass the health check, but **before running any Tier 2 vs pool matches**,
+stop and ask the user (AskUserQuestion) which bots are held out (about a third of the pool, at least 2; propose a number, they decide). They pick before seeing
 any result. Write `lab/opps/discard_pool.json`:
 `{"train": [...], "heldout": [...], "prompt": "<the prompt above>", "models": {name: "how it was made"},
 "date": "..."}`. Held-out bots get the health check only; nobody reads their results until Phase G's
@@ -105,7 +120,7 @@ final check.
 
 ### 6. Baseline report: `docs/reports/DISCARD_OPPS.md`
 
-Use the format of `docs/reports/OPPS_ANALYSIS.md`. For each **training** bot: style (from
+Use the format of `docs/reports/OPPS_ANALYSIS.md`. Start with the "Pool design" section (axes, coverage, the table of bots and why each was added). For each **training** bot: style (from
 `lab.opps.profile`), health, Tier 2 match score with locks on (100 pairs), chips/hand ± SE with locks
 off (50 pairs), accounting (`lab.opps.accounting`), where Tier 2 loses. Then: the common pattern
 across the pool and the old Hold'em bots, and which of Tier 2's known weak spots (river showdown
@@ -135,7 +150,7 @@ revert it silently**: report the numbers to the user.
 
 ## Done when
 
-- `Opps/discard/` holds 6 bots (2 converted, 4 new), all registered as `d_<name>`, all passing the
+- `Opps/discard/` holds the designed pool (2 converted + the new bots, with the design table in the report), all registered as `d_<name>`, all passing the
   health check (or honestly marked "would forfeit" with the reason);
 - `lab/opps/discard_pool.json` has the user's held-out pick;
 - `docs/reports/DISCARD_OPPS.md` and the Phase E re-check are committed, with numbers and SEs;
