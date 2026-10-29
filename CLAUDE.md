@@ -82,8 +82,8 @@ Next: reduced 24 (tournament simulator, hackathon-day bot + realistic opponents,
 held-out pool split, tournament-points report; no LBR), then 21 rehearsals with
 self-written variants. Phases 25–32 are not pursued.
 Part 4 (official rules, Discard Hold'em, from 2026-10-28). **The plan is `docs/PART4_PLAN.md`:
-read it before any Part 4 work.** Done: rules into `docs/rules/` and the docs update. Next, in
-order: A framework (scenario, transcript, round-trip and sandbox kits, embed generator, `lab.eval`) ·
+read it before any Part 4 work. Where we are now: `docs/STATUS.md`.** Done: rules into
+`docs/rules/`, the docs update, A and B. **Next: C.** In order: A framework (scenario, transcript, round-trip and sandbox kits, embed generator, `lab.eval`) ·
 B Discard Hold'em rules · C real protocol adapter · D ship-safe (no file reads, `bot.py`,
 ≤ 5 MB zip, 5 s reply cap, lock) → first upload · E Tier 2 on the real game · F LLM opponent pool
 (held-out split) · G **Tier 3: the "Phil Ivey" style** on top of Tier 2's inference and PIMC
@@ -192,8 +192,9 @@ final values of the provisional limits, and the organisers' starter kit match ru
 - `Opps/opp4` was a symlink to `Opps/opp 4`: check `ls -la` before deleting "duplicate" folders.
 - Tier 2 vs opp3 (Hold'em) loses mostly in river showdowns (big pots lost, small pots won), not
   preflop: measure with `lab.opps.accounting` before choosing a fix.
-- The betting step resets its raise counter each street, so the preflop BB does not count toward
-  `max_raises`. Discard Hold'em needs it to count (fix in Part 4, phase 2).
+- The betting step resets its raise counter each street, so the preflop BB did not count toward
+  `max_raises`. Fixed in Phase B with `betting.blind_counts_as_raise`.
+- Implementing sessions work from GitHub: push `main` after every phase, or they build on stale files.
 
 #### Agent skills
 

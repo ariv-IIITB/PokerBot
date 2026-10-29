@@ -5,7 +5,7 @@ from pathlib import Path
 
 from helpers import scripted_match
 
-from bot.actions import Action, LegalActions
+from bot.actions import SPECIAL, Action, LegalActions
 from bot.brains.params import load_params, per_street
 from bot.brains.tier1 import DEFAULTS, Tier1Brain
 from bot.cards import parse_cards as P
@@ -92,10 +92,12 @@ def test_good_price_calls() -> None:
     assert Tier1Brain(NO_BLUFF).decide(st, FACING, 0.02).kind in ("C", "R")
 
 
-def test_special_step_first_choice() -> None:
+def test_special_step_legal_choice() -> None:
+    # The discard is simulated now (discard_holdem is active), so the pick depends on time; only legality is fixed.
     from bot.actions import SpecialOption
     legal = LegalActions(special=SpecialOption("discard", ("0", "1", "2")))
-    assert Tier1Brain().decide(state_with("Ah,Kd,2c"), legal, 0.02) == Action.special("0")
+    a = Tier1Brain().decide(state_with("Ah,Kd,2c"), legal, 0.02)
+    assert a.kind == SPECIAL and legal.special.allows(a.choice)
 
 
 # --------------------------------------------------------------------------- integration
