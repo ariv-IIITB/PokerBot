@@ -606,6 +606,13 @@ opp4's match-utility formula (monotone in EV, so it changes nothing), opp1's dra
 simulation already counts draws), opp3's preflop structure (that is Tier 3's job, in G2; an earlier
 Hold'em test of "raise more preflop" alone made Tier 2 worse).
 
+> **Done (2026-10-29; commits on `claude/phase-e-on-refactor-c07yie`, zip `dist/upload2_phaseE.zip`, sha256 `1baec44f…`).**
+> E1 fast sampled discard and E2 embedded tables kept; smart rollouts dropped; E4 `river_bluff_slope` 0.5 kept;
+> E5 `ev_sizing`, E6 `leftover_frac` and `table_range_weight` dropped (`docs/reports/TIER2_DISCARD.md`).
+> E7 (50 pairs, full pool): beats every sparring bot, the starter, opp1, opp2; about even with opp3 (+0.10 ± 0.07);
+> **loses to tier1 (−0.64 ± 0.24) and opp4 (−0.60 ± 0.17)**; head-to-head vs the Phase D config +0.68 ± 0.26.
+> Timing needed `safety_factor` 4.5 → 5.5 (projected 2x use 37–48 %).
+
 ### Done when
 - Tier 2 beats every baseline on `discard_holdem`;
 - PIMC discard is shown to beat the simple discards;

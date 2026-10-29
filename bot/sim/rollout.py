@@ -31,17 +31,33 @@ from bot.sim.replay import Reconstruction
 SIMPLE_STEPS = frozenset({"betting", "deal_board", "showdown"})
 
 
-def rollout_policy(rng: np.random.Generator) -> Callable:
+def rollout_policy(rng: np.random.Generator, smart_discard: bool = True) -> Callable:
     def policy(st, p, legal):
         if legal.can_special:
             sp = legal.special
             if sp.is_range:
                 return Action.special(str(sp.lo if sp.name == "bid" else (sp.lo + sp.hi) // 2))
+            if smart_discard and sp.name == "discard":
+                keep = _best_discard(st, p, sp.choices)
+                if keep is not None:
+                    return Action.special(keep)
             return Action.special(sp.choices[int(rng.integers(len(sp.choices)))])
         if legal.check:
             return Action.check()
         return Action.call() if legal.call else Action.fold()
     return policy
+
+
+def _best_discard(st, p: int, choices) -> Optional[str]:
+    """The one-card discard that keeps the best hand with the board (bot.sim.discard's rule), or
+    None when this is not a plain one-card discard of real cards."""
+    from bot.sim.discard import keep_score
+    hole = st.hole[p]
+    if not all(c.isdigit() for c in choices) or len(hole) != len(choices) or min(hole) < 0:
+        return None
+    ev = st.rules.evaluator
+    return max(choices, key=lambda c: keep_score(ev, [x for i, x in enumerate(hole) if i != int(c)],
+                                                 st.board))
 
 
 def is_simple_point(st) -> bool:
@@ -190,8 +206,8 @@ def rollout_share(rec: Reconstruction, rng: np.random.Generator, time_budget_s: 
         lw_pend = []
         for j, w in enumerate(ws):
             r = np.random.default_rng(int(rng.integers(2**62)))
-            if needs_full_rollout(w) or not play_to_simple(w, rollout_policy(r), r):
-                play_to_end(w, rollout_policy(r), r)
+            if needs_full_rollout(w) or not play_to_simple(w, rollout_policy(r, rec.smart_discard), r):
+                play_to_end(w, rollout_policy(r, rec.smart_discard), r)
                 shares = w.extra.get("shares")
                 vals.append(shares[me] if shares is not None else float(w.folded == 1 - me))
                 logws.append(float(lw[j]))
@@ -251,10 +267,10 @@ def pimc(rec: Reconstruction, candidates: Sequence[Action], rng: np.random.Gener
                 r = np.random.default_rng(seed)        # same randomness for every candidate
                 apply_fn(w, a)
                 if (value_fn is None and not needs_full_rollout(w)
-                        and play_to_simple(w, rollout_policy(r), r)):
+                        and play_to_simple(w, rollout_policy(r, rec.smart_discard), r)):
                     pend.append(_pending(w, me, (len(per_world), i)))
                 else:
-                    play_to_end(w, rollout_policy(r), r)
+                    play_to_end(w, rollout_policy(r, rec.smart_discard), r)
                     row[i] = value_fn(w, me) if value_fn else float(w.stack[me])
                 rollouts += 1
             per_world.append(row)

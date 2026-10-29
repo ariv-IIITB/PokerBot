@@ -6,7 +6,7 @@ from the engine's time_left on every request, so the budget follows the real clo
 
 Measured on discard_holdem (Phase D): a hand takes ~5.1-5.6 decisions of ours (preflop, flop,
 discard, turn, river and every re-raise), and a brain that spends its whole budget uses
-usable / safety of the bank. safety 4.5 keeps that near 20 %, so a server 2x slower still lands
+usable / safety of the bank. safety 5.5 keeps that near 20 %, so a server 2x slower still lands
 under 50 %, and the lab's slow-machine test (engine charges every reply double) checks it.
 
 The hard limit is the last line of defence for the 5 s per-reply rule: it never exceeds
@@ -28,7 +28,7 @@ from typing import Optional
 @dataclass
 class TimingConfig:
     decisions_per_hand: float = 5.5   # measured: 5.1-5.6 on discard_holdem (the discard counts)
-    safety_factor: float = 4.5        # slack for a slower server and fixed per-decision costs
+    safety_factor: float = 5.5        # slack for a slower server and fixed per-decision costs
     reserve_frac: float = 0.10        # bank fraction never planned for
     max_budget_s: float = 0.25        # cap for any single decision
     catch_up_cap: float = 1.2         # ...and x the opening pace: a bank saved early is not spent late

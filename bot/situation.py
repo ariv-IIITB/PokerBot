@@ -12,14 +12,16 @@ decision (`at(state)`; asking twice for the same decision returns the same objec
 
 Brains are policies over this (Tier 1, Tier 2, lab brains), so none has to inherit it.
 Parameters (the brain's dict): equity_budget_frac, max_samples, use_sim, rollout_worlds,
-special_budget_frac, pimc_worlds, use_tables, lock_enabled, lock_assume_alternating.
+special_budget_frac, pimc_worlds, discard_mode, smart_rollout_discard, use_tables,
+table_range_weight, lock_enabled, lock_assume_alternating.
 """
 from __future__ import annotations
 
 from typing import Optional
 
-from bot.actions import Action, LegalActions
+from bot.actions import RAISE, Action, LegalActions
 from bot.equity import equity
+from bot.game.steps.cards import safe_action_for_hole
 from bot.log import warn
 from bot.sim.policies import decide_special
 from bot.sim.replay import reconstruct
@@ -84,17 +86,19 @@ class Situation:
         return self.pc._equity(self, budget_s)
 
     def special(self, legal: LegalActions, budget_s: float) -> Action:
-        """Simulation policy for a special step (the step's default option on any failure)."""
+        """Simulation policy for a special step; without it (or on failure) the rules' own
+        discard fallback, else the first option."""
         p = self.pc.p
         if p["use_sim"] and self.hand is not None and self.rec is not None:
             try:
                 return decide_special(self.rec, legal, self.pc.rng,
                                       budget_s * p["special_budget_frac"],
                                       {"pimc_worlds": int(p["pimc_worlds"]),
+                                       "discard_mode": str(p.get("discard_mode", "fast")),
                                        "_inference": self.pc.opponent.model})
             except Exception as e:
                 warn(f"special-step policy failed: {e!r}")
-        return Action.special(legal.special.default())  # type: ignore[union-attr]
+        return safe_action_for_hole(legal, self.hand.hole if self.hand is not None else ())
 
     def locked(self) -> bool:
         """The endgame lock (off unless the brain's params set lock_enabled)."""
@@ -147,6 +151,7 @@ class Perception:
             level = (h.sb, h.bb, h.ante or 0, getattr(self.rules, "straddle", 0)) \
                 if h.bb is not None else None
             rec = reconstruct(self.rules, h, self.rng, level=level)
+            rec.smart_discard = bool(self.p.get("smart_rollout_discard", False))
             self.opponent.saw(h.hand_id, rec)
             return rec
         except Exception as e:
@@ -168,6 +173,11 @@ class Perception:
                     and len(h.hole) == self.tables.classes.size and len(h.card_log) == 1):
                 try:
                     eq = self.tables.start_share(h.hole)      # precomputed, no sampling
+                    w = float(p.get("table_range_weight", 0.0))
+                    if (w > 0 and self.tables.eq_range is not None
+                            and any(r.actor != ME and r.action.kind == RAISE for r in h.history)):
+                        vs_range = float(self.tables.eq_range[self.tables.classes.class_of(h.hole)])
+                        eq = (1 - w) * eq + w * vs_range      # a raiser's range is stronger than random
                 except Exception:
                     eq = None
             if eq is None and p["use_sim"] and s.rec is not None:

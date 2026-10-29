@@ -30,7 +30,7 @@ Source: `docs/rules/SUMMARY.md`. *(prov.)* = provisional, may change before the 
   match. It is charged from when a request is sent until the full reply arrives, for **both
   action and discard** requests. Read `total_hands` and `time_bank_ms` from `init` and
   `time_left_ms` from each request; never hardcode. Assume the server is ~2× slower than a laptop.
-  Pacing (`bot/timing.py`): ~5.5 decisions of ours per hand (the discard counts), safety 4.5, budgets
+  Pacing (`bot/timing.py`): ~5.5 decisions of ours per hand (the discard counts), safety 5.5 (was 4.5 until Phase E), budgets
   capped at 1.2× the opening pace, hard limit ≤ 0.3 × the reply limit (1.5 s). Real use is ~22–24 %
   of the bank; projected at 2× slower it must stay ≤ 50 % (`lab.timing_bench`, `tests/test_timing_slow.py`).
 - **Any single reply within 5 s** *(prov.)*. **Wall-clock kill:** 180 s per Stage 1 match,

@@ -29,6 +29,7 @@ from bot.log import warn
 from bot.protocol import HandEnd, HandStart, Message, OppAction, Showdown
 from bot.sim.inference import DEFAULTS as INFERENCE_DEFAULTS
 from bot.sim.inference import Inference, Trust
+from bot.strategy.oppstats import OppStats, hand_percentile
 from bot.state import ME, GameState
 
 DEFAULT_PRIORS = {"vpip": 0.55, "pfr": 0.25, "aggression": 0.35, "fold_to_raise": 0.40,
@@ -113,6 +114,7 @@ class Opponent:
         self.trust = Trust()
         self.use_trust = use_trust
         self.stats = OpponentModel(priors={**DEFAULT_PRIORS, **(priors or {})}, k=k)
+        self.spots: Optional[OppStats] = None        # per-spot stats + bluff index (Tier 2 sets it)
         self._last = None                            # (hand id, Reconstruction) we decided on
 
     @property
@@ -131,8 +133,14 @@ class Opponent:
             self.model.params["gamma"] = float(self.base["gamma"]) * self.trust.level("bet")
             self.model.params["beta"] = float(self.base["beta"]) * self.trust.level("discard")
 
-    def observe(self, state: GameState, msg: Message, rng) -> None:
+    def observe(self, state: GameState, msg: Message, rng, rules=None) -> None:
+        """Feed one message. `rules` (the variant) lets shown hands be ranked for the bluff index."""
         self.stats.update(state, msg)
+        if self.spots is not None:
+            try:                                     # statistics never decide a hand's outcome
+                self.spots.update(state, msg, None if rules is None else self._percentile(state, rules))
+            except Exception as e:
+                warn(f"opponent spot stats failed: {e!r}")
         if isinstance(msg, Showdown) and self.model.enabled and self.use_trust:
             last = self._last
             if last is None or state.hand is None or last[0] != state.hand.hand_id:
@@ -141,6 +149,11 @@ class Opponent:
                 self.trust.update(self.model.decision_llr(last[1], list(msg.oppcards), rng))
             except Exception as e:
                 warn(f"trust update failed: {e!r}")
+
+    @staticmethod
+    def _percentile(state: GameState, rules):
+        dead = state.hand.dead_cards if state.hand is not None else ()
+        return lambda hole, board: hand_percentile(rules.evaluator, hole, board, rules.deck, dead)
 
     def range_weights(self, rec, combos: np.ndarray, rng) -> np.ndarray:
         """Probability of each explicit opponent hand given their visible choices (sums to 1).
