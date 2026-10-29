@@ -29,7 +29,7 @@
   "bluff_scale_max": 2.0,
   "value_shift": 0.15,
   "value_size_shift": 0.6,
-  "aggr_call_shift": 0.1,
+  "aggr_call_shift": 0.0,
   "pressure_aggr_from": 0.6,
   "pressure_aggr_shift": 1.0,
   "lock_enabled": true,

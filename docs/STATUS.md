@@ -13,7 +13,7 @@ Rules: `docs/rules/` (`SUMMARY.md` first).
 | **B** Discard Hold'em rules (`discard_holdem` spec is active, BB counts as a raise, fallback discard) | done, reviewed | `a44e234`, logs `57ed850` |
 | **C** real protocol adapter (`bot/protocols/pokerbots.py`, now the default) | done, reviewed in D1 | `d131932`, `dd51c98` |
 | **D** ship-safe → first upload | done; **upload #1 = `dist/upload1_phaseD.zip`** (the user uploads) | `accb344` |
-| **E** Tier 2 on the real game (discard, tables, oppstats, bluff-catch, EV sizing) | done on `claude/phase-e-on-refactor-c07yie`, awaiting review; **upload #2 = `dist/upload2_phaseE.zip`** | see git log |
+| **E** Tier 2 on the real game (discard, tables, oppstats, bluff-catch, EV sizing) | done and merged; F0 investigation (Tier 2 vs Tier 1) done; **latest upload = #3, `dist/upload3_phaseF0.zip`** (#2 lacked its tables) | see git log |
 | F LLM opponent pool · G Tier 3 "Ivey" · H Problem Statement / freeze | to do | — |
 
 Tests on Python 3.11 (`.venv`): fast suite 1063 passed, 2 skipped; slow suite 267 passed (21 min with
@@ -57,6 +57,16 @@ look at it.
   server; limit 50 %) with ~5.5 decisions per hand. Every E/G change must re-pass `tests/test_timing_slow.py`.
 - Tier 2 is **not deterministic run to run** (its sample counts depend on wall-clock time), so equal
   seeds don't give equal chips. Compare with enough pairs and SEs.
+
+## Phase F0 (2026-10-29): Tier 2 vs Tier 1 investigated
+
+Report: `docs/reports/TIER2_VS_TIER1.md`. The E7 loss to Tier 1 was partly noise (−0.64 at 50 pairs, −0.10/−0.22 at 100/60
+pairs on other seeds). The one extra that cost chips, `aggr_call_shift` (call lighter vs aggressive opponents), is now
+**off** (+0.64 ± 0.29 vs tier1, +0.55 ± 0.24 vs opp4, confirmed on fresh seeds; costs 4 chips/hand vs maniac, which
+we beat 100 % anyway). E4 stays (turning it off is worse). **Packaging bug:** upload #2 had no embedded tables; the
+builder now refuses without `data/<variant>/`; use upload #3.
+Do not run `tools.embed_data` or the package builder without `data/discard_holdem/` (gitignored; rebuild with
+`lab.precompute --variant discard_holdem --samples 6000 --range-top 0.3`).
 
 ## Open items for the next phases
 

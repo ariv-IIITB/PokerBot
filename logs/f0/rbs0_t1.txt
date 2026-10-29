@@ -1,0 +1,1 @@
+tier2[{"river_bluff_slope":0.0}]-nolock vs tier1-nolock: -0.50 ± 0.18 chips/hand | match score 0.435 ± 0.035 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 894.7s (89/s)

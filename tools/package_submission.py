@@ -135,7 +135,15 @@ def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src, dst)
     # The embedded data: generated for THIS spec (not the repo's committed copy).
-    (out / "bot" / "embedded.py").write_text(embed_data.render(str(spec_path)))
+    rendered = embed_data.render(str(spec_path))
+    committed = (ROOT / "bot" / "embedded.py")
+    if ("ARTIFACTS = {}" in rendered and committed.is_file()
+            and "ARTIFACTS = {}" not in committed.read_text()):
+        # Upload #2 shipped without its tables this way: data/<variant>/ was missing on the build machine.
+        raise SystemExit("refusing to package: the committed bot/embedded.py has tables but data/<variant>/ "
+                         "is missing or stale, so the package would ship without them. Rebuild the tables "
+                         "(lab.precompute) or restore data/ first.")
+    (out / "bot" / "embedded.py").write_text(rendered)
     # Trimmed registries: unused plugins are absent, so point the defaults at what we ship.
     _patch(out / "bot" / "main.py", 'DEFAULT_BRAIN = "tier2"', f'DEFAULT_BRAIN = "{brain}"')
     _patch(out / "bot" / "protocols" / "__init__.py", 'DEFAULT = "pokerbots"',

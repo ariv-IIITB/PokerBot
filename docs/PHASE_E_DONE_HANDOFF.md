@@ -1,5 +1,8 @@
 # Handoff after Phase E (2026-10-29)
 
+> **Correction (Phase F0):** upload #2 was built without the embedded tables and is superseded by upload #3
+> (`dist/upload3_phaseF0.zip`, sha `38705aa4…`). `aggr_call_shift` is now 0. See `docs/reports/TIER2_VS_TIER1.md`.
+
 Phase E is merged into `main` (`f9a858a`). Read `CLAUDE.md`, `docs/STATUS.md`, `docs/PART4_PLAN.md` first.
 Upload #2 is `dist/upload2_phaseE.zip` (sha256 `1baec44f…`, 113 KB). `dist/` is not in git: rebuild with
 `.venv/bin/python -m tools.package_submission --zip --stage2`.

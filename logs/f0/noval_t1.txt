@@ -1,0 +1,1 @@
+tier2[{"value_shift":0.0,"value_size_shift":0.0}]-nolock vs tier1-nolock: -0.21 ± 0.20 chips/hand | match score 0.502 ± 0.035 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 892.5s (90/s)
