@@ -317,11 +317,23 @@ def play_real(tmp_path, brain_a, brain_b, hands, seed=1):
     return r, ea.read_text(), eb.read_text()
 
 
-def assert_clean(r, hands, *stderr) -> None:
+DEADLINE_WARN = "brain exceeded hard deadline"
+
+
+def assert_clean(r, hands, *stderr) -> int:
+    """No forfeit, no illegal reply (so the engine sent no notice), no malformed line. Under
+    machine load a brain can overrun its short hard deadline and fall back to Tier 0: that is
+    legal play, not an error, so it is counted and returned (timing data), not asserted away."""
     assert r.hands_played == hands and r.forfeit is None
-    assert r.errors == [0, 0]                         # no illegal reply: so the engine sends no notice
+    assert r.errors == [0, 0]
+    hits = 0
     for text in stderr:
-        assert "WARN" not in text, text[:500]         # the bots saw no malformed line either
+        warns = [ln for ln in text.splitlines() if "WARN" in ln]
+        hits += sum(DEADLINE_WARN in ln for ln in warns)
+        other = [ln for ln in warns if DEADLINE_WARN not in ln]
+        assert not other, other[:3]
+    print(f"\ndeadline hits: {hits} in {hands} hands")
+    return hits
 
 
 def test_full_match_tier1_vs_tier2_over_the_real_protocol(tmp_path) -> None:
@@ -334,6 +346,30 @@ def test_full_400_hand_match_our_bot_vs_our_bot_over_the_real_protocol(tmp_path)
     r, ea, eb = play_real(tmp_path, "tier2", "tier2", hands=400)
     assert_clean(r, 400, ea, eb)
     assert min(r.bank_left) > 0
+
+
+def test_a_request_that_blows_up_in_processing_still_gets_a_reply() -> None:
+    """Silence forfeits the match: an error after parsing (here, in the brain's own hooks and the
+    state) must still produce the blind safe reply."""
+    class Exploding(Bot):
+        def on_message(self, msg):
+            if isinstance(msg, ActRequest):
+                raise RuntimeError("boom")
+            return super().on_message(msg)
+
+    out = io.StringIO()
+    bot = Exploding(ScriptedBrain(), out, adapter=get_adapter("pokerbots"))
+    for text in example_lines("discard_request"):
+        bot.handle_line(text)
+    assert out.getvalue().splitlines() == ['{"type":"action","action":"check"}'] * 2 + \
+        ['{"type":"discard","card":"7c"}']
+    assert bot.brain_errors == 3
+
+
+def test_a_broken_discard_request_still_discards_from_its_own_hole_cards() -> None:
+    bot, out = feed(example_lines('"new_hand"') + [
+        '{"type":"discard_request","hand_id":1,"hole_cards":["Kh","2s","2c"],"board":'])
+    assert out.splitlines() == ['{"type":"discard","card":"2s"}']       # the rules' tie-break: s first
 
 
 def test_starter_bot_plays_a_match_over_the_real_protocol(tmp_path) -> None:

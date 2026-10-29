@@ -97,12 +97,19 @@ class Bot:
         if not msgs:
             return True  # blank or unknown: ignore
         action = None
-        for msg in msgs:                     # a line may carry several messages; one request at most
-            a = self.on_message(msg)
-            if a is not None:
-                action = a
-        if action is not None and self.out is not None:
-            self.out.write(self.adapter.encode_action(action) + "\n")
+        try:
+            for msg in msgs:                 # a line may carry several messages; one request at most
+                a = self.on_message(msg)
+                if a is not None:
+                    action = a
+            reply = self.adapter.encode_action(action) if action is not None else None
+        except Exception as e:               # a request must always be answered: silence forfeits
+            botlog.warn(f"error handling {line.strip()[:120]!r}: {e!r}")
+            self.brain_errors += 1
+            reply = self.adapter.recover(line) if any(isinstance(m, ActRequest) for m in msgs) \
+                else None
+        if reply and self.out is not None:
+            self.out.write(reply + "\n")
             self.out.flush()
         return not any(isinstance(m, MatchEnd) for m in msgs)
 

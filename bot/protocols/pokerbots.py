@@ -25,6 +25,7 @@ placeholder index "0": the replay maps the revealed card onto whichever hidden s
 from __future__ import annotations
 
 import json
+import re
 from typing import Optional
 
 from bot.actions import (CALL, CHECK, FOLD, RAISE, SPECIAL, Action, LegalActions,
@@ -303,11 +304,23 @@ class PokerbotsAdapter(Adapter):
         reply forfeits the match. A blind check is safe (an illegal action is corrected to check
         if legal, else fold); a discard names our lowest card. Anything else gets no reply."""
         if '"discard_request"' in line:
-            card = fallback_discard(self.hole) if self.hole else parse_card("2c")
+            hole = self._hole_in(line) or self.hole
+            card = fallback_discard(hole) if hole else parse_card("2c")
             return _compact({"type": "discard", "card": format_card(card)})
         if '"action_request"' in line:
             return _compact({"type": "action", "action": "check"})
         return None
+
+    @staticmethod
+    def _hole_in(line: str) -> list[int]:
+        """The 3 hole cards named in an otherwise broken discard_request (a regex, since the
+        line may not even be JSON), else []."""
+        m = re.search(r'"hole_cards"\s*:\s*\[([^\]]*)\]', line)
+        try:
+            hole = [parse_card(c) for c in re.findall(r'"([^"]+)"', m.group(1))] if m else []
+        except Exception:
+            return []
+        return hole if len(hole) == 3 and len(set(hole)) == 3 else []
 
     # ------------------------------------------------------------------ engine side: neutral -> wire
 

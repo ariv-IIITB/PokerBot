@@ -47,9 +47,16 @@ def test_empty_input_exits_cleanly() -> None:
 
 
 def test_startup_time() -> None:
+    """Start-up must be well inside the 5 s allowed. Wall time is meaningless under a loaded
+    machine (pytest -n auto), so judge the child's own CPU time; the wall bound is loose. The
+    packaged bot's strict wall-clock start-up check runs serially in tools/package_submission."""
+    import resource
+    before = resource.getrusage(resource.RUSAGE_CHILDREN)
     t0 = time.perf_counter()
     proc = run(["-m", "bot.main"], ("\n".join(encode([MatchInfo(), MatchEnd()])) + "\n").encode())
     elapsed = time.perf_counter() - t0
-    print(f"\nbot startup + exit: {elapsed * 1000:.0f} ms")
+    after = resource.getrusage(resource.RUSAGE_CHILDREN)
+    cpu = (after.ru_utime - before.ru_utime) + (after.ru_stime - before.ru_stime)
+    print(f"\nbot startup + exit: {elapsed * 1000:.0f} ms wall, {cpu * 1000:.0f} ms cpu")
     assert proc.returncode == 0
-    assert elapsed < 2.0
+    assert cpu < 1.0 and elapsed < 5.0
