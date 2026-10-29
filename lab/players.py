@@ -90,7 +90,7 @@ class SubprocessPlayer:
     def __init__(self, cmd: Optional[list[str]] = None, cwd: Optional[str] = None,
                  name: str = "subprocess", stderr_to: Optional[str] = None,
                  variant_path: Optional[str] = None, protocol: Optional[str] = None) -> None:
-        """variant_path: a spec JSON the bot should play (sets $POKERBOT_VARIANT).
+        """variant_path: a spec JSON the bot should play (its JSON text goes to $POKERBOT_VARIANT_JSON).
         protocol: wire format (an adapter name; default $POKERBOT_PROTOCOL or placeholder).
         The bot process is started with the same $POKERBOT_PROTOCOL."""
         self.name = name
@@ -100,7 +100,7 @@ class SubprocessPlayer:
         env = dict(os.environ)
         env["POKERBOT_PROTOCOL"] = self.adapter.name
         if variant_path:
-            env["POKERBOT_VARIANT"] = str(variant_path)
+            env["POKERBOT_VARIANT_JSON"] = Path(variant_path).read_text()
         self.proc = subprocess.Popen(self.cmd, cwd=cwd or str(ROOT), stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE, stderr=self._err, bufsize=0,
                                      env=env)

@@ -99,24 +99,23 @@ def to_rules(variant: Any, evaluator: Optional[Any] = None) -> Rules:
     return rules_from_config(variant, evaluator)
 
 
-ACTIVE_SPEC = "active.json"
-
-
 def active_rules() -> Rules:
-    """The variant the bot plays: $POKERBOT_VARIANT or variant/active.json if present and
-    valid, otherwise the built-in GameConfig. Never raises."""
+    """The variant the bot plays: the spec JSON *text* in $POKERBOT_VARIANT_JSON (the lab's way
+    to pick a variant without a file read), else the spec embedded in bot/embedded.py, else the
+    built-in GameConfig. Never raises."""
+    import json
     import os
-    from pathlib import Path
-    candidates = [os.environ.get("POKERBOT_VARIANT"),
-                  str(Path(__file__).resolve().parents[2] / "variant" / ACTIVE_SPEC)]
-    for path in candidates:
-        if path and os.path.isfile(path):
-            try:
-                from variant.spec import VariantSpec
-                return to_rules(VariantSpec.load(path))  # sandbox-allow: variant/active.json, embedded in Phase D
-            except Exception as e:  # bad spec: fall back, but say so
-                from bot.log import warn
-                warn(f"could not use variant spec {path}: {e!r}")
+    from variant.spec import VariantSpec
+    sources = []
+    if os.environ.get("POKERBOT_VARIANT_JSON"):
+        sources.append(("$POKERBOT_VARIANT_JSON", lambda: json.loads(os.environ["POKERBOT_VARIANT_JSON"])))
+    sources.append(("bot/embedded.py", lambda: __import__("bot.embedded", fromlist=["SPEC"]).SPEC))
+    for label, get in sources:
+        try:
+            return to_rules(VariantSpec.from_dict(get()))
+        except Exception as e:  # bad spec: fall back, but say so
+            from bot.log import warn
+            warn(f"could not use variant spec from {label}: {e!r}")
     from variant.rules import DEFAULT_CONFIG, GameConfig
     if DEFAULT_CONFIG == GameConfig():
         # The built-in default is plain Hold'em: use its spec so precomputed data can match.

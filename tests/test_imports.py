@@ -71,10 +71,7 @@ READ_CALLS = {"open", "load", "fromfile", "read_text", "read_bytes", "listdir", 
               "glob", "rglob", "iterdir", "system", "fork", "popen", "Popen", "spawn",
               "posix_spawn", "Thread", "Timer", "start_new_thread", "ThreadPoolExecutor"}
 FLAGGED_PREFIXES = ("exec",)                       # os.execv, os.execvp, ...
-SANDBOX_ALLOW = {
-    "bot/brains/params.py", "bot/sim/tables.py",
-    "bot/game/rules_spec.py",        # reads variant/active.json through VariantSpec.load
-}
+SANDBOX_ALLOW: set[str] = set()   # Phase D removed the loaders' allow-list: nothing may read files
 ALLOW_MARK = "# sandbox-allow:"
 
 

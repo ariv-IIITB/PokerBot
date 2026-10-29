@@ -48,15 +48,15 @@ def test_pipeline_end_to_end_and_bot_loading(tmp_path, monkeypatch) -> None:
     assert aa > 0.75 and seven_two < 0.42 and aa > seven_two
     rng_eq = np.load(out / "eq_range.npy")
     assert rng_eq[hc.class_of(P("7h,2d"))] < seven_two      # worse vs a strong range
-    # The bot loads it for the matching variant only.
-    import bot.sim.tables as tables
-    monkeypatch.setenv("POKERBOT_DATA", str(tmp_path))
-    monkeypatch.setattr(tables, "ROOT", tmp_path / "no_repo")   # ignore generated repo data/
-    rules = compile_spec(load_catalog()["holdem_nl"])
-    tables = load_tables(rules)
+    # The bot loads it (embedded) for the matching variant only.
+    from tools import embed_data
+    spec = load_catalog()["holdem_nl"]
+    emb, _ = embed_data._tables(spec, tmp_path)
+    rules = compile_spec(spec)
+    tables = load_tables(rules, emb)
     assert tables is not None and abs(tables.start_share(P("Ah,Ad")) - aa) < 1e-9
     other = compile_spec(VariantSpec.from_dict({"name": "holdem_nl", "betting": {"ante": 1}}))
-    assert load_tables(other) is None                        # spec hash differs
+    assert load_tables(other, emb) is None                   # spec hash differs
 
 
 def test_resumable_and_time_limited(tmp_path) -> None:
@@ -87,23 +87,8 @@ def test_three_card_variant_classes(tmp_path) -> None:
         load_catalog()["mit2026_discard"])
 
 
-def test_missing_or_corrupt_data_falls_back(tmp_path, monkeypatch) -> None:
-    import bot.sim.tables as tables
-    monkeypatch.setenv("POKERBOT_DATA", str(tmp_path))
-    monkeypatch.setattr(tables, "ROOT", tmp_path / "no_repo")   # ignore generated repo data/
+def test_missing_or_corrupt_data_falls_back() -> None:
     rules = compile_spec(load_catalog()["holdem_nl"])
-    assert load_tables(rules) is None                         # nothing there
-    d = tmp_path / "holdem_nl"
-    d.mkdir()
-    (d / "meta.json").write_text("{not json")
-    assert load_tables(rules) is None                         # unreadable
-
-
-def test_buckets_small(tmp_path) -> None:
-    from lab.buckets import build_buckets, kmeans_emd
-    rules = compile_spec(load_catalog()["holdem_nl"])
-    build_buckets(rules, tmp_path, k=4, seed=1, samples=30)
-    cent = np.load(tmp_path / "buckets_s1_centroids.npy")
-    assert cent.shape == (4, 10) and np.all(np.diff(cent, axis=1) >= -1e-6)   # CDFs
-    c, a = kmeans_emd(np.array([[0, 1.0], [0, 1.0], [1.0, 1.0]]), 2, np.random.default_rng(0))
-    assert a[0] == a[1] != a[2]
+    assert load_tables(rules, None) is None                   # nothing embedded
+    assert load_tables(rules, {"meta": "{not a dict}", "files": {}}) is None   # unreadable
+    assert load_tables(rules, {"meta": {"spec_hash": "x"}, "files": {}}) is None

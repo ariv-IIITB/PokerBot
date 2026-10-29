@@ -92,14 +92,14 @@ def test_random_specs_valid_and_deterministic() -> None:
     compile_spec(random_supported_spec(3))
 
 
-def test_active_rules_env_override(tmp_path, monkeypatch) -> None:
-    path = tmp_path / "v.json"
-    path.write_text(json.dumps({"name": "omaha_test", "hole_cards": 4,
-                                "evaluation": {"hole_exact": 2}}))
-    monkeypatch.setenv("POKERBOT_VARIANT", str(path))
+def test_active_rules_env_override(monkeypatch) -> None:
+    text = json.dumps({"name": "omaha_test", "hole_cards": 4, "evaluation": {"hole_exact": 2}})
+    monkeypatch.setenv("POKERBOT_VARIANT_JSON", text)          # the spec JSON text, not a path
     assert active_rules().name == "omaha_test"
-    path.write_text("{broken")
-    assert active_rules().name in ("config", "holdem_nl", "discard_holdem")   # falls back, never raises
+    monkeypatch.setenv("POKERBOT_VARIANT_JSON", "{broken")
+    assert active_rules().name == "discard_holdem"             # falls back to the embedded spec
+    monkeypatch.delenv("POKERBOT_VARIANT_JSON")
+    assert active_rules().name == "discard_holdem"
 
 
 def test_to_rules_accepts_everything() -> None:

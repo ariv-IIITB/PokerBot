@@ -1,30 +1,23 @@
-"""Hyperparameter loading: built-in defaults <- bot/config/<name>.json <- explicit overrides.
+"""Hyperparameter loading: built-in defaults <- bot/embedded.PARAMS[name] <- explicit overrides.
 
-The JSON file is optional (read-only access; missing or broken file = defaults), so the
-bot always starts even if data files aren't shipped. Unknown keys are ignored with a warning.
+The bot cannot read files at run time, so the shipped values (bot/config/*.json) are embedded
+into bot/embedded.py by tools/embed_data.py. A missing or broken embedded entry means defaults,
+so the bot always starts. Unknown keys are ignored with a warning.
 """
 from __future__ import annotations
 
-import json
-from pathlib import Path
 from typing import Any, Optional
 
 from bot.log import warn
 
-CONFIG_DIR = Path(__file__).resolve().parent.parent / "config"
 
-
-def load_params(name: str, defaults: dict[str, Any], overrides: Optional[dict] = None,
-                config_dir: Optional[Path] = None) -> dict[str, Any]:
+def load_params(name: str, defaults: dict[str, Any], overrides: Optional[dict] = None) -> dict[str, Any]:
     params = dict(defaults)
-    path = (config_dir or CONFIG_DIR) / f"{name}.json"
     try:
-        with open(path, "r", encoding="utf-8") as f:  # sandbox-allow: bot/config/*.json, embedded in Phase D
-            _merge(params, json.load(f), str(path))
-    except FileNotFoundError:
-        pass
-    except Exception as e:  # unreadable / invalid JSON: run on defaults
-        warn(f"could not read {path}: {e!r}; using defaults")
+        from bot import embedded                 # looked up per call so tests can swap PARAMS
+        _merge(params, embedded.PARAMS.get(name, {}), f"embedded {name}")
+    except Exception as e:                        # broken module: run on defaults
+        warn(f"could not use embedded params for {name}: {e!r}; using defaults")
     if overrides:
         _merge(params, overrides, "overrides")
     return params

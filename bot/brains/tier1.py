@@ -64,8 +64,8 @@ class Tier1Brain(Brain):
     name = "tier1"
     param_file = "tier1"
 
-    def __init__(self, config: Optional[dict] = None, game=None, config_dir=None) -> None:
-        self.p = load_params(self.param_file, self.defaults(), config, config_dir)
+    def __init__(self, config: Optional[dict] = None, game=None) -> None:
+        self.p = load_params(self.param_file, self.defaults(), config)
         # `game`: GameConfig, VariantSpec or Rules; default = the bot's active variant.
         self.rules = to_rules(game) if game is not None else active_rules()
         self.rng = np.random.default_rng(int(self.p["seed"]))

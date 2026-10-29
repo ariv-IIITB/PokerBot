@@ -39,19 +39,28 @@ FREE = LegalActions(check=True, raise_min=2, raise_max=380)
 
 # --------------------------------------------------------------------------- params
 
-def test_params_missing_file_uses_defaults(tmp_path) -> None:
-    assert load_params("tier1", DEFAULTS, config_dir=tmp_path) == DEFAULTS
+def test_params_missing_entry_uses_defaults(monkeypatch) -> None:
+    import bot.embedded
+    monkeypatch.setattr(bot.embedded, "PARAMS", {})
+    assert load_params("tier1", DEFAULTS) == DEFAULTS
 
 
-def test_params_file_and_overrides(tmp_path) -> None:
-    (tmp_path / "tier1.json").write_text(json.dumps({"bluff_freq": 0.3, "bogus": 1, "_c": "x"}))
-    p = load_params("tier1", DEFAULTS, {"call_margin": 0.5}, config_dir=tmp_path)
+def test_params_embedded_and_overrides(monkeypatch) -> None:
+    import bot.embedded
+    monkeypatch.setattr(bot.embedded, "PARAMS", {"tier1": {"bluff_freq": 0.3, "bogus": 1}})
+    p = load_params("tier1", DEFAULTS, {"call_margin": 0.5})
     assert p["bluff_freq"] == 0.3 and p["call_margin"] == 0.5 and "bogus" not in p
 
 
-def test_params_broken_file_uses_defaults(tmp_path) -> None:
-    (tmp_path / "tier1.json").write_text("{not json")
-    assert load_params("tier1", DEFAULTS, config_dir=tmp_path) == DEFAULTS
+def test_params_broken_embedded_uses_defaults(monkeypatch) -> None:
+    import bot.embedded
+    monkeypatch.setattr(bot.embedded, "PARAMS", "not a dict")
+    assert load_params("tier1", DEFAULTS) == DEFAULTS
+
+
+def test_shipped_params_are_the_embedded_ones() -> None:
+    import bot.embedded
+    assert load_params("tier1", DEFAULTS) == {**DEFAULTS, **bot.embedded.PARAMS["tier1"]}
 
 
 def test_shipped_config_matches_known_keys() -> None:
@@ -114,15 +123,7 @@ def test_tier1_in_discard_variant() -> None:
     assert m.errors == [0, 0] and m.forfeit is None
 
 
-def test_runs_with_config_files_missing(tmp_path) -> None:
-    # In-process with an empty config dir...
-    brain = Tier1Brain(config_dir=tmp_path / "nothing_here")
-    assert brain.p == DEFAULTS
-    # ...and as a subprocess from a snapshot whose bot/config/ has been removed.
-    snap = create_snapshot("nocfg", root=tmp_path)
-    for f in (snap / "bot" / "config").iterdir():
-        f.unlink()
-    data = ("\n".join(scripted_match(hands=3)) + "\n").encode()
-    proc = subprocess.run([sys.executable, "-m", "bot.main", "--brain", "tier1"], input=data,
-                          capture_output=True, cwd=snap, timeout=60)
-    assert proc.returncode == 0 and len(proc.stdout.decode().splitlines()) == 12
+def test_runs_with_embedded_params_missing(monkeypatch) -> None:
+    import bot.embedded
+    monkeypatch.setattr(bot.embedded, "PARAMS", {})
+    assert Tier1Brain().p == DEFAULTS

@@ -1,8 +1,8 @@
 """Runtime sandbox check: play a transcript through the real entry point under an audit hook
 (tests/kit/sandbox_run.py) and fail on any file read, socket or process the sandbox forbids.
 
-Phase D embeds the data files and removes the temporary allow-list in test_imports.py; this
-test then flips from an expected failure to a pass (strict xfail makes that flip loud).
+Phase D embedded the data files (bot/embedded.py) and emptied the allow-list in
+test_imports.py, so this test must pass.
 """
 import subprocess
 import sys
@@ -36,8 +36,15 @@ def test_runner_reports_violations(tmp_path) -> None:
     assert "os.system" in events and "subprocess.Popen" not in events
 
 
-@pytest.mark.xfail(strict=True, reason="loaders still read files; embedded in Phase D")
 def test_bot_runs_inside_the_sandbox() -> None:
     bad, out = run_sandboxed("placeholder", TRANSCRIPT)
     assert out.strip(), "the bot sent no actions"
+    assert not bad, "\n".join(bad)
+
+
+def test_bot_runs_inside_the_sandbox_over_the_real_protocol() -> None:
+    """The Protocol section 10 hand, real wire format, the shipped brain: no forbidden event."""
+    example = ROOT / "tests" / "fixtures" / "protocol" / "example_hand.txt"
+    bad, out = run_sandboxed("pokerbots", example)
+    assert len(out.splitlines()) == 5, out               # raise, raise, discard, check, raise
     assert not bad, "\n".join(bad)

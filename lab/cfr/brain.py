@@ -17,6 +17,7 @@ each betting decision was made (table hit, off-tree, endgame lock, ...).
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any, Optional
 
@@ -24,8 +25,15 @@ from bot.actions import Action, LegalActions
 from bot.brains.tier2 import Tier2Brain, lock_margin
 from bot.log import log
 from lab.cfr.abstraction import Bucketer, abstract_actions, infoset_key, raise_label
-from bot.sim.tables import _candidates
 from bot.state import GameState
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def _candidates(name: str) -> list[Path]:
+    """Where a lab-only data file for variant `name` may live ($POKERBOT_DATA, then data/)."""
+    dirs = [Path(os.environ["POKERBOT_DATA"])] if os.environ.get("POKERBOT_DATA") else []
+    return [d / name for d in dirs + [ROOT / "data"]]
 
 
 class CFRBrain(Tier2Brain):
