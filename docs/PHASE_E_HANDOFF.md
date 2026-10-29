@@ -1,9 +1,20 @@
 # Phase E handoff (written 2026-10-29)
 
 Phase D is done and on `main` (`c3a3201`, upload #1 = `dist/upload1_phaseD.zip`, sha256 `2dab3f52…`,
-see `docs/SUBMISSIONS.md`). Phase E is partly built. **The WIP code is on branch
-`claude/eager-sagan-tn3syo` (not merged into `main`)**: start by `git fetch` and checking it out or
-merging it. Read `CLAUDE.md`, `docs/STATUS.md`, `docs/PART4_PLAN.md` (Phase E) first. Rules: never
+see `docs/SUBMISSIONS.md`). Phase E is partly built.
+
+**Update 2026-10-29 (later): work on branch `claude/phase-e-on-refactor`, not
+`claude/eager-sagan-tn3syo`.** `main` got an architecture refactor (see `docs/STATUS.md`,
+`GLOSSARY.md`), and the WIP was ported onto it with identical play (Tier 2 vs Tier 1 with sample
+caps binding: same chips as the old branch). Where things moved:
+- the per-spot stats are `brain.opponent.spots` (an `OppStats` inside `bot/opponent.Opponent`, fed
+  by `Opponent.observe`), not `brain.stats` (that name clashed with the CFR brain's diagnostics);
+- discard mode, the rules' fallback discard, `smart_rollout_discard` and `table_range_weight` live
+  in `bot/situation.py` (`Situation.special`, `Perception`); tables are `brain.perception.tables`;
+  equity is `brain.situation(state).equity(budget)`;
+- embedded tables are `ARTIFACTS["tables"]` (`bot/artifacts.py`); `data/discard_holdem/` was
+  rebuilt from the branch's embedded copy;
+- `test_redraw` passes: it was a wall-clock flake (now capped by worlds), not the tables or discard. Read `CLAUDE.md`, `docs/STATUS.md`, `docs/PART4_PLAN.md` (Phase E) first. Rules: never
 copy from `Opps/`; tests green on Python 3.11 (`.venv`); if three fixes in a row fail, stop and report.
 Setup: `uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r requirements-dev.txt`.
 
@@ -62,8 +73,7 @@ slightly positive except opp4 (needs the D and fast-only opp4 numbers to judge).
 
 ## Still to do
 
-1. Fix the `test_redraw` failure; commit the WIP in logical commits (E1, E2, E3, E4–E6; the code is
-   already written, defaults are the safe ones above).
+1. ~~Fix the `test_redraw` failure; commit the WIP~~ (done on `claude/phase-e-on-refactor`).
 2. Finish the missing runs: opp4 for D, E1 and fast-only; maniac, starter, opp3, opp4 for fast-only. (Jobs were
    killed by a worker restart; relaunch only the missing opponents.) Decide E1: likely **keep fast discard,
    drop smart rollouts** unless a retune fixes the tier1 loss (try `raise_equity` +0.04 with smart rollouts).

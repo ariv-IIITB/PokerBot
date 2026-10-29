@@ -36,7 +36,7 @@ sample caps binding gives the same chips as before): legacy `GameConfig` retired
 `messages_for` as the one visibility rule plus `HIDDEN_CHOICE`; one `Opponent` module;
 `bot/situation.py` under the brains. Bug fixed on the way: `lab.harness --variant X` without
 `--hands` crashed, and `--subprocess --variant X` played the embedded variant.
-**Phase E must start from this branch (or main once it is merged).** Load-sensitive tests can
+**Phase E continues on `claude/phase-e-on-refactor`** (the WIP ported onto the refactor; see `docs/PHASE_E_HANDOFF.md`). Load-sensitive tests can
 still fail under `-n auto` on this laptop (timing-bench, Tier 1 vs random); they pass on rerun.
 The package timing check is borderline on this laptop **with or without the refactor**
 (projected 42–61 % of the bank vs the 50 % limit; it was well under at Phase D): Phase E has to

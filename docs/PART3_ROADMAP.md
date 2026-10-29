@@ -45,6 +45,16 @@ biggest leak (folding too much to shoves) is fixed.
    equilibrium-style opponents, so there is something for CFR to win.
 4. At least a free week before the reveal.
 
+**2026-10-29 note (Phase E, E9).** Condition 4 is now met in the calendar sense: the rules are known
+(2026-10-28) and the deadline is 2026-11-15, so there are about two weeks. The raise cap
+(at most 4 bets/raises per street, the big blind counting as the first preflop) also shrinks the
+betting tree. But the main reason CFR lost, the coarse card buckets, still stands, and Discard
+Hold'em makes the card abstraction harder (1,755 three-card start classes, a public discard step
+after the flop). Conditions 1-3 are unmet: there is no proof from a small game, no faster trainer,
+and no evidence that Tier 2 loses points to equilibrium-style opponents (the Hold'em LLM bots it
+loses to are value-heavy bettors, not solvers). No CFR work was started; the question went to the
+user in the Phase E report.
+
 **What stays in the repo.** `lab/cfr/` keeps the MCCFR trainer, Leduc, exact best response,
 diagnostics, runtime audit and the CFR brain (`lab/cfr/brain.py`, lab only), plus their
 tests. CFR is not in `bot/` or the bot's brain registry, and the submission package never

@@ -47,11 +47,14 @@ DEFAULTS: dict[str, Any] = {
     "use_sim": True,               # False: old equity only (and first option for specials)
     "rollout_worlds": 2000,        # caps (the time budget usually binds first)
     "pimc_worlds": 400,
+    "discard_mode": "fast",        # one-card discards: fast | pimc | lowest | highest2 (bot/sim/policies.py)
+    "smart_rollout_discard": False,# (E1: +3 vs stations, -1.3 vs tier1: off until retuned) rollouts keep the best two cards instead of discarding at random
     "inference": True,             # weight opponent hands by their visible choices
     "inference_beta": 6.0,
     "inference_gamma": 3.0,
     "inference_trust": True,       # scale inference by how well it predicted past showdowns
     "use_tables": True,            # precomputed start-of-hand shares, if valid data exists
+    "table_range_weight": 0.0,     # facing a preflop raise: blend in the share vs a top-range opponent
 }
 
 
@@ -83,7 +86,7 @@ class Tier1Brain(Brain):
     def observe(self, state: GameState, msg: Message) -> None:
         if isinstance(msg, MatchInfo):
             self.perception.warm_up()
-        self.opponent.observe(state, msg, self.rng)
+        self.opponent.observe(state, msg, self.rng, self.rules)
 
     def situation(self, state: GameState) -> Situation:
         """Everything about this decision that is not strategy (bot/situation.py)."""
@@ -101,6 +104,14 @@ class Tier1Brain(Brain):
             return safe_action(legal)
         return self.choose(s.state, legal, s.equity(budget_s), p)
 
+    def sized_raise(self, frac: float, kind: str, eq: float, state: GameState,
+                    legal: LegalActions, p: dict) -> Optional[Action]:
+        """The raise for a decision already taken: `frac` x pot (kind: "value" or "bluff").
+        Tier 2 overrides this to size by expected value."""
+        h = state.hand
+        assert h is not None
+        return pot_fraction_raise(frac, h.pot, h.tocall if kind == "value" else 0, h.my_bet, legal)
+
     def choose(self, state: GameState, legal: LegalActions, eq: float, p: dict) -> Action:
         """Equity -> action, using parameter dict `p` (Tier 2 passes adjusted copies)."""
         h = state.hand
@@ -110,15 +121,16 @@ class Tier1Brain(Brain):
 
         if legal.can_raise and eq >= per_street(p["raise_equity"], street):
             if my_raises < p["max_own_raises"] or eq >= p["strong_equity"]:
-                frac = p["strong_frac"] if eq >= p["strong_equity"] else p["value_frac"]
-                r = pot_fraction_raise(frac, pot, to_call, h.my_bet, legal)
+                strong = eq >= p["strong_equity"]
+                r = self.sized_raise(p["strong_frac"] if strong else p["value_frac"], "value",
+                                     eq, state, legal, p)
                 if r is not None:
                     return r
 
         if to_call == 0:
             if (street > 0 and legal.can_raise and eq < p["bluff_max_equity"]
                     and self.pyrng.random() < p["bluff_freq"]):
-                r = pot_fraction_raise(p["bluff_frac"], pot, 0, h.my_bet, legal)
+                r = self.sized_raise(p["bluff_frac"], "bluff", eq, state, legal, p)
                 if r is not None:
                     return r
             return Action.check() if legal.check else safe_action(legal)

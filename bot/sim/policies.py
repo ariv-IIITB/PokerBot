@@ -31,6 +31,9 @@ DEFAULTS: dict[str, Any] = {
     "quote_skew": 0.0,
     "info_bonus": 0.03,
     "pimc_worlds": 400,
+    # one-card discards: "fast" (sampled showdown share, bot/sim/discard.py) | "pimc" (rollouts)
+    # | "lowest" (the rules' fallback, ablation) | "highest2" (keep the two highest, ablation)
+    "discard_mode": "fast",
 }
 
 
@@ -77,10 +80,36 @@ def decide_special(rec: Reconstruction, legal: LegalActions, rng: np.random.Gene
         return Action.special(sp.default())
     if len(sp.choices) == 1:
         return Action.special(sp.choices[0])
+    if kind == "discard" and p["discard_mode"] != "pimc":
+        a = one_card_discard(rec, legal, rng, budget_s, p)
+        if a is not None:
+            return a
     res = pimc(rec, _candidates(legal, rng, int(p["max_candidates"])), rng, budget_s,
                max_worlds=int(p["pimc_worlds"]), inference=p.get("_inference"))
     p["_stats"].update(rollouts=res.rollouts, worlds=res.worlds)
     return res.best
+
+
+def one_card_discard(rec: Reconstruction, legal: LegalActions, rng, budget_s: float, p) -> Action | None:
+    """The plain one-card discard by the configured mode; None = use the generic PIMC policy."""
+    mode = p["discard_mode"]
+    if mode == "fast":
+        from bot.sim.discard import choose_discard
+        return choose_discard(rec, legal, rng, budget_s, p.get("_inference"))
+    st, me = rec.state, rec.me
+    hole = [rec.mapping.get(t, t) for t in st.hole[me]]
+    choices = [c for c in legal.special.choices if c.isdigit()]
+    if len(choices) != len(hole) or min(hole) < 0:
+        return None
+    if mode == "lowest":
+        from bot.game.steps.cards import fallback_discard
+        return Action.special(str(hole.index(fallback_discard(hole))))
+    if mode == "highest2":
+        def kept(c: str) -> tuple:
+            k = [x for i, x in enumerate(hole) if i != int(c)]
+            return (k[0] >> 2 == k[1] >> 2, k[0] & 3 == k[1] & 3, sorted((x >> 2 for x in k), reverse=True))
+        return Action.special(max(choices, key=kept))
+    return None
 
 
 def expose_lowest(rec: Reconstruction, legal: LegalActions) -> Action:
