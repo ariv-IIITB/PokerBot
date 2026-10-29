@@ -33,6 +33,7 @@ from bot.protocols import get_adapter
 from bot.protocols.base import as_lines
 
 ROOT = Path(__file__).resolve().parent.parent
+DISCARD_DIR = ROOT / "Opps" / "discard"      # Phase F: Discard Hold'em bots, one folder each
 
 # Brains usable in-process: the bot's own plus the lab sparring bots.
 BRAINS: dict[str, str] = dict(BOT_BRAINS)
@@ -49,6 +50,13 @@ BRAINS.update({
     "opp3": "lab.opps:Opp3Brain",
     "opp4": "lab.opps:Opp4Brain",
 })
+
+
+def discard_pool_bots() -> dict[str, Path]:
+    """Every Opps/discard/<folder>/bot.py as `d_<folder>` -> its folder (Phase F opponent pool)."""
+    if not DISCARD_DIR.is_dir():
+        return {}
+    return {f"d_{p.parent.name}": p.parent for p in sorted(DISCARD_DIR.glob("*/bot.py"))}
 
 
 class PlayerTimeout(Exception):
@@ -190,6 +198,10 @@ class PlayerSpec:
 
     @staticmethod
     def brain(name: str, config: Optional[dict] = None, label: str = "") -> "PlayerSpec":
+        folder = discard_pool_bots().get(name)
+        if folder is not None:       # a pool bot: run `python bot.py` in its folder, real protocol
+            return PlayerSpec.subprocess([sys.executable, "bot.py"], cwd=str(folder),
+                                         label=label or name, protocol="pokerbots")
         cfg = tuple(sorted(config.items())) if config else None
         return PlayerSpec("brain", name, cfg, label=label or name)
 
