@@ -1,0 +1,25 @@
+done base
+tier3[{}]-nolock vs tight-nolock: +5.56 ± 0.34 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 35.6s (360/s)
+tier3[{}]-nolock vs maniac-nolock: +50.58 ± 0.71 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 78.6s (163/s)
+tier3[{}]-nolock vs random_legal-nolock: +19.58 ± 0.67 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 24.5s (523/s)
+tier3[{}]-nolock vs calling_station-nolock: +13.51 ± 0.25 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 75.2s (170/s)
+done nopre
+tier3[{"t3_preflop":false}]-nolock vs tight-nolock: +6.91 ± 0.36 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 49.3s (260/s)
+tier3[{"t3_preflop":false}]-nolock vs maniac-nolock: +50.86 ± 0.95 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 82.9s (154/s)
+tier3[{"t3_preflop":false}]-nolock vs random_legal-nolock: +25.06 ± 0.57 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 32.6s (392/s)
+tier3[{"t3_preflop":false}]-nolock vs calling_station-nolock: +5.12 ± 0.11 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 74.4s (172/s)
+done noflop
+tier3[{"t3_flop":false}]-nolock vs tight-nolock: +6.28 ± 0.31 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 35.1s (364/s)
+tier3[{"t3_flop":false}]-nolock vs maniac-nolock: +52.31 ± 0.68 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 70.2s (182/s)
+tier3[{"t3_flop":false}]-nolock vs random_legal-nolock: +19.19 ± 0.77 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 22.9s (560/s)
+tier3[{"t3_flop":false}]-nolock vs calling_station-nolock: +15.64 ± 0.33 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 72.6s (176/s)
+done noturn
+tier3[{"t3_turn":false}]-nolock vs tight-nolock: +6.60 ± 0.32 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 33.7s (380/s)
+tier3[{"t3_turn":false}]-nolock vs maniac-nolock: +52.73 ± 0.79 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 71.4s (179/s)
+tier3[{"t3_turn":false}]-nolock vs random_legal-nolock: +19.95 ± 0.61 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 23.2s (552/s)
+tier3[{"t3_turn":false}]-nolock vs calling_station-nolock: +16.66 ± 0.29 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 73.2s (175/s)
+done noriver
+tier3[{"t3_river":false}]-nolock vs tight-nolock: +5.67 ± 0.39 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 34.7s (369/s)
+tier3[{"t3_river":false}]-nolock vs maniac-nolock: +50.29 ± 1.19 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 77.0s (166/s)
+tier3[{"t3_river":false}]-nolock vs random_legal-nolock: +19.96 ± 0.57 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 24.2s (528/s)
+tier3[{"t3_river":false}]-nolock vs calling_station-nolock: +15.70 ± 0.27 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 12800 hands in 73.2s (175/s)

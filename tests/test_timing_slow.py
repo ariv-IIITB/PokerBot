@@ -46,6 +46,18 @@ def test_tier2_against_the_most_decisions_per_hand_at_2x(opponent) -> None:
 
 
 @pytest.mark.slow
+@pytest.mark.parametrize("hands,bank,opponent", [(400, 60.0, "tier3"), (1000, 150.0, "tier2"),
+                                                 (400, 60.0, "maniac"), (400, 60.0, "calling_station")])
+def test_tier3_on_a_machine_twice_as_slow(hands, bank, opponent) -> None:
+    """Phase G: Tier 3 adds an own-range sample to every postflop decision; the bank must still last."""
+    a = PlayerSpec.brain("tier3", NO_LOCK).build()
+    b = PlayerSpec.brain(opponent, NO_LOCK if opponent.startswith("tier") else None).build()
+    m = play_match([a, b], load_variant("discard_holdem"), seed=6, hands=hands, time_bank_s=bank,
+                   clock_scale=2.0, reply_limit_s=5.0)
+    check_bank(m, hands, bank, a.bot, b.bot if opponent.startswith("tier") else None)
+
+
+@pytest.mark.slow
 def test_the_real_subprocess_bot_over_the_real_protocol_at_2x() -> None:
     """The shipped path: `bot.main` as a subprocess speaking the official wire format."""
     bot = SubprocessPlayer([sys.executable, "-m", "bot.main"], protocol="pokerbots",

@@ -1,0 +1,1 @@
+tier3 vs tier2: +0.21 ± 0.02 chips/hand | match score 0.580 ± 0.035 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 257.7s (310/s)

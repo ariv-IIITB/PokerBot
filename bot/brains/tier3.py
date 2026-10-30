@@ -29,6 +29,7 @@ import numpy as np
 
 from bot.actions import CALL, CHECK, FOLD, RAISE, Action, LegalActions, safe_action
 from bot.brains.tier2 import DEFAULTS as TIER2_DEFAULTS
+from bot.brains.params import load_params, per_street
 from bot.brains.tier2 import Tier2Brain
 from bot.log import warn
 from bot.situation import Situation
@@ -51,6 +52,13 @@ DEFAULTS.update({
     "hide_discard": False,         # G7: among near-equal discards, reveal the least (A/B before use)
     "hide_margin": 0.01,           # ... "near-equal" = within this much expected share of the best
     "range_samples": 300,          # hands sampled for our own-range percentile
+    # ---- guards against wide, big-betting opponents (Phase G fix; see docs/reports/TIER3.md)
+    "eq_floor": True,              # never fold (preflop, flop, turn) a hand Tier 2's pot-odds rule calls
+    "mdf_eq_slack": 0.05,          # an MDF call needs equity >= pot odds - this (None = no floor)
+    "bluff_tilt_scale": True,      # 3-bet / 4-bet bluff mass x (1 + tilt): none vs players who never fold
+    "value_floor": True,           # postflop, never check or just call a hand Tier 2 would value-raise ...
+    "value_floor_size": "t2",      # ... "t2": Tier 2 takes the decision (its adapted sizes); "t3": texture sizes
+    "value_floor_gate": True,      # ... only as often as the opponent fails to fold to turn/river bets (gated, capped)
     # ---- preflop (G2): shares of ALL starting hands, positions are heads-up
     "pf_band": 0.04,               # linear blend width around every cutoff (no hard edges)
     "pf_play_weight": 0.35,        # playability's weight against strength in the combined percentile
@@ -61,6 +69,8 @@ DEFAULTS.update({
     "pf_trap_prob": 0.25,          # ... this often
     "pf_bb_defend": 0.70,          # big blind vs a 2.5 bb raise: call + 3-bet
     "pf_defend_slope": 0.20,       # less defence per extra big blind of raise (more vs min-raises)
+    "pf_ratio_slope": 0.12,        # button vs a 3-bet: less continuing per unit of 3-bet size ratio
+    "pf_size_pressure": False,     # scale both slopes like Tier 2's bet_pressure (to 0 vs players who raise nearly always)
     "pf_3bet": 0.16,               # total 3-bet share: value + blocker bluffs
     "pf_3bet_value": 0.08,
     "pf_3bet_mult": 3.6,           # 3-bet to this x their raise (2.5 bb -> ~9 bb)
@@ -150,11 +160,17 @@ class Tier3Brain(Tier2Brain):
         self._hand_id: Optional[int] = None
         self._line: Optional[np.ndarray] = None        # P(our preflop line | class), product over our decisions
         self._floated = False
-        self.stats = {"t3_decisions": 0, "t3_fallbacks": 0}
+        # t3_fallbacks: Tier 2 decided (a spot Tier 3 leaves to it, or an error); t3_errors: the style code threw
+        self.stats = {"t3_decisions": 0, "t3_fallbacks": 0, "t3_errors": 0}
 
     @classmethod
     def defaults(cls) -> dict[str, Any]:
-        return {k: (dict(v) if isinstance(v, dict) else v) for k, v in DEFAULTS.items()}
+        """Tier 2's parameters as Tier 2 loads them (its defaults + the shipped bot/config/tier2.json),
+        plus Tier 3's own keys: "t3": false then plays exactly like the shipped Tier 2."""
+        base = load_params(Tier2Brain.param_file, Tier2Brain.defaults())
+        base.update({k: (dict(v) if isinstance(v, dict) else v) for k, v in DEFAULTS.items()
+                     if k not in TIER2_DEFAULTS})
+        return base
 
     # ---- plumbing
     def _tables(self):
@@ -206,6 +222,7 @@ class Tier3Brain(Tier2Brain):
         try:
             return fn(*args)
         except Exception as e:          # a bug in the style must never cost a hand: Tier 2 decides
+            self.stats["t3_errors"] += 1
             warn(f"tier3 {fn.__name__} failed: {e!r}")
             return None
 
@@ -213,7 +230,7 @@ class Tier3Brain(Tier2Brain):
         h = s.hand
         assert h is not None
         if h.street == 0:
-            return self._preflop(s, legal, p) if p["t3_preflop"] else None
+            return self._preflop(s, legal, budget_s, p) if p["t3_preflop"] else None
         flag = {1: "t3_flop", 2: "t3_turn", 3: "t3_river"}.get(h.street)
         if flag is None or not p[flag]:
             return None
@@ -222,6 +239,35 @@ class Tier3Brain(Tier2Brain):
     # ======================================================================= preflop (G2)
     def _tilt(self, spot: str, p: dict) -> float:
         return self.opponent.spots.tilt(spot) if p["t3_adapt"] else 0.0
+
+    def _bluff_mass(self, total: float, value: float, slope: float, p: dict) -> float:
+        """Total re-raise share (value + bluffs). The bluffs grow by `slope` x tilt when the
+        opponent folds to our re-raises a lot; with bluff_tilt_scale they shrink by (1 + tilt)
+        when it does not, down to none against a player who never folds."""
+        t = self._tilt("fold_to_3bet", p)
+        if not p.get("bluff_tilt_scale"):
+            return total + slope * t
+        bluff = max(0.0, total - value)
+        bluff = bluff + slope * t if t >= 0 else bluff * (1.0 + t)
+        return value + bluff
+
+    @staticmethod
+    def t2_calls(h: HandState, eq: float, p: dict) -> bool:
+        """Tier 2's rule for a bet we face: equity >= pot odds + margin + pressure (bot/brains/tier1.py)."""
+        to_call = h.tocall
+        if to_call <= 0:
+            return False
+        pot = h.pot
+        need = to_call / (pot + to_call) + p["call_margin"] + p["bet_pressure"] * to_call / max(pot, 1)
+        return eq >= need
+
+    def _size_scale(self, p: dict) -> float:
+        """1, or (pf_size_pressure) the share of Tier 2's "big bets are strong" penalty left after
+        its adjustment for players who raise nearly always (bot/brains/tier2.py `adjusted`)."""
+        if not p.get("pf_size_pressure"):
+            return 1.0
+        base = float(self.p["bet_pressure"])
+        return min(1.0, max(0.0, float(p["bet_pressure"]) / base)) if base > 0 else 1.0
 
     def _pf_table(self, spot: Spot, p: dict) -> tuple[np.ndarray, dict]:
         """The [fold, passive, raise] table of this spot after adaptation, and the sizes to use."""
@@ -250,20 +296,24 @@ class Tier3Brain(Tier2Brain):
             tbl = m.probs(key, lambda: m.bb_vs_limp(iso, band))
             sizes["raise_bb"] = float(p["pf_iso_size_bb"])
         elif spot.name == "bb_vs_open":
-            d = float(p["pf_bb_defend"]) - float(p["pf_defend_slope"]) * (spot.raise_to_bb - 2.5)
+            d = float(p["pf_bb_defend"]) - float(p["pf_defend_slope"]) * self._size_scale(p) * (spot.raise_to_bb - 2.5)
             d = min(0.9, max(0.2, d))
-            three = float(p["pf_3bet"]) + float(p["pf_adapt_3bet"]) * self._tilt("fold_to_3bet", p)
-            three = min(0.30, max(float(p["pf_3bet_value"]), three))
             value = float(p["pf_3bet_value"])
+            three = self._bluff_mass(float(p["pf_3bet"]), value, float(p["pf_adapt_3bet"]), p)
+            three = min(0.30, max(value, three))
             key = ("vs_open", round(d, 2), round(value, 3), round(three, 3), band)
             tbl = m.probs(key, lambda: m.bb_vs_open(d, value, three, band))
             sizes["mult"] = float(p["pf_3bet_mult"])
         elif spot.name == "btn_vs_3bet":
             w = self._tilt("three_bet", p)                  # + : they 3-bet a lot: defend wider, 4-bet more
-            cont = float(p["pf_btn_continue"]) - 0.12 * (spot.ratio - float(p["pf_3bet_mult"])) + 0.10 * w
+            cont = (float(p["pf_btn_continue"]) + 0.10 * w
+                    - float(p["pf_ratio_slope"]) * self._size_scale(p) * (spot.ratio - float(p["pf_3bet_mult"])))
             cont = min(0.85, max(0.25, cont))
-            four = float(p["pf_4bet"]) + 0.04 * w
             value = float(p["pf_4bet_value"])
+            if p.get("bluff_tilt_scale"):
+                four = self._bluff_mass(float(p["pf_4bet"]) + 0.04 * max(0.0, w), value, 0.04, p)
+            else:
+                four = float(p["pf_4bet"]) + 0.04 * w
             four = max(value, four)
             key = ("vs_3bet", round(cont, 2), round(value, 3), round(four, 3), band)
             tbl = m.probs(key, lambda: m.btn_vs_3bet(cont, value, four, band))
@@ -272,7 +322,7 @@ class Tier3Brain(Tier2Brain):
             raise ValueError(spot.name)
         return tbl, sizes
 
-    def _preflop(self, s: Situation, legal: LegalActions, p: dict) -> Optional[Action]:
+    def _preflop(self, s: Situation, legal: LegalActions, budget_s: float, p: dict) -> Optional[Action]:
         h = s.hand
         assert h is not None
         m = self._preflop_model()
@@ -283,6 +333,9 @@ class Tier3Brain(Tier2Brain):
         tbl, sizes = self._pf_table(spot, p)
         cls = m.class_of(h.hole)
         col = self._draw(tbl[cls])
+        if (col == FOLD_COL and p.get("eq_floor") and legal.call and h.tocall > 0
+                and self.t2_calls(h, s.equity(budget_s), p)):
+            col = PASSIVE_COL                          # the table folds, but the price is right
         action = self._pf_action(spot, col, h, legal, bb, sizes)
         executed = {FOLD: FOLD_COL, CHECK: PASSIVE_COL, CALL: PASSIVE_COL, RAISE: RAISE_COL}.get(action.kind)
         if executed is not None:                       # our range for the rest of the hand
@@ -322,9 +375,49 @@ class Tier3Brain(Tier2Brain):
             return None
         ctx = _Ctx(h, street, eq, pr, tex, dr, keep, board, self._initiative(h), h.seat == 0,
                    self.opponent.spots)
+        if p.get("value_floor") and self.t2_raises(h, eq, legal, p) and self._value_floor_on(p):
+            if h.tocall > 0 or p.get("value_floor_size", "t2") == "t2":
+                return None                                        # Tier 2's value raise, Tier 2's size
+            check = Action.check() if legal.check else safe_action(legal)
+            return self._size(self._texture_size(ctx, p), "value", ctx, s, legal, p) or check
         if h.tocall > 0:
             return self._facing_bet(ctx, s, legal, p)
         return self._unfaced(ctx, s, legal, p)
+
+    @staticmethod
+    def t2_raises(h: HandState, eq: float, legal: LegalActions, p: dict) -> bool:
+        """Tier 2's value-raise rule (bot/brains/tier1.py `choose`, with the adapted thresholds)."""
+        if not legal.can_raise or eq < per_street(p["raise_equity"], h.street):
+            return False
+        mine = sum(1 for a in h.actions_on(h.street, ME) if a.kind == RAISE)
+        return mine < p["max_own_raises"] or eq >= p["strong_equity"]
+
+    def value_floor_weight(self, p: dict) -> float:
+        """How much the opponent is a "calling station" (0..1): the gated, capped tilts of its fold
+        rate against our turn and river bets, negated. 0 below the sample gate and against players
+        who fold normally; 1 against players who (almost) never fold."""
+        if not p.get("value_floor_gate", True):
+            return 1.0
+        if not p["t3_adapt"]:
+            return 0.0
+        st = self.opponent.spots
+        return min(1.0, max(0.0, -(st.tilt("fold_turn") + st.tilt("fold_river")) / 2.0))
+
+    def _value_floor_on(self, p: dict) -> bool:
+        w = self.value_floor_weight(p)
+        return w >= 1.0 or (w > 0.0 and self._chance(w))
+
+    @staticmethod
+    def _texture_size(c: "_Ctx", p: dict) -> float:
+        """The style's value size for this street and board (never the hand's strength)."""
+        if c.street == 1:
+            wet = c.tex.wet >= float(p["cbet_wet_cut"]) and not c.tex.paired
+            return float(p["cbet_wet_size"] if wet else p["cbet_dry_size"])
+        if c.street == 2:
+            return float(p["barrel_size"])
+        share = float(p["river_value_share"])
+        x = min(1.0, max(0.0, (c.pr - (1.0 - share)) / max(share, 1e-6)))
+        return float(p["river_size_lo"]) + (float(p["river_size_hi"]) - float(p["river_size_lo"])) * x
 
     @staticmethod
     def _initiative(h: HandState) -> Optional[str]:
@@ -498,8 +591,13 @@ class Tier3Brain(Tier2Brain):
         outs = c.dr.outs_class != "none" or c.dr.overcards > 0 or c.dr.has_showdown_value
         if c.eq < float(p["cont_min_eq"]) and not outs:
             pass_prob *= 0.2                                       # nothing to continue with
+        slack = p.get("mdf_eq_slack")
+        if slack is not None and c.eq < to_call / (h.pot + to_call) - float(slack):
+            pass_prob = 0.0                                        # MDF never pays a price the equity is far from
         if self._chance(pass_prob) and legal.call:
             return Action.call()
+        if p.get("eq_floor") and legal.call and self.t2_calls(h, c.eq, p):
+            return Action.call()                                   # outside the MDF slice, but the price is right
         # ---- a float: no showdown value, but outs, in position, against a player who gives up the turn
         if (c.street == 1 and c.in_position and legal.call and frac <= float(p["float_max_bet"])
                 and not c.dr.has_showdown_value and (c.dr.outs_class != "none" or c.dr.overcards > 0)

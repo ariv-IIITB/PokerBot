@@ -1,4 +1,4 @@
-# Status (updated 2026-10-29, after Phase D)
+# Status (updated 2026-10-30, Phase G)
 
 Read this after `CLAUDE.md` to know where the project stands. Plan: `docs/PART4_PLAN.md`.
 Rules: `docs/rules/` (`SUMMARY.md` first).
@@ -15,7 +15,8 @@ Rules: `docs/rules/` (`SUMMARY.md` first).
 | **D** ship-safe → first upload | done; **upload #1 = `dist/upload1_phaseD.zip`** (the user uploads) | `accb344` |
 | **E** Tier 2 on the real game (discard, tables, oppstats, bluff-catch, EV sizing) | done on `claude/phase-e-on-refactor-c07yie`, awaiting review; **upload #2 = `dist/upload2_phaseE.zip`** | see git log |
 | **F v2** Discard Hold'em opponent pool: 9 bots in `Opps/discard/` (2 converted, 7 independent), health OK | pool + health done on `ccr-412db155-a836ca`; held-out split, Tier 2 baseline and E re-check **deferred** (user, 2026-10-30), see `docs/reports/DISCARD_OPPS.md` section 4 | `4f72a86` |
-| G Tier 3 "Ivey" · H Problem Statement / freeze | to do | — |
+| **G** Tier 3 "Ivey" (`bot/brains/tier3.py`, registered `tier3`; default stays `tier2`) | built and fixed on `ccr-412db155-a836ca`; evaluated vs non-pool bots only; **G-step pool runs and G8 wait for the held-out split**, see `docs/reports/TIER3.md` | see git log (`phase G`) |
+| H Problem Statement / freeze | to do | — |
 
 Tests on Python 3.11 (`.venv`): fast suite 1063 passed, 2 skipped; slow suite 267 passed (21 min with
 `-n 3`) at Phase D (`accb344`). The runtime sandbox test passes (no xfail left).
@@ -77,8 +78,15 @@ phase starts by reviewing the previous one.
   `lab.pool_health`. **Still to do, in this order:** the user picks the held-out split (before any result),
   then the Tier 2 baseline and the Phase E re-check (`tools/f_eval/run_f2.sh`). Until then nobody has read
   a Tier 2 chip result against a pool bot, and G must not tune on any pool bot.
-- **Phase G:** Tier 3 ("Ivey") builds on Phase E's Tier 2. On the river, the bluff index decides
-  calls, not MDF.
+- **Phase G (built, 2026-10-30):** Tier 3 = Tier 2 + the style (preflop tables from the 3-card
+  classes, texture c-bets, MDF defence with floats, polarised barrels, river value/bluff ratios,
+  capped adaptation). Facing a river bet stays Tier 2's bluff-index rule, never MDF. Fixes found by
+  ablation: `eq_floor` (never fold what Tier 2's pot-odds rule calls: +22 vs maniac, +8 vs
+  random_legal) and a gated `value_floor` (value-bet like Tier 2 vs players who never fold: +9 vs
+  calling_station, +7.6 vs starter). Locks on, 100 pairs: Tier 3 beats Tier 2 0.580 ± 0.035 (match
+  score). Open: −2.1 vs tight, −2.4 vs random_legal (vs Tier 2, both still won 100 %); locks off
+  Tier 3 wins chips vs Tier 2 but ~0.42 of matches. **Next:** after the held-out split, run the plan's
+  `--pool train` checks and G8 (`docs/reports/TIER3.md`).
 - **1 Nov:** the Problem Statement comes out → Phase H checks (showdown rule, provisional limits).
 
 ## Environment

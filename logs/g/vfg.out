@@ -1,0 +1,18 @@
+done base
+tier3[{}]-nolock vs tier2-nolock: +2.05 ± 0.38 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 110.6s (174/s)
+tier3[{}]-nolock vs tier1-nolock: +1.39 ± 0.38 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 177.5s (108/s)
+tier3[{}]-nolock vs calling_station-nolock: +13.87 ± 0.24 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 113.9s (169/s)
+tier3[{}]-nolock vs tight-nolock: +5.67 ± 0.38 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 53.9s (356/s)
+tier3[{}]-nolock vs maniac-nolock: +48.45 ± 0.69 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 119.3s (161/s)
+tier3[{}]-nolock vs random_legal-nolock: +19.98 ± 0.42 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 38.6s (497/s)
+tier3[{}]-nolock vs all_in-nolock: +26.01 ± 0.71 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 10.5s (1,827/s)
+tier3[{}]-nolock vs starter: +11.95 ± 0.18 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 117.7s (163/s)
+done vf_gate
+tier3[{"value_floor":true}]-nolock vs tier2-nolock: +1.87 ± 0.36 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 125.3s (153/s)
+tier3[{"value_floor":true}]-nolock vs tier1-nolock: +0.90 ± 0.36 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 172.1s (112/s)
+tier3[{"value_floor":true}]-nolock vs calling_station-nolock: +22.82 ± 0.43 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 113.9s (169/s)
+tier3[{"value_floor":true}]-nolock vs tight-nolock: +6.85 ± 0.39 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 53.0s (362/s)
+tier3[{"value_floor":true}]-nolock vs maniac-nolock: +50.15 ± 0.79 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 109.1s (176/s)
+tier3[{"value_floor":true}]-nolock vs random_legal-nolock: +19.37 ± 0.42 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 37.2s (516/s)
+tier3[{"value_floor":true}]-nolock vs all_in-nolock: +26.12 ± 0.71 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 10.6s (1,815/s)
+tier3[{"value_floor":true}]-nolock vs starter: +19.56 ± 0.26 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 117.1s (164/s)
