@@ -121,6 +121,17 @@ def needed_modules(spec: VariantSpec, brain: str, protocol: str) -> set[str]:
     return seen
 
 
+
+def _is_active_variant(spec_path) -> bool:
+    """Is this the variant the committed bot/embedded.py was generated for (variant/active.json)?
+    Only then must its tables be in the package; other variants may have no tables at all."""
+    try:
+        mine, _ = embed_data.load_spec(str(spec_path))
+        active, _ = embed_data.load_spec(None)
+        return mine.to_dict() == active.to_dict()
+    except Exception:
+        return True                      # unsure: keep the guard
+
 def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
     spec = VariantSpec.load(spec_path)
     if out.exists():
@@ -138,7 +149,7 @@ def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
     rendered = embed_data.render(str(spec_path))
     committed = (ROOT / "bot" / "embedded.py")
     if ("ARTIFACTS = {}" in rendered and committed.is_file()
-            and "ARTIFACTS = {}" not in committed.read_text()):
+            and "ARTIFACTS = {}" not in committed.read_text() and _is_active_variant(spec_path)):
         # Upload #2 shipped without its tables this way: data/<variant>/ was missing on the build machine.
         raise SystemExit("refusing to package: the committed bot/embedded.py has tables but data/<variant>/ "
                          "is missing or stale, so the package would ship without them. Rebuild the tables "

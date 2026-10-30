@@ -112,3 +112,18 @@ def test_cfr_is_lab_only_and_never_packaged(tmp_path) -> None:
         pkg.main(["--brain", "cfr", "--out", str(tmp_path / "never")])
     from tools import embed_data
     assert set(embed_data.TABLE_FILES) == {"classes", "eq_random", "eq_range"}   # never a CFR strategy
+
+
+def test_the_package_refuses_the_active_variant_without_its_tables(tmp_path, monkeypatch) -> None:
+    """Upload #2 shipped without tables because data/ was missing: the builder must refuse for the
+    active variant, but not for a catalog variant that has no tables at all."""
+    from tools import embed_data
+    if "ARTIFACTS = {}" in (pkg.ROOT / "bot" / "embedded.py").read_text():
+        pytest.skip("the committed embedded.py has no tables")
+    real_render = embed_data.render
+    monkeypatch.setattr(embed_data, "render", lambda variant=None, *a, **kw:
+                        real_render(variant, embed_data.CONFIG_DIR, tmp_path / "no_data"))
+    assert pkg._is_active_variant(pkg.ROOT / "variant" / "active.json")
+    assert not pkg._is_active_variant(pkg.ROOT / "variant" / "catalog" / "auction_card.json")
+    with pytest.raises(SystemExit, match="refusing to package"):
+        pkg.build(pkg.ROOT / "variant" / "active.json", "tier2", "pokerbots", tmp_path / "out")
