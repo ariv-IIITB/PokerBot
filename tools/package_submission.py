@@ -41,7 +41,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from bot.game.steps import step_module  # noqa: E402
-from bot.main import BRAINS  # noqa: E402
+from bot.main import BRAINS, DEFAULT_BRAIN  # noqa: E402
 from bot.protocols import ADAPTERS  # noqa: E402
 from tools import embed_data  # noqa: E402
 from tools.sandbox_scan import SHIPPED_ALLOW, sandbox_violations  # noqa: E402
@@ -156,7 +156,7 @@ def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
                          "(lab.precompute) or restore data/ first.")
     (out / "bot" / "embedded.py").write_text(rendered)
     # Trimmed registries: unused plugins are absent, so point the defaults at what we ship.
-    _patch(out / "bot" / "main.py", 'DEFAULT_BRAIN = "tier2"', f'DEFAULT_BRAIN = "{brain}"')
+    _patch(out / "bot" / "main.py", f'DEFAULT_BRAIN = "{DEFAULT_BRAIN}"', f'DEFAULT_BRAIN = "{brain}"')
     _patch(out / "bot" / "protocols" / "__init__.py", 'DEFAULT = "pokerbots"',
            f'DEFAULT = "{protocol}"')
     (out / "bot.py").write_text(BOT_PY % {"protocol": protocol})
@@ -279,7 +279,7 @@ def check_package(out: Path, spec_path: Path, protocol: str, brain: str, hands: 
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Build + verify the submission package.")
     ap.add_argument("--variant", default=str(ROOT / "variant" / "active.json"))
-    ap.add_argument("--brain", default="tier2", choices=sorted(BRAINS))
+    ap.add_argument("--brain", default=DEFAULT_BRAIN, choices=sorted(BRAINS))
     ap.add_argument("--protocol", default="pokerbots", choices=sorted(ADAPTERS))
     ap.add_argument("--out", default=str(ROOT / "dist" / "submission"))
     ap.add_argument("--zip", action="store_true", help="also build <out>.zip and check THAT, unpacked")

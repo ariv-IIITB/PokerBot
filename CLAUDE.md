@@ -205,6 +205,8 @@ final values of the provisional limits, and the organisers' starter kit match ru
 - 2026-10-28: the "Phil Ivey" style becomes a separate Tier 3 brain (Part 4, phase 8), built
   after the bot plays the real game and protocol safely. Tier 2 stays the shipped bot until Tier 3
   beats it in the lab.
+- 2026-10-30: Tier 3 passed G8 and is the default brain (`docs/reports/TIER3.md`). Held-out pool:
+  `d_conv_opp4`, `d_new_eqrandom`, `d_new_geometric` (never tune on them).
 
 #### Lessons
 - `Opps/opp4` was a symlink to `Opps/opp 4`: check `ls -la` before deleting "duplicate" folders.

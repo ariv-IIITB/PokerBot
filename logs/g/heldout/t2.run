@@ -1,0 +1,74 @@
+tier2 vs d_conv_opp4: -0.76 ± 0.18 chips/hand | match score 0.640 ± 0.048 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 286.7s (140/s)
+--- profile: tier2
+  flop  checked_to n=10444 K=77% R=23%
+  flop  vs_bet     n=12097 C=50% F=42% R=8%
+  pre   open       n=20000 C=59% F=38% R=3%
+  pre   vs_raise   n=13249 C=66% F=32% R=2%
+  river checked_to n= 5622 K=57% R=43%
+  river vs_bet     n= 1718 C=43% F=46% R=10%
+  turn  checked_to n= 9067 K=55% R=45%
+  turn  vs_bet     n= 4363 C=38% F=46% R=16%
+--- profile: d_conv_opp4
+--- accounting: tier2 (-30326 chips over 40000 hands, -0.76/hand)
+  opp_fold       flop   hands=   640 chips=   +1652 (+0.041/hand)
+  opp_fold       pre    hands= 10295 chips=  +11508 (+0.288/hand)
+  opp_fold       river  hands=  1403 chips=  +26962 (+0.674/hand)
+  opp_fold       turn   hands=  2837 chips=  +21636 (+0.541/hand)
+  showdown_chop  river  hands=   294 chips=      +0 (+0.000/hand)
+  showdown_loss  river  hands=  2521 chips= -167848 (-4.196/hand)
+  showdown_win   river  hands=  2436 chips= +148199 (+3.705/hand)
+  we_fold        flop   hands=  5030 chips=  -20589 (-0.515/hand)
+  we_fold        pre    hands= 11744 chips=  -15947 (-0.399/hand)
+  we_fold        river  hands=   797 chips=  -13095 (-0.327/hand)
+  we_fold        turn   hands=  2003 chips=  -22804 (-0.570/hand)
+--- accounting: d_conv_opp4 (+0 chips over 40000 hands, +0.00/hand)
+tier2 vs d_new_eqrandom: -0.38 ± 0.15 chips/hand | match score 0.710 ± 0.046 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 308.5s (130/s)
+--- profile: tier2
+  flop  checked_to n=17795 K=77% R=23%
+  flop  vs_bet     n= 5152 C=54% F=37% R=9%
+  pre   open       n=20000 C=54% F=43% R=3%
+  pre   other      n= 5676 K=97% R=3%
+  pre   vs_raise   n=12500 C=48% F=50% R=2%
+  river checked_to n= 7852 K=62% R=38%
+  river vs_bet     n= 2859 C=39% F=45% R=16%
+  turn  checked_to n=12969 K=55% R=45%
+  turn  vs_bet     n= 4784 C=36% F=47% R=17%
+--- profile: d_new_eqrandom
+--- accounting: tier2 (-15108 chips over 40000 hands, -0.38/hand)
+  opp_fold       flop   hands=  2783 chips=   +8959 (+0.224/hand)
+  opp_fold       pre    hands=  4863 chips=   +4949 (+0.124/hand)
+  opp_fold       river  hands=  1646 chips=  +13878 (+0.347/hand)
+  opp_fold       turn   hands=  3632 chips=  +13728 (+0.343/hand)
+  showdown_chop  river  hands=   370 chips=      +0 (+0.000/hand)
+  showdown_loss  river  hands=  3464 chips= -132020 (-3.300/hand)
+  showdown_win   river  hands=  3009 chips= +139784 (+3.495/hand)
+  we_fold        flop   hands=  1893 chips=   -7978 (-0.199/hand)
+  we_fold        pre    hands= 14834 chips=  -21035 (-0.526/hand)
+  we_fold        river  hands=  1277 chips=  -15894 (-0.397/hand)
+  we_fold        turn   hands=  2229 chips=  -19479 (-0.487/hand)
+--- accounting: d_new_eqrandom (+0 chips over 40000 hands, +0.00/hand)
+tier2 vs d_new_geometric: -2.45 ± 0.24 chips/hand | match score 0.400 ± 0.049 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 362.7s (110/s)
+--- profile: tier2
+  flop  checked_to n=23235 K=78% R=22%
+  flop  vs_bet     n= 9650 C=43% F=43% R=14%
+  pre   open       n=20000 C=70% F=26% R=4%
+  pre   other      n= 4688 K=96% R=4%
+  pre   vs_raise   n=20850 C=69% F=28% R=3%
+  river checked_to n=12182 K=62% R=38%
+  river vs_bet     n= 3551 C=48% F=42% R=10%
+  turn  checked_to n=17221 K=62% R=38%
+  turn  vs_bet     n= 6533 C=33% F=46% R=21%
+--- profile: d_new_geometric
+--- accounting: tier2 (-98123 chips over 40000 hands, -2.45/hand)
+  opp_fold       flop   hands=  3055 chips=  +19221 (+0.481/hand)
+  opp_fold       pre    hands=  1148 chips=   +4092 (+0.102/hand)
+  opp_fold       river  hands=  2380 chips=  +28775 (+0.719/hand)
+  opp_fold       turn   hands=  2822 chips=  +26576 (+0.664/hand)
+  showdown_chop  river  hands=   601 chips=      +0 (+0.000/hand)
+  showdown_loss  river  hands=  6097 chips= -308543 (-7.714/hand)
+  showdown_win   river  hands=  4341 chips= +222759 (+5.569/hand)
+  we_fold        flop   hands=  4160 chips=  -15929 (-0.398/hand)
+  we_fold        pre    hands= 10912 chips=  -16685 (-0.417/hand)
+  we_fold        river  hands=  1485 chips=  -26388 (-0.660/hand)
+  we_fold        turn   hands=  2999 chips=  -32001 (-0.800/hand)
+--- accounting: d_new_geometric (+0 chips over 40000 hands, +0.00/hand)

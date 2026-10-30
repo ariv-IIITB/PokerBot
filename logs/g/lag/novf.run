@@ -1,0 +1,25 @@
+tier3[{"value_floor":false}]-nolock vs d_new_lag-nolock: +6.24 ± 0.35 chips/hand | match score 0.967 ± 0.023 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 182.5s (132/s)
+--- profile: tier3[{"value_floor":false}]-nolock
+  flop  checked_to n=12668 K=81% R=19%
+  flop  vs_bet     n=14285 C=65% F=28% R=6%
+  pre   open       n=12000 C=19% R=81%
+  pre   other      n= 1446 K=60% R=40%
+  pre   vs_raise   n=14340 C=73% F=15% R=12%
+  river checked_to n= 7209 K=58% R=42%
+  river vs_bet     n= 6314 C=49% F=34% R=17%
+  turn  checked_to n= 9979 K=77% R=23%
+  turn  vs_bet     n=10791 C=61% F=30% R=9%
+--- profile: d_new_lag-nolock
+--- accounting: tier3[{"value_floor":false}]-nolock (+149821 chips over 24000 hands, +6.24/hand)
+  opp_fold       flop   hands=   295 chips=   +3061 (+0.128/hand)
+  opp_fold       pre    hands=  2043 chips=   +5812 (+0.242/hand)
+  opp_fold       river  hands=  1629 chips=  +66864 (+2.786/hand)
+  opp_fold       turn   hands=   633 chips=  +13729 (+0.572/hand)
+  showdown_chop  river  hands=   266 chips=      +0 (+0.000/hand)
+  showdown_loss  river  hands=  2674 chips= -305375 (-12.724/hand)
+  showdown_win   river  hands=  4822 chips= +532882 (+22.203/hand)
+  we_fold        flop   hands=  4057 chips=  -31967 (-1.332/hand)
+  we_fold        pre    hands=  2136 chips=   -4384 (-0.183/hand)
+  we_fold        river  hands=  2156 chips=  -70671 (-2.945/hand)
+  we_fold        turn   hands=  3289 chips=  -60130 (-2.505/hand)
+--- accounting: d_new_lag-nolock (+0 chips over 24000 hands, +0.00/hand)

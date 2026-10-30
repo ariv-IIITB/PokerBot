@@ -28,9 +28,10 @@ def capped_match(a: str, a_cfg: dict, b: str, seed: int, hands: int, b_cfg=None)
     return m, pa.bot.brain
 
 
-def test_tier3_is_registered_and_tier2_stays_the_default() -> None:
+def test_tier3_is_registered_and_is_the_default_since_g8() -> None:
     assert BRAINS["tier3"] == "bot.brains.tier3:Tier3Brain"
-    assert DEFAULT_BRAIN == "tier2"
+    assert BRAINS["tier2"] == "bot.brains.tier2:Tier2Brain"     # kept: the fallback if Tier 3 is reverted
+    assert DEFAULT_BRAIN == "tier3"
 
 
 def test_tier3_starts_from_the_shipped_tier2_parameters() -> None:

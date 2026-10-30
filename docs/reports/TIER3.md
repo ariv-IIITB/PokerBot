@@ -1,14 +1,20 @@
 # Tier 3 ("Ivey" style) on Discard Hold'em: Phase G results
 
-`bot/brains/tier3.py` (`Tier3Brain(Tier2Brain)`, registered as `"tier3"`; **the default brain stays
-`tier2`**). Every behaviour is a flag or number in `tier3.DEFAULTS`; `"t3": false` is the shipped
-Tier 2 (same parameters, every decision goes to `Tier2Brain.play`: `tests/test_tier3.py`).
+`bot/brains/tier3.py` (`Tier3Brain(Tier2Brain)`, registered as `"tier3"`). **Since G8 (2026-10-30)
+`tier3` is the default brain** (`bot/main.py:DEFAULT_BRAIN`; upload candidate #4,
+`dist/upload4_phaseG.zip`). Every behaviour is a flag or number in `tier3.DEFAULTS`; `"t3": false` is the
+shipped Tier 2 (same parameters, every decision goes to `Tier2Brain.play`: `tests/test_tier3.py`).
+To revert: `DEFAULT_BRAIN = "tier2"` and rebuild the package.
 
-**No result in this report involves a pool bot (`d_*`)**, and none of the retired Hold'em bots
-`opp1`–`opp4` either (two pool bots are conversions of opp3/opp4). The opponents are the sparring
-bots (`calling_station`, `tight`, `maniac`, `random_legal`, `all_in`, `tier0`), the organisers'
-`starter`, `tier1` and `tier2`. The plan's G-step evaluation (`--pool train`, 50 pairs) and the G8
-ship decision wait for the user's held-out split.
+**Summary.** Tier 3 beats Tier 2 head-to-head (locks on, 100 pairs: match score 0.670 ± 0.033), is
+better on the training pool (locks on: +1.57 ± 0.54 chips/hand summed, mean match score 0.62 vs 0.55,
+no bot drops) and on the held-out pool (+1.16 ± 0.50, better on all three). **But both brains still
+lose chips to most of the Discard Hold'em pool** (river showdowns, as in the old Hold'em finding), so
+the next gains are in river play against value-heavy bettors, not in style.
+
+Order of work: the first sections (the fix, the value floor) used only non-pool opponents (sparring
+bots, `starter`, `tier1`, `tier2`), before the held-out split existed; no `d_*` or `opp1`–`opp4`
+result was read until the split was fixed. The pool sections follow.
 
 Method: `lab.eval tier3:<config> --pool ... --pairs N --locks off --variant discard_holdem
 --report accounting,profile` (script: `tools/g_eval/ablate.sh`), configs compared in one batch, one
@@ -178,6 +184,76 @@ the endgame lock it banks those big leads, which is why the locks-on score is ab
 scored on matches won, so the locks-on match score is the number that counts, but this skew should be
 checked again on the training pool.
 
+## Training pool (after the held-out split, 2026-10-30)
+
+Split (chosen by style before any pool result was read, `lab/opps/discard_pool.json`): **held out**
+`d_conv_opp4` (a real LLM bot: charts, EV sizes), `d_new_eqrandom` (the common weak pattern: equity vs a
+random hand), `d_new_geometric` (theory: polarised sizes, MDF, the closest to Tier 3's own style).
+**Training:** `d_conv_opp3`, `d_new_rules`, `d_new_lag`, `d_new_trapper`, `d_new_exploiter`, `d_new_minraise`.
+Tier 2 here includes F0 (`aggr_call_shift` 0, merged from `main`), as does Tier 3 (it inherits Tier 2's
+shipped parameters).
+
+**Locks off, 50 pairs, seeds 0–49** (`logs/g/pool/`; `lab.eval --compare logs/g/pool/t2.txt logs/g/pool/t3.txt`):
+
+| training bot | tier2 (match) | tier3 (match) | diff |
+|---|---|---|---|
+| d_conv_opp3 | −2.63 ± 0.25 (0.13) | −1.46 ± 0.22 (0.32) | **+1.17 ± 0.33** |
+| d_new_rules | −0.87 ± 0.21 (0.39) | −0.66 ± 0.19 (0.40) | +0.21 ± 0.28 |
+| d_new_lag | +7.06 ± 0.30 (0.94) | +5.94 ± 0.35 (0.87) | **−1.12 ± 0.46** |
+| d_new_trapper | −1.15 ± 0.13 (0.32) | −0.29 ± 0.14 (0.42) | **+0.86 ± 0.19** |
+| d_new_exploiter | −1.69 ± 0.20 (0.26) | −1.11 ± 0.21 (0.35) | +0.58 ± 0.29 |
+| d_new_minraise | +0.05 ± 0.21 (0.54) | +0.13 ± 0.15 (0.54) | +0.08 ± 0.26 |
+| sum | | | +1.78 ± 0.77 |
+
+**Both brains lose to four of the six training bots.** It is the old leak again, river showdowns:
+against conv_opp3, Tier 2 loses 3,610 showdowns for −5.79 chips/hand and wins 2,549 for +2.35; Tier 3
+loses 3,244 (−6.06) and wins 3,172 (+3.60). Tier 3 is better on five of six; by the keep rule ("no
+opponent drops by more than 2 SE") the −1.12 against new_lag fails it.
+
+new_lag ablation (30 pairs, fresh seeds 1000–1029, `logs/g/lag/`): base +6.27 ± 0.41, tier2 +6.72 ± 0.40,
+preflop off +6.30, flop off +6.73, turn off +6.52, river off +6.20, value floor off +6.24. No street
+explains the gap (all within ~1 SE); pooled over both runs Tier 3 is about −0.85 ± 0.36 against new_lag,
+spread over turn and river folds (Tier 3 builds bigger pots with its barrels and then folds to new_lag's
+raises). Not chased further (plan: don't spiral).
+
+**Locks on (as shipped), 50 pairs, seeds 2000–2049** (`logs/g/pool_on/`; verdict **KEEP**, sum +1.57 ± 0.54):
+
+| training bot | tier2 chips (match) | tier3 chips (match) | chips diff |
+|---|---|---|---|
+| d_conv_opp3 | −2.20 ± 0.19 (0.23) | −1.48 ± 0.22 (0.41) | **+0.72 ± 0.29** |
+| d_new_rules | −1.02 ± 0.17 (0.57) | −0.98 ± 0.16 (0.49) | +0.04 ± 0.23 |
+| d_new_lag | +0.24 ± 0.02 (0.99) | +0.16 ± 0.05 (0.97) | −0.08 ± 0.05 |
+| d_new_trapper | −0.71 ± 0.14 (0.47) | −0.03 ± 0.12 (0.74) | **+0.68 ± 0.18** |
+| d_new_exploiter | −1.62 ± 0.23 (0.35) | −1.40 ± 0.19 (0.39) | +0.22 ± 0.30 |
+| d_new_minraise | −0.39 ± 0.10 (0.68) | −0.40 ± 0.12 (0.74) | −0.01 ± 0.16 |
+| mean match score | 0.548 | **0.623** | |
+
+With the lock (it ends won matches early, so chips against new_lag shrink to ~0) Tier 3 wins more
+matches against four of six and no opponent drops; the new_lag gap is a match-score 0.99 → 0.97.
+
+**Held out, one `--final` run, locks on, 50 pairs, seeds 3000–3049** (`logs/g/heldout/`; the plan says 100
+pairs, cut to 50 for time: ~4 h of wall clock for both brains):
+
+| held-out bot | tier2 chips (match) | tier3 chips (match) | diff |
+|---|---|---|---|
+| d_conv_opp4 | −0.76 ± 0.18 (0.64) | −0.20 ± 0.15 (0.70) | **+0.56 ± 0.23** |
+| d_new_eqrandom | −0.38 ± 0.15 (0.71) | −0.12 ± 0.13 (0.74) | +0.26 ± 0.20 |
+| d_new_geometric | −2.45 ± 0.24 (0.40) | −2.11 ± 0.31 (0.48) | +0.34 ± 0.39 |
+| sum | | | +1.16 ± 0.50 |
+
+## G8: ship decision
+
+| Criterion | Result | |
+|---|---|---|
+| 1. Beats Tier 2 head-to-head (locks on, 100 pairs, match score > 0.5 by 2 SE) | 0.670 ± 0.033 over 200 matches (seeds 600–699, both with F0; `logs/g/final/h2h_lockson_f0.*`). Before F0: 0.580 ± 0.035 | met |
+| 2. Better on the training pool, locks on and off | on: +1.57 ± 0.54, no drop; off: +1.78 ± 0.77, but d_new_lag −1.12 ± 0.46 (−0.45 ± 0.57 on fresh seeds) | met on, nearly met off |
+| 3. Held-out not worse than Tier 2 | +1.16 ± 0.50, better on all three | met |
+| 4. Timing and memory at 400 and 1000 hands | package: projected 2× bank use 27–33 %, worst reply 42 ms (projected), 42 MB | met |
+
+**Decision: Tier 3 ships** (`DEFAULT_BRAIN = "tier3"`, upload candidate #4). The one soft spot is
+criterion 2 with the locks off against new_lag (a loose-aggressive bot both brains beat 87–99 % of the
+time). The lock is on in the real match.
+
 ## Kept / dropped
 
 | Change | State | Evidence |
@@ -198,21 +274,26 @@ reads random big raises as strong); vs tight it is spread over the postflop stre
 bluffs and calls any pair against bets up to half the pot). Both are still won 100 % of matches.
 Whether they matter depends on the real pool, which is untested here by design.
 
-**Not done (waits for the held-out split):** the plan's per-step `--pool train` runs at 50 pairs,
-G8's training-pool criterion (2) and held-out criterion (3). So the default brain stays `tier2`.
+**Next:** both brains lose to d_conv_opp3, d_new_rules, d_new_exploiter (training) and d_new_geometric
+(held out) in chips; the accounting shows the losses at river showdowns (more showdowns lost than won,
+and bigger). That is where the next work should go. The Phase E re-check on the pool
+(`tools/f_eval/run_f2.sh recheck`) was not run.
 
 ## Checks
 
-- Fast suite: `.venv/bin/python -m pytest -n 4`: **1161 passed, 3 skipped**.
+- Fast suite: `.venv/bin/python -m pytest -n 4`: **1163 passed, 2 skipped** (after the F0 merge, the rebuilt tables and the default switch).
+  (`tests/test_tier1.py::test_tier1_beats_random_and_plays_legally` failed once under `-n 4` and passed 3/3 alone: the known load-sensitive test.)
 - `tests/test_timing_slow.py -m slow -n 3`: **10 passed** (4 new Tier 3 cases: self-play 400 hands,
   vs tier2 1000 hands, vs maniac and calling_station; the engine charges every reply ×2).
 - Bank use at 2× (seed 6, locks off): Tier 3 23 % (self-play, 400 hands), 24 % (1000 hands vs tier2),
   26 % vs maniac, 27 % vs calling_station; Tier 2 self-play 24 %. Worst reply 0.04 s. The own-range
   sample costs little.
 - Memory (`lab.memory_check --hands 400`): Tier 3 43.1 MB, Tier 2 40.9 MB peak RSS.
-- `tools.package_submission --zip --stage2`: all checks pass (ships `tier2`, the default; projected
-  2× bank use 34–37 %). **The zip was built without tables** (`data/discard_holdem/` is not on this
-  machine): it is a check only, not an upload.
+- `tests/test_timing_slow.py -m slow`: 10 passed again after the default switch (the real subprocess bot is now Tier 3).
+- `tools.package_submission --zip --stage2` **with Tier 3 as the default and the tables** (rebuilt with
+  `lab.precompute --variant discard_holdem --samples 6000 --range-top 0.3`; `tests/test_embed.py` passes, so the
+  committed `bot/embedded.py` matches them): all checks pass, 190 KB, projected 2× bank use 27–33 %, 41.8 MB.
+  Saved as `dist/upload4_phaseG.zip` (sha256 in `docs/SUBMISSIONS.md`).
 - `tests/test_tier3.py` (new): registration and default brain, Tier 3 inherits the shipped Tier 2
   parameters (and follows a change to `tier2.json`), `"t3": false` never enters Tier 3's code,
   legality and no style exceptions vs five bots, the equity floor never folds a priced call (vs
@@ -227,4 +308,10 @@ G8's training-pool criterion (2) and held-out criterion (3). So the default brai
   starts from Tier 2's loaded parameters; `stats["t3_errors"]` counts style exceptions
   (`t3_fallbacks` also counts the spots Tier 3 leaves to Tier 2 on purpose).
 - `tests/test_tier3.py` (new), `tests/test_timing_slow.py` (Tier 3 cases).
-- `tools/g_eval/ablate.sh`: runs a list of configs against a list of opponents.
+- `tools/g_eval/ablate.sh`: runs a list of configs against a list of opponents (`FIRST_SEED`, `LOCKS`, `FINAL`).
+- `lab/opps/discard_pool.json` (the split; replaces `discard_pool_draft.json`).
+- Merged `main` (F0: Tier 2 `aggr_call_shift` 0, the package no-tables guard).
+- `tools/package_submission.py`: the no-tables guard applies only to the active variant (F0's guard refused every
+  catalog variant without tables; 3 tests failed on `main`); the default `--brain` follows `bot/main.py`.
+  New test `tests/test_day1.py::test_the_package_refuses_the_active_variant_without_its_tables`.
+- `bot/main.py`: `DEFAULT_BRAIN = "tier3"` (G8).
