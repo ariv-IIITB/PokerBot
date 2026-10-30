@@ -1,0 +1,29 @@
+{
+  "status": "Held-out split chosen 2026-10-30 (by the agent at the user's request, by style before any pool result was read): one real LLM bot (conv_opp4), the weak equity-vs-random pattern (new_eqrandom), one theory bot (new_geometric). Held-out bots: one --final run only, never tuned on.",
+  "train": [
+    "d_conv_opp3",
+    "d_new_rules",
+    "d_new_lag",
+    "d_new_trapper",
+    "d_new_exploiter",
+    "d_new_minraise"
+  ],
+  "heldout": [
+    "d_conv_opp4",
+    "d_new_eqrandom",
+    "d_new_geometric"
+  ],
+  "prompt": "Build a bot for this poker competition. The two attached PDFs are the official rules and protocol. It must never crash or time out, and it should win as many matches as possible. Deliver a complete bot.py (or a folder with bot.py at the top level) that runs with `python3.11 bot.py`, uses only the standard library, numpy and scipy, and speaks the protocol exactly as specified. Give me the full code, no placeholders.",
+  "models": {
+    "d_conv_opp3": "converted by hand from Opps/opp3 (a Hold'em bot an LLM wrote from a single prompt); port of the protocol layer, 3-then-2 hole cards, sampled discard, opponent discard",
+    "d_conv_opp4": "converted by hand from Opps/opp4 (a Hold'em bot an LLM wrote from a single prompt); same port",
+    "d_new_eqrandom": "written by a fresh Claude sub-agent (session model) that saw only rulebook.pdf, protocol.pdf, the prompt and the style brief: equity against a uniformly random opponent hand, pot odds plus margin, fixed value sizes, no bluffing, discard by simulation",
+    "d_new_rules": "written by a fresh Claude sub-agent (session model) that saw only rulebook.pdf, protocol.pdf, the prompt and the style brief: rule-based, no Monte Carlo, hand classes and board texture, fixed sizes, heuristic discard",
+    "d_new_lag": "written by a fresh Claude sub-agent (session model) that saw only rulebook.pdf, protocol.pdf, the prompt and the style brief: loose-aggressive, opens or raises most hands, light 3- and 4-bets, fires every street, bluffs a lot",
+    "d_new_trapper": "written by a fresh Claude sub-agent (session model) that saw only rulebook.pdf, protocol.pdf, the prompt and the style brief: tight-passive trapper, slow-plays, check-raises, calls down medium hands, almost never bluffs",
+    "d_new_exploiter": "written by a fresh Claude sub-agent (session model) that saw only rulebook.pdf, protocol.pdf, the prompt and the style brief: opponent-modelling, classifies nit / station / maniac / balanced and switches exploit modes, uses the revealed discard",
+    "d_new_minraise": "written by a fresh Claude sub-agent (session model) that saw only rulebook.pdf, protocol.pdf, the prompt and the style brief: small-ball, min-raises, 25 to 35 percent pot bets, cheap rules, no simulation",
+    "d_new_geometric": "written by a fresh Claude sub-agent (session model) that saw only rulebook.pdf, protocol.pdf, the prompt and the style brief: theory-minded, pot-geometry sizes, polarised bets with bluff-to-value ratio, MDF defence, Monte Carlo vs uniform range"
+  },
+  "date": "2026-10-29"
+}
