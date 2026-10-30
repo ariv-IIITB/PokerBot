@@ -9,6 +9,7 @@ set -u
 STEP=${1:?step}; PROCS=${2:-4}
 cd "$(dirname "$0")/../.."
 PY=.venv/bin/python
+[ -f lab/opps/discard_pool.json ] || { echo "no lab/opps/discard_pool.json: the held-out split is not chosen yet (see lab/opps/discard_pool_draft.json)"; exit 2; }
 mkdir -p logs/f2
 run() {  # NAME BRAIN PAIRS LOCKS REPORT
   echo "start $1 $(date +%T)" >> logs/f2/progress.txt

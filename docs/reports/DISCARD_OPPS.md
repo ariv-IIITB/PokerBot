@@ -4,7 +4,9 @@ Phase F v2 replaces the original Phase F (the user generating LLM bots by hand).
 `Opps/discard/<name>/bot.py`, every bot runs as `python3.11 bot.py` over the real protocol
 (`docs/rules/protocol.pdf`) and is registered in the lab as `d_<name>`. Nothing in `bot/` changed.
 
-(Results sections are filled in below as the runs finish.)
+**Status (2026-10-30): the pool is built and healthy. The held-out split, the Tier 2 baseline against
+the pool and the Phase E re-check are NOT done**: at the user's request they wait until after Phase G
+("let's just do phase G and then run extensive testing"). Section 4 says how to resume.
 
 ## 1. The old Hold'em bots: which two were useful, and why
 
@@ -82,8 +84,58 @@ are the point of a realistic field. No bot needed a fix to finish a match.
 
 - **A bot that burns its time bank or crashes** is realistic, but it gives no information about how
   Tier 2 should play: the match is a forfeit win. The health check reports any such bot; none of
-  the nine would forfeit.
+  the nine would forfeit (section 3).
 - **Always-raise / shove, calling station, random, pure nit:** already in the sparring pool
   (`all_in`, `maniac`, `calling_station`, `random_legal`, `tight`), so no new bot.
 - The sparring bots and the organisers' starter play the discard at random or by lowest card; the
   pool's nine all use a real discard decision, so the discard axis is covered inside the pool.
+
+## 3. Health check (`lab.pool_health`, `logs/f2/health_*.txt`)
+
+Real protocol, 400-hand matches, duplicate seats, time bank 60 s, single-reply cap 5 s. Against the
+organisers' starter bot (10 to 20 matches), against Tier 2 with the endgame lock on (10 matches), and
+against the starter with the clock charging every reply **twice** (`--clock-scale 2`: a server twice as
+slow; the bot sees its bank drain through `time_left_ms`). Columns: slowest single reply after
+start-up / largest share of the bank used in one match.
+
+| Bot | vs starter | vs Tier 2 | vs starter, 2x slower | stderr (cap 64 KB) |
+|---|---|---|---|---|
+| conv_opp3 | 0.05 s / 34 % | 0.38 s / 37 % | 0.13 s / 67 % | 0 B |
+| conv_opp4 | 0.05 s / 46 % | 0.32 s / 39 % | 0.09 s / 90 % | 0 B |
+| new_eqrandom | 0.12 s / 44 % | 0.10 s / 37 % | 0.19 s / 78 % | 0 B |
+| new_rules | 0.02 s / 1 % | 0.02 s / 4 % | 0.01 s / 3 % | 0 B |
+| new_lag | 0.05 s / 18 % | 0.04 s / 5 % | 0.08 s / 36 % | 0 B |
+| new_trapper | 0.06 s / 36 % | 0.23 s / 41 % | 0.11 s / 67 % | 0 B |
+| new_exploiter | 0.05 s / 46 % | 0.04 s / 36 % | 0.12 s / 87 % | 504 B |
+| new_minraise | 0.03 s / 1 % | 0.01 s / 1 % | 0.02 s / 3 % | 0 B |
+| new_geometric | 0.07 s / 44 % | 0.07 s / 37 % | 0.15 s / 82 % | 0 B |
+
+**All nine: 0 forfeits, 0 malformed replies, 0 illegal actions, start-up under 1.1 s: none would
+forfeit.** Nothing in the seven new bots had to be fixed. The two converted bots first used 65 to
+78 % of the bank (3 hole cards triple the equity work); their budgets were cut (opp3: fewer samples;
+opp4: 35 ms to 20 ms per decision) and the numbers above are after that. The converted bots'
+per-hand cost, profiled in-process on the worst case (a station that sees every flop): opp3 about 50 ms,
+opp4 about 55 ms, against 150 ms per hand available.
+
+The health run does not read chips. No Tier 2 chip result against any pool bot has been read yet.
+
+## 4. Not done yet, and how to resume
+
+1. **Held-out split** (`lab/opps/discard_pool_draft.json` has the prompt, the "models" notes and the
+   date). The user picks about a third of the pool (at least 2) **before** any result is read. Proposed
+   by style, not by result: `conv_opp4 + new_eqrandom + new_rules`, `conv_opp4 + new_lag + new_rules`, or
+   `new_exploiter + new_trapper + new_minraise`. Note for the choice: opp1 and opp2 are not in the
+   pool, `conv_opp4` is the only bot of the old "beaten" ones that is, and opp4 beat Tier 2 in the last
+   Phase E run (-0.60 ± 0.17). Then fill in `train` / `heldout` and rename the file to
+   `lab/opps/discard_pool.json` (`tests/test_pool_bots.py::test_pool_file_is_consistent` checks it).
+2. **Baseline** (`tools/f_eval/run_f2.sh locks_on` and `locks_off`, about 2 h on 4 cores): Tier 2 vs
+   each training bot, locks on 100 pairs and locks off 50 pairs, with `--report accounting,profile`.
+3. **Phase E re-check** (`tools/f_eval/run_f2.sh recheck`): base, no-E1 (`discard_mode: pimc`), no-E2
+   (`use_tables: false`) and no-E4 (`river_bluff_slope: 0.0`), 30 pairs each, then
+   `python -m lab.eval --compare logs/f2/re_noEx.txt logs/f2/re_base.txt`. Keep a change unless it
+   drops a training bot by more than 2 SE; if it does, report the numbers, do not revert silently.
+4. Fill sections 5 to 7 of this report (per-bot style from `lab.opps.profile`, where Tier 2 loses, the
+   common pattern against the old Hold'em bots, the Phase E table).
+
+Until the split exists, `--pool train` falls back to the retired Hold'em bots opp1 to opp4; use named
+`d_<name>` pools only after the split, and do not tune on held-out bots.

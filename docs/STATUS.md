@@ -14,7 +14,8 @@ Rules: `docs/rules/` (`SUMMARY.md` first).
 | **C** real protocol adapter (`bot/protocols/pokerbots.py`, now the default) | done, reviewed in D1 | `d131932`, `dd51c98` |
 | **D** ship-safe → first upload | done; **upload #1 = `dist/upload1_phaseD.zip`** (the user uploads) | `accb344` |
 | **E** Tier 2 on the real game (discard, tables, oppstats, bluff-catch, EV sizing) | done on `claude/phase-e-on-refactor-c07yie`, awaiting review; **upload #2 = `dist/upload2_phaseE.zip`** | see git log |
-| F LLM opponent pool · G Tier 3 "Ivey" · H Problem Statement / freeze | to do | — |
+| **F v2** Discard Hold'em opponent pool: 9 bots in `Opps/discard/` (2 converted, 7 independent), health OK | pool + health done on `ccr-412db155-a836ca`; held-out split, Tier 2 baseline and E re-check **deferred** (user, 2026-10-30), see `docs/reports/DISCARD_OPPS.md` section 4 | `4f72a86` |
+| G Tier 3 "Ivey" · H Problem Statement / freeze | to do | — |
 
 Tests on Python 3.11 (`.venv`): fast suite 1063 passed, 2 skipped; slow suite 267 passed (21 min with
 `-n 3`) at Phase D (`accb344`). The runtime sandbox test passes (no xfail left).
@@ -71,8 +72,11 @@ phase starts by reviewing the previous one.
 - **CFR (Tier 4), decided 2026-10-29:** a separate track, `docs/CFR_PLAN.md`. K1–K3 (abstraction,
   trainers, river solver) are lab work and can run in their own session alongside E–G. Gate A
   (blueprint vs Tier 2 and opp3) ~3–4 Nov; if it fails, Tier 3 ships.
-- **Phase F:** the user is generating Discard Hold'em LLM bots (the prompt is in the plan, Phase F)
-  into `Opps/discard/<model>/bot.py` and picks 2 held-out bots before seeing results.
+- **Phase F (v2, replaces the plan above):** the pool was built here, not by the user: `Opps/discard/*`
+  (conv_opp3, conv_opp4 + 7 independent sub-agent bots), registered as `d_<name>`, all pass
+  `lab.pool_health`. **Still to do, in this order:** the user picks the held-out split (before any result),
+  then the Tier 2 baseline and the Phase E re-check (`tools/f_eval/run_f2.sh`). Until then nobody has read
+  a Tier 2 chip result against a pool bot, and G must not tune on any pool bot.
 - **Phase G:** Tier 3 ("Ivey") builds on Phase E's Tier 2. On the river, the bluff index decides
   calls, not MDF.
 - **1 Nov:** the Problem Statement comes out → Phase H checks (showdown rule, provisional limits).

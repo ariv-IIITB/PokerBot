@@ -665,6 +665,11 @@ Hold'em test of "raise more preflop" alone made Tier 2 worse).
 ### Done when
 The report is committed, the E re-check is reported, and the user has seen both.
 
+> **Status (2026-10-30), Phase F v2** (`docs/PHASE_F_V2_PROMPT.md` replaced the "user generates the bots"
+> setup): the pool is built (`Opps/discard/`: conv_opp3, conv_opp4 and seven independent bots), registered
+> as `d_<name>`, and healthy (`docs/reports/DISCARD_OPPS.md` section 3). **Deferred at the user's request:**
+> the held-out split, the Tier 2 baseline and the Phase E re-check (section 4 of the report).
+
 ---
 
 ## Phase G — Tier 3: the "Ivey" style
