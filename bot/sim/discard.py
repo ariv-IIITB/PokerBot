@@ -72,9 +72,10 @@ def _simple_discard(rec: Reconstruction) -> bool:
 
 def choose_discard(rec: Reconstruction, legal: LegalActions, rng: np.random.Generator,
                    budget_s: float, inference=None, max_samples: int = 4000,
-                   first_chunk: int = 96) -> Optional[Action]:
+                   first_chunk: int = 96, out: Optional[dict] = None) -> Optional[Action]:
     """The best card to drop by sampled showdown share, or None when this is not the simple
-    one-card discard (the caller then uses its generic policy)."""
+    one-card discard (the caller then uses its generic policy). If `out` is a dict it receives
+    "means": the sampled expected share of every option (only when the choice was sampled)."""
     if not _simple_discard(rec):
         return None
     st, me = rec.state, rec.me
@@ -138,5 +139,7 @@ def choose_discard(rec: Reconstruction, legal: LegalActions, rng: np.random.Gene
             if ess >= inference.params["min_ess"] * len(lw):
                 w = cand
     means = {o: float(np.average(v, weights=w)) for o, v in values.items()}
+    if out is not None:
+        out["means"] = means
     best = max(means, key=lambda o: (means[o], -int(o)))
     return Action.special(best)
