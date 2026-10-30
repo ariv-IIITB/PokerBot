@@ -1,0 +1,1 @@
+tier2[{"aggr_call_shift":0.0}]-nolock vs tier1-nolock: +0.30 ± 0.16 chips/hand | match score 0.530 ± 0.035 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 834.1s (96/s)

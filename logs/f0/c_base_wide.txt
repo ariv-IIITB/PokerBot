@@ -1,0 +1,5 @@
+tier2[{}]-nolock vs calling_station-nolock: +8.86 ± 0.10 chips/hand | match score 1.000 ± 0.000 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 180.8s (133/s)
+tier2[{}]-nolock vs tight-nolock: +8.18 ± 0.29 chips/hand | match score 1.000 ± 0.000 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 116.1s (207/s)
+tier2[{}]-nolock vs opp1-nolock: +8.02 ± 0.27 chips/hand | match score 1.000 ± 0.000 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 309.8s (77/s)
+tier2[{}]-nolock vs opp2-nolock: +2.29 ± 0.20 chips/hand | match score 0.933 ± 0.032 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 240.1s (100/s)
+tier2[{}]-nolock vs maniac-nolock: +53.37 ± 0.61 chips/hand | match score 1.000 ± 0.000 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 171.6s (140/s)

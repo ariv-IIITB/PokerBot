@@ -29,7 +29,7 @@ DEFAULTS.update({
     "adapt_bluffs": True,          # False: bluff_freq stays at its Tier 1 value (ablation switch)
     "value_shift": 0.15,           # raise threshold drop per unit of (vpip - prior)
     "value_size_shift": 0.6,       # size boost per unit of (prior_ftr - ftr)
-    "aggr_call_shift": 0.10,       # call margin drop per unit of (aggression - prior)
+    "aggr_call_shift": 0.0,        # call margin drop per unit of (aggression - prior); 0.10 cost ~0.6 vs tier1/opp4 (Phase F0), off
     "pressure_aggr_from": 0.6,     # all-street aggression above this shrinks bet_pressure...
     "pressure_aggr_shift": 1.0,    # ...to bet_pressure x (1 - shift * excess); 0 = off
     "lock_enabled": True,

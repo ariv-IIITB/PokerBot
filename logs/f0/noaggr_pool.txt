@@ -1,0 +1,4 @@
+tier2[{"aggr_call_shift":0.0}]-nolock vs opp3-nolock: +0.16 ± 0.08 chips/hand | match score 0.583 ± 0.064 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 158.4s (152/s)
+tier2[{"aggr_call_shift":0.0}]-nolock vs opp4-nolock: -0.16 ± 0.27 chips/hand | match score 0.500 ± 0.065 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 318.9s (75/s)
+tier2[{"aggr_call_shift":0.0}]-nolock vs starter: +7.58 ± 0.15 chips/hand | match score 1.000 ± 0.000 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 194.5s (123/s)
+tier2[{"aggr_call_shift":0.0}]-nolock vs maniac-nolock: +49.48 ± 0.66 chips/hand | match score 1.000 ± 0.000 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 154.2s (156/s)
