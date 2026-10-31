@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from bot.actions import Action, LegalActions
+from bot.actions import Action, LegalActions, SpecialOption
 from bot.brains.tier2 import DEFAULTS, Tier2Brain, lock_margin
 from bot.cards import parse_cards as P
 from bot.game.rules_spec import to_rules
@@ -214,6 +214,17 @@ def test_the_lock_lifts_as_soon_as_the_lead_is_gone() -> None:
         brain.decide(st, legal, 0.005)
         assert (brain.locked_decisions == before + 1) == locked, bankroll
 
+
+def test_a_locked_hand_still_discards_its_worst_card() -> None:
+    """The lock stops betting, not discarding: a discard puts no chips in, so a locked hand
+    plays it normally instead of throwing away whatever card is listed first (an ace here)."""
+    brain = Tier2Brain(game=DH_RULES)
+    st = lock_state(10, 8, 60, 0, 1)                      # locked: see the test above
+    st.apply(HoleCards(P("Ah,Ad,2c")))
+    st.apply(BoardUpdate(1, P("Kh,Ks,7d")))
+    discard = LegalActions(special=SpecialOption("discard", ("0", "1", "2")))
+    assert brain.decide(st, discard, 0.05) == Action.special("2")    # the 2c, keeping the aces
+    assert brain.locked_decisions == 1
 
 @pytest.mark.parametrize("hands", [400, 1000])
 @pytest.mark.parametrize("opp", ["all_in", "maniac"])

@@ -70,7 +70,7 @@ the discard with the normal discard policy.
 
 | Purpose | Command | Expected on success |
 |---|---|---|
-| The new test | `.venv/bin/python -m pytest -q tests/test_tier2.py -k locked_discard` | `1 passed` (after the fix) |
+| The new test | `.venv/bin/python -m pytest -q tests/test_tier2.py -k locked_hand_still` | `1 passed` (after the fix) |
 | Tier 2 tests | `.venv/bin/python -m pytest -q tests/test_tier2.py` | 0 failed |
 | Fast suite | `.venv/bin/python -m pytest -n auto -q` | 0 failed |
 | Time bank check (required after any `bot/` change, per `CLAUDE.md`) | `.venv/bin/python -m lab.timing_bench --variant discard_holdem --hands 1000` | a line `... projected x2 = ...s (P% of bank)` with P ≤ 50 |
@@ -127,7 +127,7 @@ that a locked hand no longer discards slot 0 and goes through `Situation.special
 prove the simulation ran. That is enough for this fix, because both branches of
 `Situation.special` give `"2"` here.
 
-**Verify**: `.venv/bin/python -m pytest -q tests/test_tier2.py -k locked_discard` → `1 failed`,
+**Verify**: `.venv/bin/python -m pytest -q tests/test_tier2.py -k locked_hand_still` → `1 failed`,
 and the failure shows `choice='0'` on the left of the `==`. A stderr warning
 `reconstruction failed` may appear; that is expected for this hand-built state.
 
@@ -145,7 +145,7 @@ In `bot/brains/tier2.py`, `decide`, change the locked branch to:
 
 Nothing else in the file changes.
 
-**Verify**: `.venv/bin/python -m pytest -q tests/test_tier2.py -k locked_discard` → `1 passed`.
+**Verify**: `.venv/bin/python -m pytest -q tests/test_tier2.py -k locked_hand_still` → `1 passed`.
 
 ### Step 3: Full checks
 
@@ -167,7 +167,7 @@ Nothing else in the file changes.
 
 ## Done criteria
 
-- [ ] `.venv/bin/python -m pytest -q tests/test_tier2.py -k locked_discard` → `1 passed`
+- [ ] `.venv/bin/python -m pytest -q tests/test_tier2.py -k locked_hand_still` → `1 passed`
 - [ ] `.venv/bin/python -m pytest -n auto -q` → 0 failed
 - [ ] `lab.timing_bench` projected x2 ≤ 50 % of the bank; `lab.memory_check` exits 0
 - [ ] `git diff 39ca8f8 --stat` (or vs your base) shows only `bot/brains/tier2.py` and `tests/test_tier2.py`

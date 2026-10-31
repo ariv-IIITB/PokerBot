@@ -12,9 +12,9 @@ the acceptance rule (`lab/eval.py`) or the held-out bots.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 001  | Track the Discard Hold'em tables in git | P1 | S | — | TODO |
-| 002  | Run the fast test suite in GitHub Actions | P1 | S | 001 | TODO |
-| 003  | A locked Tier 2 discards its worst card, not slot 0 | P2 | S | — | TODO |
+| 001  | Track the Discard Hold'em tables in git | P1 | S | — | DONE (fresh clone packages; 1103 passed) |
+| 002  | Run the fast test suite in GitHub Actions | P1 | S | 001 | DONE locally (fresh clone + new venv: 1103 passed); first GitHub run to check after push |
+| 003  | A locked Tier 2 discards its worst card, not slot 0 | P2 | S | — | DONE (red→green; timing 49% before and after, RSS 39 MB) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
@@ -29,7 +29,8 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
 ## Findings considered and not planned
 
 - `Bot.run` loops forever if reading stdin keeps failing (`bot/main.py:73-80`): real, but
-  unlikely (stdin uses `errors="replace"`). The owner chose not to plan it this round.
+  unlikely (stdin uses `errors="replace"`). The owner chose not to plan it this round; on 2026-10-31
+  two independent reviewers also rejected it (no reachable trigger; a dead stdin loses the match either way).
 - `brain.observe()` runs outside the hard deadline (`bot/main.py:143-147`): rejected. The worst
   reply over a 400-hand match was 36 ms (73 ms projected at 2× slower) against the 5 s limit.
 - `setup-teammate.sh` installs a third-party Claude plugin: dev tooling by design, never shipped.

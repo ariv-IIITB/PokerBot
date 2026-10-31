@@ -152,6 +152,8 @@ class Tier2Brain(Tier1Brain):
         s = self.situation(state)
         if s.locked():
             self.locked_decisions += 1
+            if legal.can_special:           # a discard puts no chips in: play it normally
+                return s.special(legal, budget_s)
             return safe_action(legal)
         h = s.hand
         action = self.play(s, legal, budget_s, self.adjusted(h.street if h is not None else 0))
