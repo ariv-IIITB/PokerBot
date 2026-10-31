@@ -13,7 +13,7 @@ the acceptance rule (`lab/eval.py`) or the held-out bots.
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
 | 001  | Track the Discard Hold'em tables in git | P1 | S | — | DONE (fresh clone packages; 1103 passed) |
-| 002  | Run the fast test suite in GitHub Actions | P1 | S | 001 | DONE locally (fresh clone + new venv: 1103 passed); first GitHub run to check after push |
+| 002  | Run the fast test suite in GitHub Actions | P1 | S | 001 | DONE (first GitHub runs green on main and branch, 8912a06) |
 | 003  | A locked Tier 2 discards its worst card, not slot 0 | P2 | S | — | DONE (red→green; timing 49% before and after, RSS 39 MB) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
