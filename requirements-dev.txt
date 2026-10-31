@@ -5,3 +5,4 @@ scipy==1.16.2
 pytest==8.4.2
 pyflakes==4.0.3
 pytest-xdist==3.8.0
+numba==0.62.1         # lab only: the fast CFR trainer (lab/cfr/fast/); never imported in bot/
