@@ -55,6 +55,13 @@ def test_package_contains_only_what_the_variant_needs(tmp_path) -> None:
     assert m.forfeit is None and m.errors[0] == 0
 
 
+def test_package_refuses_the_embedded_variant_without_its_tables(tmp_path) -> None:
+    # Upload #2: data/<variant>/ was missing on the build machine and the zip shipped without tables.
+    with pytest.raises(SystemExit, match="refusing to package"):
+        pkg.build(pkg.ROOT / "variant" / "active.json", "tier2", "pokerbots", tmp_path / "sub",
+                  data_dir=tmp_path / "no_data")
+
+
 def test_package_never_touches_foreign_folders(tmp_path) -> None:
     out = tmp_path / "precious"
     out.mkdir()

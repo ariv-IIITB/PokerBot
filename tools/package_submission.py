@@ -121,7 +121,15 @@ def needed_modules(spec: VariantSpec, brain: str, protocol: str) -> set[str]:
     return seen
 
 
-def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
+def _has_tables_for(embedded: Path, spec: VariantSpec) -> bool:
+    """True if the generated file `embedded` carries tables and was built for `spec`."""
+    ns: dict = {}
+    exec(compile(embedded.read_text(), str(embedded), "exec"), ns)
+    return bool(ns.get("ARTIFACTS")) and ns.get("SPEC") == spec.to_dict()
+
+
+def build(spec_path: Path, brain: str, protocol: str, out: Path,
+          data_dir: Path = embed_data.DATA_DIR) -> dict:
     spec = VariantSpec.load(spec_path)
     if out.exists():
         if not (out / "PACKAGE.json").is_file():
@@ -135,11 +143,11 @@ def build(spec_path: Path, brain: str, protocol: str, out: Path) -> dict:
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src, dst)
     # The embedded data: generated for THIS spec (not the repo's committed copy).
-    rendered = embed_data.render(str(spec_path))
+    rendered = embed_data.render(str(spec_path), data_dir=data_dir)
     committed = (ROOT / "bot" / "embedded.py")
-    if ("ARTIFACTS = {}" in rendered and committed.is_file()
-            and "ARTIFACTS = {}" not in committed.read_text()):
+    if "ARTIFACTS = {}" in rendered and committed.is_file() and _has_tables_for(committed, spec):
         # Upload #2 shipped without its tables this way: data/<variant>/ was missing on the build machine.
+        # Other variants never had tables to lose, so they package without them.
         raise SystemExit("refusing to package: the committed bot/embedded.py has tables but data/<variant>/ "
                          "is missing or stale, so the package would ship without them. Rebuild the tables "
                          "(lab.precompute) or restore data/ first.")
