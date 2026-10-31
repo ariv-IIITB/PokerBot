@@ -188,6 +188,64 @@ def history_ids(par: Params) -> list[dict[str, int]]:
     return ids
 
 
+DECISION, FOLD, SHOWDOWN = 0, 1, 2
+
+
+def flatten(par: Params) -> dict:
+    """The whole abstract tree as flat NumPy arrays (the trainer walks these; no betting logic).
+
+    Per node n (0 = root): kind (DECISION / FOLD / SHOWDOWN), street, actor, hist (history id within
+    its street, decision nodes only, as history_ids), n_act, first (index of its first edge),
+    contrib[n, seat] (chips each seat has put in), folder (seat that folded, else -1).
+    Per edge e: child[e] (node index), label[e] (index into LABELS). Children are in LABELS order.
+    """
+    from collections import deque
+
+    import numpy as np
+
+    ids = history_ids(par)
+    nodes: list[Node] = []
+    edges_child: list[int] = []
+    edges_label: list[int] = []
+    first: list[int] = []
+    n_act: list[int] = []
+    queue = deque([root(par)])
+    while queue:                                   # breadth first: parents before children
+        n = queue.popleft()
+        nodes.append(n)
+        if n.done:
+            first.append(-1)
+            n_act.append(0)
+            continue
+        acts = actions(n, par)
+        first.append(len(edges_child))
+        n_act.append(len(acts))
+        for lab, _k, _a in acts:
+            edges_label.append(LABELS.index(lab))
+            edges_child.append(-1)                 # filled below
+            queue.append(child(n, lab, par))
+    # children were appended to the queue in order, so node indices follow edge order
+    nxt = 1
+    for e in range(len(edges_child)):
+        edges_child[e] = nxt
+        nxt += 1
+    kind = [FOLD if n.folded is not None else SHOWDOWN if n.done else DECISION for n in nodes]
+    start = par.stack
+    return {
+        "kind": np.array(kind, dtype=np.int8),
+        "street": np.array([n.street for n in nodes], dtype=np.int8),
+        "actor": np.array([n.actor for n in nodes], dtype=np.int8),
+        "hist": np.array([ids[n.street][n.history] if not n.done else -1 for n in nodes], dtype=np.int32),
+        "n_act": np.array(n_act, dtype=np.int8),
+        "first": np.array(first, dtype=np.int32),
+        "contrib": np.array([[start - n.stacks[0], start - n.stacks[1]] for n in nodes], dtype=np.int32),
+        "folder": np.array([-1 if n.folded is None else n.folded for n in nodes], dtype=np.int8),
+        "child": np.array(edges_child, dtype=np.int32),
+        "label": np.array(edges_label, dtype=np.int8),
+        "histories": [sorted(d, key=d.get) for d in ids],
+    }
+
+
 def infoset_key(street: int, bucket: int, history: str) -> str:
     """Same format as bot.abstraction.infoset_key."""
     return f"{street}|{bucket}|{history}"

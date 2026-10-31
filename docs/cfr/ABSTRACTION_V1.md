@@ -131,7 +131,14 @@ two distinct of m:       i = draw(m); j = draw(m - 1); if j >= i: j += 1
 ```
 
 `dead` = cards out of play that the actor knows: on the turn and river, both discards. The
-"unseen" list is `sorted(deck − hole − board − dead)`; draws index into it.
+"unseen" list is `sorted(deck − hole − board − dead)`; draws index into it. A draw from a list with
+positions removed (the runout, or the river) indexes the shortened list and is mapped back by
+`k += (k >= p)` for each removed position p, in ascending order.
+
+**Exact arithmetic.** A "count" is 2 × wins + ties (an integer). Every feature is an integer sum of
+counts divided once by an integer denominator (e.g. flop `E[HS] = Σ_r cnt_r / (2·O·R)`,
+`E[HS²] = Σ_r cnt_r² / ((2O)²·R)`), so NumPy and Numba produce the same float bit for bit.
+Implemented in `bot/abstraction.py` (runtime) and `lab/cfr/fast/buckets.py` (trainer).
 
 ### 5.2 Flop (3 hole cards, before the discard)
 
@@ -139,13 +146,14 @@ two distinct of m:       i = draw(m); j = draw(m - 1); if j >= i: j += 1
 **O = 40 opponent hands** (two distinct of `unseen − runout`); the same samples serve all three keeps.
 For each keep K (3 choices), with `share_r` = mean over the O hands of K's showdown share on runout r:
 `E[HS](K) = mean_r share_r`, `E[HS²](K) = mean_r share_r²`. The best keep K* = argmax E[HS] (§4).
-Features: `x = E[HS](K*)`, `y = E[HS²](K*)`.
-Cost: 3 × 50 × 40 = 6,000 opponent evaluations per player.
+Features: `x = E[HS](K*)`, `y = E[HS²](K*)`. Draw order per runout: the two runout draws, then
+(a, b) for each of the O opponent hands. Ties between keeps go to the first keep.
+Cost: 2,000 opponent and 150 own evaluations per player (the opponent samples are shared by the keeps).
 
 ### 5.3 Turn (2 kept cards, 4 board, 2 dead)
 
-`unseen` = 44 cards. **Every river card** r (44, exact), **O = 24** opponent hands each from
-`unseen − r` → 1,056 evaluations. Features as on the flop.
+`unseen` = 44 cards. **Every river card** r (44, exact, in `unseen` order), **O = 24** opponent hands
+each from `unseen − r` → 1,056 evaluations. Features as on the flop.
 
 ### 5.4 River (2 kept cards, 5 board, 2 dead)
 
@@ -166,6 +174,14 @@ for tests, in `lab/cfr/fast/buckets.py`.
 
 **Runtime budget:** ≤ 15 ms per decision on the laptop (C2 measures; the server is ~2× slower).
 Over budget: precompute the flop features per (canonical flop, 3-card class) offline (size check first).
+
+### 5.6 Training data path *(C1–C3)*
+
+Per-deal features cost ~0.3 ms per core in Numba (both seats, all streets), too much to recompute in
+every MCCFR iteration. The trainer therefore samples deals from a **precomputed deal pool**: per deal,
+each seat's bucket on every street (with §4's discards) and the showdown result. The betting is the
+same for every deal, so the trainer walks `tree.flatten`'s arrays (node → children, actor, street,
+history id, chips put in at terminals) instead of running betting logic.
 
 ## 6. Worked example (one full hand, every key)
 
@@ -238,8 +254,9 @@ infoset are. If C3 measures < 20,000 iterations/s, drop to cap 2 before cutting 
 | tree chips, pot, to-call and raise bounds equal `bot/game` on 1,200 random lines (caps 4, 3, 2) | `tests/test_cfr_tree.py`, passing |
 | the worked example's menus, pots and histories (§6) | `tests/test_cfr_tree.py`, passing |
 | history ids dense per street, sizes of §8 | `tests/test_cfr_tree.py`, passing |
-| Numba game core == tree == `bot/game` on 20,000 random lines | *(C1)* |
-| 7-card evaluator == `bot/evaluator.py` on 1 M hands | *(C1)* |
-| SplitMix64 sampler: NumPy and Numba draw identical streams; bucket ids equal on 5,000 situations | *(C2)* |
-| the worked example's sampled features and bucket ids | *(C2)* |
+| flat tree (`tree.flatten`) == reference tree; terminal payoffs == `bot/game` on 600 random hands | `tests/test_cfr_tree.py`, passing |
+| 7-card evaluator == `bot/evaluator.py` on 100 k hands (1 M: slow) | `tests/test_cfr_fast.py`, passing |
+| SplitMix64 reference vectors; NumPy and Numba streams, seeds and all features identical on 120 situations (5,000: slow) | `tests/test_cfr_fast.py`, passing |
+| the worked example's sampled features (close to the exact ones) | `tests/test_cfr_fast.py`, passing |
+| the worked example's bucket ids | *(C2, after the threshold fit)* |
 | runtime key == trainer key on 1,000 random hands | *(C5)*, extends `tests/test_cfr_runtime.py` |

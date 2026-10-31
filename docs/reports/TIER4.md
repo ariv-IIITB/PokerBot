@@ -39,3 +39,37 @@ NumPy 2.3.4 without changing it.
 
 **Not done in C0 (by design):** bucket thresholds and the sampled feature values of the worked
 example need C2's sampler; C2's test pins them.
+
+## C1 + C2, first part (2026-11-01)
+
+**What:**
+- `lab/cfr/fast/eval7.py`: Numba 7-card evaluator. One lookup in a best-of-7 table over the 50,388
+  rank multisets (built from `bot/evaluator.py`'s 5-card table) plus the flush suit's 5-subsets when a
+  suit has 5+ cards. **Equal to the bot's evaluator on 1 M random hands; 63 ns per hand** (16 M/s;
+  a first version allocating per call took 888 ns).
+- `bot/abstraction.py` (shipped, NumPy) and `lab/cfr/fast/buckets.py` (Numba): the §5 SplitMix64 sampler
+  and the flop / turn / river features. **Bit-identical on 5,000 random situations** (exact integer
+  counts, one division).
+- `lab/cfr/fast/tree.py: flatten`: the abstract tree as flat arrays for the trainer (22,498 nodes at cap 3);
+  terminal payoffs equal `bot/game`'s on 600 random hands.
+
+**Costs (laptop):**
+
+| | flop | turn | river |
+|---|---|---|---|
+| runtime, NumPy, per decision | 3.2 ms | 0.5 ms | 0.5 ms |
+| trainer, Numba, per seat | 0.09 ms | 0.04 ms | 0.02 ms |
+
+The runtime is well inside the 15 ms budget (≈ 6.5 ms at 2× on the flop). A training deal (both seats,
+all streets) is ~0.3 ms per core, so the trainer uses a **precomputed deal pool** (contract §5.6):
+~10 M deals in ~5 min on 10 cores.
+
+**Design change vs the build map:** no Numba betting state machine. The betting tree is the same for
+every deal, so C3 walks `tree.flatten`'s arrays; the per-deal work is the pool's buckets and showdown.
+
+**Tests:** `tests/test_cfr_fast.py` (7 fast + 2 slow), 3 new flat-tree tests in `tests/test_cfr_tree.py`.
+Fast suite 1214 passed, 2 skipped; slow twin tests passed.
+
+**Next (C2 rest, C3):** the deal pool builder with the fixed discard (§4); fit the §5.5 thresholds on
+200 k pool deals and pin the worked example's bucket ids; then the MCCFR traversal over the flat tree and
+the 20 k it/s throughput check.

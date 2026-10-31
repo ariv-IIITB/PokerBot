@@ -117,3 +117,80 @@ def test_history_ids_are_dense_per_street(par) -> None:
     for d in ids:
         assert sorted(d.values()) == list(range(len(d)))
     assert ids[0][""] == 0 and "RRC/" in ids[1] and "RRC/CHC/CP" in ids[2]
+
+
+# --------------------------------------------------------------------------- the flat tree (C1)
+
+@pytest.fixture(scope="module")
+def flat(par):
+    return tree.flatten(par)
+
+
+def test_flat_tree_has_every_decision_node_once(par, flat) -> None:
+    dec = flat["kind"] == tree.DECISION
+    assert int(dec.sum()) == len(list(tree.decision_nodes(par)))
+    for s in range(4):
+        hs = flat["hist"][dec & (flat["street"] == s)]
+        assert sorted(hs.tolist()) == list(range(len(flat["histories"][s])))
+    assert flat["child"].tolist() == list(range(1, len(flat["kind"])))     # breadth first
+
+
+def _walk_flat(flat, labels: str) -> int:
+    n = 0
+    for lab in labels.replace("|", " ").split():
+        f, k = flat["first"][n], flat["n_act"][n]
+        got = [tree.LABELS[x] for x in flat["label"][f:f + k]]
+        n = int(flat["child"][f + got.index(lab)])
+    return n
+
+
+def test_flat_tree_follows_the_reference_tree(par, flat) -> None:
+    line = "R R C | C H R C | C C | C P"
+    for depth in range(1, len(line.split()) + 1):
+        prefix = " ".join(line.replace("|", " ").split()[:depth])
+        n = _walk_flat(flat, prefix)
+        ref, _acts, _lab = tree.walk_line(prefix + " C", par)[-1]   # node after the prefix
+        assert flat["kind"][n] == tree.DECISION
+        assert (int(flat["street"][n]), int(flat["actor"][n])) == (ref.street, ref.actor)
+        assert flat["histories"][ref.street][flat["hist"][n]] == ref.history
+        assert flat["contrib"][n].tolist() == [200 - ref.stacks[0], 200 - ref.stacks[1]]
+    end = _walk_flat(flat, line + " C")
+    assert flat["kind"][end] == tree.SHOWDOWN and flat["contrib"][end].tolist() == [159, 159]     # pot 318, as in ABSTRACTION_V1 §6
+    fold = _walk_flat(flat, "R F")
+    assert flat["kind"][fold] == tree.FOLD and flat["folder"][fold] == 1
+    assert flat["contrib"][fold].tolist() == [5, 2]
+
+
+def flat_utility(flat, n: int, seat: int, showdown: int) -> int:
+    """Chips won by `seat` at terminal n; showdown = +1 seat 0 wins, -1 seat 1 wins, 0 split."""
+    c = flat["contrib"][n]
+    if flat["kind"][n] == tree.FOLD:
+        q = int(flat["folder"][n])
+        return -int(c[q]) if seat == q else int(c[q])
+    win = showdown if seat == 0 else -showdown
+    return win * int(c[1 - seat]) if win > 0 else (-int(c[seat]) if win < 0 else 0)
+
+
+def test_flat_terminal_payoffs_equal_the_rules_engine(par, flat) -> None:
+    rules = to_rules(load_variant("discard_holdem"))
+    rng = np.random.default_rng(21)
+    seen = {tree.FOLD: 0, tree.SHOWDOWN: 0}
+    for _ in range(600):
+        deck = [rules.deck[i] for i in rng.permutation(len(rules.deck))]
+        st = GameState(rules, deck, [rules.starting_stack] * 2, record=False)
+        n, ref = 0, tree.root(par)
+        p = _settle(st)
+        while p is not None:
+            f, k = flat["first"][n], flat["n_act"][n]
+            e = f + int(rng.integers(k))
+            label = tree.LABELS[flat["label"][e]]
+            acts = {lab: (kind, amt) for lab, kind, amt in tree.actions(ref, par)}
+            kind, amt = acts[label]
+            act(st, p, _engine_action(kind, amt))
+            n, ref = int(flat["child"][e]), tree.child(ref, label, par)
+            p = _settle(st)
+        assert flat["kind"][n] != tree.DECISION
+        sd = int(np.sign(st.deltas[0])) if flat["kind"][n] == tree.SHOWDOWN else 0
+        assert [flat_utility(flat, n, s, sd) for s in (0, 1)] == list(st.deltas)
+        seen[int(flat["kind"][n])] += 1
+    assert min(seen.values()) > 50
