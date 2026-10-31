@@ -1,5 +1,8 @@
 # CFR hybrid bot (Tier 4): the plan
 
+> **Superseded on 2026-10-31 by `docs/CFR_BUILDMAP.md`** (none of this was built; dates passed; Tier 3
+> now ships and the exploit layer comes first). Kept for its reasoning.
+
 Written 2026-10-29. Read `CLAUDE.md`, `docs/STATUS.md` and `docs/PART4_PLAN.md` first.
 This plan replaces the "CFR is a no-go" verdict of `docs/PART3_ROADMAP.md` for Discard Hold'em:
 that verdict came from 2 h of training on 1 core with 8 coarse buckets.

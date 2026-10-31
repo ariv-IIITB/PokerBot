@@ -70,6 +70,17 @@ builder now refuses without `data/<variant>/`; use upload #3.
 `data/discard_holdem/` is committed (135 KB). If you change the variant or the precompute settings, rebuild it with
 `lab.precompute --variant discard_holdem --samples 6000 --range-top 0.3`, then run `tools.embed_data`, and commit both.
 
+## 31 Oct: book, Tier 3 fix, packaging fix, CFR build map
+
+- `docs/book/pokerbot_book.html`: the offline two-chapter book (concepts; the repo; opponent profiles of 21 bots;
+  the exploit-layer design; designs A vs B).
+- Tier 3 fix `ba5800f`: a hard deadline between building the preflop model and the own-range helper silently
+  turned Tier 3 into Tier 2 postflop for the rest of the match. Upload candidate #4 predates it: rebuild.
+- Packaging fix: `tools.package_submission` now defaults to `bot.main.DEFAULT_BRAIN` (it defaulted to tier2 while
+  main.py said tier3, so the documented command built a bot that fell back to Tier 0; the checks caught it).
+- **Next: `docs/CFR_BUILDMAP.md`** (Track X exploit layer on Tier 3, ships regardless; Track C CFR with a kill gate
+  on 6 Nov). It supersedes `docs/CFR_PLAN.md`.
+
 ## Open items for the next phases
 
 The plan was finalized on 2026-10-29 (`docs/PART4_PLAN.md`): done phases are marked, and every
