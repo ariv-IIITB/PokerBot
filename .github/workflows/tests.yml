@@ -1,0 +1,22 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Set up Python 3.11 and dev requirements
+        run: |
+          uv venv --python 3.11 .venv
+          uv pip install --python .venv/bin/python -r requirements-dev.txt
+      - name: Fast test suite
+        run: .venv/bin/python -m pytest -n auto -q
