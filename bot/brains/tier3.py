@@ -183,8 +183,11 @@ class Tier3Brain(Tier2Brain):
             return None
         key = (id(t), float(self.p["pf_play_weight"]))
         if self._model is None or self._model_key != key:
-            self._model, self._model_key = PreflopModel(t, float(self.p["pf_play_weight"])), key
-            self._own = OwnRange(self.rules.evaluator, t, self.rules.deck)
+            # Build both, then assign together: a hard deadline in between used to leave the model
+            # set and _own None, so every later postflop decision fell back to Tier 2.
+            model = PreflopModel(t, float(self.p["pf_play_weight"]))
+            own = OwnRange(self.rules.evaluator, t, self.rules.deck)
+            self._model, self._model_key, self._own = model, key, own
         return self._model
 
     def _new_hand(self, h: HandState) -> None:

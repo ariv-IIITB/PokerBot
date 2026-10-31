@@ -279,6 +279,21 @@ Whether they matter depends on the real pool, which is untested here by design.
 and bigger). That is where the next work should go. The Phase E re-check on the pool
 (`tools/f_eval/run_f2.sh recheck`) was not run.
 
+## Fix after G8 (2026-10-31): a deadline on the first decision could disable Tier 3
+
+Found while profiling the pool for the book (`docs/book/pokerbot_book.html`, §2.10.6): `_preflop_model()`
+assigned the preflop model before building `OwnRange`. A hard deadline (`DeadlineExceeded`) between the
+two left the model set and `_own` None. The model was never rebuilt, so every later postflop decision hit
+the assert in `_postflop` and fell back to Tier 2 for the rest of the match (595 fallbacks logged in
+the profiling run under 4-way CPU load; reproduced on purpose: one interrupted build gave 597 fallbacks
+in a 200-hand match). Fix: build both, then assign together (`bot/brains/tier3.py`). Regression test:
+`tests/test_tier3.py::test_a_deadline_while_building_the_preflop_model_does_not_disable_tier3` (failed
+with 177 errors before the fix, passes after). Fast suite 1172 passed, 2 skipped; `tests/test_timing_slow.py`
+10 passed; bank use at 2x: 32 % (400 hands, 60 s), 34 % (1000 hands, 150 s); peak RSS 39 MB.
+The 1000-hands-on-a-60-s-bank bench reads 55–59 % on this machine both before and after the fix
+(49 % earlier the same day under a different load), so it is load noise, not the fix. Upload candidate #4
+predates this fix: rebuild the package before uploading.
+
 ## Checks
 
 - Fast suite: `.venv/bin/python -m pytest -n 4`: **1163 passed, 2 skipped** (after the F0 merge, the rebuilt tables and the default switch).

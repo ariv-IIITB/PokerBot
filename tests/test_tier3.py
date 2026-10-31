@@ -94,6 +94,28 @@ def test_t3_off_hands_every_decision_to_tier2(monkeypatch) -> None:
     assert calls["t2"] > 100
 
 
+def test_a_deadline_while_building_the_preflop_model_does_not_disable_tier3(monkeypatch) -> None:
+    """The first decision builds the preflop model and the own-range helper. If the hard deadline
+    fires in between, the next decision must build both again: before the fix, the model was kept,
+    the helper stayed None, and every postflop decision of the match fell back to Tier 2."""
+    import bot.brains.tier3 as t3
+    from bot.timing import DeadlineExceeded
+
+    real, fired = t3.OwnRange, []
+
+    def interrupted_once(*a, **kw):
+        if not fired:
+            fired.append(True)
+            raise DeadlineExceeded()          # the alarm lands while this is being built
+        return real(*a, **kw)
+
+    monkeypatch.setattr(t3, "OwnRange", interrupted_once)
+    m, brain = capped_match("tier3", CAPPED, "calling_station", 2, 60)
+    assert fired and m.errors == [0, 0] and m.forfeit is None
+    assert brain.stats["t3_errors"] == 0
+    assert brain.stats["t3_decisions"] > 0
+
+
 @pytest.mark.parametrize("opp", ["maniac", "all_in", "random_legal", "calling_station", "tight"])
 def test_tier3_plays_legally_and_never_raises(opp: str) -> None:
     """No errors, no forfeits, and the style code never threw (a throw would hand the decision to
