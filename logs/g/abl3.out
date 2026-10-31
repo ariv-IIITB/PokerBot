@@ -1,0 +1,15 @@
+done base
+tier3[{}]-nolock vs tier2-nolock: +1.74 ± 0.27 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 25600 hands in 161.3s (159/s)
+tier3[{}]-nolock vs tier1-nolock: +0.53 ± 0.45 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 25600 hands in 239.4s (107/s)
+done nopre
+tier3[{"t3_preflop":false}]-nolock vs tier2-nolock: +1.44 ± 0.23 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 25600 hands in 203.5s (126/s)
+tier3[{"t3_preflop":false}]-nolock vs tier1-nolock: +1.40 ± 0.26 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 25600 hands in 275.1s (93/s)
+done noflop
+tier3[{"t3_flop":false}]-nolock vs tier2-nolock: +1.85 ± 0.29 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 25600 hands in 159.2s (161/s)
+tier3[{"t3_flop":false}]-nolock vs tier1-nolock: -0.19 ± 0.32 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 25600 hands in 217.5s (118/s)
+done noturn
+tier3[{"t3_turn":false}]-nolock vs tier2-nolock: +1.00 ± 0.22 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 25600 hands in 136.8s (187/s)
+tier3[{"t3_turn":false}]-nolock vs tier1-nolock: -0.56 ± 0.46 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 25600 hands in 219.2s (117/s)
+done noriver
+tier3[{"t3_river":false}]-nolock vs tier2-nolock: +2.41 ± 0.35 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 25600 hands in 186.2s (137/s)
+tier3[{"t3_river":false}]-nolock vs tier1-nolock: +1.08 ± 0.35 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 25600 hands in 233.1s (110/s)

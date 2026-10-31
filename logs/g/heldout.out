@@ -1,0 +1,9 @@
+done t2
+tier2 vs d_conv_opp4: -0.76 ± 0.18 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 286.7s (140/s)
+tier2 vs d_new_eqrandom: -0.38 ± 0.15 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 308.5s (130/s)
+tier2 vs d_new_geometric: -2.45 ± 0.24 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 362.7s (110/s)
+done t3
+tier3[{}] vs d_conv_opp4: -0.20 ± 0.15 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 200.2s (200/s)
+tier3[{}] vs d_new_eqrandom: -0.12 ± 0.13 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 283.7s (141/s)
+tier3[{}] vs d_new_geometric: -2.11 ± 0.31 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 300.9s (133/s)
+heldout finished

@@ -1,0 +1,12 @@
+d_conv_opp3        vs starter       20 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.05s | bank used max 34% avg 32% | stderr max 0 B | first reply 0.55s | ok
+d_conv_opp3        vs starter @2x    6 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.13s | bank used max 67% avg 65% | stderr max 0 B | first reply 0.55s | ok
+d_conv_opp4        vs starter       20 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.05s | bank used max 46% avg 43% | stderr max 0 B | first reply 0.40s | ok
+d_conv_opp4        vs starter @2x    6 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.09s | bank used max 90% avg 88% | stderr max 0 B | first reply 0.56s | ok
+d_new_lag          vs starter       20 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.05s | bank used max 18% avg 16% | stderr max 0 B | first reply 0.20s | ok
+d_new_lag          vs starter @2x    6 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.08s | bank used max 36% avg 35% | stderr max 0 B | first reply 0.17s | ok
+d_new_minraise     vs starter       20 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.03s | bank used max 1% avg 1% | stderr max 0 B | first reply 0.15s | ok
+d_new_minraise     vs starter @2x    6 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.02s | bank used max 3% avg 2% | stderr max 0 B | first reply 0.16s | ok
+d_new_rules        vs starter       20 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.02s | bank used max 1% avg 1% | stderr max 0 B | first reply 0.20s | ok
+d_new_rules        vs starter @2x    6 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.01s | bank used max 3% avg 3% | stderr max 0 B | first reply 0.14s | ok
+d_new_trapper      vs starter       20 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.06s | bank used max 36% avg 34% | stderr max 0 B | first reply 0.25s | ok
+d_new_trapper      vs starter @2x    6 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.11s | bank used max 67% avg 64% | stderr max 0 B | first reply 0.15s | ok

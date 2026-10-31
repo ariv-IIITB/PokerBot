@@ -115,3 +115,79 @@ def test_hand_percentile_orders_hands() -> None:
     middle = hand_percentile(EV, P("Ac,Kd"), board, FULL_DECK)         # ace high
     junk = hand_percentile(EV, P("3d,4c"), board, FULL_DECK)           # four high
     assert nuts_ish > 0.9 and junk < 0.2 and junk < middle < nuts_ish
+
+
+# --------------------------------------------------------------------------- Phase G spots
+
+from bot.actions import Action as A  # noqa: E402
+from bot.state import ActionRecord, ME, OPP  # noqa: E402
+from bot.strategy.oppstats import spot_events  # noqa: E402
+
+
+def rec(street, actor, action):
+    return ActionRecord(street, actor, action)
+
+
+def events(*recs):
+    return dict(spot_events(list(recs)))
+
+
+def test_answers_to_our_open_and_3bet() -> None:
+    assert events(rec(0, ME, A.raise_to(5)), rec(0, OPP, A.fold())) == {"fold_to_open": True, "three_bet": False}
+    assert events(rec(0, ME, A.raise_to(5)), rec(0, OPP, A.raise_to(18))) == \
+        {"fold_to_open": False, "three_bet": True}
+    assert events(rec(0, ME, A.raise_to(5)), rec(0, OPP, A.call())) == {"fold_to_open": False, "three_bet": False}
+    # we re-raise their raise (we are the big blind): they fold / call
+    assert events(rec(0, OPP, A.raise_to(5)), rec(0, ME, A.raise_to(18)), rec(0, OPP, A.fold())) == \
+        {"fold_to_3bet": True}
+    assert events(rec(0, OPP, A.raise_to(5)), rec(0, ME, A.raise_to(18)), rec(0, OPP, A.call())) == \
+        {"fold_to_3bet": False}
+
+
+def test_raise_vs_limp() -> None:
+    assert events(rec(0, ME, A.call()), rec(0, OPP, A.raise_to(8))) == {"raise_vs_limp": True}
+    assert events(rec(0, ME, A.call()), rec(0, OPP, A.check())) == {"raise_vs_limp": False}
+    assert events(rec(0, OPP, A.call())) == {}                      # their own limp is not this spot
+
+
+def test_flop_spots_follow_the_preflop_aggressor() -> None:
+    pre_us = [rec(0, ME, A.raise_to(5)), rec(0, OPP, A.call())]
+    pre_them = [rec(0, OPP, A.raise_to(5)), rec(0, ME, A.call())]
+    # we raised preflop, bet the flop: they fold (a miss of cbet: it is not their spot)
+    assert events(*pre_us, rec(1, OPP, A.check()), rec(1, ME, A.raise_to(4)), rec(1, OPP, A.fold())) == \
+        {"fold_to_cbet": True, "check_raise": False}
+    assert events(*pre_us, rec(1, OPP, A.check()), rec(1, ME, A.raise_to(4)), rec(1, OPP, A.raise_to(12))) == \
+        {"fold_to_cbet": False, "check_raise": True}
+    # they raised preflop: do they c-bet when no bet faces them?
+    assert events(*pre_them, rec(1, OPP, A.raise_to(4))) == {"cbet": True}
+    assert events(*pre_them, rec(1, OPP, A.check())) == {"cbet": False}
+    assert events(*pre_us, rec(1, ME, A.check()), rec(1, OPP, A.check())) == {}      # no aggressor: not a c-bet
+
+
+def test_turn_and_river_bets_when_unfaced() -> None:
+    pre = [rec(0, ME, A.raise_to(5)), rec(0, OPP, A.call())]
+    flop = [rec(1, OPP, A.check()), rec(1, ME, A.check())]
+    assert events(*pre, *flop, rec(2, OPP, A.raise_to(8))) == {"turn_bet": True}
+    assert events(*pre, *flop, rec(2, OPP, A.check())) == {"turn_bet": False}
+    assert events(*pre, *flop, rec(2, OPP, A.check()), rec(2, ME, A.check()),
+                  rec(3, OPP, A.raise_to(12))) == {"river_bet": True}
+    # facing our bet is the fold-to-bet spots' business, not turn_bet
+    assert "turn_bet" not in events(*pre, *flop, rec(2, OPP, A.check()), rec(2, ME, A.raise_to(8)),
+                                    rec(2, OPP, A.call()))
+
+
+def test_stats_are_fed_and_gated() -> None:
+    stats = OppStats()
+    st = hand_with_history([])
+    st.apply(MatchInfo(hands=400, sb=1, bb=2, stack=200))
+    for _ in range(GATE + 5):
+        st.apply(HandStart(1, 0, 200, 200))
+        st.record_my_action(Action.raise_to(5))
+        msg = OppAction(Action.fold())
+        st.apply(msg)
+        stats.update(st, msg)
+    assert stats.spots["fold_to_open"].n == GATE + 5 and stats.spots["three_bet"].hits == 0
+    assert stats.tilt("fold_to_open") > 0 and stats.rate("fold_to_open") <= POPULATION["fold_to_open"] + CAP + 1e-9
+    assert stats.tilt("three_bet") < 0 and stats.rate("three_bet") >= 0.0
+    fresh = OppStats()
+    assert fresh.tilt("cbet") == 0.0 and fresh.rate("cbet") == POPULATION["cbet"]

@@ -1,0 +1,14 @@
+done base
+tier3[{}]-nolock vs d_new_lag-nolock: +6.27 ± 0.41 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 175.4s (137/s)
+done t2
+tier2-nolock vs d_new_lag-nolock: +6.72 ± 0.40 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 163.5s (147/s)
+done nopre
+tier3[{"t3_preflop":false}]-nolock vs d_new_lag-nolock: +6.30 ± 0.39 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 191.4s (125/s)
+done noflop
+tier3[{"t3_flop":false}]-nolock vs d_new_lag-nolock: +6.73 ± 0.39 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 158.0s (152/s)
+done noturn
+tier3[{"t3_turn":false}]-nolock vs d_new_lag-nolock: +6.52 ± 0.48 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 166.1s (144/s)
+done noriver
+tier3[{"t3_river":false}]-nolock vs d_new_lag-nolock: +6.20 ± 0.38 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 172.2s (139/s)
+done novf
+tier3[{"value_floor":false}]-nolock vs d_new_lag-nolock: +6.24 ± 0.35 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 182.5s (132/s)

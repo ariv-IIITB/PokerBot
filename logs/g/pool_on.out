@@ -1,0 +1,15 @@
+done t2
+tier2 vs d_conv_opp3: -2.20 ± 0.19 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 310.1s (129/s)
+tier2 vs d_new_rules: -1.02 ± 0.17 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 118.2s (338/s)
+tier2 vs d_new_lag: +0.24 ± 0.02 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 60.3s (663/s)
+tier2 vs d_new_trapper: -0.71 ± 0.14 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 376.1s (106/s)
+tier2 vs d_new_exploiter: -1.62 ± 0.23 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 568.4s (70/s)
+tier2 vs d_new_minraise: -0.39 ± 0.10 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 124.0s (323/s)
+done t3
+tier3[{}] vs d_conv_opp3: -1.48 ± 0.22 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 287.0s (139/s)
+tier3[{}] vs d_new_rules: -0.98 ± 0.16 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 111.7s (358/s)
+tier3[{}] vs d_new_lag: +0.16 ± 0.05 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 75.2s (532/s)
+tier3[{}] vs d_new_trapper: -0.03 ± 0.12 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 290.5s (138/s)
+tier3[{}] vs d_new_exploiter: -1.40 ± 0.19 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 522.4s (77/s)
+tier3[{}] vs d_new_minraise: -0.40 ± 0.12 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 112.6s (355/s)
+trainon finished

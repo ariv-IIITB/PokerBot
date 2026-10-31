@@ -1,4 +1,4 @@
-# Status (updated 2026-10-29, after Phase D)
+# Status (updated 2026-10-30, Phase G)
 
 Read this after `CLAUDE.md` to know where the project stands. Plan: `docs/PART4_PLAN.md`.
 Rules: `docs/rules/` (`SUMMARY.md` first).
@@ -14,7 +14,9 @@ Rules: `docs/rules/` (`SUMMARY.md` first).
 | **C** real protocol adapter (`bot/protocols/pokerbots.py`, now the default) | done, reviewed in D1 | `d131932`, `dd51c98` |
 | **D** ship-safe → first upload | done; **upload #1 = `dist/upload1_phaseD.zip`** (the user uploads) | `accb344` |
 | **E** Tier 2 on the real game (discard, tables, oppstats, bluff-catch, EV sizing) | done and merged; F0 investigation (Tier 2 vs Tier 1) done; **latest upload = #3, `dist/upload3_phaseF0.zip`** (#2 lacked its tables) | see git log |
-| F LLM opponent pool · G Tier 3 "Ivey" · H Problem Statement / freeze | to do | — |
+| **F v2** Discard Hold'em opponent pool: 9 bots in `Opps/discard/` (2 converted, 7 independent), health OK | pool + health done; **held-out split chosen 2026-10-30: `d_conv_opp4`, `d_new_eqrandom`, `d_new_geometric`** (`lab/opps/discard_pool.json`); Tier 2 baseline in `docs/reports/TIER3.md`; E re-check not run | `4f72a86` |
+| **G** Tier 3 "Ivey" (`bot/brains/tier3.py`) | **done; G8 passed, `tier3` is the default brain; upload candidate #4 = `dist/upload4_phaseG.zip`** (the user uploads), see `docs/reports/TIER3.md` | see git log (`phase G`) |
+| H Problem Statement / freeze | to do | — |
 
 Tests on Python 3.11 (`.venv`): fast suite 1063 passed, 2 skipped; slow suite 267 passed (21 min with
 `-n 3`) at Phase D (`accb344`). The runtime sandbox test passes (no xfail left).
@@ -81,10 +83,18 @@ phase starts by reviewing the previous one.
 - **CFR (Tier 4), decided 2026-10-29:** a separate track, `docs/CFR_PLAN.md`. K1–K3 (abstraction,
   trainers, river solver) are lab work and can run in their own session alongside E–G. Gate A
   (blueprint vs Tier 2 and opp3) ~3–4 Nov; if it fails, Tier 3 ships.
-- **Phase F:** the user is generating Discard Hold'em LLM bots (the prompt is in the plan, Phase F)
-  into `Opps/discard/<model>/bot.py` and picks 2 held-out bots before seeing results.
-- **Phase G:** Tier 3 ("Ivey") builds on Phase E's Tier 2. On the river, the bluff index decides
-  calls, not MDF.
+- **Phase F (v2, replaces the plan above):** the pool was built here, not by the user: `Opps/discard/*`
+  (conv_opp3, conv_opp4 + 7 independent sub-agent bots), registered as `d_<name>`, all pass
+  `lab.pool_health`. **Still to do, in this order:** the user picks the held-out split (before any result),
+  then the Tier 2 baseline and the Phase E re-check (`tools/f_eval/run_f2.sh`). Until then nobody has read
+  a Tier 2 chip result against a pool bot, and G must not tune on any pool bot.
+- **Phase G (done, 2026-10-30):** Tier 3 = Tier 2 + the style (preflop tables from the 3-card
+  classes, texture c-bets, MDF defence with floats, polarised barrels, river value/bluff ratios,
+  capped adaptation), plus `eq_floor` and a gated `value_floor`. Facing a river bet stays Tier 2's
+  bluff-index rule. G8 passed: vs Tier 2 locks on 0.670 ± 0.033; training pool locks on +1.57 ± 0.54
+  (mean match score 0.62 vs 0.55); held-out +1.16 ± 0.50. **Default brain = `tier3`.**
+- **Biggest open problem:** both brains lose chips to d_conv_opp3, d_new_rules, d_new_exploiter and
+  d_new_geometric, at river showdowns. Next work goes there (train pool only).
 - **1 Nov:** the Problem Statement comes out → Phase H checks (showdown rule, provisional limits).
 
 ## Environment

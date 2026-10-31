@@ -36,7 +36,7 @@ Current state: `docs/STATUS.md`.
 | **D** | Ship-safe: no file reads, `bot.py`, package, timing, lock → **upload #1** | C | ✅ done `accb344` (user uploads) |
 | **E** | Tier 2 plays the real game well: discard, tables, **lessons from the LLM bots** → **upload #2** | D | Nov 1–3 |
 | **F** | Opponent pool: the user's LLM bots, train/held-out split, baseline report | C (+ user's bots) | when the bots arrive (target Nov 3) |
-| **G** | Tier 3: the "Ivey" style, built one behaviour at a time → **upload #3** if it ships | E, F | Nov 4–12 |
+| **G** | Tier 3: the "Ivey" style, built one behaviour at a time → **upload #3** if it ships | E, F | ✅ done 2026-10-30, G8 passed, `tier3` is the default (`docs/reports/TIER3.md`) → upload candidate #4 |
 | **H** | Problem Statement update (1 Nov, inserted when it lands) and final freeze | any | Nov 1, Nov 13–15 |
 
 **Uploads.** A valid upload must exist at all times. Upload after D (safe Tier 2), after E (better
@@ -665,9 +665,37 @@ Hold'em test of "raise more preflop" alone made Tier 2 worse).
 ### Done when
 The report is committed, the E re-check is reported, and the user has seen both.
 
+> **Status (2026-10-30), Phase F v2** (`docs/PHASE_F_V2_PROMPT.md` replaced the "user generates the bots"
+> setup): the pool is built (`Opps/discard/`: conv_opp3, conv_opp4 and seven independent bots), registered
+> as `d_<name>`, and healthy (`docs/reports/DISCARD_OPPS.md` section 3). **Deferred at the user's request:**
+> the held-out split, the Tier 2 baseline and the Phase E re-check (section 4 of the report).
+
 ---
 
 ## Phase G — Tier 3: the "Ivey" style
+
+> **Done (2026-10-30, branch `ccr-412db155-a836ca`; report `docs/reports/TIER3.md`).** As built:
+> - `bot/brains/tier3.py` (`DEFAULTS` = the CONFIG; Tier 3 inherits Tier 2's *shipped* parameters, so
+>   `"t3": false` is Tier 2), `bot/strategy/{potmath,texture,preflop,ranges}.py` (`potmath`, not
+>   `math`, so the stdlib module is never shadowed), Phase G spots in `bot/strategy/oppstats.py`.
+>   Tests: `tests/test_tier3.py`, `tests/test_potmath_texture.py`, `tests/test_ranges.py`,
+>   `tests/test_oppstats.py`; Tier 3 cases in `tests/test_timing_slow.py`.
+> - Held-out split (chosen by the agent at the user's request, by style): `d_conv_opp4`, `d_new_eqrandom`,
+>   `d_new_geometric`. The style fixes were found on non-pool bots before the split; the pool runs came
+>   after. **Deviation:** no per-step G2–G7 pool runs (Tier 3 was evaluated as a whole, with street
+>   ablations), and 50 pairs instead of 100 for the held-out run.
+> - Two guards the plan did not have, both found by ablation (the WIP folded far too much against
+>   wide, big-betting players: the preflop size-shrunk defence and the own-range MDF slice ignore
+>   who bets): `eq_floor` (never fold, preflop to turn, what Tier 2's pot-odds rule calls) and a
+>   gated `value_floor` (a hand Tier 2 would value-raise goes to Tier 2, with probability = how
+>   far the opponent's turn/river fold rates sit below the prior, gated and capped).
+>   `mdf_eq_slack` and `bluff_tilt_scale` are kept as neutral guards.
+> - G7 `hide_discard`: no gain, off. The sizing A/B: texture sizes lost to Tier 2's sizes for the
+>   value floor; c-bets, barrels and bluffs keep texture sizes.
+> - **G8 passed:** vs Tier 2 locks on 0.670 ± 0.033 (100 pairs); training pool locks on +1.57 ± 0.54 (no
+>   drop), locks off +1.78 ± 0.77 (d_new_lag −1.1); held-out +1.16 ± 0.50; timing 27–33 % projected at 2×.
+>   `DEFAULT_BRAIN = "tier3"`; upload candidate #4 = `dist/upload4_phaseG.zip`.
+> - Open gaps vs Tier 2: tight −2.1 ± 0.5, random_legal −2.4 ± 0.7 chips/hand (both still won 100 %).
 
 The style, from the user's spec:
 - relentless initiative;

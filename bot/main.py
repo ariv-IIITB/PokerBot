@@ -37,8 +37,9 @@ BRAINS = {
     "tier0": "bot.brains.tier0:Tier0Brain",
     "tier1": "bot.brains.tier1:Tier1Brain",
     "tier2": "bot.brains.tier2:Tier2Brain",
+    "tier3": "bot.brains.tier3:Tier3Brain",        # Phase G; the default since G8
 }
-DEFAULT_BRAIN = "tier2"
+DEFAULT_BRAIN = "tier3"    # Phase G8 (2026-10-30): Tier 3 passed the ship checks (docs/reports/TIER3.md)
 
 
 def load_brain(name: str) -> Brain:

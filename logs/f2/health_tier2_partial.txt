@@ -1,0 +1,6 @@
+d_conv_opp3        vs tier2         10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.38s | bank used max 37% avg 23% | stderr max 0 B | first reply 0.80s | ok
+d_conv_opp4        vs tier2         10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.32s | bank used max 39% avg 26% | stderr max 0 B | first reply 1.09s | ok
+d_new_lag          vs tier2         10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.04s | bank used max 5% avg 2% | stderr max 0 B | first reply 0.28s | ok
+d_new_minraise     vs tier2         10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.01s | bank used max 1% avg 1% | stderr max 0 B | first reply 0.13s | ok
+d_new_rules        vs tier2         10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.02s | bank used max 4% avg 2% | stderr max 0 B | first reply 0.26s | ok
+d_new_trapper      vs tier2         10 matches | forfeits 0 | malformed 0 | illegal 0 | max reply 0.23s | bank used max 41% avg 31% | stderr max 0 B | first reply 0.16s | ok

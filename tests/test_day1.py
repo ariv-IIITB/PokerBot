@@ -119,3 +119,13 @@ def test_cfr_is_lab_only_and_never_packaged(tmp_path) -> None:
         pkg.main(["--brain", "cfr", "--out", str(tmp_path / "never")])
     from tools import embed_data
     assert set(embed_data.TABLE_FILES) == {"classes", "eq_random", "eq_range"}   # never a CFR strategy
+
+
+def test_the_tables_guard_applies_only_to_the_variant_the_embedded_file_was_built_for() -> None:
+    """A catalog variant without tables must still package; the active variant must not lose its tables."""
+    from variant.spec import VariantSpec
+    embedded = pkg.ROOT / "bot" / "embedded.py"
+    if "ARTIFACTS = {}" in embedded.read_text():
+        pytest.skip("the committed embedded.py has no tables")
+    assert pkg._has_tables_for(embedded, VariantSpec.load(pkg.ROOT / "variant" / "active.json"))
+    assert not pkg._has_tables_for(embedded, VariantSpec.load(pkg.ROOT / "variant" / "catalog" / "auction_card.json"))

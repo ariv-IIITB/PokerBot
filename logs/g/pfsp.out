@@ -1,0 +1,18 @@
+done base
+tier3[{}]-nolock vs tier2-nolock: +1.94 ± 0.42 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 130.8s (147/s)
+tier3[{}]-nolock vs tier1-nolock: +0.52 ± 0.42 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 173.4s (111/s)
+tier3[{}]-nolock vs calling_station-nolock: +22.83 ± 0.41 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 114.5s (168/s)
+tier3[{}]-nolock vs tight-nolock: +6.78 ± 0.44 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 52.5s (366/s)
+tier3[{}]-nolock vs maniac-nolock: +51.21 ± 0.69 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 110.7s (173/s)
+tier3[{}]-nolock vs random_legal-nolock: +20.40 ± 0.43 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 37.4s (513/s)
+tier3[{}]-nolock vs all_in-nolock: +24.27 ± 0.77 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 10.7s (1,793/s)
+tier3[{}]-nolock vs starter: +19.57 ± 0.24 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 119.2s (161/s)
+done pfsp
+tier3[{"pf_size_pressure":true}]-nolock vs tier2-nolock: +2.14 ± 0.45 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 122.6s (157/s)
+tier3[{"pf_size_pressure":true}]-nolock vs tier1-nolock: +1.38 ± 0.52 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 172.7s (111/s)
+tier3[{"pf_size_pressure":true}]-nolock vs calling_station-nolock: +22.70 ± 0.38 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 114.5s (168/s)
+tier3[{"pf_size_pressure":true}]-nolock vs tight-nolock: +6.86 ± 0.37 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 52.4s (367/s)
+tier3[{"pf_size_pressure":true}]-nolock vs maniac-nolock: +52.23 ± 0.77 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 109.8s (175/s)
+tier3[{"pf_size_pressure":true}]-nolock vs random_legal-nolock: +20.19 ± 0.53 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 38.3s (501/s)
+tier3[{"pf_size_pressure":true}]-nolock vs all_in-nolock: +25.33 ± 0.64 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 10.8s (1,773/s)
+tier3[{"pf_size_pressure":true}]-nolock vs starter: +19.44 ± 0.26 chips/hand  | A/B 0/0 | forfeits A/B 0/0 | 19200 hands in 119.1s (161/s)
