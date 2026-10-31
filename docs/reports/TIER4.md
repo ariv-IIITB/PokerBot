@@ -86,3 +86,29 @@ the 20 k it/s throughput check.
   showdown; equal-mass cells on a fresh pool; vectorized bucket ids == runtime bucket functions; the example.
 
 **Next (C3):** MCCFR over the flat tree with the pool (validated on Kuhn as a flat tree), throughput vs 20 k it/s.
+
+## C3. Fast trainer (2026-11-01)
+
+- `lab/cfr/fast/mccfr.py`: external-sampling MCCFR over the flat tree, deals drawn from the pool; regret
+  matching; iterations in parallel without locks (`numba.prange`, "hogwild"); Linear CFR by discounting
+  regrets and strategy sums by t/(t+1) after each of the first N batches; per-row traverser visit counts;
+  exact profile value / best response / exploitability over an enumerated set of deals; uint8 export
+  (rows visited < `min_visits` times are zero = miss at run time).
+- `lab/cfr/fast/train.py`: CLI with `--hours`/`--iters`, checkpoints every 15 min, `--resume`, progress log,
+  blueprint export (`blueprint_v1.npz`: `probs` uint8 [502,060 × 6] + `meta` JSON with version, spec hash,
+  params, cuts, history strings).
+- `lab/cfr/fast/toy.py`: Kuhn poker as a flat tree.
+
+**Validation (build map C3, in order):**
+1. **Kuhn:** value −0.0555 (exact −1/18 = −0.0556), exploitability 0.0014 after 200 k iterations. Pass.
+2. Leduc: not done (Kuhn plus the exact checks of the flat tree against `bot/game` cover the traversal;
+   Leduc would add a public card, which the real tree already exercises). Skipped on purpose.
+3. **Throughput on the real abstraction** (cap 3, 502,060 rows, real buckets): **240 k it/s on one thread,
+   1.2–1.35 M it/s on 10 threads**, ~60× the 20 k it/s gate. **Cap 3 stays** (decision 2 of 1 Nov).
+
+Note: Numba's on-disk cache segfaulted when it loaded the self-recursive traversal compiled in another
+run; the traversal and its callers are compiled per run (`cache=False`, a few seconds).
+
+**Tests:** `tests/test_cfr_mccfr.py` (4): Kuhn value and exploitability; uniform-profile exact values; a
+smoke run on the real tree (finite regrets, average strategy sums to 1 on legal actions, export rows sum to
+255 or 0); the CLI end to end with checkpoint, resume and export metadata.
