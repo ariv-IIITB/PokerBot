@@ -31,6 +31,7 @@ from bot.sim.inference import DEFAULTS as INFERENCE_DEFAULTS
 from bot.sim.inference import Inference, Trust
 from bot.strategy.oppstats import OppStats, hand_percentile
 from bot.strategy.traits import TraitTests
+from bot.strategy.types import TypePosterior
 from bot.state import ME, GameState
 
 DEFAULT_PRIORS = {"vpip": 0.55, "pfr": 0.25, "aggression": 0.35, "fold_to_raise": 0.40,
@@ -117,6 +118,8 @@ class Opponent:
         self.stats = OpponentModel(priors={**DEFAULT_PRIORS, **(priors or {})}, k=k)
         self.spots: Optional[OppStats] = None        # per-spot stats + bluff index (Tier 2 sets it)
         self.traits = TraitTests()                   # SPRT trait verdicts for the exploit layer (X1)
+        self.types: Optional[TypePosterior] = None   # type posterior (X2), built on the first message
+        self._types_tried = False                    # that comes with the rules
         self._last = None                            # (hand id, Reconstruction) we decided on
 
     @property
@@ -142,6 +145,18 @@ class Opponent:
             self.traits.update(state, msg)
         except Exception as e:
             warn(f"opponent trait tests failed: {e!r}")
+        if not self._types_tried and rules is not None:
+            self._types_tried = True
+            try:
+                self.types = TypePosterior.from_rules(rules)
+            except Exception as e:
+                warn(f"opponent type library not usable: {e!r}")
+        if self.types is not None:
+            try:
+                self.types.update(state, msg)
+            except Exception as e:
+                warn(f"opponent type posterior failed: {e!r}")
+                self.types = None
         if self.spots is not None:
             try:                                     # statistics never decide a hand's outcome
                 self.spots.update(state, msg, None if rules is None else self._percentile(state, rules))

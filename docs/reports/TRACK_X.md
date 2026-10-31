@@ -96,3 +96,36 @@ and the verdicts below replayed through `Opponent.observe`.
 
 This matches the book's identification table (§2.9): over-folders at ~35–145 hands, stations in
 ~13–27. CUSUM alarms: 0 in most matches, at most 2 (minraise, near the over-folder threshold).
+
+## X2. Type posterior (2026-11-01)
+
+**What:** `bot/strategy/types.py` (NumPy): naive Bayes over the opponent's decisions, P(action ∈ {fold,
+passive, raise} | street, facing our bet, type), log-likelihood × 0.5 (naive Bayes is over-confident),
+uniform prior. The library (`data/discard_holdem/types.json`, 6.5 KB, embedded as `ARTIFACTS["types"]`
+by `tools/embed_data.py`) is built by `lab/opps/types.py` from recorded pairs 2–11 (pairs 0–1 are the
+test fixtures, so they are held-out seeds):
+
+| type | family | river bluff share | river bets (unfaced) |
+|---|---|---|---|
+| exploiter, conv_opp3, rules | over-folder | 3 %, 23 %, 4 % | |
+| minraise | value-only | 4 % | |
+| tight | nit | 11 % | |
+| station (starter = calling_station) | station | 0 % | 0 % |
+| trapper | trapper | 0 % | |
+| lag, maniac | aggressor | 20 %, 52 % | |
+| unknown | population average, flattened 50 % toward uniform | 21 % | 27 % |
+
+**Unseen styles.** A first version with pooled family types matched random_legal to "value-only" with
+probability 1.00 (it would then have folded bluff-catchers against a bot that bluffs half its rivers).
+Fix: one type per bot plus a **fit check**: the KL (per decision) from the observed actions to the best type,
+minus its sampling bias df/2N, is −0.016…+0.020 for every library bot on held-out seeds, +0.09…+0.17 for
+random_legal and +0.35 for all_in. Mass moves to "unknown" linearly between 0.03 and 0.06.
+
+`Opponent.observe` builds the posterior on the first message that brings the rules and feeds it (errors
+caught; a broken library leaves it None). **Nothing reads it yet** (X3 will), so play is unchanged.
+
+**Held-out seeds** (fixtures, 4 matches each): the right family at hand 400 in 4/4 matches for every
+training/sparring bot, at hand 100 in ≥ 3/4; random_legal and all_in end "unknown" (≥ 0.76 by hand 50,
+1.00 by 400). Over-folders' implied river bluff share 3–4 % (exploiter, rules), maniac 52 %.
+
+**Tests:** `tests/test_strategy_types.py` (17). Fast suite 1260 passed, 2 skipped.
