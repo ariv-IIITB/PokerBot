@@ -1,6 +1,7 @@
-# Status (updated 2026-10-30, Phase G)
+# Status (updated 2026-11-01, CFR build map: X0, C0, X1 done; G8 re-checked)
 
-Read this after `CLAUDE.md` to know where the project stands. Plan: `docs/PART4_PLAN.md`.
+Read this after `CLAUDE.md` to know where the project stands. Plan: `docs/PART4_PLAN.md`, and from
+31 Oct **`docs/CFR_BUILDMAP.md`** (Track X exploit layer, Track C CFR; supersedes `docs/CFR_PLAN.md`).
 Rules: `docs/rules/` (`SUMMARY.md` first).
 
 ## Where we are
@@ -16,7 +17,11 @@ Rules: `docs/rules/` (`SUMMARY.md` first).
 | **E** Tier 2 on the real game (discard, tables, oppstats, bluff-catch, EV sizing) | done and merged; F0 investigation (Tier 2 vs Tier 1) done; **latest upload = #3, `dist/upload3_phaseF0.zip`** (#2 lacked its tables) | see git log |
 | **F v2** Discard Hold'em opponent pool: 9 bots in `Opps/discard/` (2 converted, 7 independent), health OK | pool + health done; **held-out split chosen 2026-10-30: `d_conv_opp4`, `d_new_eqrandom`, `d_new_geometric`** (`lab/opps/discard_pool.json`); Tier 2 baseline in `docs/reports/TIER3.md`; E re-check not run | `4f72a86` |
 | **G** Tier 3 "Ivey" (`bot/brains/tier3.py`) | **done; G8 passed, `tier3` is the default brain; upload candidate #4 = `dist/upload4_phaseG.zip`** (the user uploads), see `docs/reports/TIER3.md` | see git log (`phase G`) |
-| H Problem Statement / freeze | to do | — |
+| Build map X0 recorder + profile table + fixtures (`docs/reports/TRACK_X.md`) | done, merged | `05d4aab` |
+| Build map C0 abstraction v1 contract + reference tree (`docs/cfr/ABSTRACTION_V1.md`, `docs/reports/TIER4.md`) | done, merged | `3296194` |
+| Build map X1 trait detectors (`bot/strategy/traits.py`, observe only) | done on `x/exploit-layer`, not merged | `ac6de87` |
+| G8 re-check of the fixed Tier 3 | **passed** (see below); upload candidate #5 | this update |
+| H Problem Statement / freeze | to do (**first thing once the Problem Statement is out**) | — |
 
 Tests on Python 3.11 (`.venv`): fast suite 1063 passed, 2 skipped; slow suite 267 passed (21 min with
 `-n 3`) at Phase D (`accb344`). The runtime sandbox test passes (no xfail left).
@@ -81,6 +86,31 @@ builder now refuses without `data/<variant>/`; use upload #3.
 - **Next: `docs/CFR_BUILDMAP.md`** (Track X exploit layer on Tier 3, ships regardless; Track C CFR with a kill gate
   on 6 Nov). It supersedes `docs/CFR_PLAN.md`.
 
+## 1 Nov: decisions after build-map day 0, and the G8 re-check
+
+Decisions (the user, 31 Oct evening, on `HANDOFF_2026-10-31_X0_C0.md`):
+
+1. **X0 and C0 merged into `main`** (`46d42aa`; fast suite 1203 passed, 2 skipped) and pushed.
+2. **Sized-raise cap stays 3 for CFR run 1**; drop to 2 only if C3 measures < 20k it/s (`ABSTRACTION_V1.md` §8).
+3. **Removed the tracked `opps -> Opps` symlink** (nothing used it; on macOS's case-insensitive disk it
+   replaced `Opps/`) (`70d4c4a`). **Book fixed** (`3d96f2f`): the column "bets river when checked to" is
+   "bets river when not facing a bet" (leads included), with "… only after our check" next to it in both
+   profile tables and the bot explorer (re-measured on 12 pairs; held-out bots not re-recorded).
+4. **G8 re-check of the fixed Tier 3** (all G8 numbers predated `ba5800f`): fresh seeds, locks on, one eval at
+   a time, no held-out pool (`docs/reports/TIER3.md`, "G8 re-check"; `logs/g/recheck/`):
+   - head-to-head vs Tier 2, 100 pairs: **0.600 ± 0.035** (2.9 SE above 0.5; G8 had 0.670 ± 0.033);
+   - training pool, 50 pairs, `--compare` tier2 → tier3: **KEEP**, sum +2.06 ± 0.62, no bot down (worst
+     d_new_rules −0.12 ± 0.23); conv_opp3 +1.07 ± 0.35, trapper +0.62 ± 0.21; mean match score 0.59 vs 0.51;
+   - `t3_errors` 0 everywhere; `t3_fallbacks` 3–14 % of decisions = the deliberate hand-offs to Tier 2.
+   **Tier 3 passes again**; these are X1/X3's baseline numbers. Package rebuilt with the fix:
+   **upload candidate #5** (`docs/SUBMISSIONS.md`); #4 predates the fix.
+5. **Order from here:** Phase H as soon as the Problem Statement is out (priority over everything), then
+   X2/X3 (Track X) and C1/C2 (Track C).
+
+New tooling: `lab.eval --report stats` (sums each brain's own `stats` counters, e.g. Tier 3's
+`t3_fallbacks`); `tools/g_eval/recheck.sh`; `lab.opps.record` / `lab.opps.traits` (X0).
+Branches: `x/exploit-layer` (X1 on top of `70d4c4a`), `cfr/tier4` (C1/C2 in progress).
+
 ## Open items for the next phases
 
 The plan was finalized on 2026-10-29 (`docs/PART4_PLAN.md`): done phases are marked, and every
@@ -110,7 +140,10 @@ phase starts by reviewing the previous one.
 
 ## Environment
 
-- Repo: `/home/fioriv/synergy/PokerBot`, GitHub `ariv-IIITB/PokerBot`, branch `main`.
+- Repo: `/home/fioriv/synergy/PokerBot`, GitHub `ariv-IIITB/PokerBot`, branch `main`. A Mac copy at
+  `~/Desktop/pokerbots_synergy2` is also used (local branch `master` tracks `origin/main`).
+- Numba (`numba==0.62.1`, lab only) is in `requirements-dev.txt` for the CFR trainer: re-run
+  `uv pip install --python .venv/bin/python -r requirements-dev.txt`.
 - Python 3.11 via uv: `.venv/bin/python -m pytest -n auto` (system python is 3.12; don't use it for tests).
 - `Opps/opp1..opp4`: the Hold'em LLM bots (lab only, never copy into `bot/`). `opp4` used to be a
   symlink to `opp 4`; it is a real folder now.

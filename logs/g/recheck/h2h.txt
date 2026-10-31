@@ -1,0 +1,2 @@
+tier3 vs tier2: +0.28 ± 0.02 chips/hand | match score 0.600 ± 0.035 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 190.6s (420/s)
+--- brain stats: tier3: t3_decisions=80884 t3_errors=0 t3_fallbacks=4903

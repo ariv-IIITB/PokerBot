@@ -294,6 +294,39 @@ The 1000-hands-on-a-60-s-bank bench reads 55–59 % on this machine both before 
 (49 % earlier the same day under a different load), so it is load noise, not the fix. Upload candidate #4
 predates this fix: rebuild the package before uploading.
 
+## G8 re-check after the fix (2026-11-01)
+
+Every G8 number above was measured before `ba5800f`, when a deadline could switch Tier 3's postflop
+play off for a whole match (more likely under the 4-way CPU load of those runs). Re-run on the fixed
+code (`3d96f2f`, same `bot/` as `70d4c4a`), fresh seeds, locks on (as shipped), **one eval at a
+time** with fewer workers (8 processes head-to-head, 5 against subprocess bots), from a pinned
+worktree; `tools/g_eval/recheck.sh`, outputs in `logs/g/recheck/`. Held-out bots not run.
+
+**Head-to-head, 100 pairs, seeds 7000–7099:** Tier 3 vs Tier 2 match score **0.600 ± 0.035** over
+200 matches (+0.28 ± 0.02 chips/hand): 2.9 SE above 0.5. **Criterion 1 still met** (G8 before the fix:
+0.670 ± 0.033 on seeds 600–699; the two differ by 1.4 SE).
+
+**Training pool, 50 pairs, seeds 8000–8049** (`lab.eval --compare logs/g/recheck/pool_t2.txt logs/g/recheck/pool_t3.txt`):
+
+| training bot | tier2 chips (match) | tier3 chips (match) | diff |
+|---|---|---|---|
+| d_conv_opp3 | −2.94 ± 0.25 (0.16) | −1.87 ± 0.24 (0.48) | **+1.07 ± 0.35** |
+| d_new_rules | −1.25 ± 0.18 (0.52) | −1.37 ± 0.15 (0.43) | −0.12 ± 0.23 |
+| d_new_lag | +0.10 ± 0.08 (0.97) | +0.07 ± 0.08 (0.95) | −0.03 ± 0.11 |
+| d_new_trapper | −1.03 ± 0.14 (0.47) | −0.41 ± 0.16 (0.62) | **+0.62 ± 0.21** |
+| d_new_exploiter | −2.15 ± 0.29 (0.27) | −1.76 ± 0.18 (0.36) | +0.39 ± 0.34 |
+| d_new_minraise | −0.76 ± 0.14 (0.65) | −0.63 ± 0.12 (0.70) | +0.13 ± 0.18 |
+| sum / mean match score | 0.507 | **0.590** | **+2.06 ± 0.62, KEEP** |
+
+No training bot drops by more than 2 SE (worst: d_new_rules −0.5 SE). **Tier 3 still passes**, and the
+margin on the pool is larger than at G8 (+1.57 ± 0.54).
+
+**Fallbacks** (`lab.eval --report stats`, new): `t3_errors` = **0** in every run (the bug gave ~600 per
+match). `t3_fallbacks` = 5.7 % of Tier 3's decisions head-to-head, 3.3–14 % against the pool bots (highest
+vs d_new_trapper and d_new_lag): these are the spots Tier 3 hands to Tier 2 on purpose (facing a river bet:
+Tier 2's bluff-catching rule; Tier 2's value raises; preflop spots outside Tier 3's table). Five
+`brain exceeded hard deadline` warnings (budgets ~5 ms) in 560,000 hands: rare, not chased.
+
 ## Checks
 
 - Fast suite: `.venv/bin/python -m pytest -n 4`: **1163 passed, 2 skipped** (after the F0 merge, the rebuilt tables and the default switch).
