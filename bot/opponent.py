@@ -30,6 +30,7 @@ from bot.protocol import HandEnd, HandStart, Message, OppAction, Showdown
 from bot.sim.inference import DEFAULTS as INFERENCE_DEFAULTS
 from bot.sim.inference import Inference, Trust
 from bot.strategy.oppstats import OppStats, hand_percentile
+from bot.strategy.traits import TraitTests
 from bot.state import ME, GameState
 
 DEFAULT_PRIORS = {"vpip": 0.55, "pfr": 0.25, "aggression": 0.35, "fold_to_raise": 0.40,
@@ -115,6 +116,7 @@ class Opponent:
         self.use_trust = use_trust
         self.stats = OpponentModel(priors={**DEFAULT_PRIORS, **(priors or {})}, k=k)
         self.spots: Optional[OppStats] = None        # per-spot stats + bluff index (Tier 2 sets it)
+        self.traits = TraitTests()                   # SPRT trait verdicts for the exploit layer (X1)
         self._last = None                            # (hand id, Reconstruction) we decided on
 
     @property
@@ -136,6 +138,10 @@ class Opponent:
     def observe(self, state: GameState, msg: Message, rng, rules=None) -> None:
         """Feed one message. `rules` (the variant) lets shown hands be ranked for the bluff index."""
         self.stats.update(state, msg)
+        try:                                         # observed only: nothing decides on it yet
+            self.traits.update(state, msg)
+        except Exception as e:
+            warn(f"opponent trait tests failed: {e!r}")
         if self.spots is not None:
             try:                                     # statistics never decide a hand's outcome
                 self.spots.update(state, msg, None if rules is None else self._percentile(state, rules))

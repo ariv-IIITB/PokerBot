@@ -57,3 +57,42 @@ Commands:
     --pairs 12 --processes 6 --out logs/records
 .venv/bin/python -m lab.opps.traits logs/records/*.json.gz [--fixtures tests/fixtures/opp_records]
 ```
+
+## X1. Trait detectors in `bot/` (2026-10-31)
+
+**What:** `bot/strategy/traits.py` (stdlib only): Wald SPRTs (α = β = 0.05, bounds ±log 19) for
+three traits, a CUSUM after each verdict (threshold 5 nats; an alarm restarts the trait), and
+rates shrunk toward the prior (K = 15).
+
+| trait | observation | H0 / H1 |
+|---|---|---|
+| `overfolder` | folds, per decision facing our postflop bet or raise | 0.40 / 0.60 |
+| `station` | calls or raises, per decision facing our river bet or raise | 0.50 / 0.80 |
+| `preflop_folder` | folds to our first-in preflop raise | 0.35 / 0.55 |
+
+`Opponent.observe` (`bot/opponent.py`) feeds it from the same message stream as `OpponentModel`
+(on each `OppAction` it classifies the last action from `state.hand.history`); errors are caught and
+logged. **Nothing reads the verdicts yet** (X3 will), so play is unchanged.
+
+**Tests:** `tests/test_strategy_traits.py`, 39: SPRT bounds and steps, shrinkage, a style switch (75 % →
+20 % folds) trips the CUSUM within 40 decisions, no alarm on a steady 70 % folder (20 seeds), event
+classification, the bot's events equal X0's lab definitions on every fixture hand (> 50,000 decisions),
+and the verdicts below replayed through `Opponent.observe`.
+
+**Verdicts on the X0 fixtures** (4 matches each; `y@107` = settled on "yes" from hand 107 on):
+
+| bot | over-folder | station | preflop folder |
+|---|---|---|---|
+| d_conv_opp3 | y@107 y@140 y@35 y@145 | n n n n | n n n n |
+| d_new_rules | y@247 y@139 y@19 y@36 | n n n n | n n n n |
+| d_new_exploiter | y@31 y@125 y@31 y@43 | n n n n | n n n n |
+| d_new_lag | n n n n | n n n n | n n n n |
+| d_new_trapper | n n n n | y@61 y@45 open y@249 | n n n n |
+| d_new_minraise | n n n open | n n n n | n n n n |
+| starter / calling_station | n (by hand 10) | y@12–27 | n |
+| tight | n | y@46–65 | y@26–219 |
+| maniac | n | y@44–84 | n |
+| random_legal | n | n | n |
+
+This matches the book's identification table (§2.9): over-folders at ~35–145 hands, stations in
+~13–27. CUSUM alarms: 0 in most matches, at most 2 (minraise, near the over-folder threshold).
