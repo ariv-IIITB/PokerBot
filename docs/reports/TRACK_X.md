@@ -129,3 +129,26 @@ training/sparring bot, at hand 100 in ≥ 3/4; random_legal and all_in end "unkn
 1.00 by 400). Over-folders' implied river bluff share 3–4 % (exploiter, rules), maniac 52 %.
 
 **Tests:** `tests/test_strategy_types.py` (17). Fast suite 1260 passed, 2 skipped.
+
+## X3. Counter-moves with lambda (2026-11-01; code done, gate X pending)
+
+**What:** `bot/brains/exploit.py`: `adjust(p, street, traits, types)`, a pure function over a brain's
+already opponent-adjusted parameters. No evidence → the same dict back (Tier 3 exactly).
+
+| move | evidence → lambda | effect at lambda = 1 |
+|---|---|---|
+| over-folder | X1 SPRT "yes"; ramps 0 → 1 over 20 more observations; 0 again on a CUSUM alarm | pure-bluff frequencies (`cbet_air_wet`, `stab_dry_freq`, `stab_wet_freq`, `barrel_bluff_prob`, Tier 2's `bluff_freq`) → 0.60; river bluffs × 2.5 (`river_air_share` / 2.5) |
+| value-only river bettor | X2 posterior mass on types with ≤ 10 % river bluffs: 0.7 → 0.9 maps to 0 → 1, × min(1, decisions / 60) | river `call_margin` + 0.12 |
+
+`bot/brains/tier3x.py`: `tier3x` = Tier 3 with the layer on top of `adjusted()` (errors → Tier 3's params;
+`stats` counts the decisions each move touched). Registered in `bot/main.py` (not the default).
+Not built yet: the station, preflop-folder and trapper moves (stations are already beaten by +20
+chips/hand; no training bot is a preflop folder).
+
+On the held-out fixture seeds the value-only move switches on for exploiter, rules and minraise (λ > 0.5 by
+hand 400) and stays off for maniac, lag and random_legal.
+
+**Tests:** `tests/test_exploit.py` (14). Fast suite 1274 passed, 2 skipped.
+
+**Gate X (to run):** `lab.eval tier3x --pool train --pairs 50 --first-seed 8000 --locks on` against the G8
+re-check's `logs/g/recheck/pool_t3.txt` (same seeds), then fresh seeds; also tier2, starter and sparring bots.
