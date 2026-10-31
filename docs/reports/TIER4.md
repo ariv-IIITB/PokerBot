@@ -73,3 +73,16 @@ Fast suite 1214 passed, 2 skipped; slow twin tests passed.
 **Next (C2 rest, C3):** the deal pool builder with the fixed discard (§4); fit the §5.5 thresholds on
 200 k pool deals and pin the worked example's bucket ids; then the MCCFR traversal over the flat tree and
 the 20 k it/s throughput check.
+
+## C2, second part: deal pool and thresholds (2026-11-01)
+
+- `lab/cfr/fast/deals.py`: reproducible deals (SplitMix64 from pool seed and index), both seats discard by
+  the fixed policy, exact integer features per seat/street and the showdown result; `numba.prange` over deals.
+  **16,000 deals/s** on 10 cores (10 M in ~10 min). Pool files go to `data/cfr/` (not in git).
+- `lab/cfr/fast/cuts_v1.json`: §5.5 cuts fitted on 200,000 deals. Flop/turn: all 100 cells used, 3,985–4,017
+  each; river: 25 equal HS bins, the blocker bit is the rarer half.
+- Worked example buckets: button 93 / 89 / 40, big blind 80 / 74 / 32 (now in the contract's §6).
+- Tests: `tests/test_cfr_deals.py` (5): pool features == runtime features with the training discard, classes,
+  showdown; equal-mass cells on a fresh pool; vectorized bucket ids == runtime bucket functions; the example.
+
+**Next (C3):** MCCFR over the flat tree with the pool (validated on Kuhn as a flat tree), throughput vs 20 k it/s.

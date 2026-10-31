@@ -169,8 +169,11 @@ using exactly the estimators above:
 - river: 24 cuts on HS → bucket = `2 · hsbin + blocker`;
 - `bin = number of cuts ≤ value` (`np.searchsorted(cuts, value, side="right")`).
 
-The cuts are stored in the blueprint's `meta.thresholds` (so trainer and runtime cannot drift) and,
-for tests, in `lab/cfr/fast/buckets.py`.
+The cuts are stored in the blueprint's `meta.thresholds` (so trainer and runtime cannot drift) and in
+`lab/cfr/fast/cuts_v1.json` (fitted on 200,000 deals of pool seed 1; cuts sit halfway between two
+attainable feature values, so no feature ever equals a cut). Flop and turn cells come out equal-mass
+(3,985–4,017 per cell of 400,000 seat-deals); river HS bins are equal-mass and the blocker bit splits them
+unevenly (by design).
 
 **Runtime budget:** ≤ 15 ms per decision on the laptop (C2 measures; the server is ~2× slower).
 Over budget: precompute the flop features per (canonical flop, 3-card class) offline (size check first).
@@ -188,8 +191,8 @@ history id, chips put in at terminals) instead of running betting logic.
 Line (`tree --line "R R C | C H R C | C C | C P C"`). Button: **As Kd 7c**, big blind: **Qh Qs 3d**.
 Flop **Kh 8d 2c**; discards 7c (button) and 3d (big blind); turn **5s**; river **Jh**.
 
-Bucket features, computed exactly by enumeration (the sampled §5 values will differ in the
-second decimal; C2's test pins the sampled values and bucket ids for this hand):
+Bucket features, computed exactly by enumeration (the sampled §5 values differ in the second
+decimal: button flop .892/.799, turn .895/.806; big blind flop .798/.646, turn .791/.635):
 
 | | Button (As Kd 7c) | Big blind (Qh Qs 3d) |
 |---|---|---|
@@ -198,23 +201,27 @@ second decimal; C2's test pins the sampled values and bucket ids for this hand):
 | turn E[HS] / E[HS²] | .890 / .793 | .776 / .606 |
 | river HS, blocker | .893, 0 | .784, 0 (board Kh 8d 2c 5s Jh: no suit 3 times) |
 
-Decisions (`b_f`, `b_t`, `b_r` = the actor's flop/turn/river bucket from §5.5's cuts):
+With the sampled features (§5) and `lab/cfr/fast/cuts_v1.json` (§5.5) the buckets are: button flop
+**93**, turn **89**, river **40**; big blind flop **80**, turn **74**, river **32**
+(`tests/test_cfr_deals.py::test_worked_example_bucket_ids`).
+
+Decisions:
 
 | # | Street | Actor | Pot | History before | Menu (raise-to) | Action | Key |
 |---|---|---|---|---|---|---|---|
 | 1 | pre | button | 3 | `` | F C R5 A200 | R | `0|1486|` |
 | 2 | pre | BB | 7 | `R` | F C R15 A200 | R | `0|683|R` |
 | 3 | pre | button | 20 | `RR` | F C A200 | C | `0|1486|RR` |
-| 4 | flop | BB | 30 | `RRC/` | C H15 P30 A185 | C | `1|b_f(BB)|RRC/` |
-| 5 | flop | button | 30 | `RRC/C` | C H15 P30 A185 | H | `1|b_f(BTN)|RRC/C` |
-| 6 | flop | BB | 45 | `RRC/CH` | F C R38 A185 | R | `1|b_f(BB)|RRC/CH` |
-| 7 | flop | button | 83 | `RRC/CHR` | F C R95 A185 | C | `1|b_f(BTN)|RRC/CHR` |
+| 4 | flop | BB | 30 | `RRC/` | C H15 P30 A185 | C | `1|80|RRC/` |
+| 5 | flop | button | 30 | `RRC/C` | C H15 P30 A185 | H | `1|93|RRC/C` |
+| 6 | flop | BB | 45 | `RRC/CH` | F C R38 A185 | R | `1|80|RRC/CH` |
+| 7 | flop | button | 83 | `RRC/CHR` | F C R95 A185 | C | `1|93|RRC/CHR` |
 | — | discard | both | 106 | | (fixed policy: 7c, 3d) | | no key |
-| 8 | turn | BB | 106 | `RRC/CHRC/` | C H53 P106 A147 | C | `2|b_t(BB)|RRC/CHRC/` |
-| 9 | turn | button | 106 | `RRC/CHRC/C` | C H53 P106 A147 | C | `2|b_t(BTN)|RRC/CHRC/C` |
-| 10 | river | BB | 106 | `RRC/CHRC/CC/` | C H53 P106 A147 | C | `3|b_r(BB)|RRC/CHRC/CC/` |
-| 11 | river | button | 106 | `RRC/CHRC/CC/C` | C H53 P106 A147 | P | `3|b_r(BTN)|RRC/CHRC/CC/C` |
-| 12 | river | BB | 212 | `RRC/CHRC/CC/CP` | F C A147 | C | `3|b_r(BB)|RRC/CHRC/CC/CP` |
+| 8 | turn | BB | 106 | `RRC/CHRC/` | C H53 P106 A147 | C | `2|74|RRC/CHRC/` |
+| 9 | turn | button | 106 | `RRC/CHRC/C` | C H53 P106 A147 | C | `2|89|RRC/CHRC/C` |
+| 10 | river | BB | 106 | `RRC/CHRC/CC/` | C H53 P106 A147 | C | `3|32|RRC/CHRC/CC/` |
+| 11 | river | button | 106 | `RRC/CHRC/CC/C` | C H53 P106 A147 | P | `3|40|RRC/CHRC/CC/C` |
+| 12 | river | BB | 212 | `RRC/CHRC/CC/CP` | F C A147 | C | `3|32|RRC/CHRC/CC/CP` |
 
 Notes on the example: at #3 the street has 3 raises (BB, open, 3-bet), so only all-in is left as a
 raise. At #12, 2.5 × 106 = 265 is above all-in (147), so `R` merges into `A`. Showdown: the button's
@@ -258,5 +265,6 @@ infoset are. If C3 measures < 20,000 iterations/s, drop to cap 2 before cutting 
 | 7-card evaluator == `bot/evaluator.py` on 100 k hands (1 M: slow) | `tests/test_cfr_fast.py`, passing |
 | SplitMix64 reference vectors; NumPy and Numba streams, seeds and all features identical on 120 situations (5,000: slow) | `tests/test_cfr_fast.py`, passing |
 | the worked example's sampled features (close to the exact ones) | `tests/test_cfr_fast.py`, passing |
-| the worked example's bucket ids | *(C2, after the threshold fit)* |
+| the worked example's bucket ids with `cuts_v1.json` | `tests/test_cfr_deals.py`, passing |
+| pool features == runtime features (with the training discard); cuts equal-mass on a fresh pool | `tests/test_cfr_deals.py`, passing |
 | runtime key == trainer key on 1,000 random hands | *(C5)*, extends `tests/test_cfr_runtime.py` |
