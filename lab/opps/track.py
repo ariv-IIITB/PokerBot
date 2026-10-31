@@ -6,9 +6,10 @@ records, for each player:
   profile   (street, facing) -> action kind counts       "what does it do when checked to?"
   spots     spot label -> action kind counts             the labels TARGETS in lab/eval.py uses
   acct      (how the hand ended, street) -> [hands, chips]    "where do the chips go?"
+  stats     the brain's own int counters (`brain.stats`, e.g. Tier 3's t3_fallbacks), summed
 
 Everything is plain dicts of ints so results cross process boundaries. `merge` adds them up and
-`format_profile` / `format_accounting` print the blocks lab.eval and the lab.opps CLIs show.
+`format_profile` / `format_accounting` / `format_stats` print the blocks lab.eval and the lab.opps CLIs show.
 """
 from __future__ import annotations
 
@@ -62,7 +63,8 @@ def ending_of(h) -> tuple[str, str]:
 def _empty() -> dict:
     return {"profile": defaultdict(lambda: defaultdict(int)),
             "spots": defaultdict(lambda: defaultdict(int)),
-            "acct": defaultdict(lambda: [0, 0])}
+            "acct": defaultdict(lambda: [0, 0]),
+            "stats": defaultdict(int)}
 
 
 class Tracker:
@@ -70,6 +72,7 @@ class Tracker:
 
     def __init__(self) -> None:
         self.data = {"A": _empty(), "B": _empty()}
+        self.brains: dict[str, list] = {"A": [], "B": []}
 
     def wrap(self, player, label: str):
         """Hook one in-process player (no-op for subprocess players)."""
@@ -77,6 +80,7 @@ class Tracker:
         if bot is None:
             return player
         brain, d = bot.brain, self.data[label]
+        self.brains[label].append(brain)
         decide, observe = brain.decide, brain.observe
 
         def tracked_decide(state, legal, budget):
@@ -108,10 +112,20 @@ class Tracker:
         self.wrap(a_player, "A")
         self.wrap(b_player, "B")
 
+    def brain_stats(self, label: str) -> dict:
+        """The int counters in `brain.stats`, summed over the brains wrapped as `label`."""
+        out: dict = defaultdict(int)
+        for brain in self.brains[label]:
+            for k, v in (getattr(brain, "stats", None) or {}).items():
+                if isinstance(v, int) and not isinstance(v, bool):
+                    out[k] += v
+        return dict(out)
+
     def to_plain(self) -> dict:
         return {who: {"profile": {k: dict(v) for k, v in d["profile"].items()},
                       "spots": {k: dict(v) for k, v in d["spots"].items()},
-                      "acct": {k: list(v) for k, v in d["acct"].items()}}
+                      "acct": {k: list(v) for k, v in d["acct"].items()},
+                      "stats": self.brain_stats(who)}
                 for who, d in self.data.items()}
 
 
@@ -129,6 +143,8 @@ def merge(parts: list[dict]) -> dict:
             for k, (n, chips) in d["acct"].items():
                 out[who]["acct"][k][0] += n
                 out[who]["acct"][k][1] += chips
+            for k, n in d.get("stats", {}).items():
+                out[who]["stats"][k] += n
     return out
 
 
@@ -158,3 +174,14 @@ def format_accounting(merged: dict, names: dict[str, str], hands: int) -> str:
             lines.append(f"  {end:14} {street:6} hands={n:6} chips={chips:+8d} "
                          f"({chips / max(1, hands):+.3f}/hand)")
     return "\n".join(lines)
+
+
+def format_stats(merged: dict, names: dict[str, str]) -> str:
+    """The brains' own counters (only players whose brain keeps a `stats` dict)."""
+    lines = []
+    for who in ("A", "B"):
+        st = merged[who].get("stats") or {}
+        if st:
+            lines.append(f"--- brain stats: {names[who]}: "
+                         + " ".join(f"{k}={v}" for k, v in sorted(st.items())))
+    return "\n".join(lines) if lines else "--- brain stats: none"

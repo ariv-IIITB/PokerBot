@@ -94,3 +94,15 @@ def test_run_pool_end_to_end(capsys) -> None:
     text = "\n".join(lines)
     assert lines[0].startswith("tier0-nolock vs calling_station-nolock:")
     assert "--- accounting: tier0-nolock" in text and "--- profile targets" in text
+
+
+def test_stats_report_sums_the_brains_own_counters() -> None:
+    lines = ev.run_pool("tier3", ["calling_station"], 1, variant="discard_holdem", hands=12,
+                        locks="off", report=("stats",), processes=1)
+    text = "\n".join(lines)
+    assert "--- brain stats: tier3-nolock:" in text
+    stat_line = next(line for line in lines if line.startswith("--- brain stats: tier3"))
+    counts = dict(kv.split("=") for kv in stat_line.split(": ", 2)[2].split())
+    assert set(counts) == {"t3_decisions", "t3_errors", "t3_fallbacks"}
+    assert int(counts["t3_decisions"]) > 0 and int(counts["t3_errors"]) == 0
+    assert "calling_station" not in stat_line          # sparring bots keep no stats
