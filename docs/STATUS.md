@@ -65,8 +65,8 @@ pairs on other seeds). The one extra that cost chips, `aggr_call_shift` (call li
 **off** (+0.64 ± 0.29 vs tier1, +0.55 ± 0.24 vs opp4, confirmed on fresh seeds; costs 4 chips/hand vs maniac, which
 we beat 100 % anyway). E4 stays (turning it off is worse). **Packaging bug:** upload #2 had no embedded tables; the
 builder now refuses without `data/<variant>/`; use upload #3.
-Do not run `tools.embed_data` or the package builder without `data/discard_holdem/` (gitignored; rebuild with
-`lab.precompute --variant discard_holdem --samples 6000 --range-top 0.3`).
+`data/discard_holdem/` is committed (135 KB). If you change the variant or the precompute settings, rebuild it with
+`lab.precompute --variant discard_holdem --samples 6000 --range-top 0.3`, then run `tools.embed_data`, and commit both.
 
 ## Open items for the next phases
 

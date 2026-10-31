@@ -142,7 +142,7 @@ revert it silently**: report the numbers to the user.
   (one load-sensitive test, `test_tier1_beats_random_and_plays_legally`, may fail under load; rerun alone).
 - Evaluations are slow (Tier 2 plays ~22 hands/s per core). Run them in the background with Monitor,
   not in the foreground; the machine has 4 cores; do not run timing checks while evals run.
-- Do not run `python -m tools.embed_data` unless `data/discard_holdem/` exists (it is gitignored);
+- Do not run `python -m tools.embed_data` unless `data/discard_holdem/` exists (it is committed; rebuild it only if the tables change);
   otherwise it writes an empty-tables `bot/embedded.py`. This phase should not touch `bot/` at all.
 - Never tune Tier 2 on the held-out bots. Never copy code between `Opps/` and `bot/`.
 - If three fixes in a row fail, stop and say so.

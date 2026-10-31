@@ -19,7 +19,9 @@ results/
 dist/
 *.ckpt
 # Generated tables / strategies (lab/precompute.py, lab/cfr/train.py)
-data/
+data/*
+!data/discard_holdem/
+!data/discard_holdem/*.npy
 
 # From the team setup (ariv-IIITB)
 *$py.class

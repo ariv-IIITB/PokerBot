@@ -1,0 +1,22 @@
+{
+  "spec_hash": "67430f7ec9d87823",
+  "variant": "discard_holdem",
+  "seed": 0,
+  "samples": 6000,
+  "complete": {
+    "classes": true,
+    "equity_random": true,
+    "equity_range": true
+  },
+  "hole_size": 3,
+  "n_classes": 1755,
+  "files": {
+    "classes.npy": 88528,
+    "eq_range.npy": 14168,
+    "eq_random.npy": 14168,
+    "class_counts.npy": 7148,
+    "class_reps.npy": 10658
+  },
+  "total_bytes": 134670,
+  "range_top": 0.3
+}
