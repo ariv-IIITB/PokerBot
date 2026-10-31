@@ -44,6 +44,7 @@ BRAINS.update({
     "tight": "lab.sparring.bots:Tight",
     "maniac": "lab.sparring.bots:Maniac",
     "cfr": "lab.cfr.brain:CFRBrain",          # lab only: CFR is a no-go for the real bot
+    "tier4lab": "lab.cfr.fast.brain:Tier4LabBrain",   # Tier 4 with a blueprint file from data/cfr/
     # LLM-built opponents from Opps/ (play them on lab/opps/holdem_100bb.json)
     "opp1": "lab.opps:Opp1Brain",
     "opp2": "lab.opps:Opp2Brain",

@@ -112,3 +112,24 @@ run; the traversal and its callers are compiled per run (`cache=False`, a few se
 **Tests:** `tests/test_cfr_mccfr.py` (4): Kuhn value and exploitability; uniform-profile exact values; a
 smoke run on the real tree (finite regrets, average strategy sums to 1 on legal actions, export rows sum to
 255 or 0); the CLI end to end with checkpoint, resume and export metadata.
+
+## C5. The Tier 4 brain (2026-11-01)
+
+- `bot/cfr/blueprint.py` (shipped, NumPy): `Blueprint` (the uint8 table + metadata; refuses another contract
+  version), `abstract_view` (replays the hand's betting on real chips with the contract's menu formulas; exact
+  menu sizes keep their label, other raises are translated pseudo-harmonically, a sized raise past the cap is
+  a miss), `menu`, `bucket` (preflop class; flop/turn/river features + the blueprint's cuts).
+- `bot/brains/tier4.py`: `Tier4Brain(Tier3Brain)` overrides `play()` only. On a street in `cfr_streets`
+  (default `[0, 1]`) it samples the blueprint's action and maps it to chips on the real state; everything else
+  (discard, other streets, off-tree history, untrained row, a replay that disagrees with the engine's to-call
+  or stack, a budget under 10 ms, any error) goes to Tier 3. The endgame lock is handled before `play()`.
+  Registered as `tier4` in `bot/main.py` (**not the default**).
+- `lab/cfr/fast/brain.py`: `tier4lab` = Tier 4 with a blueprint file (`blueprint_file`), since the bot itself
+  may not read files. Embedding the blueprint as `ARTIFACTS["blueprint"]` waits for a blueprint that passes gate A.
+- Known limit: when Tier 4 plays preflop, Tier 3's own-range line model (used by its postflop fallback) does
+  not see those preflop actions.
+
+**Tests:** `tests/test_tier4.py` (9): runtime key and menu == trainer's at every node of 1,000 random lines per
+seat; translation and cap misses; the worked example's buckets through the runtime path; artifact round trip
+and version check; with a small trained table, legal matches vs calling_station, maniac and tier1 with
+> 20 hits and no errors or state mismatches; `cfr_streets: []` never touches the table.
