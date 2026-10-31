@@ -26,7 +26,7 @@
 Nothing runs the tests when code is pushed. The project's phases are implemented by sessions
 that push to GitHub, and their reports are reviewed by hand. Commit `966b2e1` ("phase F0")
 pushed a packaging guard that broke two tests in `tests/test_day1.py` on every machine, and
-nobody noticed for two days (fixed in `39ca8f8`). The competition deadline is 15 Nov 2026,
+nobody noticed for about 30 hours (fixed in `39ca8f8`). The competition deadline is 15 Nov 2026,
 and a broken submission forfeits matches. A CI job that runs the existing fast suite on push
 turns "someone forgot to run the tests" into a red mark on the commit.
 

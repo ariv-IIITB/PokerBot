@@ -30,7 +30,7 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
 
 - `Bot.run` loops forever if reading stdin keeps failing (`bot/main.py:73-80`): real, but
   unlikely (stdin uses `errors="replace"`). The owner chose not to plan it this round.
-- `brain.observe()` runs outside the hard deadline (`bot/main.py:133-137`): rejected. The worst
+- `brain.observe()` runs outside the hard deadline (`bot/main.py:143-147`): rejected. The worst
   reply over a 400-hand match was 36 ms (73 ms projected at 2× slower) against the 5 s limit.
 - `setup-teammate.sh` installs a third-party Claude plugin: dev tooling by design, never shipped.
 - `exec` of `bot/embedded.py` in `tools/package_submission.py` (`_has_tables_for`): it runs our

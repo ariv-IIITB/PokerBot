@@ -57,7 +57,7 @@ the discard with the normal discard policy.
   `safe_action_for_hole(legal, hole)`, which discards the rules' fallback card: the lowest rank
   (`bot/game/steps/cards.py:40-59`). This is what an unlocked Tier 2 uses, through
   `Tier1Brain.play` (`bot/brains/tier1.py:99-102`: `if legal.can_special: return s.special(legal, budget_s)`).
-- Measured at `39ca8f8` with the test below: locked, hole `Ah,Ad,2c`, flop `Kh,Ks,7d` →
+- Measured at `39ca8f8` with the test below (where the hand-built state makes the reconstruction fail, so the unlocked path uses the lowest-card fallback): locked, hole `Ah,Ad,2c`, flop `Kh,Ks,7d` →
   `Action(kind='S', choice='0')`, which discards the `Ah`. Unlocked, the same spot →
   `choice='2'` (the `2c`).
 - Test conventions: `tests/test_tier2.py`, section `# --- lock on discard_holdem` (around
@@ -121,6 +121,11 @@ def test_a_locked_hand_still_discards_its_worst_card() -> None:
 
 The expected `"2"` comes from the game, not from the code: keeping `Ah Ad` on a `Kh Ks 7d` flop
 (aces and kings) dominates either `A 2` hand, and `2c` is also the rules' fallback (the lowest card).
+In this hand-built state the reconstruction fails (the `reconstruction failed` warning), so
+`Situation.special` takes its fallback branch, not the simulation. The test therefore proves
+that a locked hand no longer discards slot 0 and goes through `Situation.special`; it does not
+prove the simulation ran. That is enough for this fix, because both branches of
+`Situation.special` give `"2"` here.
 
 **Verify**: `.venv/bin/python -m pytest -q tests/test_tier2.py -k locked_discard` → `1 failed`,
 and the failure shows `choice='0'` on the left of the `==`. A stderr warning
