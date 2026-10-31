@@ -32,6 +32,20 @@ def test_new_variant_reports_invalid_and_unsupported(tmp_path, capsys) -> None:
     assert "NEEDS A NEW PLUGIN" in capsys.readouterr().out
 
 
+@pytest.mark.parametrize("brain", ["tier2", "tier3"])
+def test_packaged_main_defaults_to_the_packaged_brain(tmp_path, brain) -> None:
+    """The packaged bot must start the brain it was packaged with: a mismatch made it fall back
+    to Tier 0 (main.py said tier3 while the default package held tier2)."""
+    out = tmp_path / "sub"
+    pkg.build(pkg.ROOT / "variant" / "active.json", brain, "pokerbots", out)
+    assert f'DEFAULT_BRAIN = "{brain}"' in (out / "bot" / "main.py").read_text()
+
+
+def test_the_package_cli_defaults_to_the_bots_own_default_brain() -> None:
+    from bot.main import DEFAULT_BRAIN
+    assert pkg.parse_args([]).brain == DEFAULT_BRAIN
+
+
 def test_package_contains_only_what_the_variant_needs(tmp_path) -> None:
     spec_path = pkg.ROOT / "variant" / "catalog" / "mit2026_discard.json"
     out = tmp_path / "submission"

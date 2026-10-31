@@ -1,7 +1,7 @@
 """Build and verify the submission package (`bot.py` + the `bot/` and `variant/` modules it needs).
 
     .venv/bin/python -m tools.package_submission [--variant variant/active.json]
-        [--brain tier2] [--protocol pokerbots] [--out dist/submission] [--zip] [--stage2]
+        [--brain <default: bot.main.DEFAULT_BRAIN>] [--protocol pokerbots] [--out dist/submission] [--zip] [--stage2]
 
 The package contains only what the variant needs: `bot.py` at the top level, the bot/ modules
 reachable from bot/main.py (imports scanned with ast) plus the brain, the protocol adapter and
@@ -29,6 +29,7 @@ import ast
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -41,7 +42,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from bot.game.steps import step_module  # noqa: E402
-from bot.main import BRAINS  # noqa: E402
+from bot.main import BRAINS, DEFAULT_BRAIN  # noqa: E402
 from bot.protocols import ADAPTERS  # noqa: E402
 from tools import embed_data  # noqa: E402
 from tools.sandbox_scan import SHIPPED_ALLOW, sandbox_violations  # noqa: E402
@@ -153,7 +154,7 @@ def build(spec_path: Path, brain: str, protocol: str, out: Path,
                          "(lab.precompute) or restore data/ first.")
     (out / "bot" / "embedded.py").write_text(rendered)
     # Trimmed registries: unused plugins are absent, so point the defaults at what we ship.
-    _patch(out / "bot" / "main.py", 'DEFAULT_BRAIN = "tier2"', f'DEFAULT_BRAIN = "{brain}"')
+    _patch_default_brain(out / "bot" / "main.py", brain)
     _patch(out / "bot" / "protocols" / "__init__.py", 'DEFAULT = "pokerbots"',
            f'DEFAULT = "{protocol}"')
     (out / "bot.py").write_text(BOT_PY % {"protocol": protocol})
@@ -162,6 +163,16 @@ def build(spec_path: Path, brain: str, protocol: str, out: Path,
             "modules": sorted(mods), "data": "ARTIFACTS = {}" not in embedded}
     (out / "PACKAGE.json").write_text(json.dumps(info, indent=2))
     return info
+
+
+def _patch_default_brain(path: Path, brain: str) -> None:
+    """Point the packaged main.py's DEFAULT_BRAIN at the packaged brain, whatever it said before
+    (a fixed-string patch missed once main.py's default moved to tier3)."""
+    text = path.read_text()
+    new, n = re.subn(r'^DEFAULT_BRAIN = "[^"]*"', f'DEFAULT_BRAIN = "{brain}"', text, count=1, flags=re.M)
+    if n != 1:
+        raise SystemExit(f"cannot set DEFAULT_BRAIN in {path}")
+    path.write_text(new)
 
 
 def _patch(path: Path, old: str, new: str) -> None:
@@ -273,10 +284,10 @@ def check_package(out: Path, spec_path: Path, protocol: str, brain: str, hands: 
     return problems
 
 
-def main(argv: Optional[list[str]] = None) -> int:
+def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(description="Build + verify the submission package.")
     ap.add_argument("--variant", default=str(ROOT / "variant" / "active.json"))
-    ap.add_argument("--brain", default="tier2", choices=sorted(BRAINS))
+    ap.add_argument("--brain", default=DEFAULT_BRAIN, choices=sorted(BRAINS))
     ap.add_argument("--protocol", default="pokerbots", choices=sorted(ADAPTERS))
     ap.add_argument("--out", default=str(ROOT / "dist" / "submission"))
     ap.add_argument("--zip", action="store_true", help="also build <out>.zip and check THAT, unpacked")
@@ -285,7 +296,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--opponents", default="tier2-nolock,maniac,starter")
     ap.add_argument("--max-startup", type=float, default=1.0)
     ap.add_argument("--max-mb", type=float, default=500.0)
-    args = ap.parse_args(argv)
+    return ap.parse_args(argv)
+
+
+def main(argv: Optional[list[str]] = None) -> int:
+    args = parse_args(argv)
     spec_path = Path(args.variant)
     if not spec_path.is_file():
         from lab.harness import load_variant
