@@ -116,6 +116,56 @@ def test_eof_without_endmatch_exits_cleanly() -> None:
     assert len(replies) == 4 and not bot.state.match_over
 
 
+class FlakyStream(io.StringIO):
+    """stdin whose first `fails` reads raise, as a broken decode would."""
+
+    def __init__(self, text: str, fails: int) -> None:
+        super().__init__(text)
+        self.fails = fails
+
+    def readline(self, *args):
+        if self.fails > 0:
+            self.fails -= 1
+            raise UnicodeDecodeError("utf-8", b"\xff", 0, 1, "invalid start byte")
+        return super().readline(*args)
+
+
+def test_failed_read_is_skipped_and_the_match_goes_on() -> None:
+    msgs = scripted_messages(hands=1)
+    out = io.StringIO()
+    bot = Bot(Tier0Brain(), out)
+    assert bot.run(FlakyStream("\n".join(encode(msgs)) + "\n", fails=1)) == 0
+    assert decode_replies(msgs, out.getvalue().splitlines()) == [F, K, S0, F]
+    assert bot.bad_lines == 1 and bot.state.match_over
+
+
+class ClosedPipe(io.StringIO):
+    """stdout after the engine has gone away."""
+
+    def write(self, s: str) -> int:
+        raise BrokenPipeError(32, "Broken pipe")
+
+
+def test_closed_stdout_ends_the_loop_cleanly() -> None:
+    bot = Bot(Tier0Brain(), ClosedPipe())
+    assert bot.run(io.StringIO("\n".join(encode(scripted_messages(hands=3))) + "\n")) == 0
+    assert bot.state.hands_played == 0      # stopped at the first reply, did not play on
+
+
+@pytest.mark.parametrize("junk", [None, "raise", 42])
+def test_brain_returning_a_non_action_gets_tier0(junk) -> None:
+    _, replies = run_bot(ScriptedBrain(junk), scripted_messages(hands=1))
+    assert replies == [F, K, S0, F]
+
+
+def test_nothing_is_answered_after_the_match_ends() -> None:
+    match = scripted_messages(hands=1)
+    out = io.StringIO()
+    bot = Bot(Tier0Brain(), out)
+    bot.run(io.StringIO("\n".join(encode(match + match)) + "\n"))
+    assert len(out.getvalue().splitlines()) == 4 and bot.state.hands_played == 1
+
+
 def test_every_reply_parses() -> None:
     msgs = scripted_messages(hands=5)
     _, replies = run_bot(ScriptedBrain(Action.call()), msgs)
