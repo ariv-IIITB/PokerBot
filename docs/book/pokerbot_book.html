@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Poker Bot Book</title>
-<style>
+<style id="book-style">
 :root {
   --bg: #fbfaf7; --fg: #1d1c1a; --muted: #5d5a54; --rule: #dedad2; --accent: #8a3b12;
   --accent-soft: #f4e7dc; --code-bg: #f1eee8; --key-bg: #eef3ec; --key-rule: #5c7f52;
@@ -89,7 +89,7 @@ dl.gloss dd { margin: .15rem 0 0 0; }
 .ans dd { margin-left: 0; }
 .tag { font-family: system-ui, sans-serif; font-size: .72rem; padding: .05rem .4rem; border-radius: 9px;
   border: 1px solid var(--rule); color: var(--muted); white-space: nowrap; }
-.toolbar { position: fixed; right: 12px; bottom: 12px; display: flex; gap: 6px; z-index: 5; }
+.toolbar { position: fixed; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 6px; z-index: 5; }
 .toolbar a, .toolbar button { font: 600 13px system-ui, sans-serif; background: var(--bg); color: var(--fg);
   border: 1px solid var(--rule); border-radius: 18px; padding: 6px 12px; text-decoration: none; cursor: pointer; }
 @media print { .toolbar { display: none; } body { font-size: 11pt; background: #fff; color: #000; }
@@ -167,7 +167,7 @@ details.exd { background: var(--accent-soft); border: none; }
 </style>
 </head>
 <body>
-<div class="toolbar"><a href="#toc">Contents</a><a href="#glossary">Glossary</a><button type="button" id="theme">Theme</button></div>
+<div class="toolbar"><a href="#toc">Contents</a><a href="#glossary">Glossary</a><button type="button" id="theme">Theme</button><button type="button" id="dl" hidden>Download for offline</button></div>
 <main>
 <h1>Poker Bots from the Ground Up</h1>
 <p class="lead">A two-chapter book for the Synergy PokerBots 2026 team. Chapter&nbsp;1 builds every idea we need, from <code>git add</code> to counterfactual regret minimisation and safe exploitation. Chapter&nbsp;2 uses only those ideas to explain this repository, presents new measurements, and lays out two candidate designs for the final two weeks.</p>
@@ -1178,9 +1178,40 @@ for c_ in CARDS:
 
 </main>
 <script type="application/json" id="bot-data">{"d_conv_opp3": {"role": "training", "family": "over-folder", "moves": ["Bet and bluff far more on flop, turn and river", "Fold bluff-catchers to their river bets (they are value)", "Use the smallest bet whose break-even fold rate is well below theirs"], "chips": -1.13, "se": 0.43, "wins": 0.20833333333333334, "vpip": 0.824, "pfr": 0.354, "wtsd": 0.216, "fold": [0.418, 0.682, 0.716], "riverbet": 0.46, "weak": 0.193, "disclow": 0.621, "id": 12, "over": ["yes", 108], "station": ["no", 54]}, "d_new_rules": {"role": "training", "family": "over-folder", "moves": ["Bet and bluff far more on flop, turn and river", "Fold bluff-catchers to their river bets (they are value)", "Use the smallest bet whose break-even fold rate is well below theirs"], "chips": -0.84, "se": 0.37, "wins": 0.3333333333333333, "vpip": 0.773, "pfr": 0.408, "wtsd": 0.382, "fold": [0.624, 0.591, 0.586], "riverbet": 0.348, "weak": 0.049, "disclow": 0.619, "id": 18, "over": ["yes", 40], "station": ["no", 84]}, "d_new_lag": {"role": "training", "family": "aggressor", "moves": ["Call down wider; let it bluff", "Check-raise strong hands", "Tier 3's equity floor already handles this"], "chips": 5.8, "se": 0.93, "wins": 0.9583333333333334, "vpip": 0.899, "pfr": 0.59, "wtsd": 0.386, "fold": [0.115, 0.183, 0.399], "riverbet": 0.656, "weak": 0.191, "disclow": 0.605, "id": 4, "over": ["no", 32], "station": ["no", 126]}, "d_new_trapper": {"role": "training", "family": "station-ish trapper", "moves": ["No bluffs on the river", "Fold medium hands when it raises (raises mean strength)", "Small value bets"], "chips": -0.06, "se": 0.41, "wins": 0.4166666666666667, "vpip": 0.497, "pfr": 0.034, "wtsd": 0.613, "fold": [0.324, 0.211, 0.217], "riverbet": 0.245, "weak": 0.0, "disclow": 0.647, "id": 13, "over": ["no", 16], "station": ["yes", 94]}, "d_new_exploiter": {"role": "training", "family": "over-folder", "moves": ["Bet and bluff far more on flop, turn and river", "Fold bluff-catchers to their river bets (they are value)", "Use the smallest bet whose break-even fold rate is well below theirs"], "chips": -1.69, "se": 0.49, "wins": 0.16666666666666666, "vpip": 0.802, "pfr": 0.317, "wtsd": 0.265, "fold": [0.65, 0.794, 0.794], "riverbet": 0.338, "weak": 0.041, "disclow": 0.61, "id": 20, "over": ["yes", 37], "station": ["no", 40]}, "d_new_minraise": {"role": "training", "family": "middle", "moves": ["Fold bluff-catchers to river bets (few bluffs)", "Steal more preflop if it folds ~50% to raises"], "chips": 0.29, "se": 0.45, "wins": 0.5, "vpip": 0.786, "pfr": 0.524, "wtsd": 0.447, "fold": [0.472, 0.398, 0.441], "riverbet": 0.444, "weak": 0.041, "disclow": 0.681, "id": 5, "over": ["no", 78], "station": ["no", 69]}, "d_conv_opp4": {"role": "held out", "family": "middle", "moves": ["Fold bluff-catchers to river bets (few bluffs)", "Steal more preflop if it folds ~50% to raises"], "chips": -0.49, "se": 0.59, "wins": 0.375, "vpip": 0.488, "pfr": 0.317, "wtsd": 0.344, "fold": [0.137, 0.501, 0.524], "riverbet": 0.273, "weak": 0.211, "disclow": 0.671, "id": 5, "over": ["no", 258], "station": ["no", 104]}, "d_new_eqrandom": {"role": "held out", "family": "middle", "moves": ["Fold bluff-catchers to river bets (few bluffs)", "Steal more preflop if it folds ~50% to raises"], "chips": -0.11, "se": 0.54, "wins": 0.5416666666666666, "vpip": 0.695, "pfr": 0.315, "wtsd": 0.364, "fold": [0.469, 0.442, 0.457], "riverbet": 0.383, "weak": 0.0, "disclow": 0.657, "id": 12, "over": ["no", 70], "station": ["no", 103]}, "d_new_geometric": {"role": "held out", "family": "over-folder", "moves": ["Bet and bluff far more on flop, turn and river", "Fold bluff-catchers to their river bets (they are value)", "Use the smallest bet whose break-even fold rate is well below theirs"], "chips": -2.88, "se": 0.77, "wins": 0.25, "vpip": 0.776, "pfr": 0.506, "wtsd": 0.397, "fold": [0.554, 0.413, 0.561], "riverbet": 0.32, "weak": 0.06, "disclow": 0.637, "id": 6, "over": ["yes", 84], "station": ["no", 92]}, "starter": {"role": "organisers' starter", "family": "station", "moves": ["Never bluff", "Value-bet thinner and bigger (up to all-in with strong hands)"], "chips": 20.06, "se": 0.71, "wins": 1.0, "vpip": 0.801, "pfr": 0.0, "wtsd": 1.0, "fold": [0.0, 0.0, 0.0], "riverbet": 0, "weak": null, "disclow": 1.0, "id": null, "over": ["no", 6], "station": ["yes", 18]}, "calling_station": {"role": "sparring", "family": "station", "moves": ["Never bluff", "Value-bet thinner and bigger (up to all-in with strong hands)"], "chips": 22.36, "se": 0.8, "wins": 1.0, "vpip": 0.8, "pfr": 0.0, "wtsd": 1.0, "fold": [0.0, 0.0, 0.0], "riverbet": 0, "weak": null, "disclow": 0.36, "id": null, "over": ["no", 6], "station": ["yes", 18]}, "tight": {"role": "sparring", "family": "tight", "moves": ["Bluff more preflop and on the flop", "Respect its river bets"], "chips": 6.35, "se": 0.47, "wins": 1.0, "vpip": 0.416, "pfr": 0.087, "wtsd": 0.525, "fold": [0.305, 0.305, 0.085], "riverbet": 0.363, "weak": 0.087, "disclow": 0.4, "id": 14, "over": ["no", 30], "station": ["yes", 76]}, "maniac": {"role": "sparring", "family": "aggressor", "moves": ["Call down wider; let it bluff", "Check-raise strong hands", "Tier 3's equity floor already handles this"], "chips": 49.02, "se": 1.89, "wins": 1.0, "vpip": 0.957, "pfr": 0.737, "wtsd": 0.688, "fold": [0.016, 0.031, 0.023], "riverbet": 0.703, "weak": 0.503, "disclow": 0.351, "id": 4, "over": ["no", 15], "station": ["yes", 37]}, "random_legal": {"role": "sparring", "family": "random", "moves": ["Play solid value; it gives chips away"], "chips": 18.29, "se": 1.02, "wins": 1.0, "vpip": 0.644, "pfr": 0.361, "wtsd": 0.373, "fold": [0.366, 0.382, 0.471], "riverbet": 0.494, "weak": 0.513, "disclow": 0.361, "id": 2, "over": ["no", 140], "station": ["no", 151]}, "all_in": {"role": "sparring", "family": "aggressor", "moves": ["Call down wider; let it bluff", "Check-raise strong hands", "Tier 3's equity floor already handles this"], "chips": 24.8, "se": 1.26, "wins": 1.0, "vpip": 1.0, "pfr": 1.0, "wtsd": 1.0, "fold": [null, null, null], "riverbet": null, "weak": null, "disclow": 0.368, "id": 3, "over": ["mixed", null], "station": ["mixed", null]}, "tier1": {"role": "our Tier 1", "family": "ours", "moves": ["Lab reference only"], "chips": 1.21, "se": 0.78, "wins": 0.625, "vpip": 0.777, "pfr": 0.052, "wtsd": 0.376, "fold": [0.259, 0.333, 0.339], "riverbet": 0.43, "weak": 0.107, "disclow": 0.61, "id": 9, "over": ["no", 24], "station": ["yes", 80]}, "tier2": {"role": "our Tier 2", "family": "ours", "moves": ["Lab reference only"], "chips": 2.33, "se": 0.64, "wins": 0.5, "vpip": 0.556, "pfr": 0.041, "wtsd": 0.359, "fold": [0.247, 0.409, 0.356], "riverbet": 0.409, "weak": 0.106, "disclow": 0.607, "id": null, "over": ["no", 24], "station": ["mixed", 92]}}</script>
-<script>
+<script id="widgets-js">
 (function () {
   "use strict";
+  // A clean copy of the whole book for offline reading, taken before any widget starts.
+  var SNAP = (function () {
+    try { return { main: document.querySelector("main").outerHTML, bar: document.querySelector(".toolbar").outerHTML }; }
+    catch (e) { return null; }
+  })();
+  function offlineFile() {
+    var parts = ["book-style", "bot-data", "widgets-js", "theme-js"].map(function (id) {
+      var e = document.getElementById(id); return e ? e.outerHTML : "";
+    });
+    return "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n" +
+      "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Poker Bot Book</title>\n" +
+      parts[0] + "\n</head>\n<body>\n" + SNAP.bar + "\n" + SNAP.main + "\n" +
+      parts[1] + "\n" + parts[2] + "\n" + parts[3] + "\n</body>\n</html>\n";
+  }
+  (function offerDownload() {
+    var btn = document.getElementById("dl");
+    if (!btn || !SNAP || !window.claude || typeof window.claude.use !== "function") return;
+    window.claude.use("downloads").then(function (d) {
+      if (!d) return;
+      btn.hidden = false;
+      btn.addEventListener("click", function () {
+        btn.disabled = true;
+        d.save({ filename: "pokerbot_book.html", data: new Blob([offlineFile()], { type: "text/html" }) })
+          .then(function () { btn.textContent = "Saved"; })
+          .catch(function (e) {
+            if (e && (e.code === "declined" || e.code === "rate_limited")) { btn.disabled = false; return; }
+            btn.textContent = "Download unavailable here";
+          });
+      });
+    }, function () {});
+  })();
   var NS = "http://www.w3.org/2000/svg";
   function el(tag, attrs, kids) {
     var e = document.createElement(tag);
@@ -1508,7 +1539,7 @@ for c_ in CARDS:
 })();
 
 </script>
-<script>
+<script id="theme-js">
 (function(){var r=document.documentElement,b=document.getElementById('theme');
 try{var s=localStorage.getItem('book-theme');if(s)r.setAttribute('data-theme',s);}catch(e){}
 b.addEventListener('click',function(){var d=r.getAttribute('data-theme');
