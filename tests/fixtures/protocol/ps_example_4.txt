@@ -1,0 +1,10 @@
+# Problem Statement 8.4: a fold before the discard. We are A (button), hole As 5d 9c; hand 3.
+E> {"type":"init","protocol_version":"1.0","total_hands":400,"starting_stack":200,"small_blind":1,"big_blind":2,"time_bank_ms":60000,"per_response_ms":5000}
+E> {"type":"new_hand","hand_id":3,"seat":"button","hole_cards":["As","5d","9c"],"stack":200,"opp_stack":200}
+E> {"type":"action_request","hand_id":3,"street":"preflop","board":[],"pot":3,"my_bet":1,"opp_bet":2,"to_call":1,"my_stack":199,"opp_stack":198,"legal_actions":["fold","call","raise"],"min_raise":4,"max_raise":200,"raises_left":3,"history":[],"time_left_ms":60000}
+B> {"type":"action","action":"call"}
+E> {"type":"action_request","hand_id":3,"street":"flop","board":["Kd","7s","3c"],"pot":8,"my_bet":0,"opp_bet":4,"to_call":4,"my_stack":198,"opp_stack":196,"legal_actions":["fold","call","raise"],"min_raise":8,"max_raise":198,"raises_left":3,"history":[{"street":"preflop","actor":"me","action":"call","amount":2},{"street":"preflop","actor":"opp","action":"check"},{"street":"flop","actor":"opp","action":"raise","amount":4}],"time_left_ms":59900}
+B> {"type":"action","action":"fold"}
+# the loss: all 3 hole cards listed, opp_hole_cards and opp_discard null
+E> {"type":"hand_result","hand_id":3,"result":"fold","net":-2,"board":["Kd","7s","3c"],"my_hole_cards":["As","5d","9c"],"opp_hole_cards":null,"opp_discard":null,"history":[{"street":"preflop","actor":"me","action":"call","amount":2},{"street":"preflop","actor":"opp","action":"check"},{"street":"flop","actor":"opp","action":"raise","amount":4},{"street":"flop","actor":"me","action":"fold"}]}
+E> {"type":"match_end","reason":"complete"}

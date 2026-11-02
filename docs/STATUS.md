@@ -21,7 +21,7 @@ Rules: `docs/rules/` (`SUMMARY.md` first).
 | Build map C0 abstraction v1 contract + reference tree (`docs/cfr/ABSTRACTION_V1.md`, `docs/reports/TIER4.md`) | done, merged | `3296194` |
 | Build map X1 trait detectors (`bot/strategy/traits.py`, observe only) | done on `x/exploit-layer`, not merged | `ac6de87` |
 | G8 re-check of the fixed Tier 3 | **passed** (see below); upload candidate #5 | this update |
-| H Problem Statement / freeze | to do (**first thing once the Problem Statement is out**) | — |
+| H Problem Statement (1 Nov): filed, no rule changed, showdown = best 5 of 7 confirmed, worked examples 8.1–8.6 as tests (`tests/test_problem_statement.py`) | done (the final freeze, 13–15 Nov, is still to do) | see git log |
 
 Tests on Python 3.11 (`.venv`): fast suite 1063 passed, 2 skipped; slow suite 267 passed (21 min with
 `-n 3`) at Phase D (`accb344`). The runtime sandbox test passes (no xfail left).

@@ -1,9 +1,10 @@
 # Official rules: summary
 
 Source of truth: [rulebook.pdf](rulebook.pdf) and [protocol.pdf](protocol.pdf), both
-received 2026-10-28. The full **Problem Statement** (game rules with worked examples) is
-released **1 Nov 2026**. Where it conflicts with the Rulebook on the *game rules* (Rulebook
-section 4), the Problem Statement wins; on everything else the Rulebook wins (Rulebook 1.3).
+received 2026-10-28, and [problem_statement.pdf](problem_statement.pdf), released 1 Nov 2026
+(game rules with worked examples; it changes no rule above, checked 2 Nov). Where it conflicts with
+the Rulebook on the *game rules* (Rulebook section 4), the Problem Statement wins; on everything
+else the Rulebook wins (Rulebook 1.3, PS section 10).
 Values marked *(prov.)* are provisional and may change before the deadline.
 
 **Deadline: 15 Nov 2026, 23:59 IST.** One final bot per team, uploaded on Unstop.
@@ -19,7 +20,8 @@ Values marked *(prov.)* are provisional and may change before the deadline.
   still comes after the flop).
 - Turn (1 card), turn betting, river (1 card), river betting, showdown.
 - Showdown: the best 5-card hand from the 2 remaining hole cards plus the 5 board cards, standard
-  rankings. Our reading is that any 5 of the 7 count, as in Hold'em. To confirm on 1 Nov.
+  rankings. **Confirmed (PS section 6): any 5 of the 7 count, using both, one or none of the hole
+  cards** (a player can "play the board"; a split pot is net 0 each).
 - Minimum raise-to = `opp_bet + max(last bet/raise size this street, 2)`. With no bet yet the
   minimum is 2. The BB counts as the first raise preflop, so the first preflop minimum is 4.
 - Maximum raise = all-in, meaning the most either player can commit this street. If that is below
@@ -82,8 +84,10 @@ Values marked *(prov.)* are provisional and may change before the deadline.
 - Opponent actions arrive only in `history` (all voluntary actions this hand, oldest first).
 - Worked example: Protocol section 10 (bot on the button, net +12).
 
-## Still unknown (wait for the Problem Statement, 1 Nov)
+## Still open
 
-- The exact showdown rule (any 5 of 7?), edge cases and worked examples.
 - Final values of the provisional limits: RAM, time banks, per-reply limit, wall-clock kill and C.
-- The organisers' starter kit and its local match runner (Protocol 12 mentions it; we don't have it).
+- The organisers' starter kit and its local match runner (PS section 9 tells teams to use it; we
+  don't have it). Our stand-in is `lab/sparring/starter_bot.py`.
+
+The worked examples (PS section 8) are tests in `tests/test_problem_statement.py`.
