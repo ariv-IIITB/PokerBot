@@ -5,14 +5,14 @@ then merge into `main` and push. Tests on Python 3.11: `.venv/bin/python -m pyte
 
 ## Input
 
-The Problem Statement, released 1 Nov 2026: `/home/fioriv/Documents/finalpokerbot.pdf` (8 pages).
+The Problem Statement, released 1 Nov 2026: `docs/rules/problem_statement.pdf` (8 pages, already committed).
 Checked on 2 Nov: **it changes no rule.** Every rule matches `docs/rules/SUMMARY.md` and
 `variant/active.json`. It settles one open question: **at showdown each player uses the best 5 of the 7
 cards (both, one or none of the 2 hole cards).** Provisional limits are unchanged.
 
 ## Tasks
 
-1. **File it.** Copy the PDF to `docs/rules/problem_statement.pdf`.
+1. **Filed.** The PDF is already at `docs/rules/problem_statement.pdf`; nothing to do.
 2. **SUMMARY.md.** In "Game", replace "Our reading is that any 5 of the 7 count … To confirm on 1 Nov"
    with the confirmed rule (cite PS §6). Replace "Still unknown" with what is still open: final values
    of the provisional limits, and the organisers' starter kit match runner (PS §9 tells teams to use it;
