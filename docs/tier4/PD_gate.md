@@ -5,8 +5,8 @@ Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` "Gate
 different files). Seeds 12000+. `--processes` per README rule 3.
 
 **Compute:** this is the largest run set (step 0, 3 member head-to-heads, the 100-pair head-to-head, the pool locks
-on/off × 2 arms, the adversary, Stage 2 30 pairs × 1000 hands × 2 arms × 2 lock modes). If it runs too long,
-cut the Stage 2 run to 20 pairs before anything else.
+on/off × 2 arms, the adversary, Stage 2 30 pairs × 1000 hands × 2 arms × 2 lock modes). Every comparison uses the README's sequential
+test; the Stage 2 run is required (30 pairs, then sequential).
 
 The incumbent is the one PA named (`tier3x` if gate X passed, else `tier3`).
 

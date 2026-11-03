@@ -72,6 +72,25 @@ Gate R therefore compares Tier 3 with vs without the solver.
    The next session reads that note, not your transcript.
 9. If three fixes in a row fail, or a go/no-go says no, stop and write the handoff.
 
+## Aim: as close to optimal as the hard limits allow
+
+The only limits are the hard ones: the time bank (≤ 1.4 × Tier 3's bank use on the same machine, README rule 3), the
+5 s reply limit, 1 GB memory, the 5 MB zip, never crashing, and the competition deadline. Nothing else is capped for
+convenience. Concretely:
+
+- **Spend the safe time.** The 1.4 × ratio is a budget to use, not a ceiling to stay far below. Anything that gets
+  better with more time (the river solve, the discard) is tuned upward until the combined ratio reaches **1.35**
+  (0.05 kept as margin), and stops there.
+- **Tune by coordinate descent, not one pass.** Vary one parameter at a time around the current best, move to the
+  best point, repeat until no single change improves by > 1 SE; then a full 3 × 3 grid on the two most sensitive
+  parameters around the best. Every kept point is confirmed on fresh seeds.
+- **Sequential tests instead of fixed small samples.** A comparison starts at 30 pairs and adds 30 more at a time
+  until |z| ≥ 2.5 or 200 pairs; decide on the combined total. Confirmation runs are separate fresh seeds.
+- **Nothing is optional.** Every piece is built and tested; its gate decides KEEP or DROP. A piece is dropped only by
+  failing its gate, or by the slip rule when the deadline gets close.
+- **Hard limits stay hard.** Two things are out because they can't work, not to save time: solving earlier streets
+  live (no value estimate for the depth limit) and IS-based strategy selection (no statistical power in 400 hands).
+
 ## User checkpoints
 
 The user reviews only the go/no-go handoffs: **PA** (gate X), **RA** (GO/NO-GO), **DB** part 1 (is there
@@ -109,6 +128,6 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 This README is the source of truth for the slip order (it replaces the one in `TIER4_PLAN.md`). I1's retry rule is in
 `I1_integrate.md`.
 
-If time runs short, drop in this order: RC's restricted p → DC → DB's learned rule (keep its measurements) → R entirely.
+If the deadline gets close, drop in this order: RC's restricted p → DC → DB's learned rule (keep its measurements) → R entirely.
 P and DA are not optional. If gate P fails, PD's handoff says so, and I1 ships the incumbent (`tier3x` if gate X
 passed, else `tier3`) plus any D and R KEEPs.
