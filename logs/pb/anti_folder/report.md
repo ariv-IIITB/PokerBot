@@ -4,3 +4,10 @@
 centre x_bluff_max=0.6, x_river_bluff_mult=2.5, x_vo_margin=0.12: d_new_exploiter -0.75±0.21, d_conv_opp3 -1.07±0.31, d_new_rules -0.28±0.20 | sum -2.10
 | parameter | value | sum diff vs centre ± SE | z |
 |---|---|---|---|
+| x_bluff_max | 0.45 | -1.04 ± 0.60 | -1.7 |
+| x_bluff_max | 0.75 | +0.00 ± 0.60 | +0.0 |
+| x_river_bluff_mult | 1.5 | -0.83 ± 0.63 | -1.3 |
+| x_river_bluff_mult | 3.5 | -0.58 ± 0.60 | -1.0 |
+| x_vo_margin | 0.06 | -0.23 ± 0.58 | -0.4 |
+| x_vo_margin | 0.18 | -0.25 ± 0.60 | -0.4 |
+**no move**: best candidate x_bluff_max=0.75 diff +0.00, z +0.0 <= 1
