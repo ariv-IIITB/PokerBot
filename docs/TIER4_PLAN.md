@@ -1,5 +1,7 @@
 # Tier 4 plan (v5, 2026-11-02, after four santa review rounds)
 
+**Running it:** this plan is split into one-session sub-plans in `docs/tier4/` (start with `docs/tier4/README.md`).
+
 At `main` = `795e3a0`. Build on a branch **`tier4/main` cut from `origin/x/exploit-layer`** (`43df7e8`: X1 traits,
 X2 type posterior, X3 λ-layer `tier3x`; not merged into `main`). First commit on it: merge `main` (brings this
 plan, `PHASE_H_PLAN.md` and the Problem Statement). Phase H runs in parallel in a Sonnet session; merge `main` again
