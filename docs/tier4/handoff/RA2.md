@@ -13,7 +13,7 @@ Files changed: `bot/strategy/river_solver.py`, `lab/river_bench.py`, `tests/test
 | 20 ms | 402, 0.0091 ± 0.0008 (0.0085) | **326, 0.0057 ± 0.0006 (0.0046)** | 64 |
 | 40 ms | 892, 0.0079 ± 0.0007 (0.0068) | **730, 0.0038 ± 0.0005 (0.0028)** | 64 |
 | 80 ms | 1888, 0.0076 ± 0.0007 (0.0065) | **1114, 0.0030 ± 0.0004 (0.0019)** | 96 |
-Ranges cost 3.0 ms of the box (inference 2.5 + ranks 0.5): 226 passes would fit in 10 ms if they were free.
+**Full ranges (990/903 combos), medians: their range 2.5 ms (p90 3.2) + ranks 0.5 ms + setup 0.5 ms (48 buckets) / 0.6 (64) / 0.9 (96) = ~3.6 ms; no sampling needed.** Our range here is uniform (free); RB's own-range build is extra.
 
 ## Steps (kept / dropped)
 1. Ranks: one evaluation per combo + last-board cache (0.63 → 0.48 ms cold, 0.06 warm). Bucket kernel without `np.add.at`
