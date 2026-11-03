@@ -13,8 +13,7 @@ Files changed: `bot/strategy/river_solver.py`, `lab/river_bench.py`, `tests/test
 | 20 ms | 402, 0.0091 ± 0.0008 (0.0085) | **326, 0.0057 ± 0.0006 (0.0046)** | 64 |
 | 40 ms | 892, 0.0079 ± 0.0007 (0.0068) | **730, 0.0038 ± 0.0005 (0.0028)** | 64 |
 | 80 ms | 1888, 0.0076 ± 0.0007 (0.0065) | **1114, 0.0030 ± 0.0004 (0.0019)** | 96 |
-Each +10 ms of box buys little at 10 → 20 ms (0.98 → 0.57 %), then 0.38 % (40 ms), 0.30 % (80 ms). Ranges cost 3.0 ms of the box
-(inference 2.5 + ranks 0.5): 226 passes would fit in 10 ms if they were free.
+Ranges cost 3.0 ms of the box (inference 2.5 + ranks 0.5): 226 passes would fit in 10 ms if they were free.
 
 ## Steps (kept / dropped)
 1. Ranks: one evaluation per combo + last-board cache (0.63 → 0.48 ms cold, 0.06 warm). Bucket kernel without `np.add.at`
@@ -28,8 +27,7 @@ Each +10 ms of box buys little at 10 → 20 ms (0.98 → 0.57 %), then 0.38 % (4
    worse). DROPPED, code removed.
 7. Reuse in a hand: 17 % of river decisions are second ones, already easy (0.005 vs 0.011 at 10 ms); only the ranks cache
    is reused. No regret reuse.
-+ float64 in `auto`: float32 is no faster here and hits denormals on 5–8 % of spots (up to 3.4× per pass; 0.3–1.7 outliers
-  at 10 ms with 96–128 buckets).
++ float64 in `auto`: float32 is no faster here and hits denormals on 5–8 % of spots (up to 3.4× per pass).
 
 ## For RB
 * Call `solve_river(..., auto=True, cfg=TreeCfg(bet_sizes=(1.0, INF), raise_sizes=(1.0, INF)))`: it picks float64, drops
