@@ -1,8 +1,12 @@
 # RC: gate R and the restricted river (Sonnet for the gate; Opus if you build the restricted part)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §R (restricted, accounting, gate R),
-handoffs `RA.md`, `RB.md`, `S0.md`. Branch `tier4/r`. Files: the R row of the README's ownership table. Seeds 30000+.
+handoffs `RA.md`, `RA2.md`, `RB.md`, `S0.md`. Branch `tier4/r`. Files: the R row of the README's ownership table. Seeds 30000+.
 `--processes` per README rule 3.
+
+## Step 0
+Merge RA2's branch (named in `handoff/RA2.md`) into RB's branch. RA2 kept `solve_river`'s API, so this should be
+clean; run the fast suite and RA's bench once after the merge.
 
 ## Tasks
 1. **Accounting SE:** extend `lab/opps/accounting.py` (or `lab.eval --report accounting`) to report each bucket's
