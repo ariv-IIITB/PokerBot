@@ -1,4 +1,4 @@
-# PC: selection, bail-out, stop-loss, adversary bot (Opus, ~1 day)
+# PC: selection, bail-out, stop-loss, adversary bot (Opus, cloud)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §P2, `docs/tier4/handoff/PA.md`, and on
 the branch `bot/strategy/traits.py` (X1) and `bot/strategy/types.py` (X2).

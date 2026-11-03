@@ -1,4 +1,4 @@
-# RA: river solver spike (Opus, ~1 day, go/no-go)
+# RA: river solver spike (Opus, cloud, go/no-go)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §R (budget, R0, ranges), `bot/timing.py`,
 `bot/sim/inference.py` (`log_weights`), `lab/cfr/exact.py` (the reference solver). Branch `tier4/r` from

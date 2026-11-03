@@ -1,4 +1,4 @@
-# PA: gate X and `tier4p` with forced members (Opus, laptop, ~1 day)
+# PA: gate X and `tier4p` with forced members (Opus, laptop)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §P (P0a, P1 only), and on
 `tier4/base`: `bot/brains/exploit.py`, `bot/brains/tier3x.py`, `docs/reports/TRACK_X.md` (X2/X3 sections).

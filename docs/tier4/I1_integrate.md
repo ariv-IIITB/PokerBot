@@ -1,4 +1,4 @@
-# I1: integrate and decide what ships (Opus, Mon 9–Tue 10)
+# I1: integrate and decide what ships (Opus, laptop, last)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, the final handoffs `PD.md`, `DC.md`, `RC.md` (and `RA.md` if R
 stopped at the spike). Don't read the other sub-plans unless a handoff leaves a question open.
@@ -16,7 +16,7 @@ Level within noise means `tier3` ships.
 3. **Combined gates** (the pieces were tested alone; now together):
    - combined timing at 2× slower, 400/60 s and 1000/150 s, vs calling_station and trapper: ≤ 50 % of the bank;
      deadline hits ≤ baseline + 2√baseline; `lab.memory_check` < 500 MB;
-   - best candidate vs the incumbent as shipped today (`tier3` on `main`): head-to-head 100 pairs, score ≥ 0.5 + 2 SE
+   - best candidate vs the incumbent as currently shipped (`tier3` on `main`): head-to-head 100 pairs, score ≥ 0.5 + 2 SE
      to call it an improvement; training pool two-part KEEP; a Stage 2 run (1000 hands, 30 pairs).
    **Retries, at most 2.** Retry 1 drops the piece the failing gate points at (if unclear, the next in slip order:
    R's restricted p → DC → DB's learned rule → R entirely → `tier4p`'s portfolio), and re-runs only the failing gate.

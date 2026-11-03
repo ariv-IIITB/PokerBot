@@ -7,9 +7,8 @@ README, **its own sub-plan** and the handoff notes it lists. Nothing else unless
 ## Streams
 
 ```
-            Tue 3        Wed 4        Thu 5        Fri 6        Sat 7        Sun 8        Mon 9      Tue 10
 S  shared   S0 ──► recordings + score script (others need them only at their gates)
-P  portfolio PA ──► PB tuning (night) ─┐
+P  portfolio PA ──► PB tuning ─────────┐
                     PC selection ──────┴► PD gate P ─────►
 D  discard  DA rollouts + retune ─────────────────────┐
             (after S0) DB learn their rule ──────────┴► DC our discard ──►
@@ -32,9 +31,9 @@ Sub-plan IDs use letters so they don't clash with the section labels (P0–P4, D
 | **RA** | `RA_spike.md`: solver + ranges, speed and exploitability | R0 | `tier4/r` | — | — | Opus, cloud |
 | **RB** | `RB_integrate.md`: solver in Tier 3's river behind a flag, own range, timing | R1 | `tier4/r` | RA (go) | — | Opus, laptop |
 | **RC** | `RC_gate.md`: accounting SE, gate R, restricted p | gate R, restricted p | `tier4/r` | RB | S0 | Sonnet, laptop |
-| **I1** | `I1_integrate.md`: merge P + D + R, combined gates, held-out, package | Mon 9–Tue 10 | `tier4/main` | PD, DC, RC | — | Opus, laptop |
+| **I1** | `I1_integrate.md`: merge P + D + R, combined gates, held-out, package | last | `tier4/main` | PD, DC, RC | — | Opus, laptop |
 
-**Day 1 (Tue 3) runs four sessions at once: S0 and PA on the laptop, DA and RA in the cloud.** After that, a session starts as soon as its
+**First, four sessions run at once: S0 and PA on the laptop, DA and RA in the cloud.** After that, a session starts as soon as its
 "needs before starting" are pushed. "Needs before its gate" only blocks the final measurement, not the code.
 PB and PC run at the same time (different files).
 
@@ -117,6 +116,6 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 This README is the source of truth for the slip order (it replaces the one in `TIER4_PLAN.md`). I1's retry rule is in
 `I1_integrate.md`.
 
-If a day slips, drop in this order: RC's restricted p → DC → DB's learned rule (keep its measurements) → R entirely.
+If time runs short, drop in this order: RC's restricted p → DC → DB's learned rule (keep its measurements) → R entirely.
 P and DA are not optional. If gate P fails, PD's handoff says so, and I1 ships the incumbent (`tier3x` if gate X
 passed, else `tier3`) plus any D and R KEEPs.
