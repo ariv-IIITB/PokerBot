@@ -1,0 +1,8 @@
+tier3-nolock vs d_conv_opp3-nolock: -1.39 ± 0.38 chips/hand | match score 0.350 ± 0.062 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 153.6s (156/s)
+tier3-nolock vs d_new_rules-nolock: -0.98 ± 0.24 chips/hand | match score 0.367 ± 0.063 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 51.0s (470/s)
+tier3-nolock vs d_new_lag-nolock: +5.95 ± 0.44 chips/hand | match score 0.917 ± 0.036 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 93.9s (256/s)
+tier3-nolock vs d_new_trapper-nolock: +0.28 ± 0.20 chips/hand | match score 0.617 ± 0.063 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 131.7s (182/s)
+tier3-nolock vs d_new_exploiter-nolock: -1.17 ± 0.28 chips/hand | match score 0.300 ± 0.060 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 266.1s (90/s)
+tier3-nolock vs d_new_minraise-nolock: -0.04 ± 0.16 chips/hand | match score 0.500 ± 0.065 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 71.3s (337/s)
+tier3-nolock vs tier1-nolock: +1.52 ± 0.37 chips/hand | match score 0.733 ± 0.058 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 135.4s (177/s)
+tier3-nolock vs tier2-nolock: +1.54 ± 0.35 chips/hand | match score 0.383 ± 0.063 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 96.6s (248/s)

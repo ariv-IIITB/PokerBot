@@ -1,0 +1,18 @@
+start smart-on (Tier 3 values) vs plain tier3 same seeds: +0.72 ± 1.26
+round 1 re68-68-70-74_cm2 vs re70-68-70-74_cm2: +0.33 ± 1.21 (z +0.3)
+round 1 re72-68-70-74_cm2 vs re70-68-70-74_cm2: -0.27 ± 1.23 (z -0.2)
+round 1 re70-66-70-74_cm2 vs re70-68-70-74_cm2: +0.44 ± 1.23 (z +0.4)
+round 1 re70-70-70-74_cm2 vs re70-68-70-74_cm2: -0.37 ± 1.24 (z -0.3)
+round 1 re70-68-68-74_cm2 vs re70-68-70-74_cm2: +1.47 ± 1.24 (z +1.2)
+round 1 re70-68-72-74_cm2 vs re70-68-70-74_cm2: +0.75 ± 1.21 (z +0.6)
+round 1 re70-68-70-72_cm2 vs re70-68-70-74_cm2: +0.37 ± 1.21 (z +0.3)
+round 1 re70-68-70-76_cm2 vs re70-68-70-74_cm2: +1.33 ± 1.30 (z +1.0)
+start smart-on (Tier 3 values) vs plain tier3 same seeds: +0.72 ± 1.26
+round 1 re68-68-70-74_cm2 vs re70-68-70-74_cm2: +0.33 ± 1.21 (z +0.3)
+round 1 re72-68-70-74_cm2 vs re70-68-70-74_cm2: -0.27 ± 1.23 (z -0.2)
+round 1 re70-66-70-74_cm2 vs re70-68-70-74_cm2: +0.44 ± 1.23 (z +0.4)
+round 1 re70-70-70-74_cm2 vs re70-68-70-74_cm2: -0.37 ± 1.24 (z -0.3)
+round 1 re70-68-68-74_cm2 vs re70-68-70-74_cm2: +1.47 ± 1.24 (z +1.2)
+round 1 re70-68-72-74_cm2 vs re70-68-70-74_cm2: +0.75 ± 1.21 (z +0.6)
+round 1 re70-68-70-72_cm2 vs re70-68-70-74_cm2: +0.37 ± 1.21 (z +0.3)
+round 1 re70-68-70-76_cm2 vs re70-68-70-74_cm2: +1.33 ± 1.30 (z +1.0)
