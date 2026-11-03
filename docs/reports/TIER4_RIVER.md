@@ -128,3 +128,57 @@ equals the exact kernel with one combo per bucket, `auto` exact below the bucket
 deadline respected, exploitability < 3 % after 300 passes). Fast suite 1314 passed, 2 skipped; `test_timing_slow.py` 10 passed.
 Caveats: the first solve in a process runs a few passes slower (cold arrays); times are on this laptop, the server is ~2×
 slower, so the 10 ms row is the 20 ms server box. Our hand's strategy is its bucket's, as before.
+
+## RC: the solver in Tier 3's river, gate R (stage 1; the restricted river is NOT done)
+
+Machine: Intel Core Ultra 5 225H, nproc 14, shared with PB/DA evals (turnstile + laptop lock), Python 3.11.
+
+**What changed.** RB's hook now calls `solve_river(..., auto=True, cfg=TreeCfg(bet_sizes=(1.0, INF), raise_sizes=(1.0, INF)))` on the
+**full** ranges (990 / 903 combos): the 300-combo sampling and the 150-pass cap are gone (`river_combos`, `river_buckets`
+removed; `river_max_iters` is back as a lab-only knob, default 0 = no cap). Per-decision costs on 40 recorded spots, laptop speed, median
+(p90): their range 1.9 ms (2.4), our own range 1.3 ms (1.8), ranks 0.45 ms, so ~3.6 ms before the solve: RB's own-range build is not a
+bottleneck and was not optimised. Every spot got >= 20 passes in a 10 ms box (median 124 passes at 10 ms, 314 at 20 ms, 747 at 40 ms).
+`lab/rc_range_bench.py`. No start-up dummy solve: the cold first solve costs a few passes once per match.
+
+**Time box (the 2x-slower stand-in, `lab/rc_ratio.py`).** Same as `tests/test_river_timing.py`: the lab engine charges every second twice and
+the wall-clock box is halved. `lab.timing_bench` can't carry a brain config over its subprocess path (a first run with `tier3:{...}` silently
+ran plain Tier 3), so the harness is used. Bank use flag on / flag off (400 hands; calling_station / trapper): box = mult x budget, mult 3 -> x1.19 / x1.21,
+3.5 -> x1.27 / x1.29, 4 -> x1.34 / x1.37; the ceiling (`river_budget_s`) never binds at 40 ms or 80 ms, the multiplier does. **Shipped values:
+`river_box_mult` 3.9, `river_budget_s` 0.040** (RB had 4.0 / 0.020). Hard deadline unchanged (the box stays < max(80 ms, 6 x budget) and
+the hard limit is >= 2 x box; `tests/test_river_hook.py`). Final check on the final code, 1000 hands: **x1.328 (31 % of bank) and x1.288 (19 %)**,
+deadline hits 0 -> 0, emergency 0, worst reply 25 ms, 142 / 121 passes, 0 fallbacks. Not past the 1.35 target, below 1.4.
+The curve above 40 ms (laptop speed) is flat (RA2), so the box is not raised further.
+
+**Margin check (task A, `lab/rc_margin.py`, shipped config, 2x stand-in, exclusive lock).** River decisions, 400 hands, calling_station / trapper:
+wall time p50 10.5 ms, p99 10.5-10.6 ms, max 10.7 ms (x2: 21.3 ms) against a hard limit of 80 ms: **max / limit 0.13 (x2: 0.27) <= 0.5, no change
+to the hard limit.** (Non-river decisions: max 20.6 ms wall, 41 ms x2 = 0.52 of 80 ms once, on calling_station: a Tier 3 discard/flop spike, baseline code, not the solver.)
+
+**Gate R** (flag on vs plain `tier3`, seeds 30000-30049, 50 pairs per point, discard_holdem). The ON arm pins the solve by passes
+(`river_max_iters` 110, ceiling 80 ms) instead of the halved wall-clock box. Reason: under the gate's CPU contention (6 + other sessions' processes, nice)
+the wall-clock box fell back to Tier 3's river on **56 %** of river decisions (2 pairs vs conv_opp3: 325 solves, 420 no-pass + 52 few-pass fallbacks, median 45 passes).
+Those outputs are kept in `logs/rc/gate_walltime_invalid/` and not used. Pinned arm fire check: 722 solves, 0 fallbacks, 110 passes. 110 = what the unloaded
+2x-stand-in runs give (100-140). So **gate R tests the solver at its unloaded 2x-server behaviour; under heavy contention the shipped time box falls back to
+Tier 3's river on a large share of decisions (safe, no gain).**
+
+| item | result | |
+|---|---|---|
+| head to head vs `tier3`, score >= 0.5 - 2 SE | 0.490 +- 0.050 over 100 matches (bar 0.40); chips -0.00 +- 0.02 | PASS |
+| training pool, chips, locks off (sum up, no bot down > 2 SE) | sum +0.27 +- 0.50; conv_opp3 +0.43 +- 0.20 (z +2.1), exploiter +0.04 +- 0.26, lag -0.06 +- 0.27, minraise -0.06 +- 0.13, rules -0.05 +- 0.15, trapper -0.03 +- 0.16 | PASS |
+| training pool, match score, locks on (not lower by > 2 SE) | 0.623 -> 0.643, +0.020 +- 0.021 (z +0.9) | PASS |
+| combined river buckets better by > 2 SE vs conv_opp3 and exploiter | conv_opp3 +0.497 +- 0.270 (z +1.8); exploiter +0.084 +- 0.270 (z +0.3) | **FAIL** |
+| timing ratio <= 1.4 | x1.33 / x1.29 at 1000 hands (above) | PASS |
+
+By the letter gate R = FAIL; `t3_river_solver` stays off in `DEFAULTS`. **Own-range caveat (RB's sensitivity check): 20 % of spots move the solver's EV
+by more than 0.20 pot depending on our assumed range (mean 0.146 +- 0.022 pot).** The range our line implies is the weakest input.
+
+**Extension** (manager's request, only the two bots that decide the failing item; fresh seeds 30100-30149, locks off, 50 pairs, final code):
+chips conv_opp3 -1.30 -> -1.38 (-0.08 +- 0.21), exploiter +6.03 -> +5.89 (-0.14 +- 0.25). River-all difference: conv_opp3 -0.121 +- 0.266 (z -0.5), exploiter -0.015 +- 0.261 (z -0.1).
+Pooled over all 100 pairs (equal weights): conv_opp3 +0.188 +- 0.189 (z +1.0), exploiter +0.035 +- 0.188 (z +0.2). The first 50 pairs' lead on conv_opp3 does not repeat.
+
+**Task B (middle rung in `Bot.choose`).** Tier 3 at budget 0 (solver on; 5,700 decisions over 3 opponents, 400 hands each): p50/p99/max ms preflop 0.05/0.19/12.7 (cold),
+flop 1.19/1.47/19.6 (cold), turn 1.27/1.66/1.88, river 1.53/2.04/2.33, discard 0.88/1.13/1.24; 0 illegal actions, 0 exceptions (`lab/rc_budget0.py`).
+So on a deadline hit or a brain exception `choose` now asks the brain again at budget 0 under a 30 ms deadline (`RETRY_DEADLINE_S`) and only then plays Tier 0; emergency
+mode still goes straight to Tier 0. Counters `deadline_retries` / `retry_wins` (in the stderr summary). Tests in `tests/test_main.py`. The retry runs on a brain that was
+interrupted mid-decision; any exception from that goes to Tier 0.
+
+Restricted river (RNR, task 3): not built. Gate R failed, so there is nothing to build on.
