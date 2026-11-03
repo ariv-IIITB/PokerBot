@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_value","members":{"anti_value":{"av_raise_fold_eq":0.9,"x_vo_margin":0.18}}}]-nolock vs d_new_minraise-nolock: +0.59 ± 0.17 chips/hand | match score 0.650 ± 0.062 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 66.1s (363/s)
