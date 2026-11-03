@@ -1,7 +1,7 @@
 # RB handoff: the river solver inside Tier 3
 
 **Done, flag off by default.** Branch `claude/subplan-xx-execution-g00q9v` (assigned instead of `tier4/r`; built on RA's branch
-`claude/zen-ptolemy-4w0rqi`, since `tier4/r` doesn't exist). Commit: see `git log -1` on the branch. Machine: Intel Xeon @ 2.10 GHz, nproc 4, Py 3.11.
+`claude/zen-ptolemy-4w0rqi`, since `tier4/r` doesn't exist). Code commit `4537708`. Machine: Intel Xeon @ 2.10 GHz, nproc 4, Py 3.11.
 Step 0: RA's GO holds here: 64 buckets, 1 / all-in tree, **136 passes median in a 20 ms box** (81 % of spots >= 100; bar 100).
 
 ## What it is
