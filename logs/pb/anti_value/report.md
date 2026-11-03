@@ -19,3 +19,13 @@ centre x_vo_margin=0.12, av_raise_fold_eq=0.7: d_new_minraise +0.62±0.15, d_new
 | av_raise_fold_eq | 0.6 | -0.48 ± 0.37 | -1.3 |
 | av_raise_fold_eq | 0.8 | +0.68 ± 0.38 | +1.8 |
 **move** av_raise_fold_eq -> 0.8 (diff +0.68, z +1.8)
+
+### Descent round 3 (seeds 51360-51389, 30 pairs, locks off)
+centre x_vo_margin=0.12, av_raise_fold_eq=0.8: d_new_minraise +0.38±0.15, d_new_trapper +1.98±0.24 | sum +2.36
+| parameter | value | sum diff vs centre ± SE | z |
+|---|---|---|---|
+| x_vo_margin | 0.06 | -0.27 ± 0.40 | -0.7 |
+| x_vo_margin | 0.18 | -0.40 ± 0.41 | -1.0 |
+| av_raise_fold_eq | 0.7 | -0.55 ± 0.38 | -1.5 |
+| av_raise_fold_eq | 0.9 | +0.12 ± 0.37 | +0.3 |
+**no move**: best candidate av_raise_fold_eq=0.9 diff +0.12, z +0.3 <= 1
