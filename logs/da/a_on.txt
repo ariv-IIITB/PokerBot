@@ -1,0 +1,8 @@
+tier3[{"smart_rollout_discard":true}] vs d_conv_opp3: -1.27 ± 0.23 chips/hand | match score 0.500 ± 0.065 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 303.6s (79/s)
+tier3[{"smart_rollout_discard":true}] vs d_new_rules: -1.06 ± 0.22 chips/hand | match score 0.533 ± 0.065 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 112.9s (213/s)
+tier3[{"smart_rollout_discard":true}] vs d_new_lag: +0.15 ± 0.06 chips/hand | match score 0.967 ± 0.023 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 76.1s (315/s)
+tier3[{"smart_rollout_discard":true}] vs d_new_trapper: -0.36 ± 0.21 chips/hand | match score 0.700 ± 0.060 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 367.5s (65/s)
+tier3[{"smart_rollout_discard":true}] vs d_new_exploiter: -1.48 ± 0.23 chips/hand | match score 0.433 ± 0.065 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 468.7s (51/s)
+tier3[{"smart_rollout_discard":true}] vs d_new_minraise: -0.24 ± 0.15 chips/hand | match score 0.833 ± 0.049 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 118.0s (203/s)
+tier3[{"smart_rollout_discard":true}] vs tier1: -0.57 ± 0.23 chips/hand | match score 0.717 ± 0.059 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 230.1s (104/s)
+tier3[{"smart_rollout_discard":true}] vs tier2: +0.33 ± 0.03 chips/hand | match score 0.633 ± 0.063 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 148.0s (162/s)
