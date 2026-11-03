@@ -84,8 +84,10 @@ convenience. Concretely:
 - **Tune by coordinate descent, not one pass.** Vary one parameter at a time around the current best, move to the
   best point, repeat until no single change improves by > 1 SE; then a full 3 × 3 grid on the two most sensitive
   parameters around the best. Every kept point is confirmed on fresh seeds.
-- **Sequential tests instead of fixed small samples.** A comparison starts at 30 pairs and adds 30 more at a time
-  until |z| ≥ 2.5 or 200 pairs; decide on the combined total. Confirmation runs are separate fresh seeds.
+- **Light testing (user, 2026-11-03): build near-optimal, test lightly.** Tuning points 30 pairs, descent capped at 3
+  rounds. A KEEP is one fresh-seed run of 50 pairs with the two-part rule; no sequential extension, no Stage 2 runs
+  except I1's final check. Timing: one `lab.timing_bench` ratio check per brain change (a hard limit, never skipped);
+  no slow suite; fast suite once before each push. Gate X is not redone (cloud result stands: incumbent `tier3x`).
 - **Nothing is optional.** Every piece is built and tested; its gate decides KEEP or DROP. A piece is dropped only by
   failing its gate, or by the slip rule when the deadline gets close.
 - **Hard limits stay hard.** Two things are out because they can't work, not to save time: solving earlier streets
