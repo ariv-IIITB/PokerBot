@@ -29,6 +29,17 @@ clean; run the fast suite and RA's bench once after the merge.
 4. On a PASS, set `t3_river_solver` on (and `t3_river_rnr` if it passed) in Tier 3's `DEFAULTS`, regenerate
    `bot/embedded.py`. Record everything in `docs/reports/TIER4_RIVER.md`. Fast suite and slow timing green, push.
 
+5. **Hard-limit margin (user-approved 2026-11-04; run after the gate evals finish, never edit `bot/` while they run).** Shipped
+   config, unloaded, 2× clock harness, exclusive lock: wall time of every river decision (p50/p99/max) against its hard limit
+   (`TimeManager.hard_limit`: min(max(0.08, 6 × budget), 1.5 s, 0.3 × reply, 0.25 × bank_left)). Require max ≤ 0.5 × the limit;
+   if not, raise the hard limit for river decisions within the existing caps.
+6. **Middle fallback rung.** Today `Controller.choose` (`bot/main.py`) falls to Tier 0 (check, else FOLD) on a hard-deadline hit,
+   an escaped exception or emergency mode; hard-deadline warnings do occur under CPU load (seen in the gate logs). On DeadlineExceeded
+   or a brain Exception (not emergency): retry once with `brain.decide(state, legal, 0.0)` under a ~30 ms hard deadline, then Tier 0.
+   First confirm Tier 3 at budget 0 skips rollouts and the solver and returns a legal sensible action in < 10 ms; if not, report that
+   and build nothing. Counter `deadline_retries` in the stats line. Tests: deadline → retry used; retry also fails → Tier 0;
+   emergency → Tier 0 directly; nothing ever raises out of `choose`. Fast suite once, one timing ratio check.
+
 ## Done when
 - `docs/tier4/handoff/RC.md`: gate R PASS/FAIL per item with numbers; the restricted part KEEP / DROP / skipped; final
   flag defaults; the commit. This is the R stream's final note for I1.

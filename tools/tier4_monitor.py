@@ -19,6 +19,7 @@ PLAN = {
     "RA2": ("tier4/r", ["tier4/r"], ["RA"]),
     "RB": ("tier4/r", ["tier4/r"], ["RA"]),
     "RC": ("tier4/r", ["tier4/r"], ["RB", "RA2"]),
+    "PF": ("tier4/pf", ["tier4/r"], ["RC"]),
     "I1": ("tier4/main", ["tier4/p", "tier4/d", "tier4/r"], ["PD", "DC", "RC"]),
 }
 

@@ -15,7 +15,7 @@ Level within noise means `tier3` ships.
    `tier4p` (its members inherit D's and R's changes through Tier 3).
 3. **Combined gates** (the pieces were tested alone; now together):
    - combined timing, 400/60 s and 1000/150 s, vs calling_station and trapper: README rule 3's ratio (≤ 1.4 × Tier 3);
-     deadline hits ≤ baseline + 2√baseline; `lab.memory_check` < 500 MB;
+     deadline hits ≤ baseline + 2√baseline; `lab.memory_check` < 500 MB with the river solver on (the old 43 MB figure was Tier 3 without it); `lab.fuzz --subprocess --hands 2000` on the final package;
    - best candidate vs the incumbent as currently shipped (`tier3` on `main`): head-to-head 100 pairs, score ≥ 0.5 + 2 SE
      to call it an improvement; training pool two-part KEEP; a Stage 2 run (1000 hands, 30 pairs, then sequential). All comparisons use the README's sequential test.
    **Retries, at most 2.** Retry 1 drops the piece the failing gate points at (if unclear, the next in slip order:

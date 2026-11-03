@@ -33,6 +33,7 @@ Sub-plan IDs use letters so they don't clash with the section labels (P0–P4, D
 | **RA2** | `RA2_exact.md`: solver as close to exact as the box allows (cheaper ranges, better buckets, card removal, exact when small, DCFR, reuse) | R0 (accuracy) | own branch from `tier4/r` | RA | — | Opus, cloud |
 | **RB** | `RB_integrate.md`: solver in Tier 3's river behind a flag, own range, timing | R1 | `tier4/r` | RA (go) | — | Opus, cloud |
 | **RC** | `RC_gate.md`: merge RA2 into RB's branch, accounting SE, gate R, restricted p | gate R, restricted p | `tier4/r` | RB + RA2 | S0 | Sonnet, cloud |
+| **PF** | `PF_preflop.md`: offline preflop chart behind a flag (go/no-go first; user-approved 2026-11-04) | new | `tier4/pf` | RC | — | Sonnet, local |
 | **I1** | `I1_integrate.md`: merge P + D + R, combined gates, held-out, package | last | `tier4/main` | PD, DC, RC | — | Opus, cloud |
 
 **First, four sessions run at once: S0, PA, DA and RA.** After that, a session starts as soon as its
@@ -106,7 +107,7 @@ prerequisite has pushed its handoff.
 | S0 | `lab/opps/record.py`, `lab/opps/score_compare.py` (new), `logs/records/` |
 | P | `bot/brains/tier4p.py` (new), `bot/brains/tier4p_select.py` (new, PC), `bot/brains/exploit.py`, `bot/main.py` (the registry line only), `lab/eval.py` (`LOCK_BRAINS` only), `lab/sparring/adversary.py` (new), `tests/test_tier4p*.py`, `tests/test_timing_slow.py`, `docs/reports/TIER4P.md` |
 | D | `bot/sim/rollout.py`, `bot/sim/inference.py`, `bot/sim/discard.py`, `bot/config/tier3.json` (new: D's tuned Tier 3 values), `lab/opps/discard_rules.py` (new), `tests/test_discard_*.py`, `docs/reports/TIER4_DISCARD.md` |
-| R | `bot/strategy/river_solver.py` (new; RA2 only, once RA2 starts), `bot/strategy/own_range.py` (new), `bot/brains/tier3.py`, `bot/timing.py`, `lab/opps/accounting.py`, `lab/river_bench.py` (new), `tests/test_river_*.py`, `docs/reports/TIER4_RIVER.md` |
+| R | `bot/strategy/river_solver.py` (new; RA2 only, once RA2 starts), `bot/strategy/own_range.py` (new), `bot/brains/tier3.py`, `bot/timing.py`, `bot/main.py` (`Controller.choose` only, for RC's fallback fix), `lab/opps/accounting.py`, `lab/river_bench.py` (new), `tests/test_river_*.py`, `docs/reports/TIER4_RIVER.md` |
 | I | merges only; `docs/STATUS.md`, `docs/SUBMISSIONS.md` |
 
 Not ours: `bot/cfr/`, `lab/cfr/fast/` and `docs/reports/TIER4.md` (the teammate's CFR, Tier 5).
@@ -125,6 +126,7 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 | 30000–30999 | RC gate R |
 | 40000–40999 | I1 (incl. held-out `--final`) |
 | 50000–50999 | GX: gate X redo on the laptop |
+| 60000–60999 | PF preflop chart |
 | 51000–51999 | PB redo (laptop) tuning; 52000–52999 its confirmations |
 | 53000–53999 | DA redo (laptop) tuning; 54000–54999 its confirmations |
 
@@ -133,6 +135,6 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 This README is the source of truth for the slip order (it replaces the one in `TIER4_PLAN.md`). I1's retry rule is in
 `I1_integrate.md`.
 
-If the deadline gets close, drop in this order: RC's restricted p → DC → DB's learned rule (keep its measurements) → R entirely.
+If the deadline gets close, drop in this order: PF → RC's restricted p → DC → DB's learned rule (keep its measurements) → R entirely.
 P and DA are not optional. If gate P fails, PD's handoff says so, and I1 ships the incumbent (`tier3x` if gate X
 passed, else `tier3`) plus any D and R KEEPs.
