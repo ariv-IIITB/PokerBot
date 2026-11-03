@@ -11,7 +11,6 @@ ev() {  # out locks pairs brain pool report
   flock /tmp/pokerbot_turnstile.lock true
   flock -s /tmp/pokerbot_laptop.lock nice -n 15 .venv/bin/python -m lab.eval "$4" --pool $5 --pairs $3 --first-seed $SEED \
       --locks $2 --processes 6 --report $6 --out "$1.tmp" > /dev/null 2> "$1.err" && mv "$1.tmp" "$1"
-  git add "$1" 2>/dev/null; git commit -qm "RC gate R: $(basename $1)" 2>/dev/null || true
 }
 # 1. head to head (locks on, the match score)
 ev $D/h2h_on.txt on $PAIRS "$ON" tier3 stats
