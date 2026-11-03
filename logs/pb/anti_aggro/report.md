@@ -35,3 +35,11 @@ centre aa_call_margin=-0.03, aa_mdf_mult=1, aa_bluff_mult=0.75: d_new_lag +5.63�
 | aa_bluff_mult | 0.5 | -1.50 ± 1.26 | -1.2 |
 | aa_bluff_mult | 1 | +0.37 ± 1.38 | +0.3 |
 **no move**: best candidate aa_bluff_mult=1 diff +0.37, z +0.3 <= 1
+
+### Grid on aa_call_margin, aa_bluff_mult around aa_call_margin=-0.03, aa_mdf_mult=1, aa_bluff_mult=0.75 (swings aa_call_margin 3.35, aa_mdf_mult 1.96, aa_bluff_mult 2.13; seeds 51700-51729)
+| aa_call_margin \ aa_bluff_mult | 0.5 | 0.75 | 1 |
+|---|---|---|---|
+| -0.06 | -0.35 ± 1.21 (z -0.3) | +0.07 ± 1.24 (z +0.1) | -0.14 ± 1.25 (z -0.1) |
+| -0.03 | -1.72 ± 1.25 (z -1.4) | centre | -1.07 ± 1.22 (z -0.9) |
+| 0 | -2.54 ± 1.11 (z -2.3) | -2.50 ± 1.14 (z -2.2) | -4.01 ± 1.25 (z -3.2) |
+**no grid move** (best other point diff +0.07, z +0.1 <= 1)
