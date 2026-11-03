@@ -8,7 +8,7 @@ and `docs/reports/TIER4P.md` (PC edits other parts of `tier4p.py` at the same ti
 For each member `anti_folder`, `anti_value`, `anti_aggro` (members forced with `tier4p:{"member":...}`):
 
 1. **Grid:** the ≤ 3 parameters × 3 values from PA's handoff (≤ 27 points). 16 pairs per point, locks off,
-   `--processes 3`, seeds 10000+ (new block per member), against the member's family:
+   `--processes` = nproc − 1 (cloud), seeds 10000+ (new block per member), against the member's family:
    - `anti_folder`: exploiter, conv_opp3, rules
    - `anti_value`: minraise, trapper
    - `anti_aggro`: lag, maniac
@@ -20,8 +20,10 @@ For each member `anti_folder`, `anti_value`, `anti_aggro` (members forced with `
    keep the starting values and say so.
 5. Fast suite green, push, handoff.
 
-Compute guide (measured throughput, `--processes 3` ≈ a quarter of the machine): `anti_folder` ≈ 1.3 M hands
-(exploiter is the slowest bot) ≈ 6–8 h; the others ≈ 2 h each. Run `anti_folder` overnight.
+**Cloud results only rank grid points.** The binding KEEP for each chosen point is PD's step 0 on the laptop.
+Compute guide: `anti_folder` ≈ 1.3 M hands (exploiter, the slowest bot, plays ~96 hands/s on the whole laptop), the
+others ≈ 0.4 M each. Time scales with `--processes` (nproc − 1 here): at 3 processes ≈ 6–8 h for `anti_folder` and
+≈ 2 h for each other member; at 12, about a quarter of that.
 
 ## Done when
 - Each member: grid table, the 2 confirmed points with ± SE, the restriction check, the chosen values — all in

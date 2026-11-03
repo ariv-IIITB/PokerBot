@@ -30,6 +30,8 @@ for them). Files: `lab/opps/discard_rules.py` (new), `bot/sim/inference.py`, `te
 8. Tests: the posterior moves to the right rule on synthetic showdowns; an error falls back to the softmax.
    Fast suite green, push, handoff.
 
+**Provisional (cloud):** part 2's KEEP is a cloud number; DC's step 0 re-runs it on the laptop.
+
 ## Done when
 - `docs/tier4/handoff/DB.md`: the D0 table and the go/no-go; the D4 list of reacting bots; if part 2 ran, KEEP or DROP
   with numbers, the param name, the commit.
