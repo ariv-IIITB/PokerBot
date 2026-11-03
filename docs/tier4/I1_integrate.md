@@ -1,8 +1,11 @@
-# I1: integrate and decide what ships (Opus, Sun 9–Mon 10)
+# I1: integrate and decide what ships (Opus, Mon 9–Tue 10)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, the final handoffs `PD.md`, `DC.md`, `RC.md` (and `RA.md` if R
 stopped at the spike). Don't read the other sub-plans unless a handoff leaves a question open.
-Branch `tier4/main` from `origin/tier4/base`. Seeds 40000+. Use the whole machine (no other sessions should run evals now).
+Branch `tier4/main` from `origin/tier4/base`. Seeds 40000+. Laptop, alone: `--processes 12`, `flock` per README rule 3.
+
+**What ships by default:** `tier3` as packaged in upload candidate #5, unless a candidate passes every gate below.
+Level within noise means `tier3` ships.
 
 ## Tasks
 1. **Merge** `origin/tier4/p`, `origin/tier4/d`, `origin/tier4/r` into `tier4/main`. Expected conflicts: `bot/embedded.py`
@@ -15,8 +18,13 @@ Branch `tier4/main` from `origin/tier4/base`. Seeds 40000+. Use the whole machin
      deadline hits ≤ baseline + 2√baseline; `lab.memory_check` < 500 MB;
    - best candidate vs the incumbent as shipped today (`tier3` on `main`): head-to-head 100 pairs, score ≥ 0.5 + 2 SE
      to call it an improvement; training pool two-part KEEP; a Stage 2 run (1000 hands, 30 pairs).
-4. **Held-out, once:** two `--final` runs on the held-out pool (incumbent and the chosen candidate, same seeds). If the
-   candidate is below the incumbent by > 2 SE on the sum, the incumbent ships.
+   **Retries, at most 2.** Retry 1 drops the piece the failing gate points at (if unclear, the next in slip order:
+   R's restricted p → DC → DB's learned rule → R entirely → `tier4p`'s portfolio), and re-runs only the failing gate.
+   Retry 2 falls back to the incumbent (`tier3x` or `tier3`) plus the KEEPs that survived. If that fails too, `tier3`
+   (#5) ships.
+4. **Held-out, once:** two `--final` runs on the held-out pool (the final pick and the incumbent, same seeds), only after
+   the combined gates have picked the candidate, never before a retry. If the candidate is below the incumbent by
+   > 2 SE on the sum, the incumbent ships.
 5. **Package:** `tools.package_submission --zip --stage2 --brain <chosen>`; record the sha256 in `docs/SUBMISSIONS.md`.
    Don't upload: the user does.
 6. Update `docs/STATUS.md` (Tier 4 row, what shipped, what was dropped and why). Fast suite and slow timing green. Push

@@ -5,6 +5,11 @@ Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §R (
 `bot/timing.py`, `bot/main.py` (the hard-deadline fallback). Branch `tier4/r` (continue after RA's GO).
 Files: the R row of the README's ownership table.
 
+## Step 0: make RA's GO final (laptop)
+Re-run `lab/river_bench.py` on the laptop under `flock -x /tmp/pokerbot_laptop.lock`. If it misses the GO bar
+(≥ 50 iterations in 10 ms, range building included), try RA's reduced variant; if that misses too, stop and write
+a NO-GO handoff.
+
 ## Tasks
 1. **Our range** (`bot/strategy/own_range.py`): weights over our 2-card combos from our line on every street and our
    public discard, using the same likelihood model inference uses for the opponent. (`OwnRange` only gives a

@@ -2,11 +2,12 @@
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §P2, `docs/tier4/handoff/PA.md`, and on
 the branch `bot/strategy/traits.py` (X1) and `bot/strategy/types.py` (X2).
-Branch `tier4/p-sel` from `origin/tier4/p` (after PA). Edit `choose_member` and new helpers in `bot/brains/tier4p.py`
-(not `MEMBERS`: PB tunes those values at the same time), `lab/sparring/adversary.py`, `tests/test_tier4p_select.py`.
+Branch `tier4/p-sel` from `origin/tier4/p` (after PA). Selection, bail-out and stop-loss go in
+`bot/brains/tier4p_select.py` (PA created it as a stub; PA's `choose_member` hook calls it). **Don't edit
+`tier4p.py`**: PB tunes its values at the same time. Also `lab/sparring/adversary.py`, `tests/test_tier4p_select.py`.
 
 ## Tasks
-1. **Selection** in `choose_member` (called once per hand):
+1. **Selection** in `tier4p_select.py` (called once per hand through `choose_member`):
    - F = the X2 family with the highest posterior mass (summed over its types). Families → members:
      over-folder → `anti_folder`; value-only and trapper → `anti_value`; aggressor → `anti_aggro`;
      unknown, nit, station → `base`.

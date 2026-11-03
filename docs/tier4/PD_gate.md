@@ -2,9 +2,17 @@
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` "Gate P", handoffs `PA.md`, `PB.md`,
 `PC.md`, `S0.md`. Branch `tier4/p`: merge `origin/tier4/p-tune` and `origin/tier4/p-sel` into it first (they touch
-different parts of `tier4p.py`; if they conflict, keep PB's values and PC's code). Seeds 12000+. `--processes 3`.
+different files). Seeds 12000+. Laptop: `--processes` and the `flock` wrapper per README rule 3.
+
+**Compute:** about 12+ h at 3 processes (step 0, 3 member head-to-heads, the 100-pair head-to-head, the pool locks
+on/off × 2 arms, the adversary, Stage 2 30 pairs × 1000 hands × 2 arms × 2 lock modes). If it doesn't fit Thu 5–Sun 8
+at your process count, cut the Stage 2 run to 20 pairs before anything else.
 
 The incumbent is the one PA named (`tier3x` if gate X passed, else `tier3`).
+
+## Step 0: make PB's values binding
+Each tuned member's chosen point vs its family, 50 pairs, on the laptop, two-part KEEP against the member's starting
+values. If it fails, that member uses its starting values.
 
 ## Gate P (all must pass)
 1. **Detection, offline:** on S0's recordings (seeds 9000–9011, never used to build `types.json`), replay the posterior
@@ -12,8 +20,9 @@ The incumbent is the one PA named (`tier3x` if gate X passed, else `tier3`).
    sparring bot, and `base` plays ≥ 90 % against random_legal and all_in.
 2. **Each member vs Tier 3**, forced on: 50 pairs head-to-head, not worse than −0.10 chips/hand and score ≥ 0.5 − 2 SE.
 3. **vs the incumbent:** head-to-head 100 pairs, score ≥ 0.5 − 2 SE. Training pool, two-part KEEP (locks off for chips,
-   locks on for score, `lab/opps/score_compare.py`). Where a member differs from what `tier3x` does (PB's tuned values,
-   `anti_aggro` vs lag), that bot must be up by > 2 SE; elsewhere, not down.
+   locks on for score, `lab/opps/score_compare.py`). For each member that differs from what `tier3x` does (PB's tuned
+   values, `anti_aggro`): its family is up by > 2 SE summed over the family's bots, and no bot is down by > 2 SE
+   (50 pairs).
 4. **Live detection:** in the locks-off pool run, `--report stats`: the right member plays ≥ 70 % of hands 200–400.
 5. **Adversary:** 50 pairs vs `adversary`: lose no more than the incumbent does + 2 SE.
 6. **Stage 2:** one 1000-hand pool run (30 pairs, `--hands 1000`), incumbent on the same seeds, two-part KEEP.

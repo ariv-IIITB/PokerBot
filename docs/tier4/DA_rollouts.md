@@ -3,7 +3,7 @@
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §D intro and D1,
 `docs/reports/TIER2_DISCARD.md` (the Phase E smart-rollout result). Branch `tier4/d` from `origin/tier4/base`.
 Files: `bot/config/tier3.json` (new), `bot/sim/rollout.py` (only if the timing needs a fix), `docs/reports/TIER4_DISCARD.md`,
-tests. Seeds 20000+. `--processes 3`.
+tests. Seeds 20000+. Cloud: `--processes` = nproc − 1.
 
 **The gap:** flop equity rollouts discard **at random for both players** (`smart_rollout_discard` is off by default,
 `bot/brains/tier1.py:51`; `bot/sim/rollout.py` `rollout_policy`). So every flop bet/call decision misjudges hand
@@ -23,6 +23,9 @@ the thresholds were tuned on random-discard equity.
    test that the embedded tier3 params carry the new values. On DROP: change nothing in `bot/`.
 6. Record every result, kept or dropped, in `docs/reports/TIER4_DISCARD.md`.
 7. Fast suite green, `-m slow tests/test_timing_slow.py` green, push, handoff.
+
+**Provisional (cloud):** task 1's timing and task 4's 50-pair confirmation are cloud numbers. DC's step 0 re-runs
+them on the laptop and makes them binding.
 
 ## Done when
 - `docs/tier4/handoff/DA.md`: KEEP or DROP with numbers (± SE, pairs), the timing cost, the values set, the commit.

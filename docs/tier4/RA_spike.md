@@ -29,6 +29,8 @@ must be useful inside that.
 5. If the full version misses: try the reduced one before giving up (prune combos with near-zero weight, one showdown
    ranking per river shared by all terminals, sizes pot + all-in only, warm start). Report both.
 
+**Provisional (cloud):** the GO is a cloud number. RB's step 0 re-runs the bench on the laptop and makes it final.
+
 ## Done when
 - `docs/tier4/handoff/RA.md`: **GO or NO-GO**, iterations per 10 ms (full and reduced), exploitability on toy rivers,
   the solver's API (signature), the commit. On NO-GO, R stops; I1 keeps Tier 3's river.
