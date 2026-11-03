@@ -61,3 +61,6 @@ overall          0.975 -> 0.995  diff +0.020 ± 0.012 (z +1.7, 2 bots)
 verdict: KEEP-score
 ```
 Two-part rule: chips pass (sum +0.90 ± 0.96), score pass -> KEEP
+
+### Restriction vs tier3, 30 pairs, locks off: +0.56 ± 0.23 chips/hand (ok, limit -0.10); match score 0.183 ± 0.050 (info)
+VERDICT: KEEP {"aa_call_margin": -0.03, "aa_mdf_mult": 1.0, "aa_bluff_mult": 0.75}
