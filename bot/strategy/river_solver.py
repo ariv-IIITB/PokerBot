@@ -177,13 +177,21 @@ def _tree_stats(t: Tree) -> dict:
             "depth": t.max_depth}
 
 
-# ------------------------------------------------------------------ card-removal terminals
+# ------------------------------------------------------------------ terminal kernels
+#
+# A kernel answers four questions for a batch of terminals (rows of z = the OTHER player's
+# reach vectors): the value of every hand of ours at a showdown / at a fold, and the same
+# for the opponent. Showdown value of hand i = sum_j z_j sign(rank_i - rank_j) over the
+# compatible j; fold value = sum_j z_j over the compatible j.
 
 
 class _Dir:
-    """Index arrays for 'values of a-hands from a reach vector over b-hands'."""
+    """Index arrays for 'values of a-hands from a reach vector over b-hands', O(n) per row:
+    prefix sums over the b-combos sorted by rank, and per card sorted by rank; the combos
+    sharing a card with hand i are removed by inclusion-exclusion over its two cards (the
+    combo equal to i has sign 0, so nothing is added back for the showdown)."""
 
-    def __init__(self, rank_a, cards_a, rank_b, cards_b) -> None:
+    def __init__(self, rank_a, cards_a, rank_b, cards_b, dtype) -> None:
         na, nb = len(rank_a), len(rank_b)
         self.na, self.nb = na, nb
         order_b = np.argsort(rank_b, kind="stable")
@@ -206,19 +214,17 @@ class _Dir:
             hi_c = np.searchsorted(keys_s, q, "right")
             st = np.searchsorted(keys_s, c * _BIG, "left")
             en = np.searchsorted(keys_s, (c + 1) * _BIG, "left")
-            # S_c = C[lo] + C[hi] - C[st] - C[en] (block 2 offsets), subtracted from S_all
             minus += [b2 + lo_c, b2 + hi_c]
             plus += [b2 + st, b2 + en]
-        self.plus = np.stack(plus).astype(np.intp)       # (6, na)
-        self.minus = np.stack(minus).astype(np.intp)     # (5, na)
+        self.plus = np.stack(plus).astype(np.intp)        # (6, na)
+        self.minus = np.stack(minus).astype(np.intp)      # (5, na)
         self.order_b = order_b.astype(np.intp)
         self.perm_e = perm_e.astype(np.intp)
         self.width = 1 + nb + 1 + 2 * nb
-        # fold: sum over compatible = total - cs[c1] - cs[c2] + z[same]
-        inc = np.zeros((nb, 52), dtype=np.float64)
+        inc = np.zeros((nb, 52))
         inc[np.arange(nb), cards_b[:, 0]] = 1.0
         inc[np.arange(nb), cards_b[:, 1]] = 1.0
-        self.inc = inc
+        self.inc = inc.astype(dtype)
         self.c1 = cards_a[:, 0].astype(np.intp)
         self.c2 = cards_a[:, 1].astype(np.intp)
         lookup = {}
@@ -227,11 +233,16 @@ class _Dir:
             lookup[(a_, b_)] = lookup[(b_, a_)] = j
         same = np.array([lookup.get((int(cards_a[i, 0]), int(cards_a[i, 1])), -1) for i in range(na)])
         self.same = np.maximum(same, 0).astype(np.intp)
-        self.same_mask = (same >= 0).astype(np.float64)
+        self.same_mask = (same >= 0).astype(dtype)
+        self.buf: Optional[np.ndarray] = None
+        self.dt = dtype
 
-    def show(self, z: np.ndarray, buf: np.ndarray) -> np.ndarray:
-        """z (T, nb) -> (T, na): sum_j z_j sign(rank_i - rank_j) over compatible j."""
+    def show(self, z: np.ndarray) -> np.ndarray:
+        """z (T, nb) -> (T, na)."""
         nb = self.nb
+        if self.buf is None or self.buf.shape[0] != z.shape[0]:
+            self.buf = np.zeros((z.shape[0], self.width), dtype=self.dt)
+        buf = self.buf
         buf[:, 0] = 0.0
         buf[:, 1:nb + 1] = z[:, self.order_b]
         buf[:, nb + 1] = 0.0
@@ -240,36 +251,125 @@ class _Dir:
         return buf[:, self.plus].sum(axis=1) - buf[:, self.minus].sum(axis=1)
 
     def fold(self, z: np.ndarray) -> np.ndarray:
-        """z (T, nb) -> (T, na): sum_j z_j over compatible j."""
         cs = z @ self.inc
         return (z.sum(axis=1, keepdims=True) - cs[:, self.c1] - cs[:, self.c2]
                 + z[:, self.same] * self.same_mask)
+
+
+class SortedKernel:
+    """Exact card removal, O(n) per terminal (best for large ranges)."""
+
+    def __init__(self, hero_cards, hero_rank, opp_cards, opp_rank, dtype=np.float32) -> None:
+        self.d0 = _Dir(hero_rank, hero_cards, opp_rank, opp_cards, dtype)
+        self.d1 = _Dir(opp_rank, opp_cards, hero_rank, hero_cards, dtype)
+        self.n0, self.n1 = len(hero_rank), len(opp_rank)
+
+    def show0(self, z1): return self.d0.show(z1)
+    def show1(self, z0): return self.d1.show(z0)
+    def fold0(self, z1): return self.d0.fold(z1)
+    def fold1(self, z0): return self.d1.fold(z0)
+
+
+class DenseKernel:
+    """Payoff matrix M[i, j] = sign(rank_i - rank_j) (times a compatibility mask when cards
+    are given: exact card removal) and matrix products. Fastest for n up to a few hundred."""
+
+    def __init__(self, M: np.ndarray, compat: Optional[np.ndarray] = None, dtype=np.float32) -> None:
+        self.M = np.ascontiguousarray(M, dtype=dtype)
+        self.MT = np.ascontiguousarray(self.M.T)
+        self.compat = None if compat is None else np.ascontiguousarray(compat, dtype=dtype)
+        self.compatT = None if compat is None else np.ascontiguousarray(self.compat.T)
+        self.n0, self.n1 = self.M.shape
+
+    @classmethod
+    def exact(cls, hero_cards, hero_rank, opp_cards, opp_rank, dtype=np.float32) -> "DenseKernel":
+        a = np.asarray(hero_cards)
+        b = np.asarray(opp_cards)
+        share = ((a[:, 0, None] == b[None, :, 0]) | (a[:, 0, None] == b[None, :, 1])
+                 | (a[:, 1, None] == b[None, :, 0]) | (a[:, 1, None] == b[None, :, 1]))
+        compat = (~share).astype(np.float64)
+        M = np.sign(hero_rank[:, None] - opp_rank[None, :]) * compat
+        return cls(M, compat, dtype)
+
+    def show0(self, z1): return z1 @ self.MT
+    def show1(self, z0): return -(z0 @ self.M)
+
+    def fold0(self, z1):
+        return z1.sum(axis=1, keepdims=True) if self.compat is None else z1 @ self.compatT
+
+    def fold1(self, z0):
+        return z0.sum(axis=1, keepdims=True) if self.compat is None else z0 @ self.compat
+
+
+def bucket_ranges(rank: np.ndarray, w: np.ndarray, n_buckets: int, always: Optional[int] = None):
+    """Split a range into at most `n_buckets` contiguous strength buckets of about equal weight.
+    Returns (bucket id per combo, bucket weights). `always` (a combo index) is guaranteed
+    its own bucket id (it is just assigned like any other combo)."""
+    order = np.argsort(rank, kind="stable")
+    cum = np.cumsum(w[order]) / w.sum()
+    b = np.minimum((cum - 1e-12) * n_buckets, n_buckets - 1).astype(np.int64)
+    b = np.maximum(b, 0)
+    ids = np.empty(len(rank), dtype=np.int64)
+    ids[order] = b
+    # drop empty buckets
+    used = np.unique(ids)
+    remap = np.full(n_buckets, -1, dtype=np.int64)
+    remap[used] = np.arange(len(used))
+    ids = remap[ids]
+    bw = np.bincount(ids, weights=w, minlength=len(used))
+    return ids, bw
+
+
+def bucket_kernel(hero_rank, hero_w, hero_b, opp_rank, opp_w, opp_b, dtype=np.float32) -> DenseKernel:
+    """Bucket-vs-bucket expected showdown sign, ignoring card removal. Built from prefix sums
+    over the opponent's sorted combos: O((n0 + n1) log n + n0 * B1)."""
+    nb0 = int(hero_b.max()) + 1
+    nb1 = int(opp_b.max()) + 1
+    order = np.argsort(opp_rank, kind="stable")
+    rs = opp_rank[order]
+    ws = opp_w[order]
+    C = np.concatenate([[0.0], np.cumsum(ws)])
+    bs = opp_b[order]
+    # bucket boundaries are not contiguous in rank in general (buckets were cut on opp's own
+    # rank order, which is this order), so they are contiguous here
+    start = np.searchsorted(bs, np.arange(nb1), "left")
+    end = np.searchsorted(bs, np.arange(nb1), "right")
+    lo = np.searchsorted(rs, hero_rank, "left")
+    hi = np.searchsorted(rs, hero_rank, "right")
+    # for each hero combo and opp bucket: weight below, tied, above
+    lt = C[np.clip(lo[:, None], start[None, :], end[None, :])] - C[start][None, :]
+    le = C[np.clip(hi[:, None], start[None, :], end[None, :])] - C[start][None, :]
+    tot = (C[end] - C[start])[None, :]
+    s = lt + le - tot                                     # sum_j w_j sign(rank_i - rank_j)
+    Mw = np.zeros((nb0, nb1))
+    np.add.at(Mw, hero_b, hero_w[:, None] * s)
+    hw = np.bincount(hero_b, weights=hero_w, minlength=nb0)
+    ow = np.bincount(opp_b, weights=opp_w, minlength=nb1)
+    M = Mw / (hw[:, None] * ow[None, :])
+    return DenseKernel(M, None, dtype)
 
 
 # ------------------------------------------------------------------ the solver
 
 
 class RiverSolver:
-    """State of one solve. Build it (setup cost), then `run(deadline)`; read the result."""
+    """State of one solve. Build it (setup cost), then `run(deadline)`; read the result.
 
-    def __init__(self, spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w, opp_rank,
-                 cfg: TreeCfg = TreeCfg(), dtype=np.float64) -> None:
+    All tensors are (node, player, hand): hero is player 0, the opponent player 1, both
+    padded to N = max(n0, n1) hands (padded hands have zero weight and zero value)."""
+
+    def __init__(self, spot: RiverSpot, w0, w1, kernel, cfg: TreeCfg = TreeCfg(),
+                 dtype=np.float32, track_all: bool = False) -> None:
         self.dt = dtype
         self.tree = t = Tree(spot, cfg)
-        self.n0, self.n1 = len(hero_w), len(opp_w)
-        hc = np.asarray(hero_cards, dtype=np.int64).reshape(-1, 2)
-        oc = np.asarray(opp_cards, dtype=np.int64).reshape(-1, 2)
-        hr = np.asarray(hero_rank, dtype=np.int64)
-        orr = np.asarray(opp_rank, dtype=np.int64)
-        self.hero_cards, self.opp_cards = hc, oc
-        w0 = np.asarray(hero_w, dtype=np.float64)
-        w1 = np.asarray(opp_w, dtype=np.float64)
+        self.kernel = kernel
+        self.n0, self.n1 = len(w0), len(w1)
+        N = self.N = max(self.n0, self.n1)
+        w0 = np.asarray(w0, dtype=np.float64)
+        w1 = np.asarray(w1, dtype=np.float64)
         self.w0 = (w0 / w0.sum()).astype(dtype)
         self.w1 = (w1 / w1.sum()).astype(dtype)
-        self.d0 = _Dir(hr, hc, orr, oc)       # hero values from opp reach
-        self.d1 = _Dir(orr, oc, hr, hc)       # opp values from hero reach
-        V = t.n
-        self.V = V
+        V = self.V = t.n
         kinds = np.array(t.kind)
         self.fold_ids = np.nonzero(kinds == 1)[0]
         self.show_ids = np.nonzero(kinds == 2)[0]
@@ -277,101 +377,84 @@ class RiverSolver:
         self.fold_c0 = term[self.fold_ids, 0, None].astype(dtype)
         self.fold_c1 = term[self.fold_ids, 1, None].astype(dtype)
         self.show_c = term[self.show_ids, 0, None].astype(dtype)
-        self.buf0 = np.zeros((len(self.show_ids), self.d0.width), dtype=dtype)
-        self.buf1 = np.zeros((len(self.show_ids), self.d1.width), dtype=dtype)
-        # decision nodes per depth; strategy tensors per player
-        self.K = max(len(c) for c in t.children if c)
-        self.dec_by_depth: list[list[int]] = [[] for _ in range(t.max_depth + 1)]
-        for i in t.dec_ids:
-            self.dec_by_depth[t.depth[i]].append(i)
-        self.pidx = {0: {}, 1: {}}                 # node id -> row in that player's tensors
-        for p in (0, 1):
-            ids = [i for i in t.dec_ids if t.depth[i] % 2 == p]
-            self.pidx[p] = {n: r for r, n in enumerate(ids)}
-        self.player_nodes = {p: np.array(list(self.pidx[p]), dtype=np.intp) for p in (0, 1)}
-        n_hand = {0: self.n0, 1: self.n1}
-        self.R, self.A, self.mask, self.unif, self.child_idx = {}, {}, {}, {}, {}
-        for p in (0, 1):
-            ids = list(self.pidx[p])
-            D = len(ids)
-            m = np.zeros((D, self.K, 1), dtype=dtype)
-            ch = np.full((D, self.K), V, dtype=np.intp)        # V = the all-zero dummy row
-            for r, n in enumerate(ids):
-                for k, c in enumerate(t.children[n]):
-                    m[r, k, 0] = 1.0
-                    ch[r, k] = c
-            self.mask[p] = m
-            self.child_idx[p] = ch
-            self.R[p] = np.zeros((D, self.K, n_hand[p]), dtype=dtype)
-            self.A[p] = np.zeros((D, self.K, n_hand[p]), dtype=dtype)
-            self.unif[p] = m / np.maximum(m.sum(axis=1, keepdims=True), 1.0)
-        # per depth: block of children, the parent rows, slots, reduceat starts
+        self.dec = np.array(t.dec_ids, dtype=np.intp)                # decision node ids (BFS order)
+        D = len(self.dec)
+        self.row_of = {int(n): r for r, n in enumerate(self.dec)}
+        self.actor = np.array([t.depth[n] % 2 for n in self.dec], dtype=np.intp)
+        K = self.K = max(len(t.children[n]) for n in self.dec)
+        mask = np.zeros((D, K, 1), dtype=dtype)
+        child_idx = np.full((D, K), V, dtype=np.intp)                # V = the all-zero dummy row
+        for r, n in enumerate(self.dec):
+            for k, c in enumerate(t.children[n]):
+                mask[r, k, 0] = 1.0
+                child_idx[r, k] = c
+        self.mask, self.child_idx = mask, child_idx
+        self.unif = mask / np.maximum(mask.sum(axis=1, keepdims=True), 1.0)
+        # every non-root node: the row, slot and actor of the decision that led to it
+        ids = np.arange(1, V)
+        self.f_ids = ids
+        self.f_row = np.array([self.row_of[t.parent[n]] for n in ids], dtype=np.intp)
+        self.f_slot = np.array([t.slot[n] for n in ids], dtype=np.intp)
+        self.f_actor = np.array([t.depth[t.parent[n]] % 2 for n in ids], dtype=np.intp)
+        # per depth: the block of children, parents, reduceat starts
         self.levels = []
         for d in range(t.max_depth):
-            ids = self.dec_by_depth[d]
-            if not ids:
+            dn = [n for n in t.dec_ids if t.depth[n] == d]
+            if not dn:
                 continue
             cs, ce = t.block[d + 1]
-            p = d % 2
-            rows = np.array([self.pidx[p][n] for n in ids], dtype=np.intp)
-            # children of decision node n are contiguous; the block holds only children of
-            # this depth's decisions, in parent order
-            starts = np.array([t.children[n][0] - cs for n in ids], dtype=np.intp)
+            starts = np.array([t.children[n][0] - cs for n in dn], dtype=np.intp)
             par = np.array([t.parent[c] for c in range(cs, ce)], dtype=np.intp)
-            slot = np.array([t.slot[c] for c in range(cs, ce)], dtype=np.intp)
-            prow = np.array([self.pidx[p][n] for n in par], dtype=np.intp)
-            self.levels.append((d, p, np.array(ids, dtype=np.intp), cs, ce, par, prow, slot, starts))
+            self.levels.append((np.array(dn, dtype=np.intp), cs, ce, par, starts))
+        self.Q = np.zeros((V + 1, 2, N), dtype=dtype)
+        self.Val = np.zeros((V + 1, 2, N), dtype=dtype)
+        self.Fc = np.ones((V + 1, 2, N), dtype=dtype)
+        self.Q[0, 0, :self.n0] = self.w0
+        self.Q[0, 1, :self.n1] = self.w1
+        self.R = np.zeros((D, K, N), dtype=dtype)
+        self.track_all = track_all
+        self.A = np.zeros((D, K, N), dtype=dtype) if track_all else np.zeros((1, K, N), dtype=dtype)
         self.iterations = 0
-        self.setup_done = time.perf_counter()
 
     # ---- one pass
-    def _strategy(self, p: int) -> np.ndarray:
-        R = self.R[p]
-        pos = (R + 1e-30) * self.mask[p]
-        return pos / pos.sum(axis=1, keepdims=True)
-
     def step(self) -> None:
-        t, V, dt = self.tree, self.V, self.dt
-        S = {0: self._strategy(0), 1: self._strategy(1)}
-        Q = {0: np.zeros((V + 1, self.n0), dtype=dt), 1: np.zeros((V + 1, self.n1), dtype=dt)}
-        Val = {0: np.zeros((V + 1, self.n0), dtype=dt), 1: np.zeros((V + 1, self.n1), dtype=dt)}
-        Q[0][0] = self.w0
-        Q[1][0] = self.w1
-        blocks = []
-        for (d, p, ids, cs, ce, par, prow, slot, starts) in self.levels:
-            o = 1 - p
-            sb = S[p][prow, slot]                               # (children, n_p)
-            Q[p][cs:ce] = Q[p][par] * sb
-            Q[o][cs:ce] = Q[o][par]
-            blocks.append(sb)
-        # terminals
+        Q, Val, Fc, R = self.Q, self.Val, self.Fc, self.R
+        pos = R + 1e-30
+        pos *= self.mask
+        S = pos / pos.sum(axis=1, keepdims=True)                     # (D, K, N)
+        Fc[self.f_ids, self.f_actor] = S[self.f_row, self.f_slot]    # factor of the acting player
+        for dn, cs, ce, par, starts in self.levels:
+            Q[cs:ce] = Q[par] * Fc[cs:ce]
+        k, n0, n1 = self.kernel, self.n0, self.n1
         if len(self.fold_ids):
-            z1 = Q[1][self.fold_ids]
-            z0 = Q[0][self.fold_ids]
-            Val[0][self.fold_ids] = self.fold_c0 * self.d0.fold(z1)
-            Val[1][self.fold_ids] = self.fold_c1 * self.d1.fold(z0)
+            qf = Q[self.fold_ids]
+            Val[self.fold_ids, 0, :n0] = self.fold_c0 * k.fold0(qf[:, 1, :n1])
+            Val[self.fold_ids, 1, :n1] = self.fold_c1 * k.fold1(qf[:, 0, :n0])
         if len(self.show_ids):
-            z1 = Q[1][self.show_ids]
-            z0 = Q[0][self.show_ids]
-            Val[0][self.show_ids] = self.show_c * self.d0.show(z1, self.buf0)
-            Val[1][self.show_ids] = self.show_c * self.d1.show(z0, self.buf1)
-        # backward
-        for lv, sb in zip(reversed(self.levels), reversed(blocks)):
-            (d, p, ids, cs, ce, par, prow, slot, starts) = lv
-            o = 1 - p
-            Val[p][ids] = np.add.reduceat(Val[p][cs:ce] * sb, starts, axis=0)
-            Val[o][ids] = np.add.reduceat(Val[o][cs:ce], starts, axis=0)
-        # regrets and average strategy
-        w = float(self.iterations + 1)
-        for p in (0, 1):
-            nodes = self.player_nodes[p]
-            if not len(nodes):
-                continue
-            cv = Val[p][self.child_idx[p]]                      # (D, K, n_p)
-            inst = (cv - Val[p][nodes][:, None, :]) * self.mask[p]
-            np.maximum(self.R[p] + inst, 0.0, out=self.R[p])
-            self.A[p] += (w * Q[p][nodes])[:, None, :] * S[p]
+            qs = Q[self.show_ids]
+            Val[self.show_ids, 0, :n0] = self.show_c * k.show0(qs[:, 1, :n1])
+            Val[self.show_ids, 1, :n1] = self.show_c * k.show1(qs[:, 0, :n0])
+        for dn, cs, ce, par, starts in reversed(self.levels):
+            Val[dn] = np.add.reduceat(Val[cs:ce] * Fc[cs:ce], starts, axis=0)
+        cv = Val[self.child_idx, self.actor[:, None]]               # (D, K, N)
+        nv = Val[self.dec, self.actor]                              # (D, N)
+        cv -= nv[:, None, :]
+        cv *= self.mask
+        R += cv
+        np.maximum(R, 0.0, out=R)
+        w = self.iterations + 1
+        if self.track_all:
+            self.A += (w * Q[self.dec, self.actor])[:, None, :] * S
+        else:
+            self.A[0] += (w * self.w0_pad)[None, :] * S[0]           # the root is a hero node
         self.iterations += 1
+
+    @property
+    def w0_pad(self) -> np.ndarray:
+        if getattr(self, "_w0p", None) is None:
+            self._w0p = np.zeros(self.N, dtype=self.dt)
+            self._w0p[:self.n0] = self.w0
+        return self._w0p
 
     def run(self, deadline: float, max_iters: int = 10**9, min_iters: int = 0) -> int:
         """Iterate until `deadline` (a perf_counter value) or `max_iters`. Returns the count."""
@@ -382,53 +465,57 @@ class RiverSolver:
         return n
 
     # ---- results
-    def average(self, p: int) -> np.ndarray:
-        """Average strategy (D, K, n_p) for player p, rows in `player_nodes[p]` order."""
-        A = self.A[p]
-        tot = A.sum(axis=1, keepdims=True)
-        out = np.where(tot > 0, A / np.maximum(tot, 1e-300), self.unif[p])
-        return out
-
     def root_strategy(self, hero_index: int) -> np.ndarray:
-        """Average strategy at the root for our hand `hero_index`, over `tree.root_labels`."""
-        a = self.average(0)
-        r = self.pidx[0][0]
+        """Average strategy at the root for our hand (or bucket) `hero_index`."""
         k = len(self.tree.children[0])
-        return a[r, :k, hero_index].astype(np.float64)
+        a = self.A[0, :k, hero_index].astype(np.float64)
+        tot = a.sum()
+        return a / tot if tot > 0 else np.full(k, 1.0 / k)
 
-    def exploitability(self) -> float:
-        """(BR_0 + BR_1) / 2 of the average strategy, in pot units (one pot = 1.0), by a
-        vector best response over the same tree. 0 at equilibrium."""
-        t, V, dt = self.tree, self.V, np.float64
-        avg = {p: self.average(p).astype(dt) for p in (0, 1)}
-        # reach of each player under the AVERAGE strategies
-        Q = {0: np.zeros((V + 1, self.n0)), 1: np.zeros((V + 1, self.n1))}
-        Q[0][0] = self.w0
-        Q[1][0] = self.w1
-        for (d, p, ids, cs, ce, par, prow, slot, starts) in self.levels:
-            o = 1 - p
-            Q[p][cs:ce] = Q[p][par] * avg[p][prow, slot]
-            Q[o][cs:ce] = Q[o][par]
+    def average(self, p: int = None) -> np.ndarray:
+        """Average strategy (D, K, N) of the decision nodes (needs track_all=True)."""
+        assert self.track_all, "build the solver with track_all=True"
+        tot = self.A.sum(axis=1, keepdims=True)
+        return np.where(tot > 0, self.A / np.maximum(tot, 1e-30), self.unif).astype(np.float64)
+
+    def exploitability(self, avg: Optional[np.ndarray] = None, kernel=None, weights=None) -> float:
+        """(BR_0 + BR_1) / 2 of a strategy profile (default: our average), in pot units
+        (one pot = 1.0), by a vector best response over the same tree. 0 at equilibrium.
+        `kernel` and `weights` = (w0, w1) evaluate it in another game (for example the exact
+        full-size game, for a strategy that was solved in a bucketed one)."""
+        t, V = self.tree, self.V
+        avg = self.average() if avg is None else avg
+        k = kernel or self.kernel
+        w0, w1 = weights if weights is not None else (self.w0[:self.n0], self.w1[:self.n1])
+        w0 = np.asarray(w0, dtype=np.float64) / np.sum(w0)
+        w1 = np.asarray(w1, dtype=np.float64) / np.sum(w1)
+        n0, n1, N = len(w0), len(w1), avg.shape[2]
+        Q = np.zeros((V + 1, 2, N))
+        Q[0, 0, :n0] = w0
+        Q[0, 1, :n1] = w1
+        F = np.ones((V + 1, 2, N))
+        F[self.f_ids, self.f_actor] = avg[self.f_row, self.f_slot]
+        for dn, cs, ce, par, starts in self.levels:
+            Q[cs:ce] = Q[par] * F[cs:ce]
+        z = float((k.fold0(Q[0:1, 1, :n1].astype(self.dt))[0] * w0).sum())
         total = 0.0
-        z_norm = float(self.d0.fold(self.w1[None, :].astype(dt))[0] @ self.w0.astype(dt))
         for br in (0, 1):
             o = 1 - br
-            Val = {br: np.zeros((V + 1, self.n0 if br == 0 else self.n1))}
-            dirn = self.d0 if br == 0 else self.d1
-            coef_f = self.fold_c0 if br == 0 else self.fold_c1
+            Val = np.zeros((V + 1, N))
+            nb, no = (n0, n1) if br == 0 else (n1, n0)
+            fold, cf = (k.fold0, self.fold_c0) if br == 0 else (k.fold1, self.fold_c1)
+            show = k.show0 if br == 0 else k.show1
             if len(self.fold_ids):
-                Val[br][self.fold_ids] = coef_f.astype(dt) * dirn.fold(Q[o][self.fold_ids])
+                Val[self.fold_ids, :nb] = cf * fold(Q[self.fold_ids, o, :no].astype(self.dt))
             if len(self.show_ids):
-                buf = np.zeros((len(self.show_ids), dirn.width))
-                Val[br][self.show_ids] = self.show_c.astype(dt) * dirn.show(Q[o][self.show_ids], buf)
-            for (d, p, ids, cs, ce, par, prow, slot, starts) in reversed(self.levels):
-                if p == br:
-                    Val[br][ids] = np.maximum.reduceat(Val[br][cs:ce], starts, axis=0)
+                Val[self.show_ids, :nb] = self.show_c * show(Q[self.show_ids, o, :no].astype(self.dt))
+            for dn, cs, ce, par, starts in reversed(self.levels):
+                if (t.depth[int(dn[0])] % 2) == br:
+                    Val[dn] = np.maximum.reduceat(Val[cs:ce], starts, axis=0)
                 else:
-                    Val[br][ids] = np.add.reduceat(Val[br][cs:ce], starts, axis=0)
-            w = self.w0 if br == 0 else self.w1
-            total += float(Val[br][0] @ w.astype(dt))
-        return 0.5 * total / z_norm
+                    Val[dn] = np.add.reduceat(Val[cs:ce], starts, axis=0)
+            total += float(Val[0, :nb] @ Q[0, br, :nb])
+        return 0.5 * total / z
 
 
 @dataclass
@@ -441,22 +528,59 @@ class SolveResult:
     solver: Optional[RiverSolver] = None
 
 
+def make_kernel(hero_cards, hero_rank, opp_cards, opp_rank, kernel: str = "auto", dtype=np.float32):
+    """Exact card-removal kernel: "dense" (matrix products; best up to a few hundred combos),
+    "sorted" (O(n) per terminal) or "auto" (dense when both ranges have <= 400 combos)."""
+    hc = np.asarray(hero_cards, dtype=np.int64).reshape(-1, 2)
+    oc = np.asarray(opp_cards, dtype=np.int64).reshape(-1, 2)
+    hr = np.asarray(hero_rank, dtype=np.int64)
+    orr = np.asarray(opp_rank, dtype=np.int64)
+    if kernel == "auto":
+        kernel = "dense" if max(len(hr), len(orr)) <= 400 else "sorted"
+    if kernel == "dense":
+        return DenseKernel.exact(hc, hr, oc, orr, dtype)
+    return SortedKernel(hc, hr, oc, orr, dtype)
+
+
+def make_solver(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w, opp_rank,
+                cfg: TreeCfg = TreeCfg(), kernel: str = "auto", dtype=np.float32,
+                track_all: bool = False) -> RiverSolver:
+    k = make_kernel(hero_cards, hero_rank, opp_cards, opp_rank, kernel, dtype)
+    return RiverSolver(spot, hero_w, opp_w, k, cfg, dtype, track_all)
+
+
 def solve_river(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w, opp_rank,
                 hero_index: int, deadline: float, cfg: TreeCfg = TreeCfg(),
                 max_iters: int = 10**9, min_iters: int = 1, keep_solver: bool = False,
-                dtype=np.float64) -> Optional[SolveResult]:
+                dtype=np.float32, buckets: int = 0, kernel: str = "auto",
+                track_all: bool = False) -> Optional[SolveResult]:
     """Solve the river spot until `deadline` (a time.perf_counter() value) and return our
-    root strategy for the hand at `hero_index` in `hero_cards`. Returns None when setup alone
-    would pass the deadline (the caller falls back). Never runs past the deadline except for
-    `min_iters` iterations when asked."""
+    root strategy for the hand at `hero_index` in `hero_cards`.
+
+    buckets > 0 : play the bucketed game (that many strength buckets per player, no card
+                  removal); the strategy returned is that of our hand's bucket.
+    kernel      : see make_kernel (ignored when bucketing).
+    Returns None when setup alone would pass the deadline and min_iters is 0."""
     t0 = time.perf_counter()
-    s = RiverSolver(spot, hero_cards, hero_w, hero_rank, opp_cards, opp_w, opp_rank, cfg, dtype)
+    hr = np.asarray(hero_rank, dtype=np.int64)
+    orr = np.asarray(opp_rank, dtype=np.int64)
+    hw = np.asarray(hero_w, dtype=np.float64)
+    ow = np.asarray(opp_w, dtype=np.float64)
+    idx = hero_index
+    if buckets > 0:
+        hb, hbw = bucket_ranges(hr, hw, buckets)
+        ob, obw = bucket_ranges(orr, ow, buckets)
+        k = bucket_kernel(hr, hw, hb, orr, ow, ob, dtype)
+        idx = int(hb[hero_index])
+        s = RiverSolver(spot, hbw, obw, k, cfg, dtype, track_all)
+    else:
+        s = make_solver(spot, hero_cards, hw, hr, opp_cards, ow, orr, cfg, kernel, dtype, track_all)
     t1 = time.perf_counter()
     if t1 >= deadline and min_iters <= 0:
         return None
     n = s.run(deadline, max_iters=max_iters, min_iters=min_iters)
     t2 = time.perf_counter()
-    return SolveResult(s.tree.root_labels, s.root_strategy(hero_index), n, t1 - t0, t2 - t1,
+    return SolveResult(s.tree.root_labels, s.root_strategy(idx), n, t1 - t0, t2 - t1,
                        s if keep_solver else None)
 
 
@@ -465,7 +589,8 @@ def solve_river(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w
 
 def combos_excluding(dead: Sequence[int], n_cards: int = 52) -> np.ndarray:
     """All 2-card combos (i < j) of the deck that avoid every card in `dead`."""
-    live = np.array([c for c in range(n_cards) if c not in set(int(x) for x in dead)], dtype=np.int64)
+    d = set(int(x) for x in dead)
+    live = np.array([c for c in range(n_cards) if c not in d], dtype=np.int64)
     i, j = np.triu_indices(len(live), 1)
     return np.stack([live[i], live[j]], axis=1)
 

@@ -5,8 +5,9 @@ import numpy as np
 import pytest
 
 from bot.game.rules_spec import holdem_rules
-from bot.strategy.river_solver import (FOLD, INF, RAISE, RiverSolver, RiverSpot, Tree, TreeCfg,
-                                       combos_excluding, hand_ranks, solve_river, _Dir)
+from bot.strategy.river_solver import (FOLD, INF, RAISE, DenseKernel, RiverSpot, SortedKernel, Tree,
+                                       TreeCfg, _Dir, bucket_kernel, bucket_ranges, combos_excluding,
+                                       hand_ranks, make_solver, solve_river)
 from lab.cfr.exact import Tree as ExactTree
 from lab.cfr.exact import exploitability
 
@@ -87,18 +88,19 @@ SPOTS = [
 ]
 
 
+@pytest.mark.parametrize("kernel", ["sorted", "dense"])
 @pytest.mark.parametrize("spot", SPOTS)
-def test_toy_exploitability_under_two_percent_of_pot(spot) -> None:
+def test_toy_exploitability_under_two_percent_of_pot(spot, kernel) -> None:
     board, hero, opp, w0, w1, r0, r1 = _toy(3, spot)
-    s = RiverSolver(spot, hero, w0, r0, opp, w1, r1)
+    s = make_solver(spot, hero, w0, r0, opp, w1, r1, kernel=kernel, dtype=np.float64, track_all=True)
     s.run(1e18, max_iters=400)
     game = ToyRiver(s.tree, hero, opp, w0, w1, r0, r1)
     tree = ExactTree(game)
-    avg = {p: s.average(p) for p in (0, 1)}
+    avg = s.average()
 
     def policy(key, n):
         p, hand, node = key
-        return avg[p][s.pidx[p][node], :n, hand]
+        return avg[s.row_of[node], :n, hand]
 
     exact = exploitability(tree, policy)
     assert exact <= 0.02, exact                                  # 2 % of the pot (pot units)
@@ -109,12 +111,35 @@ def test_terminal_values_match_brute_force() -> None:
     board, hero, opp, w0, w1, r0, r1 = _toy(5, SPOTS[0], pool=9)
     rng = np.random.default_rng(0)
     z = rng.random((4, len(opp)))
-    d = _Dir(r0, hero, r1, opp)
     ok = np.array([[not set(h.tolist()) & set(o.tolist()) for o in opp] for h in hero], float)
     sign = np.sign(r0[:, None] - r1[None, :]) * ok
-    buf = np.zeros((4, d.width))
-    assert np.allclose(d.show(z, buf), z @ sign.T)
+    d = _Dir(r0, hero, r1, opp, np.float64)
+    assert np.allclose(d.show(z), z @ sign.T)
     assert np.allclose(d.fold(z), z @ ok.T)
+    dk = DenseKernel.exact(hero, r0, opp, r1, np.float64)
+    sk = SortedKernel(hero, r0, opp, r1, np.float64)
+    zo = rng.random((4, len(hero)))
+    for k in (dk, sk):
+        assert np.allclose(k.show0(z), z @ sign.T) and np.allclose(k.fold0(z), z @ ok.T)
+        assert np.allclose(k.show1(zo), -(zo @ sign)) and np.allclose(k.fold1(zo), zo @ ok)
+
+
+def test_bucket_kernel_is_expected_sign_between_buckets() -> None:
+    rng = np.random.default_rng(4)
+    r0 = rng.integers(0, 12, 60)
+    r1 = rng.integers(0, 12, 50)
+    w0 = rng.random(60) + 0.1
+    w1 = rng.random(50) + 0.1
+    b0, bw0 = bucket_ranges(r0, w0, 6)
+    b1, bw1 = bucket_ranges(r1, w1, 5)
+    assert abs(bw0.sum() - w0.sum()) < 1e-9 and b0.max() < 6 and b1.max() < 5
+    k = bucket_kernel(r0, w0, b0, r1, w1, b1, np.float64)
+    for i in range(b0.max() + 1):
+        for j in range(b1.max() + 1):
+            mi, mj = b0 == i, b1 == j
+            ref = (w0[mi, None] * w1[None, mj] * np.sign(r0[mi, None] - r1[None, mj])).sum() \
+                / (w0[mi].sum() * w1[mj].sum())
+            assert abs(k.M[i, j] - ref) < 1e-12
 
 
 def test_card_removal_in_ranges() -> None:
