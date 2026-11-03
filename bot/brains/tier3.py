@@ -133,6 +133,7 @@ DEFAULTS.update({
     "t3_river_solver": False,      # solve each river decision (CFR+ on bucketed ranges) instead of the rules above
     "river_budget_s": TimingConfig.river_budget_s,    # ceiling of the time box (ranges + solve), seconds
     "river_box_mult": TimingConfig.river_box_mult,    # box = min(this x the decision budget, river_budget_s)
+    "river_max_iters": 0,          # >0: stop at this many passes (lab gates pin the work by passes, not by a wall-clock box)
     "river_min_iters": 20,         # fewer CFR+ passes than this: Tier 3's own river decides
 })
 
@@ -463,7 +464,8 @@ class Tier3Brain(Tier2Brain):
                          checked=bool(h.tocall <= 0 and any(rr.street == 3 and rr.actor != ME for rr in h.history)))
         cfg = TreeCfg(bet_sizes=(1.0, INF), raise_sizes=(1.0, INF), min_bet=float(h.bb or 2))
         res = solve_river(spot, hero_cards, w_hero, hand_ranks(ev, hero_cards, board), opp_cards, w_opp,
-                          hand_ranks(ev, opp_cards, board), idx, deadline, cfg=cfg, auto=True)
+                          hand_ranks(ev, opp_cards, board), idx, deadline, cfg=cfg, auto=True,
+                          max_iters=int(p["river_max_iters"]) or 10**9)
         if res is None:
             st["river_no_pass"] += 1
             return None

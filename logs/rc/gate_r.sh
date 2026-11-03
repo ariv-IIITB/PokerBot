@@ -1,9 +1,9 @@
 #!/bin/bash
 # Gate R driver, resumable: one lab.eval per (step, arm, bot); an existing non-empty output file is skipped.
-# Laptop stand-in for the 2x server: box ceiling and multiplier halved (shipped: 0.040 s, x3.9).
+# Laptop stand-in for the 2x server: the solve is pinned by passes (110 = what the 2x-clock timing runs give), not by wall-clock
 cd "$(dirname "$0")/../.." || exit 1
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
-ON='tier3:{"t3_river_solver":true,"river_budget_s":0.020,"river_box_mult":1.95}'
+ON='tier3:{"t3_river_solver":true,"river_budget_s":0.080,"river_box_mult":50,"river_max_iters":110}'
 OFF='tier3'
 PAIRS=${PAIRS:-50}; SEED=30000; D=logs/rc/gate
 ev() {  # out locks pairs brain pool report
