@@ -32,6 +32,8 @@ from bot.protocols.base import as_messages
 from bot.state import GameState
 from bot.timing import DeadlineExceeded, Stopwatch, TimeManager, hard_deadline
 
+RETRY_DEADLINE_S = 0.030   # the budget-0 retry in Bot.choose (Tier 3 needs ~1-2 ms there)
+
 # Brain registry: name -> "module:Class", imported lazily so startup stays fast.
 BRAINS = {
     "tier0": "bot.brains.tier0:Tier0Brain",
@@ -69,6 +71,8 @@ class Bot:
         self.brain_errors = 0
         self.deadline_hits = 0
         self.emergency_decisions = 0
+        self.deadline_retries = 0      # the brain asked again at budget 0 after a deadline hit or an error ...
+        self.retry_wins = 0            # ... and this many of those gave an action (the rest went to Tier 0)
         self.bad_lines = 0
 
     # ---- main loop
@@ -91,7 +95,8 @@ class Bot:
                 botlog.warn(f"unhandled error on line {line.strip()!r}: {e!r}")
         botlog.log(f"done: hands={self.state.hands_played} bankroll={self.state.bankroll} "
                    f"brain_errors={self.brain_errors} deadlines={self.deadline_hits} "
-                   f"emergency={self.emergency_decisions} bad_lines={self.bad_lines}")
+                   f"emergency={self.emergency_decisions} retries={self.retry_wins}/{self.deadline_retries} "
+                   f"bad_lines={self.bad_lines}")
         return 0
 
     def handle_line(self, line: str) -> bool:
@@ -159,7 +164,8 @@ class Bot:
         return safe_action_for_hole(legal, hand.hole if hand is not None else ())
 
     def choose(self, legal: LegalActions) -> Action:
-        """Ask the brain, with Tier 0 fallback on emergency, error or deadline."""
+        """Ask the brain; on a deadline hit or an error ask it once more at budget 0 (no rollouts, no
+        solver: ~1 ms for Tier 3), and only if that fails too play Tier 0. Emergency mode goes straight to Tier 0."""
         if self.timer.emergency():
             self.emergency_decisions += 1
             return self.fallback(legal)
@@ -173,6 +179,20 @@ class Bot:
         except Exception as e:
             self.brain_errors += 1
             botlog.warn(f"brain error: {e!r}")
+        return self.retry_cheap(legal)
+
+    def retry_cheap(self, legal: LegalActions) -> Action:
+        self.deadline_retries += 1
+        try:
+            with hard_deadline(RETRY_DEADLINE_S):
+                a = self.brain.decide(self.state, legal, 0.0)
+            if isinstance(a, Action):                  # on_message validates and clamps it like any other
+                self.retry_wins += 1
+                return a
+        except DeadlineExceeded:
+            botlog.warn("budget-0 retry exceeded its deadline")
+        except Exception as e:
+            botlog.warn(f"budget-0 retry error: {e!r}")
         return self.fallback(legal)
 
 

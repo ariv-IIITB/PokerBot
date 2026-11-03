@@ -170,3 +170,43 @@ def test_every_reply_parses() -> None:
     msgs = scripted_messages(hands=5)
     _, replies = run_bot(ScriptedBrain(Action.call()), msgs)
     assert len(replies) == acts(msgs)
+
+
+class FlakyBrain(Brain):
+    """Fails (raises or hangs) at its normal budget, answers at budget 0."""
+
+    def __init__(self, mode: str, retry_ok: bool = True) -> None:
+        self.mode, self.retry_ok, self.budgets = mode, retry_ok, []
+
+    def decide(self, state, legal, budget_s):
+        self.budgets.append(budget_s)
+        if budget_s == 0.0 and self.retry_ok:
+            return Action.check() if legal.check else Action.call()
+        if self.mode == "raise":
+            raise RuntimeError("boom")
+        time.sleep(5)
+
+
+@pytest.mark.skipif(not deadline_supported(), reason="needs SIGALRM")
+@pytest.mark.parametrize("mode", ["raise", "hang"])
+def test_a_failed_decision_is_retried_at_budget_zero(mode) -> None:
+    timer = TimeManager(cfg=TimingConfig(max_budget_s=0.01, hard_min_s=0.02, hard_mult=1.0))
+    brain = FlakyBrain(mode)
+    bot, replies = run_bot(brain, scripted_messages(hands=1), timer)
+    assert bot.deadline_retries == bot.retry_wins == 4 and 0.0 in brain.budgets
+    assert replies[1] == K and F not in replies[:2] + replies[3:]          # the retry's check/call, not Tier 0's fold
+
+
+@pytest.mark.skipif(not deadline_supported(), reason="needs SIGALRM")
+@pytest.mark.parametrize("mode", ["raise", "hang"])
+def test_when_the_retry_fails_too_tier0_plays(mode) -> None:
+    timer = TimeManager(cfg=TimingConfig(max_budget_s=0.01, hard_min_s=0.02, hard_mult=1.0))
+    bot, replies = run_bot(FlakyBrain(mode, retry_ok=False), scripted_messages(hands=1), timer)
+    assert bot.deadline_retries == 4 and bot.retry_wins == 0
+    assert replies == [F, K, S0, F]
+
+
+def test_emergency_mode_does_not_retry() -> None:
+    brain = FlakyBrain("raise")
+    bot, replies = run_bot(brain, scripted_messages(hands=1, timeleft=0.5))
+    assert brain.budgets == [] and bot.deadline_retries == 0 and replies == [F, K, S0, F]
