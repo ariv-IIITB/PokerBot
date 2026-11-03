@@ -321,33 +321,64 @@ def bucket_ranges(rank: np.ndarray, w: np.ndarray, n_buckets: int, always: Optio
     return ids, bw
 
 
-def bucket_kernel(hero_rank, hero_w, hero_b, opp_rank, opp_w, opp_b, dtype=np.float32) -> DenseKernel:
-    """Bucket-vs-bucket expected showdown sign, ignoring card removal. Built from prefix sums
-    over the opponent's sorted combos: O((n0 + n1) log n + n0 * B1)."""
+def bucket_kernel(hero_rank, hero_w, hero_b, opp_rank, opp_w, opp_b, dtype=np.float32,
+                  hero_cards=None, opp_cards=None) -> DenseKernel:
+    """Bucket-vs-bucket expected showdown sign. Built from prefix sums over the opponent's
+    sorted combos: O((n0 + n1) log n + n0 * B1). With the combos' cards given, card removal is
+    kept at bucket level: the mass of pairs sharing a card (from per-bucket card histograms:
+    one B x 52 x B product) scales the sign matrix and gives the fold (compatibility) matrix."""
     nb0 = int(hero_b.max()) + 1
     nb1 = int(opp_b.max()) + 1
     order = np.argsort(opp_rank, kind="stable")
     rs = opp_rank[order]
-    ws = opp_w[order]
-    C = np.concatenate([[0.0], np.cumsum(ws)])
-    bs = opp_b[order]
-    # bucket boundaries are not contiguous in rank in general (buckets were cut on opp's own
-    # rank order, which is this order), so they are contiguous here
-    start = np.searchsorted(bs, np.arange(nb1), "left")
-    end = np.searchsorted(bs, np.arange(nb1), "right")
-    lo = np.searchsorted(rs, hero_rank, "left")
-    hi = np.searchsorted(rs, hero_rank, "right")
-    # for each hero combo and opp bucket: weight below, tied, above
-    lt = C[np.clip(lo[:, None], start[None, :], end[None, :])] - C[start][None, :]
-    le = C[np.clip(hi[:, None], start[None, :], end[None, :])] - C[start][None, :]
-    tot = (C[end] - C[start])[None, :]
-    s = lt + le - tot                                     # sum_j w_j sign(rank_i - rank_j)
-    Mw = np.zeros((nb0, nb1))
-    np.add.at(Mw, hero_b, hero_w[:, None] * s)
+    C = np.concatenate([[0.0], np.cumsum(opp_w[order])])
+    # buckets are contiguous in the rank order (bucket_ranges cut them on it)
+    start = np.searchsorted(opp_b[order], np.arange(nb1), "left")
+    end = np.searchsorted(opp_b[order], np.arange(nb1), "right")
+    oh = np.argsort(hero_rank, kind="stable")
+    hs = hero_rank[oh]
+    hstart = np.searchsorted(hero_b[oh], np.arange(nb0), "left")
+    hend = np.searchsorted(hero_b[oh], np.arange(nb0), "right")
     hw = np.bincount(hero_b, weights=hero_w, minlength=nb0)
     ow = np.bincount(opp_b, weights=opp_w, minlength=nb1)
-    M = Mw / (hw[:, None] * ow[None, :])
-    return DenseKernel(M, None, dtype)
+    pair = hw[:, None] * ow[None, :]
+    # a pair of buckets whose rank ranges do not overlap has a constant sign; only the overlapping
+    # pairs (a band along the diagonal) need the per-member sums
+    sg = (hs[hstart][:, None] > rs[end - 1][None, :]).astype(np.float64) \
+        - (hs[hend - 1][:, None] < rs[start][None, :])
+    Mw = sg * pair
+    ia, ib = np.nonzero(sg == 0)
+    cnt = hend[ia] - hstart[ia]
+    pidx = np.repeat(np.arange(len(ia)), cnt)
+    pos = np.arange(len(pidx)) - np.repeat(np.cumsum(cnt) - cnt, cnt) + hstart[ia][pidx]
+    b = ib[pidx]
+    r_i = hs[pos]
+    lt = C[np.clip(np.searchsorted(rs, r_i, "left"), start[b], end[b])] - C[start[b]]
+    le = C[np.clip(np.searchsorted(rs, r_i, "right"), start[b], end[b])] - C[start[b]]
+    Mw[ia, ib] = np.bincount(pidx, hero_w[oh][pos] * (lt + le - ow[b]), len(ia))
+    M = Mw / pair
+    if hero_cards is None:
+        return DenseKernel(M, None, dtype)
+    hc = np.asarray(hero_cards, dtype=np.int64)
+    oc = np.asarray(opp_cards, dtype=np.int64)
+    U = (np.bincount(hero_b * 52 + hc[:, 0], hero_w, nb0 * 52)
+         + np.bincount(hero_b * 52 + hc[:, 1], hero_w, nb0 * 52)).reshape(nb0, 52)
+    T = (np.bincount(opp_b * 52 + oc[:, 0], opp_w, nb1 * 52)
+         + np.bincount(opp_b * 52 + oc[:, 1], opp_w, nb1 * 52)).reshape(nb1, 52)
+    share = U @ T.T                                       # pairs sharing a card; a shared pair counted twice
+    ok = np.sort(oc, axis=1)
+    hk = np.sort(hc, axis=1)
+    okey = ok[:, 0] * 52 + ok[:, 1]
+    oo = np.argsort(okey)
+    pos = np.minimum(np.searchsorted(okey[oo], hk[:, 0] * 52 + hk[:, 1]), len(okey) - 1)
+    j = oo[pos]
+    same = okey[j] == hk[:, 0] * 52 + hk[:, 1]            # the same combo on both sides
+    if same.any():
+        i = np.nonzero(same)[0]
+        share -= np.bincount(hero_b[i] * nb1 + opp_b[j[i]], hero_w[i] * opp_w[j[i]],
+                             nb0 * nb1).reshape(nb0, nb1)
+    compat = 1.0 - share / pair
+    return DenseKernel(M * compat, compat, dtype)
 
 
 # ------------------------------------------------------------------ the solver
@@ -551,33 +582,69 @@ def make_solver(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w
     return RiverSolver(spot, hero_w, opp_w, k, cfg, dtype, track_all)
 
 
-def solve_river(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w, opp_rank,
-                hero_index: int, deadline: float, cfg: TreeCfg = TreeCfg(),
-                max_iters: int = 10**9, min_iters: int = 0, keep_solver: bool = False,
-                dtype=np.float32, buckets: int = 0, kernel: str = "auto",
-                track_all: bool = False) -> Optional[SolveResult]:
-    """Solve the river spot until `deadline` (a time.perf_counter() value) and return our
-    root strategy for the hand at `hero_index` in `hero_cards`.
+# time left after the ranges (s) -> buckets per player; set from the box-size curve in docs/reports/TIER4_RIVER.md
+AUTO_BUCKETS = ((0.012, 48), (0.06, 64), (INF, 96))
 
-    buckets > 0 : play the bucketed game (that many strength buckets per player, no card
-                  removal); the strategy returned is that of our hand's bucket.
-    kernel      : see make_kernel (ignored when bucketing).
-    Never runs past the deadline except for `min_iters` passes (default 0). Returns None when
-    not a single pass fit (the caller falls back to its own river policy)."""
-    t0 = time.perf_counter()
+
+def auto_buckets(time_left_s: float) -> int:
+    return next(b for t, b in AUTO_BUCKETS if time_left_s < t)
+
+
+def build_game(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w, opp_rank, hero_index: int,
+               cfg: TreeCfg = TreeCfg(), dtype=np.float32, buckets: int = 0, kernel: str = "auto",
+               track_all: bool = False, card_removal: bool = False, auto: bool = False,
+               time_left: float = 0.0):
+    """The solver for one spot, and what a caller needs to read it: (solver, our index in its
+    game, (hero bucket ids, opp bucket ids) or None when it plays exact combos). See solve_river."""
     hr = np.asarray(hero_rank, dtype=np.int64)
     orr = np.asarray(opp_rank, dtype=np.int64)
     hw = np.asarray(hero_w, dtype=np.float64)
     ow = np.asarray(opp_w, dtype=np.float64)
     idx = hero_index
+    if auto:
+        keep_h = hw > 0
+        keep_h[hero_index] = True
+        keep_o = ow > 0
+        if not (keep_h.all() and keep_o.all()):
+            idx = int(keep_h[:hero_index].sum())
+            hero_cards, hr, hw = np.asarray(hero_cards)[keep_h], hr[keep_h], hw[keep_h]
+            opp_cards, orr, ow = np.asarray(opp_cards)[keep_o], orr[keep_o], ow[keep_o]
+        buckets = auto_buckets(time_left)
+        card_removal = True
+        dtype = np.float64            # float32 is no faster at these sizes and hits denormals (up to 3x slower on 5-8 % of spots)
+        if max(len(hw), len(ow)) <= buckets:
+            buckets, kernel = 0, "dense"
     if buckets > 0:
         hb, hbw = bucket_ranges(hr, hw, buckets)
         ob, obw = bucket_ranges(orr, ow, buckets)
-        k = bucket_kernel(hr, hw, hb, orr, ow, ob, dtype)
-        idx = int(hb[hero_index])
-        s = RiverSolver(spot, hbw, obw, k, cfg, dtype, track_all)
-    else:
-        s = make_solver(spot, hero_cards, hw, hr, opp_cards, ow, orr, cfg, kernel, dtype, track_all)
+        k = bucket_kernel(hr, hw, hb, orr, ow, ob, dtype,
+                          hero_cards if card_removal else None, opp_cards if card_removal else None)
+        return RiverSolver(spot, hbw, obw, k, cfg, dtype, track_all), int(hb[idx]), (hb, ob)
+    return make_solver(spot, hero_cards, hw, hr, opp_cards, ow, orr, cfg, kernel, dtype, track_all), idx, None
+
+
+def solve_river(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w, opp_rank,
+                hero_index: int, deadline: float, cfg: TreeCfg = TreeCfg(),
+                max_iters: int = 10**9, min_iters: int = 0, keep_solver: bool = False,
+                dtype=np.float32, buckets: int = 0, kernel: str = "auto",
+                track_all: bool = False, card_removal: bool = False,
+                auto: bool = False) -> Optional[SolveResult]:
+    """Solve the river spot until `deadline` (a time.perf_counter() value) and return our
+    root strategy for the hand at `hero_index` in `hero_cards`.
+
+    buckets > 0   : play the bucketed game (that many strength buckets per player); the
+                    strategy returned is that of our hand's bucket.
+    card_removal  : bucketed game only: keep card removal at bucket level (see bucket_kernel).
+    auto          : choose the best of all that for the time left (ignores `buckets`, `kernel`,
+                    `card_removal`, `dtype`): combos with zero weight are dropped; if both ranges then
+                    fit in the bucket count, the exact game (dense kernel); else bucketed with
+                    card removal, buckets from `auto_buckets(time left)`.
+    kernel        : see make_kernel (ignored when bucketing).
+    Never runs past the deadline except for `min_iters` passes (default 0). Returns None when
+    not a single pass fit (the caller falls back to its own river policy)."""
+    t0 = time.perf_counter()
+    s, idx, _ = build_game(spot, hero_cards, hero_w, hero_rank, opp_cards, opp_w, opp_rank, hero_index, cfg,
+                           dtype, buckets, kernel, track_all, card_removal, auto, deadline - t0)
     t1 = time.perf_counter()
     if t1 >= deadline and min_iters <= 0:
         return None
@@ -600,6 +667,31 @@ def combos_excluding(dead: Sequence[int], n_cards: int = 52) -> np.ndarray:
     return np.stack([live[i], live[j]], axis=1)
 
 
+_RANKS: dict = {"ev": None, "board": None, "keys": np.zeros(0, np.int64), "val": np.zeros(0, np.int64)}
+
+
 def hand_ranks(evaluator, combos: np.ndarray, board: Sequence[int]) -> np.ndarray:
-    """Showdown value (higher wins) of each combo on the 5-card board, any 5 of the 7."""
-    return np.asarray(evaluator.evaluate_batch(combos, np.asarray(board, dtype=np.intp)), dtype=np.int64)
+    """Showdown value (higher wins) of each combo on the 5-card board, any 5 of the 7.
+
+    Values are cached for the last board (and evaluator): our range and theirs overlap almost
+    entirely, and a later river decision of the same hand has the same board, so each combo is
+    evaluated once. Sorted keys + searchsorted, no per-combo Python."""
+    combos = np.asarray(combos, dtype=np.int64)
+    b = tuple(int(x) for x in board)
+    c = _RANKS
+    if c["ev"] is not evaluator or c["board"] != b:
+        c.update(ev=evaluator, board=b, keys=np.zeros(0, np.int64), val=np.zeros(0, np.int64))
+    keys = np.sort(combos, axis=1)
+    keys = keys[:, 0] * 52 + keys[:, 1]
+    pos = np.minimum(np.searchsorted(c["keys"], keys), max(len(c["keys"]) - 1, 0))
+    hit = (c["keys"][pos] == keys) if len(c["keys"]) else np.zeros(len(keys), bool)
+    if not hit.all():
+        new_keys, first = np.unique(keys[~hit], return_index=True)
+        new_val = np.asarray(evaluator.evaluate_batch(combos[~hit][first], np.asarray(b, dtype=np.intp)),
+                             dtype=np.int64)
+        allk = np.concatenate([c["keys"], new_keys])
+        allv = np.concatenate([c["val"], new_val])
+        o = np.argsort(allk, kind="stable")
+        c["keys"], c["val"] = allk[o], allv[o]
+        pos = np.searchsorted(c["keys"], keys)
+    return c["val"][pos]

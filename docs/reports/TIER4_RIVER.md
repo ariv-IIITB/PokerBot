@@ -78,3 +78,53 @@ with the small tree but still only 61 passes.
 * The `tree N decisions` figure in the bench lines is the first spot's, not a median.
 * Nothing in `bot/` imports the module yet, so Tier 3's timing is unchanged (fast suite 1310 passed, 2 skipped;
   `tests/test_timing_slow.py` 10 passed on this machine).
+
+# RA2: the river solver as close to exact as the box allows
+
+Machine: Intel Core Ultra 5 225H, nproc 14 (shared; every timing run held the laptop lock, one BLAS thread to model the
+1-vCPU server), Python 3.11. 60 real river spots (Tier 3 vs the four pool bots), **pinned in one pickle so every variant and
+box sees the same spots, timed back to back in one run**. Exploitability = best response in the exact full game (990/903
+combos, same tree), pot = 1, mean ± SE over the 60 spots (median in brackets); "passes" = median inside the box with the
+ranges (3.0 ms: inference 2.5 + ranks 0.5) and setup included. Raw: `logs/river_bench_RA2_*.txt` (kept in the notes folder,
+not committed). Reproduce: `.venv/bin/python -m lab.river_bench --spots 60 --spots-file S.pkl --box-ms 10,20,40,80
+--variants bucket64/small-tree,bucket64cr/small-tree,auto/small-tree --expl 60 --lock`.
+
+## Result: box-size curve (the numbers RB needs)
+| box | RA (64 equal-mass buckets, float32) | + card removal (64 buckets) | **final: `auto=True`** | final settings |
+|---|---|---|---|---|
+| 10 ms | 154 passes, 0.0177 ± 0.0053 (0.0108) | 132, 0.0167 ± 0.0059 (0.0087) | **144, 0.0098 ± 0.0010 (0.0082)** | 48 buckets |
+| 20 ms | 402, 0.0091 ± 0.0008 (0.0085) | 360, 0.0058 ± 0.0007 (0.0042) | **326, 0.0057 ± 0.0006 (0.0046)** | 64 |
+| 40 ms | 892, 0.0079 ± 0.0007 (0.0068) | 815, 0.0036 ± 0.0004 (0.0026) | **730, 0.0038 ± 0.0005 (0.0028)** | 64 |
+| 80 ms | 1888, 0.0076 ± 0.0007 (0.0065) | 1706, 0.0030 ± 0.0004 (0.0020) | **1114, 0.0030 ± 0.0004 (0.0019)** | 96 |
+
+So exploitability falls from ~1.8 % (10 ms) / 0.9 % (20 ms) to **0.98 % / 0.57 %**, and to 0.38 % at 40 ms and 0.30 % at 80 ms.
+The RA bucketing floor (0.65 %) is gone, which is why the curve now keeps falling with the box. **The ≤ 0.3 % target at 10 ms is not
+reached**: the limit is passes, not the abstraction. CFR+ error goes as ~1/passes (128 buckets, same 30 spots: 25 → 0.058,
+50 → 0.028, 100 → 0.014, 200 → 0.0085, 400 → 0.0050, 800 → 0.0032, 3000 → 0.0022 = the floor), and a 10 ms box holds ~145
+passes. 0.3 % needs ~800 passes, i.e. a ~40 ms box. Passes if the ranges were free: 226 in the 10 ms box (inference alone
+is 2.5 ms of it: that is RB's and `Opponent.range_weights`'s, not this file's).
+
+## Steps (kept = lowers exploitability at 10 ms or removes a risk)
+| # | step | result | |
+|---|---|---|---|
+| 1 | ranks: one evaluation per combo (cache keyed by board; our range ⊂ theirs + 2 cards; later river decision of a hand: free) | 0.63 → 0.48 ms cold, 0.06 ms warm | kept |
+| 1 | bucket kernel: `np.add.at` over (hero combo × bucket) replaced by exact signs outside the overlap band + member sums inside it | setup kernel 3.0 → 0.23 ms (64 buckets), 0.76 ms (128) | kept |
+| 2–3 | **card removal in buckets**: pair-sharing mass from per-bucket card histograms (one B×52×B product), scales the sign matrix, gives the fold matrix; exact when each bucket is one combo (tested) | floor (3000 passes, 30 spots): 64 buckets 0.0065 → 0.0030; 128: 0.0021; 256: 0.0016; 512: 0.0008. At the box: 20 ms 0.0091 → 0.0058, 40 ms 0.0079 → 0.0036 | kept |
+| 2 | bucket count by box (float64, 60 spots, other sample): 10 ms: 24 → 0.0145, 32 → 0.0129, **48 → 0.0123**, 64 → 0.0135, 96 → 0.0181; 20 ms: 48 → 0.0070, **64 → 0.0064**, 96 → 0.0078; 40 ms: 48/**64**/96 = 0.0039/0.0038/0.0040, 128 → 0.0052, 192 → 0.0076; 80 ms: 64/**96**/128 = 0.0030/0.0028/0.0031 | `AUTO_BUCKETS` = 48 below 12 ms, 64 below 60 ms, else 96 | kept |
+| 2 | buckets that never mix hand values (a river range has 30–130 distinct values of 903) | floor unchanged (128: 0.0021) | dropped |
+| 4 | exact when affordable: with `auto`, zero-weight combos are dropped and if both ranges fit in the bucket count the exact dense kernel is used (equal to one-combo buckets, same cost) | tested; the real ranges (903/990 live) never qualify, a restricted range would | kept |
+| 5 | ½ pot back (48 buckets, own game): 10 ms 0.0312, 20 ms 0.0102, 40 ms 0.0058, 80 ms 0.0042 vs 0.0103 / 0.0053 / 0.0038 / 0.0034 for pot + all-in | passes 104 vs 154 at 10 ms | dropped |
+| 6 | PCFR+ (predictive), DCFR(1.5, 0, 2), alternating updates, averaging power 1/2/3/5, coarse-to-fine warm start (16 → 128 buckets), 64 buckets, 100 passes: CFR+ t² 0.0114; PCFR+ 0.0116; DCFR 0.0205; alternating 0.0242 vs 0.0143 (128); power 0.0137/0.0114/0.0110/0.0114; warm start 0.0098 vs 0.0095 at equal passes | none beats CFR+ with t² averaging | dropped (code removed) |
+| 7 | reuse within a hand: 17 % of our river decisions are a second one (35 of 200); they are already easy (small tree): 10 ms 0.0048 ± 0.0014 vs 0.0110 ± 0.0011 for first decisions (11 / 49 spots); the rank cache makes their ranges free | no regret reuse (nothing to gain) | cache only |
+| – | **float64 in `auto`**: float32 is no faster at these sizes (median ratio 0.96 at 32 buckets, 0.91 at 64) and hits denormals (reach products ~1e-40) on 5–8 % of spots, up to 3.4× slower per pass, which gave 0.3–1.7 pot outliers at 10 ms with 96–128 buckets | 10 ms mean: float32 0.0103 ± 0.0015 (max 0.086) vs float64 0.0098 ± 0.0010 (max 0.048) | kept |
+
+## API (unchanged signature; new keyword arguments, defaults keep today's behaviour)
+`solve_river(..., card_removal=False, auto=False)`. **`auto=True`** is the final setting: float64, zero-weight combos dropped,
+exact dense if both ranges fit `auto_buckets(time left)`, else card-removal buckets (48 / 64 / 96 by the time left after the
+ranges, `AUTO_BUCKETS`), `deadline` as before. Use it with `cfg=TreeCfg(bet_sizes=(1.0, INF), raise_sizes=(1.0, INF))`.
+`hand_ranks` caches the last board (also what makes a second decision's ranges free). `build_game(...)` is the same setup
+without running (the bench uses it). Tests: 25 in `tests/test_river_solver.py` (cached ranks equal direct, card-removal kernel
+equals the exact kernel with one combo per bucket, `auto` exact below the bucket count, our hand kept at zero weight,
+deadline respected, exploitability < 3 % after 300 passes). Fast suite 1314 passed, 2 skipped; `test_timing_slow.py` 10 passed.
+Caveats: the first solve in a process runs a few passes slower (cold arrays); times are on this laptop, the server is ~2×
+slower, so the 10 ms row is the 20 ms server box. Our hand's strategy is its bucket's, as before.
