@@ -20,7 +20,7 @@ from lab.eval import LINE, compare as chips_compare  # noqa: E402
 from lab.opps.score_compare import SCORE, compare as score_compare  # noqa: E402
 
 VARIANT = "discard_holdem"
-PROCS = 13                  # user, 2026-11-03: leave one of the 14 cores free, use the rest (driver runs under nice -n 15)
+PROCS = 5                   # manager, 2026-11-03: load ~30 skews wall-clock-budgeted bots; 13 -> 5 (run the driver under nice -n 15)
 DESCENT_PAIRS = 30          # tuning points
 MAX_ROUNDS = 3              # light testing (user, 2026-11-03)
 CONFIRM_PAIRS = 50
