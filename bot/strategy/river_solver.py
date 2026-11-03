@@ -37,6 +37,7 @@ from typing import Optional, Sequence
 import numpy as np
 
 INF = float("inf")
+AVG_POWER = 2                       # averaging weight = pass number ** AVG_POWER
 _BIG = 1 << 26                      # > any evaluator value; keys = card * _BIG + rank
 FOLD, CALL, CHECK, RAISE = "F", "C", "K", "R"
 
@@ -413,6 +414,7 @@ class RiverSolver:
         self.Q[0, 1, :self.n1] = self.w1
         self.R = np.zeros((D, K, N), dtype=dtype)
         self.track_all = track_all
+        self.avg_power = AVG_POWER
         self.A = np.zeros((D, K, N), dtype=dtype) if track_all else np.zeros((1, K, N), dtype=dtype)
         self.iterations = 0
 
@@ -442,7 +444,7 @@ class RiverSolver:
         cv *= self.mask
         R += cv
         np.maximum(R, 0.0, out=R)
-        w = self.iterations + 1
+        w = (self.iterations + 1) ** self.avg_power
         if self.track_all:
             self.A += (w * Q[self.dec, self.actor])[:, None, :] * S
         else:
@@ -551,7 +553,7 @@ def make_solver(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w
 
 def solve_river(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w, opp_rank,
                 hero_index: int, deadline: float, cfg: TreeCfg = TreeCfg(),
-                max_iters: int = 10**9, min_iters: int = 1, keep_solver: bool = False,
+                max_iters: int = 10**9, min_iters: int = 0, keep_solver: bool = False,
                 dtype=np.float32, buckets: int = 0, kernel: str = "auto",
                 track_all: bool = False) -> Optional[SolveResult]:
     """Solve the river spot until `deadline` (a time.perf_counter() value) and return our
@@ -560,7 +562,8 @@ def solve_river(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w
     buckets > 0 : play the bucketed game (that many strength buckets per player, no card
                   removal); the strategy returned is that of our hand's bucket.
     kernel      : see make_kernel (ignored when bucketing).
-    Returns None when setup alone would pass the deadline and min_iters is 0."""
+    Never runs past the deadline except for `min_iters` passes (default 0). Returns None when
+    not a single pass fit (the caller falls back to its own river policy)."""
     t0 = time.perf_counter()
     hr = np.asarray(hero_rank, dtype=np.int64)
     orr = np.asarray(opp_rank, dtype=np.int64)
@@ -580,6 +583,8 @@ def solve_river(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w
         return None
     n = s.run(deadline, max_iters=max_iters, min_iters=min_iters)
     t2 = time.perf_counter()
+    if n == 0:
+        return None
     return SolveResult(s.tree.root_labels, s.root_strategy(idx), n, t1 - t0, t2 - t1,
                        s if keep_solver else None)
 

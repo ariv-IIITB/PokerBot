@@ -205,3 +205,44 @@ def test_fold_everything_pot_odds() -> None:
                       int(np.argmax(r)), deadline=time.perf_counter() + 0.3)
     fold_p = res.probs[[l[0] == FOLD for l in res.labels]].sum()
     assert fold_p < 0.05                                          # the best hand never folds
+
+
+def _spot_inputs(seed: int = 2):
+    board, cards = _board_and_pool(seed, 2)
+    combos = combos_excluding(list(board) + list(cards))
+    return combos, hand_ranks(EV, combos, board), np.ones(len(combos))
+
+
+@pytest.mark.parametrize("buckets,kernel", [(0, "sorted"), (0, "dense"), (24, "auto")])
+def test_float32_default_and_buckets_respect_deadline(buckets, kernel) -> None:
+    combos, ranks, w = _spot_inputs()
+    t0 = time.perf_counter()
+    res = solve_river(SPOTS[2], combos, w, ranks, combos, w, ranks, hero_index=11,
+                      deadline=t0 + 0.3, buckets=buckets, kernel=kernel)
+    elapsed = time.perf_counter() - t0
+    assert res is not None and res.iterations >= 1
+    assert abs(res.probs.sum() - 1.0) < 1e-9 and (res.probs >= 0).all()
+    assert elapsed < 0.3 + 0.1                                    # at most one pass over
+
+
+def test_bucketed_best_hand_never_folds_and_air_rarely_calls() -> None:
+    board = np.array([0, 5, 10, 15, 20])
+    cards = np.array([25, 30, 35, 40, 45, 3])
+    hero = _combos(cards)
+    r = hand_ranks(EV, hero, board)
+    spot = RiverSpot(pot=20, opp_bet=10, hero_stack=90, opp_stack=90, last_raise=10, aggr_so_far=1)
+    w = np.ones(len(hero))
+    best = solve_river(spot, hero, w, r, hero, w, r, int(np.argmax(r)), time.perf_counter() + 0.2,
+                       buckets=6, max_iters=600)
+    worst = solve_river(spot, hero, w, r, hero, w, r, int(np.argmin(r)), time.perf_counter() + 0.2,
+                        buckets=6, max_iters=600)
+    fold = [l[0] == FOLD for l in best.labels]
+    assert best.probs[fold].sum() < 0.05
+    assert worst.probs[fold].sum() > best.probs[fold].sum()
+
+
+def test_bucketed_exploitability_small_in_its_own_game() -> None:
+    combos, ranks, w = _spot_inputs(7)
+    s = solve_river(SPOTS[0], combos, w, ranks, combos, w, ranks, 5, time.perf_counter() + 5.0,
+                    buckets=32, max_iters=300, keep_solver=True, track_all=True, dtype=np.float64).solver
+    assert s.exploitability() < 0.02
