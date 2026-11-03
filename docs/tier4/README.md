@@ -12,7 +12,8 @@ P  portfolio PA ──► PB tuning ─────────┐
                     PC selection ──────┴► PD gate P ─────►
 D  discard  DA rollouts + retune ─────────────────────┐
             (after S0) DB learn their rule ──────────┴► DC our discard ──►
-R  river    RA spike ───► RB integrate ─────────────► RC gate R ─────►
+R  river    RA spike ───► RB integrate ─────────────┐
+                     └──► RA2 near-exact solver ─────┴► RC gate R ─────►
 I  merge                                                                          I1 ────────►
 ```
 
@@ -29,8 +30,9 @@ Sub-plan IDs use letters so they don't clash with the section labels (P0–P4, D
 | **DB** | `DB_learn.md`: rule fit, "do they read our discard", learned keep rule if go | D0, D4, D2 | `tier4/d-learn` | S0 | — | Opus, cloud |
 | **DC** | `DC_our_discard.md`: merge DB, our discard vs their rule, discard budget | D3 | `tier4/d` | DA + DB | — | Sonnet, cloud |
 | **RA** | `RA_spike.md`: solver + ranges, speed and exploitability | R0 | `tier4/r` | — | — | Opus, cloud |
+| **RA2** | `RA2_exact.md`: solver as close to exact as the box allows (cheaper ranges, better buckets, card removal, exact when small, DCFR, reuse) | R0 (accuracy) | own branch from `tier4/r` | RA | — | Opus, cloud |
 | **RB** | `RB_integrate.md`: solver in Tier 3's river behind a flag, own range, timing | R1 | `tier4/r` | RA (go) | — | Opus, cloud |
-| **RC** | `RC_gate.md`: accounting SE, gate R, restricted p | gate R, restricted p | `tier4/r` | RB | S0 | Sonnet, cloud |
+| **RC** | `RC_gate.md`: merge RA2 into RB's branch, accounting SE, gate R, restricted p | gate R, restricted p | `tier4/r` | RB + RA2 | S0 | Sonnet, cloud |
 | **I1** | `I1_integrate.md`: merge P + D + R, combined gates, held-out, package | last | `tier4/main` | PD, DC, RC | — | Opus, cloud |
 
 **First, four sessions run at once: S0, PA, DA and RA.** After that, a session starts as soon as its
@@ -83,7 +85,7 @@ prerequisite has pushed its handoff.
 | S0 | `lab/opps/record.py`, `lab/opps/score_compare.py` (new), `logs/records/` |
 | P | `bot/brains/tier4p.py` (new), `bot/brains/tier4p_select.py` (new, PC), `bot/brains/exploit.py`, `bot/main.py` (the registry line only), `lab/eval.py` (`LOCK_BRAINS` only), `lab/sparring/adversary.py` (new), `tests/test_tier4p*.py`, `tests/test_timing_slow.py`, `docs/reports/TIER4P.md` |
 | D | `bot/sim/rollout.py`, `bot/sim/inference.py`, `bot/sim/discard.py`, `bot/config/tier3.json` (new: D's tuned Tier 3 values), `lab/opps/discard_rules.py` (new), `tests/test_discard_*.py`, `docs/reports/TIER4_DISCARD.md` |
-| R | `bot/strategy/river_solver.py` (new), `bot/strategy/own_range.py` (new), `bot/brains/tier3.py`, `bot/timing.py`, `lab/opps/accounting.py`, `lab/river_bench.py` (new), `tests/test_river_*.py`, `docs/reports/TIER4_RIVER.md` |
+| R | `bot/strategy/river_solver.py` (new; RA2 only, once RA2 starts), `bot/strategy/own_range.py` (new), `bot/brains/tier3.py`, `bot/timing.py`, `lab/opps/accounting.py`, `lab/river_bench.py` (new), `tests/test_river_*.py`, `docs/reports/TIER4_RIVER.md` |
 | I | merges only; `docs/STATUS.md`, `docs/SUBMISSIONS.md` |
 
 Not ours: `bot/cfr/`, `lab/cfr/fast/` and `docs/reports/TIER4.md` (the teammate's CFR, Tier 5).
