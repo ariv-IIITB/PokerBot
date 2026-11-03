@@ -6,7 +6,7 @@ Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §R (
 `docs/reports/TIER4_RIVER.md`. Nothing under `bot/cfr/` (the teammate's).
 
 **Why a spike first:** a decision's budget is ~4.5–5.4 ms and the hard deadline is 80 ms (→ Tier 0). The plan gives
-the river a time box of 4 × the budget, ≤ 20 ms on this laptop (≈ half the iterations on the 2× server). The solver
+the river a time box of 4 × the budget, ≤ 20 ms (≈ half the iterations on the 2× slower server). The solver
 must be useful inside that.
 
 ## Tasks
@@ -24,13 +24,11 @@ must be useful inside that.
    Tests in `tests/test_river_solver.py`: toy exploitability, the deadline is respected, card removal (no combo uses
    a board or discarded card), output sums to 1 over legal actions.
 4. **Speed** (`lab/river_bench.py`): iterations per ms on 200 real river spots from S0's recordings, or from a few
-   `lab.harness` matches if S0 isn't ready. **Go if ≥ 50 iterations fit in 10 ms on this laptop, range building
+   `lab.harness` matches if S0 isn't ready. **Go if ≥ 100 iterations fit in 20 ms on this machine (≈ 50 on the 2× slower server), range building
    included.**
 5. If the full version misses: try the reduced one before giving up (prune combos with near-zero weight, one showdown
    ranking per river shared by all terminals, sizes pot + all-in only, warm start). Report both.
 
-**Provisional (cloud):** the GO is a cloud number. RB's step 0 re-runs the bench on the laptop and makes it final.
-
 ## Done when
-- `docs/tier4/handoff/RA.md`: **GO or NO-GO**, iterations per 10 ms (full and reduced), exploitability on toy rivers,
+- `docs/tier4/handoff/RA.md`: **GO or NO-GO**, iterations per 20 ms (full and reduced) and the machine, exploitability on toy rivers,
   the solver's API (signature), the commit. On NO-GO, R stops; I1 keeps Tier 3's river.

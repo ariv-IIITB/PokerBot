@@ -1,4 +1,4 @@
-# S0: recordings and the match-score script (Sonnet, laptop)
+# S0: recordings and the match-score script (Sonnet, cloud)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file. Branch `tier4/s0` from `origin/tier4/base`.
 Files you may edit: `lab/opps/record.py`, `lab/opps/score_compare.py` (new), `logs/records/`, tests for them.
@@ -12,9 +12,9 @@ every hand** (DB, PD, RC), and **a script that compares match scores** (the seco
    and the actions. Add `opp_hole3`: the opponent's 3 dealt cards on **every** hand, and their discard when one
    happened. The lab engine knows all cards, so this is lab-side only. Keep the old fields unchanged (X0 tools read
    them). Add a round-trip test (record → load → `opp_hole3` present on fold hands too).
-2. **Recordings.** Run with Tier 3 (default brain), locks off, seeds 9000–9011, `--processes` and the `flock -s` wrapper per README rule 3 (N below):
+2. **Recordings.** Run with Tier 3 (default brain), locks off, seeds 9000–9011, `--processes` per README rule 3 (N below):
    ```bash
-   flock -s /tmp/pokerbot_laptop.lock .venv/bin/python -m lab.opps.record --brain tier3 --pool train,starter,calling_station,tight,maniac,random_legal,all_in --pairs 12 --first-seed 9000 --processes N --out logs/records/s0_9000
+   .venv/bin/python -m lab.opps.record --brain tier3 --pool train,starter,calling_station,tight,maniac,random_legal,all_in --pairs 12 --first-seed 9000 --processes N --out logs/records/s0_9000
    ```
    Check the size. If it is over ~20 MB, gzip the files and make the loader read `.gz`. Commit them, so other sessions
    (and other machines) can use them. Never record held-out bots.

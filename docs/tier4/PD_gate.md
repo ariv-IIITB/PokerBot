@@ -1,8 +1,8 @@
-# PD: gate P (Sonnet, laptop, mostly compute)
+# PD: gate P (Sonnet, cloud, mostly compute)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` "Gate P", handoffs `PA.md`, `PB.md`,
 `PC.md`, `S0.md`. Branch `tier4/p`: merge `origin/tier4/p-tune` and `origin/tier4/p-sel` into it first (they touch
-different files). Seeds 12000+. Laptop: `--processes` and the `flock` wrapper per README rule 3.
+different files). Seeds 12000+. `--processes` per README rule 3.
 
 **Compute:** this is the largest run set (step 0, 3 member head-to-heads, the 100-pair head-to-head, the pool locks
 on/off × 2 arms, the adversary, Stage 2 30 pairs × 1000 hands × 2 arms × 2 lock modes). If it runs too long,
@@ -11,7 +11,7 @@ cut the Stage 2 run to 20 pairs before anything else.
 The incumbent is the one PA named (`tier3x` if gate X passed, else `tier3`).
 
 ## Step 0: make PB's values binding
-Each tuned member's chosen point vs its family, 50 pairs, on the laptop, two-part KEEP against the member's starting
+Each tuned member's chosen point vs its family, 50 pairs, two-part KEEP against the member's starting
 values. If it fails, that member uses its starting values.
 
 ## Gate P (all must pass)
@@ -27,7 +27,8 @@ values. If it fails, that member uses its starting values.
 5. **Adversary:** 50 pairs vs `adversary`: lose no more than the incumbent does + 2 SE.
 6. **Stage 2:** one 1000-hand pool run (30 pairs, `--hands 1000`), incumbent on the same seeds, two-part KEEP.
 7. **Timing and size:** add `tier4p` cases to `tests/test_timing_slow.py` (400 hands / 60 s and 1000 / 150 s at 2×
-   slower, vs calling_station and trapper). ≤ 50 % of the bank; deadline hits ≤ the Tier 3 baseline + 2√baseline over
+   slower, vs calling_station and trapper) and the README rule 3 timing ratio (≤ 1.4 × Tier 3's bank use); deadline
+   hits ≤ the Tier 3 baseline + 2√baseline over
    the same hands. `.venv/bin/python -m lab.memory_check --variant discard_holdem` < 500 MB.
    `.venv/bin/python -m tools.package_submission --zip --stage2 --brain tier4p` passes.
 

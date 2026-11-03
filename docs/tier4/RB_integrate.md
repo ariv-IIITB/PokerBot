@@ -1,13 +1,13 @@
-# RB: the solver in Tier 3's river (Opus, laptop)
+# RB: the solver in Tier 3's river (Opus, cloud)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §R (R1, our range, their range),
 `docs/tier4/handoff/RA.md`, `bot/brains/tier3.py` (its river section), `bot/strategy/ranges.py` (`OwnRange`),
 `bot/timing.py`, `bot/main.py` (the hard-deadline fallback). Branch `tier4/r` (continue after RA's GO).
 Files: the R row of the README's ownership table.
 
-## Step 0: make RA's GO final (laptop)
-Re-run `lab/river_bench.py` on the laptop under `flock -x /tmp/pokerbot_laptop.lock`. If it misses the GO bar
-(≥ 50 iterations in 10 ms, range building included), try RA's reduced variant; if that misses too, stop and write
+## Step 0: re-check RA's GO on your machine
+Re-run `lab/river_bench.py` (your machine may differ from RA's). If it misses the GO bar
+(≥ 100 iterations in 20 ms, range building included), try RA's reduced variant; if that misses too, stop and write
 a NO-GO handoff.
 
 ## Tasks
@@ -22,7 +22,7 @@ a NO-GO handoff.
 3. **Timing:** add `river_budget_s` to `TimingConfig`. Confirm that the hard deadline (max(80 ms, 6 × budget)) is never
    reached by the box; if it can be, raise the hard limit for river decisions only, within `hard_cap_s` and the
    per-reply rule. New `tests/test_river_timing.py` (slow): 400 hands / 60 s and 1000 / 150 s at 2× slower, vs
-   calling_station and trapper, with the flag on: ≤ 50 % of the bank, deadline hits ≤ the flag-off baseline +
+   calling_station and trapper, with the flag on: README rule 3's timing ratio (≤ 1.4 × Tier 3 flag-off), deadline hits ≤ the flag-off baseline +
    2√baseline.
 4. **Sensitivity:** on 200 river spots, the solver's EV with our range flattened vs built. If it changes by > 20 % of
    the pot, write that our range is the weak point (RC reads gate R with that caveat).

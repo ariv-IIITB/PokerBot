@@ -1,13 +1,9 @@
-# DC: our discard (Sonnet, laptop)
+# DC: our discard (Sonnet, cloud)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §D3–D4, handoffs `DA.md` and `DB.md`,
 and `bot/sim/discard.py` (`choose_discard`). Branch `tier4/d`: merge `origin/tier4/d-learn` into it first.
 Files: `bot/sim/discard.py`, `bot/config/tier3.json`, `tests/test_discard_*.py`, `docs/reports/TIER4_DISCARD.md`.
-Seeds 21500+. Laptop: `--processes` and the `flock` wrapper per README rule 3.
-
-## Step 0: make the cloud numbers binding (laptop)
-Re-run DA's 50-pair fresh-seed confirmation and the timing check (under `flock -x`), and DB part 2's KEEP if part 2
-ran. A piece that fails here is DROP: remove its values from `bot/config/tier3.json` (or leave its param off).
+Seeds 21500+. `--processes` per README rule 3.
 
 ## Tasks
 1. **Their keep rule in our discard:** if DB kept `discard_rule_model`, `choose_discard` lets the simulated opponent keep

@@ -20,8 +20,8 @@ For each member `anti_folder`, `anti_value`, `anti_aggro` (members forced with `
    keep the starting values and say so.
 5. Fast suite green, push, handoff.
 
-**Cloud results only rank grid points.** The binding KEEP for each chosen point is PD's step 0 on the laptop.
-Compute guide: `anti_folder` ≈ 1.3 M hands (exploiter, the slowest bot, plays ~96 hands/s on the whole laptop), the
+The binding KEEP for each chosen point is PD's step 0 (it re-runs it next to gate P, on PD's machine).
+Compute guide: `anti_folder` ≈ 1.3 M hands (exploiter, the slowest bot, plays ~96 hands/s on a 14-core machine), the
 others ≈ 0.4 M each. Run `anti_folder` first: it is the largest.
 
 ## Done when
