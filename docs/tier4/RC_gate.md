@@ -20,7 +20,7 @@ clean; run the fast suite and RA's bench once after the merge.
      can game);
    - timing: RB's slow test passes.
    If RB's sensitivity check flagged our range, state that caveat next to the result.
-3. **Restricted river (RNR), only if gate R passed and time allows** (slip rule: this goes first). A hidden coin makes
+3. **Restricted river (RNR), required** (its own gate decides KEEP/DROP; the slip rule drops it first only if the deadline gets close). A hidden coin makes
    the opponent the model player with probability p, otherwise a free player solved by CFR+. The model player's per-hand
    P(fold / call / each size) comes from `inference.py`'s bet model (logits γ × (strength − pivot)), with a pivot and
    γ per X2 type fitted on S0's recordings (9000–9005, scored on 9006–9011) and embedded via `tools.embed_data`.

@@ -17,7 +17,7 @@ Level within noise means `tier3` ships.
    - combined timing, 400/60 s and 1000/150 s, vs calling_station and trapper: README rule 3's ratio (≤ 1.4 × Tier 3);
      deadline hits ≤ baseline + 2√baseline; `lab.memory_check` < 500 MB;
    - best candidate vs the incumbent as currently shipped (`tier3` on `main`): head-to-head 100 pairs, score ≥ 0.5 + 2 SE
-     to call it an improvement; training pool two-part KEEP; a Stage 2 run (1000 hands, 30 pairs).
+     to call it an improvement; training pool two-part KEEP; a Stage 2 run (1000 hands, 30 pairs, then sequential). All comparisons use the README's sequential test.
    **Retries, at most 2.** Retry 1 drops the piece the failing gate points at (if unclear, the next in slip order:
    R's restricted p → DC → DB's learned rule → R entirely → `tier4p`'s portfolio), and re-runs only the failing gate.
    Retry 2 falls back to the incumbent (`tier3x` or `tier3`) plus the KEEPs that survived. If that fails too, `tier3`

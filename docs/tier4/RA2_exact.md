@@ -13,8 +13,10 @@ options only as keyword arguments with defaults that keep today's behaviour). Do
 ## Goal
 RA's chosen variant (64 buckets, pot + all-in) is ~1 % of the pot away from the exact game (floor 0.8 %, from bucketing),
 at 249 passes in 20 ms and 72 in the 10 ms stand-in for the 2× slower server. **Get as close to the exact game as
-possible inside the same box.** Target: median exploitability **≤ 0.3 % of the pot in the exact full game** with the
-**10 ms box** (the 2× server stand-in), range building included. Exploitability is measured the way RA's bench does
+possible.** Report exploitability against box size (10, 20, 40, 80 ms; the 10 ms box stands in for 20 ms on the 2×
+slower server), so RB can pick the largest box the time bank allows (README: spend the safe time). Aim for median
+exploitability **≤ 0.3 % of the pot in the exact full game** at 10 ms, and as low as reachable at larger boxes; keep
+going until a step stops helping, not until the target is met. Exploitability is measured the way RA's bench does
 (exact best response in the full, unbucketed game, against the given ranges).
 
 ## Steps (measure after each with `lab/river_bench.py`; keep a step only if it lowers exploitability at 10 ms)
