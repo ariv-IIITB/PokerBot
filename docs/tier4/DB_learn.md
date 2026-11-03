@@ -1,4 +1,4 @@
-# DB: what their discard tells us (Opus, ~1–1.5 days)
+# DB: what their discard tells us (Opus, cloud)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §D0, D2, D4, `docs/tier4/handoff/S0.md`,
 and `bot/sim/discard.py` (`opponent_keeps`), `bot/sim/inference.py` (`_discard_ll`, `beta`, `Trust`).

@@ -1,4 +1,4 @@
-# RB: the solver in Tier 3's river (Opus, ~1–1.5 days)
+# RB: the solver in Tier 3's river (Opus, laptop)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §R (R1, our range, their range),
 `docs/tier4/handoff/RA.md`, `bot/brains/tier3.py` (its river section), `bot/strategy/ranges.py` (`OwnRange`),

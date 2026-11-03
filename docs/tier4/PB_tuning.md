@@ -1,4 +1,4 @@
-# PB: tune the members (Sonnet, ~1 day, mostly compute)
+# PB: tune the members (Sonnet, cloud, mostly compute)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/tier4/handoff/PA.md`.
 Branch `tier4/p-tune` from `origin/tier4/p` (after PA). Edit only the `MEMBERS` values in `bot/brains/tier4p.py`
@@ -22,8 +22,7 @@ For each member `anti_folder`, `anti_value`, `anti_aggro` (members forced with `
 
 **Cloud results only rank grid points.** The binding KEEP for each chosen point is PD's step 0 on the laptop.
 Compute guide: `anti_folder` ≈ 1.3 M hands (exploiter, the slowest bot, plays ~96 hands/s on the whole laptop), the
-others ≈ 0.4 M each. Time scales with `--processes` (nproc − 1 here): at 3 processes ≈ 6–8 h for `anti_folder` and
-≈ 2 h for each other member; at 12, about a quarter of that.
+others ≈ 0.4 M each. Run `anti_folder` first: it is the largest.
 
 ## Done when
 - Each member: grid table, the 2 confirmed points with ± SE, the restriction check, the chosen values — all in

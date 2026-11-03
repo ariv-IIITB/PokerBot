@@ -1,4 +1,4 @@
-# DC: our discard (Sonnet, ~1 day)
+# DC: our discard (Sonnet, laptop)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §D3–D4, handoffs `DA.md` and `DB.md`,
 and `bot/sim/discard.py` (`choose_discard`). Branch `tier4/d`: merge `origin/tier4/d-learn` into it first.
@@ -13,7 +13,7 @@ ran. A piece that fails here is DROP: remove its values from `bot/config/tier3.j
 1. **Their keep rule in our discard:** if DB kept `discard_rule_model`, `choose_discard` lets the simulated opponent keep
    by the learned rule (else `opponent_keeps`, as now). Behind a param; A/B vs `tier3` (with DA's values), 50 pairs,
    two-part KEEP, then a fresh-seed confirmation. Skip if DB's part 2 didn't run or was dropped.
-2. **Discard budget:** `special_budget_frac` (0.8 of the decision budget today) at 0.8 / 1.5 / 3. Measure in
+2. **Discard budget:** `special_budget_frac` (currently 0.8 of the decision budget) at 0.8 / 1.5 / 3. Measure in
    `lab.eval` (two-part KEEP, 50 pairs), not `lab.discard_bench` (no betting, no ranges). Check timing at 2× for
    each: the discard counts toward the bank. Keep the cheapest value within 1 SE of the best.
 3. **Signal (only for bots DB found reacting to our discard):** among discards within `hide_margin` of the best,

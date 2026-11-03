@@ -1,4 +1,4 @@
-# Tier 4 plan (v5, 2026-11-02, after four santa review rounds)
+# Tier 4 plan (v5, after four santa review rounds)
 
 **Running it:** this plan is split into one-session sub-plans in `docs/tier4/` (start with `docs/tier4/README.md`).
 
@@ -8,15 +8,15 @@ plan, `PHASE_H_PLAN.md` and the Problem Statement). Phase H runs in parallel in 
 when it lands (expect conflicts only in `bot/main.py` and the generated `bot/embedded.py`: regenerate it with
 `tools.embed_data`, never hand-merge).
 
-**This plan supersedes `docs/CFR_BUILDMAP.md` §3 from X4 on** (league tuning and "ship `tier3x` by 9 Nov"). Gate X
-moves to Tue 3 Nov night. Track C (§4) is the teammate's, independent until 10 Nov; merging it is **Tier 5**. Our
+**This plan supersedes `docs/CFR_BUILDMAP.md` §3 from X4 on** (league tuning and "ship `tier3x`"). Track C (§4) is
+the teammate's and stays independent; merging it is **Tier 5**. Our
 files never go under `bot/cfr/` (the teammate's C7 also plans `bot/cfr/river.py`); we own the live river solver,
 and the teammate is told so.
 
 **Tier 4 = Tier 3 + one counter-strategy per opponent family, chosen by the type posterior + a live river solver +
 better use of the discard.** Tier 3 is the fallback inside every decision. Brain name `tier4p` (`tier4` is the CFR
 brain). Training bots (`lab/opps/discard_pool.json`): conv_opp3, rules, lag, trapper, exploiter, minraise. Held-out
-bots (conv_opp4, eqrandom, geometric): never tuned on, two `--final` runs on 9 Nov (incumbent and `tier4p`, same seeds).
+bots (conv_opp4, eqrandom, geometric): never tuned on, two `--final` runs (incumbent and `tier4p`, same seeds).
 
 **Measured numbers used below:** throughput 96–579 hands/s across the machine, slowest for exploiter (96),
 trapper (151), conv_opp3 (209) (`logs/g/recheck/`). Head-to-head SE between near-identical brains is ~0.02 chips/hand
@@ -38,7 +38,7 @@ per-hand SD is ~30–50 chips, so after 400 hands a member's SE is ~2 chips/hand
 (`docs/reports/TIER3.md`). Limit hold'em, where Hyperborean ran, has far lower variance. So members are **chosen by
 the X2 type posterior**, and IS is a later, optional bail-out (P4).
 
-### P0. Baselines and recordings (Tue 3)
+### P0. Baselines and recordings
 - **P0a:** gate X (`docs/CFR_BUILDMAP.md` §3): `tier3x` vs `tier3`, training pool, 50 pairs, locks on, against
   `logs/g/recheck/pool_t3.txt`. That is the incumbent number P must beat.
 - **P0b:** re-record (`lab.opps.record`; `logs/records/` is not on this machine) **12 fresh-seed pairs (24 matches) per training
@@ -47,7 +47,7 @@ the X2 type posterior**, and IS is a later, optional bail-out (P4).
   `record.py` first (lab side only) to save **the opponent's dealt 3 cards on every hand**, not only at showdown;
   D0 needs them.
 
-### P1. Members, one per X2 family (Wed 4)
+### P1. Members, one per X2 family
 X2's families are disjoint (`docs/reports/TRACK_X.md` on the branch): over-folder (exploiter, conv_opp3, rules),
 value-only (minraise), nit (tight), station (starter = calling_station), trapper (trapper), aggressor (lag, maniac),
 unknown. Members are parameter overrides on Tier 3, applied through the `exploit.adjust` mechanism (a pure function
@@ -60,14 +60,14 @@ over `adjusted()`'s dict):
 | `anti_value` | value-only, trapper | fold bluff-catchers to river bets and raises; fold medium hands to a trapper's raises | X3's value-only move |
 | `anti_aggro` | aggressor | call down wider, fewer bluffs | new |
 
-**Tuning (the "restricted" part of RNR, measured, not solved), Wed 4 night:** per member, ≤ 3 parameters × 3
+**Tuning (the "restricted" part of RNR, measured, not solved):** per member, ≤ 3 parameters × 3
 values (≤ 27 points), 16 pairs per point against its family's training/sparring bots. The best 2 points get a
 **50-pair confirmation on fresh seeds** (winner's curse). Constraint: head-to-head vs Tier 3 at 50 pairs not worse
 than −0.10 chips/hand (≈ 3 SE) and match score ≥ 0.5 − 2 SE. Compute: the grid runs once per bot in the family
-(`anti_folder`: exploiter at 96 hands/s, conv_opp3, rules ≈ 1.3 M hands ≈ 2 h; the other members ~0.5 h each);
-the head-to-head constraint runs only on the 2 confirmed points. ≈ 4–5 h in all: one night.
+(`anti_folder`: exploiter at 96 hands/s, conv_opp3, rules ≈ 1.3 M hands; the other members ≈ 0.4 M each);
+the head-to-head constraint runs only on the 2 confirmed points.
 
-### P2. Selection and bail-out (Thu 5)
+### P2. Selection and bail-out
 - Per hand: let F be the family with the highest posterior mass (summed over its types). Play F's member when
   - mass(F) ≥ 0.8 for the last 20 of our decisions, **and**
   - where X1 has a test for that trait, it says yes: the over-folder SPRT for `anti_folder`. For `anti_value` and `anti_aggro` (no X1 test exists) require ≥ 60 opponent decisions seen
@@ -81,9 +81,9 @@ the head-to-head constraint runs only on the 2 confirmed points. ≈ 4–5 h in 
   to three. At ~4 chips/hand SE by hand 100 it only catches large losses; that is its job.
 - **Safe-exploitation spirit** (Ganzfried & Sandholm 2015): the stop-loss limits what a wrong read can cost. It is a
   heuristic, not the paper's guarantee, which needs the game value.
-- **Endgame lock** as today, before the portfolio.
+- **Endgame lock** as now, before the portfolio.
 
-### Gate P (Fri 6–Sat 7)
+### Gate P
 - **Detection on fresh seeds** (P0b's recordings, never used to build `types.json`): over hands 200–400, the right
   member plays ≥ 70 % of hands against each training/sparring bot, and `base` plays ≥ 90 % of hands against
   random_legal and all_in (style outside the library).
@@ -97,13 +97,13 @@ the head-to-head constraint runs only on the 2 confirmed points. ≈ 4–5 h in 
 - **Adversary:** a lab bot that over-folds for 100 hands, then calls everything. 50 pairs; lose no more than `tier3`
   does + 2 SE.
 - **Stage 2:** one 1000-hand pool run (30 pairs), two-part KEEP.
-- Timing and size: add `tier4p` cases to `tests/test_timing_slow.py` (today it hardcodes tier2/tier3): 400 hands / 60 s and
+- Timing and size: add `tier4p` cases to `tests/test_timing_slow.py` (it currently hardcodes tier2/tier3): 400 hands / 60 s and
   1000 / 150 s at 2× slower, vs calling_station and trapper (high showdown rates). ≤ 50 % of the bank; deadline hits ≤ the
   Tier 3 baseline + 2√baseline over the same hands; `lab.memory_check` < 500 MB; `tools.package_submission --zip --stage2
   --brain tier4p` passes. Pass → **upload candidate**.
 - **If gate P fails:** `tier4p` is shelved for Tier 4. The incumbent (`tier3x` if gate X passed, else `tier3`) is the
   base for D and R: their gates compare the incumbent with vs without each piece, and the incumbent (plus any KEEPs)
-  is what ships on 10 Nov.
+  is what ships.
 - Add `tier4p` to `LOCK_BRAINS` in `lab/eval.py`, or `--locks off` silently keeps its lock.
 
 ### P4. IS bail-out: **dropped** (no sub-plan builds it; kept here for the reasoning)
@@ -113,7 +113,7 @@ the head-to-head constraint runs only on the 2 confirmed points. ≈ 4–5 h in 
   in the go/no-go), the difference estimator
   `Σ_hands (w_k − 1) · Δ` has SE ≈ SD · √f / √n. **Go only if power ≥ 0.8 at hand 400 for a 2-chip edge**, with
   Holm over the members and alpha split over the three checkpoints.
-- If go: refactor Tier 3 into `policy(situation, params) -> [(Action, prob)]`. Today it mixes through ~20 coin-flip
+- If go: refactor Tier 3 into `policy(situation, params) -> [(Action, prob)]`. It currently mixes through ~20 coin-flip
   and state sites (`self._chance`, `_line`, `_floated` in `bot/brains/tier3.py`) plus Tier 2's random size choice.
   Per-hand state is passed in, not mutated. Test: one member, same seed → same actions as before.
   The behaviour policy is a per-hand mixture over members. Weights are clipped at 20, and the bias is stated in the report.
@@ -122,28 +122,28 @@ the head-to-head constraint runs only on the 2 confirmed points. ≈ 4–5 h in 
 
 ## D. The discard
 
-Today: our discard is sampled and importance-weighted by inference (`bot/sim/discard.py` `choose_discard`, given
+Currently: our discard is sampled and importance-weighted by inference (`bot/sim/discard.py` `choose_discard`, given
 `opponent.model`). The opponent's hand is weighted by a "sensible discard" softmax (`bot/sim/inference.py`,
 `beta`, scaled by `Trust.level("discard")`). The fixed part is their **keep rule**, `opponent_keeps`
 (`bot/sim/discard.py:52`): keep the pair that makes the best 5-card hand with the flop, ties to higher ranks.
-Gap found 2 Nov: **flop equity rollouts discard at random for both players** (`smart_rollout_discard` off,
+Gap found: **flop equity rollouts discard at random for both players** (`smart_rollout_discard` off,
 `bot/sim/rollout.py`). Note: "60–68 % discard their lowest card" (book §2.8) doesn't show that LLM bots discard
 badly: Tier 1 and 2 also show 61 %, because the best keep often drops the lowest card.
 
-### D0. Is there anything to learn? (Wed 4, offline, on P0b's recordings)
+### D0. Is there anything to learn? (offline, on P0b's recordings)
 For each training bot, which of these rules matches its discards: `opponent_keeps` (the baseline),
 `drop_lowest`, `keep_pair`, `keep_flush_draw`, `keep_straight_draw`, `random`. Also how often each rule disagrees with
 `opponent_keeps` on that bot's real deals. **Go for D2 only if** some training bot's discards disagree with
 `opponent_keeps` on ≥ 15 % of its hands *and* one rule from the list explains ≥ 80 % of them.
 
-### D1. Flop equity with real discards (Wed 4 code · Thu 5 night grid)
+### D1. Flop equity with real discards
 This tests a hypothesis, not a fact: Phase E's smart rollouts lost 1.3 ± 0.4 vs tier1 (Tier 2, 30 pairs), perhaps because
 the thresholds were tuned on random-discard equity. On Tier 3: (a) smart rollouts on, no retune; (b) plus a 3 × 3 grid
 on `raise_equity` × `call_margin`. 30 pairs per point on the training pool + tier1 + tier2, then the best point at
 50 pairs on fresh seeds: two-part KEEP. Timing re-checked (pure-Python `_best_discard` per rollout). A D1 KEEP goes into `tier4p` (and the
-incumbent) before gate P's runs on Thu night; later D KEEPs are added after gate P, each with its own gate.
+incumbent) before gate P's runs; later D KEEPs are added after gate P, each with its own gate.
 
-### D2. Learn their keep rule (Fri 6, only if D0 went)
+### D2. Learn their keep rule (only if D0 went)
 - A posterior over D0's rules, updated at each showdown after a discard, when all 3 of their cards are known.
   Noise floor 10 %; the prior per X2 type comes from D0's rule mix, fitted on P0b's seeds 9000–9005, scored on 9006–9011.
 - Feeds `inference.py`'s discard likelihood: the rule mixture replaces the fixed softmax.
@@ -151,21 +151,21 @@ incumbent) before gate P's runs on Thu night; later D KEEPs are added after gate
   data on seeds 9006–9011.
 - Gate: on seeds 9006–9011, the log-likelihood of their shown turn hand is better by > 2 SE. Then 50-pair two-part KEEP.
 
-### D3. Our discard against their keep rule (Sat 7)
+### D3. Our discard against their keep rule
 - `choose_discard` lets the opponent keep by D2's rule (else `opponent_keeps`).
-- Spend more only if it pays: `special_budget_frac` (0.8 of the decision budget today) at 0.8 / 1.5 / 3, measured in
+- Spend more only if it pays: `special_budget_frac` (currently 0.8 of the decision budget) at 0.8 / 1.5 / 3, measured in
   `lab.eval` (two-part KEEP, 50 pairs), not `lab.discard_bench` (that bench has no betting and no ranges).
 
-### D4. Do they read our discard? (Sat 7, measurement)
+### D4. Do they read our discard? (measurement)
 Per training bot, on P0b's recordings: turn fold rate by the rank of the card we discarded (low/mid/high), chi-square
 test, p < 0.01 with Holm across bots. Only a bot that passes gets an A/B: among near-equal discards, choose by the
-signal we want (`hide_discard` is off today).
+signal we want (`hide_discard` is currently off).
 
 Every D result, kept or dropped, goes in `docs/reports/TIER4_DISCARD.md`.
 
 ---
 
-## R. Live river solver (Fri 6 spike · Sat 7–Sun 8 build · Mon 9 gate)
+## R. Live river solver (spike → build → gate)
 
 **Budget.** A decision gets ~4.5–5.4 ms (`bot/timing.py`: 0.9 × 60 s / 400 / 5.5 / 5.5, capped at 1.2× the pace).
 The hard deadline is max(80 ms, 6 × budget), and after it `bot/main.py` falls back to **Tier 0**. Tier 3 uses
@@ -174,18 +174,18 @@ action vs conv_opp3, ~42 % vs trapper (accounting), i.e. up to ~170 per 400 hand
 **wall-clock = 4 × `timer.budget()`, clamped to ≤ 20 ms** (shrinks as the bank drains; ≈ 20 ms laptop, so ~half the
 iterations on the 2× server), checked against trapper.
 
-- **R0 spike (Fri 6, go/no-go).** If the full version misses the target, try the reduced one before giving up:
+- **R0 spike (go/no-go).** If the full version misses the target, try the reduced one before giving up:
   prune combos with near-zero weight (often < 300 left), one showdown ranking per river shared by all terminals,
   sizes pot + all-in only, warm start from Tier 3's river policy. Exploitability is measured with a vector best
   response inside the solver (`lab/cfr/exact.py` only on reduced-deck toy rivers). Full version: NumPy vector CFR+ over ≤ 903 hands, ~20 nodes, sizes ½ / pot / all-in, ≤ 2 raises.
   Showdown and fold values in O(n) with card removal (sorted hand ranks plus per-card sums). **Go if ≥ 50 iterations
   fit in 10 ms on this laptop** (≈ 20 ms on the 2× server), **including building both ranges**, and the strategy's
   exploitability on toy rivers, computed by `lab/cfr/exact.py`, is ≤ 2 % of the pot.
-- **R1 (Sat 7):** `bot/strategy/river_solver.py`, **anytime**: range building and iterations sit inside one time box
+- **R1:** `bot/strategy/river_solver.py`, **anytime**: range building and iterations sit inside one time box
   that returns the current average strategy before the river budget. Any error or < 20 iterations → Tier 3's river.
   `TimingConfig` gets a river budget (`river_budget_s`). Re-check that the hard deadline (6 × budget) still covers
   it; the 80 ms alarm must not fire in `tests/test_timing_slow.py`.
-- **Our range (new, Sat 7; an approximation and the main risk of an ungadgeted re-solve):** `OwnRange` gives only a
+- **Our range (new; an approximation and the main risk of an ungadgeted re-solve):** `OwnRange` gives only a
   percentile from our preflop line. Needed: weights over our
   2-card combos from our line on every street and our public discard, using the likelihood model inference uses for
   the opponent. Sensitivity check: if solver EV changes by > 20 % of the pot with our range flattened, the own range is
@@ -195,7 +195,7 @@ iterations on the 2× server), checked against trapper.
 - The solve starts at the current node with the real bet amounts, so off-tree sizes and a 3rd/4th raise are handled.
   In RNR the model player and the free player reach a mid-river root with different ranges; start with both equal to
   the inference range and note it as a simplification.
-- **Restricted (Sun 8; RNR on the river, after Milec et al. 2024's CDRNR):** a hidden coin makes the opponent the model
+- **Restricted (RNR on the river, after Milec et al. 2024's CDRNR):** a hidden coin makes the opponent the model
   player with probability p, otherwise a free player solved by CFR+. The model player's per-hand P(fold / call / each
   size) comes from `inference.py`'s bet model (logits γ × (strength − pivot)) with a pivot and γ per X2 type, fitted
   offline on training recordings. p is set as 0.5 × the family posterior mass (a starting rule: posterior mass is
@@ -203,9 +203,9 @@ iterations on the 2× server), checked against trapper.
   Caveat: this re-solves the river alone with inferred ranges and no safety gadget, so it isn't safe in the paper's
   sense. Gate R is the check.
 - All members use the solver on the river; members differ on earlier streets and in p.
-- **Accounting SE (Sat 7, lab):** extend `lab.opps.accounting` to report each bucket's chips/hand with an SE over pairs,
+- **Accounting SE (lab):** extend `lab.opps.accounting` to report each bucket's chips/hand with an SE over pairs,
   so gate R can test river showdowns.
-- **Gate R (Mon 9):** run with the time box halved (to stand in for the 2× server). `tier4p` with vs without the
+- **Gate R:** run with the time box halved (to stand in for the 2× server). `tier4p` with vs without the
   solver: head-to-head 100 pairs, match score ≥ 0.5 − 2 SE; pool two-part KEEP; net of **all river buckets together** (showdown + we fold + they fold; showdown alone can be
   gamed by folding more) vs conv_opp3 and exploiter better by > 2 SE; the restricted-p A/B kept only by its own
   head-to-head + two-part KEEP; **combined timing** (Tier 3 + R + D3's budget, measured together, at 2×) ≤ 50 %; deadline hits ≤ baseline + 2√baseline
@@ -213,18 +213,14 @@ iterations on the 2× server), checked against trapper.
 
 ---
 
-## Timeline (one person + Claude sessions; evals one at a time, grids at night)
+## Order
 
-| day | day work | night |
-|---|---|---|
-| Tue 3 | branch + merge main; `record.py` change | P0a gate X, then P0b recordings (one after the other) |
-| Wed 4 | P1 members; D0 fit; D1 code | P1 tuning grids |
-| Thu 5 | P2 selection + bail-out | D1 grid |
-| Fri 6 | gate P detection + member checks; R0 spike; D2 if D0 went | gate P incumbent + adversary + Stage 2 runs |
-| Sat 7 | gate P verdict → upload candidate; R1 + own range; accounting SE; D3, D4 | D2/D3 evals |
-| Sun 8 | R restricted p; D keep/drop decisions | gate R runs |
-| Mon 9 | gate R verdict; held-out `--final` once | final pool run |
-| Tue 10 | report, upload candidate, hand off to Tier 5 | — |
+1. P0: gate X (picks the incumbent) and the fresh recordings.
+2. In parallel: P1 members, D0 rule fit, D1 code; then the P1 tuning grids and the D1 grid.
+3. P2 selection and bail-out → gate P → upload candidate if it passes.
+4. In parallel: the R0 spike, then R1 and our range; D2 if D0 went; D3 and D4.
+5. Restricted p (R); D keep/drop decisions; gate R.
+6. Held-out `--final` once, final report, upload candidate, hand off to Tier 5.
 
 **Slip rule:** the source of truth is `docs/tier4/README.md` ("Slip rule"), and I1's retry rule is in
 `docs/tier4/I1_integrate.md`. If R is dropped, the river stays Tier 3's.
@@ -236,13 +232,13 @@ iterations on the 2× server), checked against trapper.
   wall-clock).
 - `tests/test_timing_slow.py` after any `bot/` change. Nothing reads files at runtime: new tables (type pivots/γ)
   go through `tools.embed_data`.
-- Held-out bots: never tuned on; two `--final` runs on 9 Nov (incumbent and `tier4p`, same seeds). If `tier4p` is below the incumbent by > 2 SE on the
+- Held-out bots: never tuned on; two `--final` runs (incumbent and `tier4p`, same seeds). If `tier4p` is below the incumbent by > 2 SE on the
   sum there, the incumbent ships instead.
 - Seed ledger: fixtures 0–11; P0b 9000–9011; gate X 8000+; tuning and confirmations each get their own block, written
   in `docs/reports/TIER4P.md` (`TIER4.md` is the teammate's report).
 - Stage 2: the stop-loss checkpoints are at 25/50/75 % of `total_hands`; the 1000-hand gate runs the incumbent on
   the same seeds.
-- Tooling to write (Wed 4): the adversary bot, and a match-score comparison script (the second half of the
+- Tooling to write early: the adversary bot, and a match-score comparison script (the second half of the
   two-part KEEP; `--compare` only does chips).
 
 ## Risks

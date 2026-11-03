@@ -1,4 +1,4 @@
-# S0: recordings and the match-score script (Sonnet, ~½ day)
+# S0: recordings and the match-score script (Sonnet, laptop)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file. Branch `tier4/s0` from `origin/tier4/base`.
 Files you may edit: `lab/opps/record.py`, `lab/opps/score_compare.py` (new), `logs/records/`, tests for them.

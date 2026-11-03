@@ -1,4 +1,4 @@
-# DA: flop equity with real discards (Sonnet, ~1 day, mostly compute)
+# DA: flop equity with real discards (Sonnet, cloud, mostly compute)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §D intro and D1,
 `docs/reports/TIER2_DISCARD.md` (the Phase E smart-rollout result). Branch `tier4/d` from `origin/tier4/base`.
