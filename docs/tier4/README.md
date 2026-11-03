@@ -19,20 +19,20 @@ I  merge                                                                        
 
 Sub-plan IDs use letters so they don't clash with the section labels (P0–P4, D0–D4, R0–R1) in `TIER4_PLAN.md`.
 
-| id | sub-plan | plan sections | branch | needs before starting | needs before its gate | model |
+| id | sub-plan | plan sections | branch | needs before starting | needs before its gate | model, where |
 |---|---|---|---|---|---|---|
-| **S0** | `S0_recordings.md`: recorder change, 12 fresh pairs per bot, match-score script | P0b | `tier4/s0` | — | — | Sonnet |
-| **PA** | `PA_members.md`: gate X, `tier4p` with forced members | P0a, P1 (code) | `tier4/p` | — | — | Opus |
-| **PB** | `PB_tuning.md`: member grids + confirmations | P1 (tuning) | `tier4/p-tune` | PA | — | Sonnet |
-| **PC** | `PC_selection.md`: selection, bail-out, stop-loss, adversary bot | P2 | `tier4/p-sel` | PA | — | Opus |
-| **PD** | `PD_gate.md`: merge PB + PC, gate P, timing, package | gate P | `tier4/p` | PB + PC | S0 | Sonnet |
-| **DA** | `DA_rollouts.md`: smart rollouts on Tier 3 + retune | D1 | `tier4/d` | — | — | Sonnet |
-| **DB** | `DB_learn.md`: rule fit, "do they read our discard", learned keep rule if go | D0, D4, D2 | `tier4/d-learn` | S0 | — | Opus |
-| **DC** | `DC_our_discard.md`: merge DB, our discard vs their rule, discard budget | D3 | `tier4/d` | DA + DB | — | Sonnet |
-| **RA** | `RA_spike.md`: solver + ranges, speed and exploitability | R0 | `tier4/r` | — | — | Opus |
-| **RB** | `RB_integrate.md`: solver in Tier 3's river behind a flag, own range, timing | R1 | `tier4/r` | RA (go) | — | Opus |
-| **RC** | `RC_gate.md`: accounting SE, gate R, restricted p | gate R, restricted p | `tier4/r` | RB | S0 | Sonnet |
-| **I1** | `I1_integrate.md`: merge P + D + R, combined gates, held-out, package | Sun 9–Mon 10 | `tier4/main` | PD, DC, RC | — | Opus |
+| **S0** | `S0_recordings.md`: recorder change, 12 fresh pairs per bot, match-score script | P0b | `tier4/s0` | — | — | Sonnet, laptop |
+| **PA** | `PA_members.md`: gate X, `tier4p` with forced members | P0a, P1 (code) | `tier4/p` | — | — | Opus, cloud |
+| **PB** | `PB_tuning.md`: member grids + confirmations | P1 (tuning) | `tier4/p-tune` | PA | — | Sonnet, cloud |
+| **PC** | `PC_selection.md`: selection, bail-out, stop-loss, adversary bot | P2 | `tier4/p-sel` | PA | — | Opus, cloud |
+| **PD** | `PD_gate.md`: merge PB + PC, gate P, timing, package | gate P | `tier4/p` | PB + PC | S0 | Sonnet, laptop |
+| **DA** | `DA_rollouts.md`: smart rollouts on Tier 3 + retune | D1 | `tier4/d` | — | — | Sonnet, cloud |
+| **DB** | `DB_learn.md`: rule fit, "do they read our discard", learned keep rule if go | D0, D4, D2 | `tier4/d-learn` | S0 | — | Opus, cloud |
+| **DC** | `DC_our_discard.md`: merge DB, our discard vs their rule, discard budget | D3 | `tier4/d` | DA + DB | — | Sonnet, laptop |
+| **RA** | `RA_spike.md`: solver + ranges, speed and exploitability | R0 | `tier4/r` | — | — | Opus, cloud |
+| **RB** | `RB_integrate.md`: solver in Tier 3's river behind a flag, own range, timing | R1 | `tier4/r` | RA (go) | — | Opus, laptop |
+| **RC** | `RC_gate.md`: accounting SE, gate R, restricted p | gate R, restricted p | `tier4/r` | RB | S0 | Sonnet, laptop |
+| **I1** | `I1_integrate.md`: merge P + D + R, combined gates, held-out, package | Sun 9–Mon 10 | `tier4/main` | PD, DC, RC | — | Opus, laptop |
 
 **Day 1 (Mon 3) runs four sessions at once: S0, PA, DA, RA.** After that, a session starts as soon as its
 "needs before starting" are pushed. "Needs before its gate" only blocks the final measurement, not the code.
@@ -48,9 +48,17 @@ Gate R therefore compares Tier 3 with vs without the solver.
    2 skipped). Push your branch at the end. Don't merge into `main` or into another stream's branch (I1 does that).
 2. **Edit only the files your stream owns** (table below). `bot/embedded.py` is generated: after changing params
    or data, run `.venv/bin/python -m tools.embed_data` and commit it. Never hand-merge it.
-3. **CPU:** this laptop has 14 cores, and up to four sessions run evals at the same time. Use **`--processes 3`** on
-   every `lab.eval` / `lab.opps.record` run (12 processes in all). Budgets are wall-clock, so the two arms of a
-   comparison run **back to back in the same session**, and every KEEP is confirmed once on fresh seeds.
+3. **Where it runs, and CPU:**
+   - **Cloud** (own machine per session): RA, PA, PC, DB, PB, DA. Start with `nproc` and set `--processes` to that
+     minus 1. Setup: `uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r requirements-dev.txt`.
+   - **Laptop** (14 cores, shared): S0, PD, RB, RC, DC, I1, and **every timing check** (`tests/test_timing_slow.py`,
+     `tests/test_river_timing.py`, `lab.timing_bench`, the package check). The "server is ~2× slower" rule is calibrated
+     on this laptop; a cloud machine's timing numbers don't count. A cloud session that changed `bot/` writes
+     "timing not checked (cloud)" in its handoff, and the next laptop session runs the timing check first.
+     On the laptop, use **`--processes 3`** (up to four sessions at once, 12 processes).
+   - Budgets are wall-clock, so the two arms of a comparison run **back to back on the same machine**, and numbers
+     from different machines are never compared with each other. Every KEEP is confirmed once on fresh seeds.
+   - Each handoff says which machine its numbers came from (`nproc`, cloud or laptop).
 4. **Seeds:** use only your block (below), so no two sessions reuse seeds.
 5. **Two-part KEEP** (every pool gate): `lab.eval --compare` on chips from a **locks-off** run (sum up, no bot down
    > 2 SE) **and** the mean match score from a **locks-on** run not lower by > 2 SE (S0's `lab/opps/score_compare.py`;
