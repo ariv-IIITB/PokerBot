@@ -37,3 +37,21 @@ centre x_vo_margin=0.12, av_raise_fold_eq=0.8: d_new_minraise +0.38±0.15, d_new
 | 0.8 | +0.07 ± 0.35 (z +0.2) | centre | +0.18 ± 0.36 (z +0.5) |
 | 0.9 | +0.05 ± 0.37 (z +0.1) | +0.19 ± 0.37 (z +0.5) | +0.21 ± 0.37 (z +0.6) |
 **no grid move** (best other point diff +0.21, z +0.6 <= 1)
+
+Final point: x_vo_margin=0.12, av_raise_fold_eq=0.8 (defaults x_vo_margin=0.12, av_raise_fold_eq=0.6)
+
+### Confirmation vs defaults, 50 pairs, seeds 52300-52349, locks off (chips)
+```
+d_new_minraise +0.62 -> +0.54  diff -0.08 ± 0.18 (z -0.4)
+d_new_trapper +0.70 -> +1.86  diff +1.16 ± 0.22 (z +5.3)  improved
+sum      diff +1.08 ± 0.29 (z +3.8)
+verdict: KEEP
+```
+locks on (score):
+```
+d_new_minraise   0.680 -> 0.740  diff +0.060 ± 0.064
+d_new_trapper    0.740 -> 0.900  diff +0.160 ± 0.053
+overall          0.710 -> 0.820  diff +0.110 ± 0.042 (z +2.6, 2 bots)
+verdict: KEEP-score
+```
+Two-part rule: chips pass (sum +1.08 ± 0.29), score pass -> KEEP
