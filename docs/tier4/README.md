@@ -122,6 +122,9 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 | 20000–20999 | DA; 21000–21999 DB and DC |
 | 30000–30999 | RC gate R |
 | 40000–40999 | I1 (incl. held-out `--final`) |
+| 50000–50999 | GX: gate X redo on the laptop |
+| 51000–51999 | PB redo (laptop) tuning; 52000–52999 its confirmations |
+| 53000–53999 | DA redo (laptop) tuning; 54000–54999 its confirmations |
 
 ## Slip rule
 
