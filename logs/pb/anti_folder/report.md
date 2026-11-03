@@ -19,3 +19,8 @@ centre x_bluff_max=0.6, x_river_bluff_mult=2.5, x_vo_margin=0.12: d_new_exploite
 | 0.6 | -0.94 ± 0.67 (z -1.4) | centre | -0.90 ± 0.64 (z -1.4) |
 | 0.75 | -0.47 ± 0.67 (z -0.7) | -0.65 ± 0.64 (z -1.0) | -0.66 ± 0.65 (z -1.0) |
 **no grid move** (best other point diff +0.00, z +0.0 <= 1)
+
+Final point: x_bluff_max=0.6, x_river_bluff_mult=2.5, x_vo_margin=0.12 (defaults x_bluff_max=0.6, x_river_bluff_mult=2.5, x_vo_margin=0.12)
+
+Final point = PA defaults: nothing to confirm; MEMBERS unchanged.
+VERDICT: defaults
