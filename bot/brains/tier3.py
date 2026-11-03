@@ -176,8 +176,10 @@ class Tier3Brain(Tier2Brain):
         self.stats = {"t3_decisions": 0, "t3_fallbacks": 0, "t3_errors": 0}
         # river solver (all ints, summed by the lab's `--report stats`): decisions it took, CFR+ passes and
         # microseconds over them, and why it handed a decision back to Tier 3's river
-        self.stats.update({"river_solves": 0, "river_iters": 0, "river_us": 0, "river_fallbacks": 0,
-                           "river_errors": 0, "river_few_iters": 0, "river_no_pass": 0, "river_missing": 0})
+        # (only with the flag on, so a flag-off Tier 3 reports exactly the counters it always did)
+        if self.p.get("t3_river_solver"):
+            self.stats.update({"river_solves": 0, "river_iters": 0, "river_us": 0, "river_fallbacks": 0,
+                               "river_errors": 0, "river_few_iters": 0, "river_no_pass": 0, "river_missing": 0})
         self.river_iters_log: list[int] = []            # passes per solved decision (capped, for benches)
 
     @classmethod

@@ -24,7 +24,7 @@ def play(cfg: dict, opp: str = "calling_station", seed: int = 7, hands: int = 40
 def test_the_solver_is_off_by_default() -> None:
     assert Tier3Brain.defaults()["t3_river_solver"] is False
     m, brain = play({}, hands=25)
-    assert brain.stats["river_solves"] == 0 and brain.stats["river_fallbacks"] == 0
+    assert not any(k.startswith("river_") for k in brain.stats)     # flag off: the counters are the old three
     assert m.errors == [0, 0] and m.forfeit is None
 
 

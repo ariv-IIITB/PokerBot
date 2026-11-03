@@ -29,7 +29,7 @@ import numpy as np
 from bot.actions import CHECK, RAISE
 from bot.brains.tier3 import Tier3Brain
 from bot.strategy.river_solver import (INF, RiverSolver, RiverSpot, TreeCfg, _tree_stats, bucket_kernel,
-                                       bucket_ranges, hand_ranks, make_kernel, make_solver)
+                                       bucket_ranges, hand_ranks, make_kernel, make_solver, solve_river)
 
 # ---------------------------------------------------------------------------- recording
 
