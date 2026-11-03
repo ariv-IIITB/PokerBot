@@ -43,3 +43,21 @@ centre aa_call_margin=-0.03, aa_mdf_mult=1, aa_bluff_mult=0.75: d_new_lag +5.63�
 | -0.03 | -1.72 ± 1.25 (z -1.4) | centre | -1.07 ± 1.22 (z -0.9) |
 | 0 | -2.54 ± 1.11 (z -2.3) | -2.50 ± 1.14 (z -2.2) | -4.01 ± 1.25 (z -3.2) |
 **no grid move** (best other point diff +0.07, z +0.1 <= 1)
+
+Final point: aa_call_margin=-0.03, aa_mdf_mult=1, aa_bluff_mult=0.75 (defaults aa_call_margin=-0.03, aa_mdf_mult=1.1, aa_bluff_mult=0.5)
+
+### Confirmation vs defaults, 50 pairs, seeds 52600-52649, locks off (chips)
+```
+d_new_lag +5.17 -> +5.76  diff +0.59 ± 0.54 (z +1.1)
+maniac   +51.65 -> +51.96  diff +0.31 ± 0.79 (z +0.4)
+sum      diff +0.90 ± 0.96 (z +0.9)
+verdict: KEEP
+```
+locks on (score):
+```
+d_new_lag        0.950 -> 0.990  diff +0.040 ± 0.024
+maniac           1.000 -> 1.000  diff +0.000 ± 0.000
+overall          0.975 -> 0.995  diff +0.020 ± 0.012 (z +1.7, 2 bots)
+verdict: KEEP-score
+```
+Two-part rule: chips pass (sum +0.90 ± 0.96), score pass -> KEEP

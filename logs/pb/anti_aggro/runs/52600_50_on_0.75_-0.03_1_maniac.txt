@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_aggro","members":{"anti_aggro":{"aa_bluff_mult":0.75,"aa_call_margin":-0.03,"aa_mdf_mult":1.0}}}] vs maniac: +0.27 ± 0.02 chips/hand | match score 1.000 ± 0.000 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 9.9s (4,051/s)
