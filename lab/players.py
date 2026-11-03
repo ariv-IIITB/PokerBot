@@ -44,6 +44,7 @@ BRAINS.update({
     "tight": "lab.sparring.bots:Tight",
     "maniac": "lab.sparring.bots:Maniac",
     "adversary": "lab.sparring.adversary:Adversary",   # over-folds for 100 hands, then a calling station
+    "adversary_strict": "lab.sparring.adversary:AdversaryStrict",   # ... folding all but two pair+
     "cfr": "lab.cfr.brain:CFRBrain",          # lab only: CFR is a no-go for the real bot
     # LLM-built opponents from Opps/ (play them on lab/opps/holdem_100bb.json)
     "opp1": "lab.opps:Opp1Brain",

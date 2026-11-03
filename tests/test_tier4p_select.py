@@ -304,3 +304,9 @@ def test_adversary_is_registered_and_plays_a_match() -> None:
     res = play_match([PlayerSpec.brain("adversary").build(cfg), PlayerSpec.brain("calling_station").build(cfg)],
                      cfg, 3, 150)
     assert res.errors == [0, 0] and res.forfeit is None
+
+
+def test_adversary_strict_continues_only_with_two_pair() -> None:
+    from lab.players import BRAINS
+    from lab.sparring.adversary import Adversary, AdversaryStrict
+    assert "adversary_strict" in BRAINS and AdversaryStrict().min_hand == 2 and Adversary().min_hand == 1

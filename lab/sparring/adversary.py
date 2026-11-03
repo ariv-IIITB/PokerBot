@@ -2,7 +2,10 @@
 
 For the first SWITCH_AT hands it folds to any postflop bet unless it has a pair or better that uses its
 hole cards (the over-folder family); it calls preflop and never raises. From hand SWITCH_AT on it
-calls everything down (a calling station). Config: {"seed": n, "switch_at": 100}.
+calls everything down (a calling station). Config: {"seed": n, "switch_at": 100, "min_hand": 1}.
+`min_hand` is the made-hand strength it continues with before the switch: 1 = pair or better (the
+default; about 45 % folds to a bet, which X1 rates as not an over-folder), 2 = two pair or better
+(`adversary_strict`: folds ~80 %, a clear over-folder, so tier4p's bail-out can be exercised).
 """
 from __future__ import annotations
 
@@ -22,6 +25,7 @@ class Adversary(_Sparring):
         super().__init__(config)
         self.switch_at = int(self.cfg.get("switch_at", SWITCH_AT))
         self.ev = None
+        self.min_hand = int(self.cfg.get("min_hand", 1))
 
     def on_rules(self) -> None:
         self.ev = self.rules.evaluator
@@ -34,7 +38,7 @@ class Adversary(_Sparring):
             return False
         helper = Tight.__new__(Tight)
         helper.ev = self.ev
-        return Tight.made_strength(helper, state) >= 1
+        return Tight.made_strength(helper, state) >= self.min_hand
 
     def decide(self, state: GameState, legal: LegalActions, budget_s: float) -> Action:
         if legal.can_special:
@@ -44,3 +48,11 @@ class Adversary(_Sparring):
                 and legal.fold and not self._has_pair(state)):
             return Action.fold()
         return Action.call() if legal.call else safe_action(legal)
+
+
+class AdversaryStrict(Adversary):
+    """Continues only with two pair or better before the switch: a clear over-folder."""
+    name = "adversary_strict"
+
+    def __init__(self, config: Optional[dict] = None) -> None:
+        super().__init__({"min_hand": 2, **(config or {})})
