@@ -39,6 +39,7 @@ BRAINS = {
     "tier2": "bot.brains.tier2:Tier2Brain",
     "tier3": "bot.brains.tier3:Tier3Brain",        # Phase G; the default since G8
     "tier3x": "bot.brains.tier3x:Tier3XBrain",     # Tier 3 + the exploit layer (build map X3); not the default
+    "tier4p": "bot.brains.tier4p:Tier4PBrain",     # Tier 3 + portfolio members (Tier 4 P); not the default
 }
 DEFAULT_BRAIN = "tier3"    # Phase G8 (2026-10-30): Tier 3 passed the ship checks (docs/reports/TIER3.md)
 

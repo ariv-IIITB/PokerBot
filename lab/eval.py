@@ -37,7 +37,7 @@ DEFAULT_VARIANT = "lab/opps/holdem_100bb.json"     # the rules the Opps/ bots we
 POOL_FILE = ROOT / "lab" / "opps" / "discard_pool.json"
 DEFAULT_TRAIN = ["opp1", "opp2", "opp3", "opp4"]
 OPP_CONFIG = {"opp3": {"fold_out": False}}          # opp3 would otherwise fold out when ahead
-LOCK_BRAINS = {"tier2", "tier3", "tier3x", "tier4", "tier4lab"}
+LOCK_BRAINS = {"tier2", "tier3", "tier3x", "tier4", "tier4lab", "tier4p"}
 
 # Action-profile targets for our brain, in percent: spot -> action kind -> (low, high).
 # Style targets from the Part 4 plan; winning matches beats hitting a target.
