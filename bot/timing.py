@@ -40,6 +40,8 @@ class TimingConfig:
     hard_cap_s: float = 1.5           # ...nor than this
     hard_reply_frac: float = 0.3      # ...nor than this share of the per-reply limit
     default_reply_s: float = 5.0      # per-reply limit when the engine doesn't say
+    river_budget_s: float = 0.020     # ceiling of the river solver's time box (Tier 3's t3_river_solver)
+    river_box_mult: float = 4.0       # ...whose box is min(this x the decision budget, river_budget_s)
 
 
 class TimeManager:
@@ -100,6 +102,12 @@ class TimeManager:
             return 0.0
         per = usable / (max(1, hands_remaining) * c.decisions_per_hand) / c.safety_factor
         return min(per, c.max_budget_s, c.catch_up_cap * self.pace_s)
+
+    def river_box(self, budget_s: float) -> float:
+        """Wall-clock seconds the river solver may use (ranges + solve) for a decision with budget `budget_s`.
+        Always below the hard deadline: hard_limit is max(hard_min_s, 6 x budget) unless capped by the
+        bank (emergency mode starts long before that), and this is min(4 x budget, 20 ms) < both."""
+        return max(0.0, min(self.cfg.river_box_mult * budget_s, self.cfg.river_budget_s))
 
     def hard_limit(self, budget_s: float) -> float:
         """Wall-clock cutoff after which the brain is interrupted."""

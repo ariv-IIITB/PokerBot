@@ -1,0 +1,32 @@
+
+calling_station 400h: used 17.0s -> 29.7s (x1.74, charged x2); hard-deadline hits 0 -> 0; worst reply 75 ms; river solves 365, 98 passes each, fallbacks 50
+F
+=================================== FAILURES ===================================
+_ test_river_solver_bank_use_and_deadline_hits_at_2x[calling_station-400-60.0] _
+
+hands = 400, bank = 60.0, opponent = 'calling_station'
+
+    @pytest.mark.slow
+    @pytest.mark.parametrize("hands,bank", [(400, 60.0), (1000, 150.0)])
+    @pytest.mark.parametrize("opponent", ["calling_station", "d_new_trapper"])
+    def test_river_solver_bank_use_and_deadline_hits_at_2x(hands, bank, opponent) -> None:
+        m0, bot0, _ = run(False, hands, bank, opponent)
+        m1, bot1, brain1 = run(True, hands, bank, opponent)
+        for m in (m0, m1):
+            assert m.forfeit is None, m.forfeit_reason
+            assert m.hands_played == hands
+        used0, used1 = bank - m0.bank_left[0], bank - m1.bank_left[0]
+        print(f"\n{opponent} {hands}h: used {used0:.1f}s -> {used1:.1f}s (x{used1 / used0:.2f}, charged x2); "
+              f"hard-deadline hits {bot0.deadline_hits} -> {bot1.deadline_hits}; worst reply "
+              f"{m1.worst_decision_s[0] * 1000:.0f} ms; river solves {brain1.stats['river_solves']}, "
+              f"{brain1.stats['river_iters'] / max(1, brain1.stats['river_solves']):.0f} passes each, "
+              f"fallbacks {brain1.stats['river_fallbacks']}")
+>       assert used1 <= RATIO * used0 + 0.5, f"{used1:.1f}s vs {used0:.1f}s flag off"
+E       AssertionError: 29.7s vs 17.0s flag off
+E       assert 29.74055883800156 <= ((1.4 * 17.047532475999787) + 0.5)
+
+tests/test_river_timing.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_river_timing.py::test_river_solver_bank_use_and_deadline_hits_at_2x[calling_station-400-60.0]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 27.31s

@@ -221,6 +221,49 @@ def exploit_after(c: Captured, inp: dict, name: str, iters: int, dtype=np.float3
     return out
 
 
+# ---------------------------------------------------------------------------- sensitivity to our range (RB)
+
+
+def sensitivity(spots: list, iters: int = 150, buckets: int = 64, dtype=np.float32) -> dict:
+    """Does the solver's answer depend on our range? Per spot, solve twice with the live recipe (bucketed,
+    pot + all-in tree, `iters` passes): our range FLATTENED (uniform over the combos our public discard allows)
+    and BUILT (bot/strategy/own_range.py). Returns the per-spot arrays
+    ev_flat, ev_built (our hand's root value in pots, last pass, chips won - chips in over the whole hand),
+    tv (total-variation distance between the two root strategies) and pot (chips)."""
+    from bot.strategy.own_range import own_range_weights
+    ev_f, ev_b, tv, pots = [], [], [], []
+    for c in spots:
+        inp, _ = build_inputs(c)
+        hw_built = own_range_weights(c.rec, inp["hero_cards"], c.rng)
+        got = []
+        for hw in (np.ones(len(hw_built)), hw_built):
+            hw = np.maximum(hw, 1e-9 * hw.max())
+            res = solve_river(c.spot, inp["hero_cards"], hw, inp["hero_rank"], inp["opp_cards"], inp["opp_w"],
+                              inp["opp_rank"], inp["hero_index"], 1e18, cfg=SMALL_TREE, max_iters=iters,
+                              keep_solver=True, dtype=dtype, buckets=buckets)
+            hb, _ = bucket_ranges(inp["hero_rank"], hw, buckets)
+            got.append((float(res.solver.Val[0, 0, int(hb[inp["hero_index"]])]), res.probs, res.solver.tree.unit))
+        ev_f.append(got[0][0]); ev_b.append(got[1][0])
+        tv.append(0.5 * float(np.abs(got[0][1] - got[1][1]).sum()))
+        pots.append(got[0][2])
+    return {"ev_flat": np.array(ev_f), "ev_built": np.array(ev_b), "tv": np.array(tv), "pot": np.array(pots)}
+
+
+def report_sensitivity(r: dict) -> str:
+    d = np.abs(r["ev_built"] - r["ev_flat"])               # already in pots (the solver's unit)
+    n = len(d)
+    se = lambda a: a.std(ddof=1) / np.sqrt(len(a)) if len(a) > 1 else 0.0   # noqa: E731
+    over = float((d > 0.20).mean())
+    verdict = ("OWN RANGE IS THE WEAK POINT (the mean change is above 20 % of the pot)" if d.mean() > 0.20
+               else "own range is not the weak point on average")
+    return (f"sensitivity to our range ({n} river spots, root EV of our hand in pots, flat vs built): "
+            f"|change| mean {d.mean():.3f} ± {se(d):.3f}, median {np.median(d):.3f}, p90 {np.percentile(d, 90):.3f}, "
+            f"share of spots above 0.20 pot {over:.2f} | signed change (built - flat) mean "
+            f"{(r['ev_built'] - r['ev_flat']).mean():+.3f} ± {se(r['ev_built'] - r['ev_flat']):.3f} | root strategy "
+            f"total-variation distance mean {r['tv'].mean():.3f} ± {se(r['tv']):.3f}, share > 0.25: "
+            f"{float((r['tv'] > 0.25).mean()):.2f} | {verdict}")
+
+
 # ---------------------------------------------------------------------------- CLI
 
 
@@ -233,6 +276,9 @@ def main(argv: Optional[list[str]] = None) -> None:
     ap.add_argument("--expl", type=int, default=0,
                     help="exploitability on this many spots (after the iterations that fit in the box)")
     ap.add_argument("--expl-iters", default="", help="...or after exactly these numbers of passes (comma list)")
+    ap.add_argument("--sensitivity", type=int, default=0, metavar="N",
+                    help="only: the solver's EV with our range flattened vs built, on N river spots (RB)")
+    ap.add_argument("--first-seed", type=int, default=50000, help="first match seed for the recorded spots")
     args = ap.parse_args(argv)
     import os
     cpu = "?"
@@ -242,7 +288,12 @@ def main(argv: Optional[list[str]] = None) -> None:
         pass
     print(f"machine: {cpu}, nproc={os.cpu_count()}")
     t0 = time.perf_counter()
-    spots = record_spots(args.spots)
+    if args.sensitivity:
+        spots = record_spots(args.sensitivity, first_seed=args.first_seed)
+        print(f"recorded {len(spots)} river spots in {time.perf_counter() - t0:.0f}s")
+        print(report_sensitivity(sensitivity(spots)))
+        return
+    spots = record_spots(args.spots, first_seed=args.first_seed)
     print(f"recorded {len(spots)} river spots in {time.perf_counter() - t0:.0f}s")
     built = [build_inputs(c) for c in spots]
     inf_t = np.array([b[1]["inference"] for b in built]) * 1e3
