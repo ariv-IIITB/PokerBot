@@ -9,7 +9,7 @@ Machine: Intel Xeon @ 2.30 GHz, nproc 4, Python 3.11, NumPy float32. Reproduce:
 for a server 2× slower: ranges and setup then take the same share of the box as 2× the time in a 20 ms box).
 
 ## What was built
-`bot/strategy/river_solver.py` (NumPy only, ~600 lines), `lab/river_bench.py`, `tests/test_river_solver.py` (20 tests).
+`bot/strategy/river_solver.py` (NumPy only, 605 lines), `lab/river_bench.py`, `tests/test_river_solver.py` (20 tests).
 
 * **Tree** from the engine's own numbers: pot, both street bets, both stacks behind, last raise size, bets so far,
   whether they checked. Menu fold / call / check, bets and raises of pot fractions and all-in (default ½ / 1 / all-in,
@@ -60,9 +60,9 @@ Exploitability against passes (64 buckets, pot + all-in, translated to the exact
 loss from bucketing (card removal and hand identity inside a bucket); the rest is not converged.
 
 ## Why the full version misses
-A pass is ~15–30 decision nodes × 903–990 hands: the terminals alone (≈ 2 × 14 showdowns and 14 folds) cost 0.5–1 ms
-in float32 even with O(n) removal, and the rest of the pass touches ~100 k floats per node-level. 100 passes need
-~0.2 ms/pass; the exact game is 4–9× over that before ranges and setup, and ranges alone eat 3.8 ms of the 20.
+A pass costs 0.8 ms (pot + all-in tree) to 1.7 ms (½/1/all-in) median at 990/903 hands in float32, even with O(n)
+card removal (profile: the showdown/fold kernels ~40 %, the rest is the strategy, reach, value and regret tensors).
+100 passes in 20 ms need ≤ 0.12 ms/pass after 3.8 ms of ranges and ~1.5–6 ms of setup: the exact game is 7–14× over.
 Pruning does not help much because the inferred weights are flat; the dense kernel at 300 combos reaches ~0.24 ms/pass
 with the small tree but still only 61 passes.
 
@@ -73,7 +73,8 @@ with the small tree but still only 61 passes.
   main risk (see the plan), and the opponent range is only as good as `Inference`.
 * Inference is 2.5 ms of the box (the second largest item after the solve): RB should cache the strength of the 903
   combos per board, or score only the bucketed range.
-* The first pass costs ~2–3× a steady pass (cold arrays); included in the pass counts above.
+* The first pass costs ~1.9× a steady pass for the bucketed game (0.11 vs 0.06 ms) and ~1.2× for the exact one (cold
+  arrays); included in the pass counts above.
 * The `tree N decisions` figure in the bench lines is the first spot's, not a median.
 * Nothing in `bot/` imports the module yet, so Tier 3's timing is unchanged (fast suite 1310 passed, 2 skipped;
   `tests/test_timing_slow.py` 10 passed on this machine).
