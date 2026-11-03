@@ -75,7 +75,7 @@ def test_a_missing_piece_falls_back(monkeypatch) -> None:
 def test_the_river_box_always_sits_inside_the_hard_deadline(bank, hands) -> None:
     tm = TimeManager(bank, hands)
     cfg = tm.cfg
-    assert cfg.river_budget_s == 0.020 and cfg.river_box_mult == 4.0
+    assert cfg.river_budget_s == 0.040 and cfg.river_box_mult == 3.9
     worst_ratio = 0.0
     for left in (bank, 0.9 * bank, 0.5 * bank, 0.2 * bank, 0.1 * bank, 0.06 * bank):
         tm.observe_timeleft(left)
