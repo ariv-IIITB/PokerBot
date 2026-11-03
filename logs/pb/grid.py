@@ -10,10 +10,12 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from lab.eval import parse_summary  # noqa: E402
 
+# One-at-a-time design (user decision): the default point plus each parameter at its other grid values,
+# the rest at their defaults. Interactions between parameters are NOT tested.
 GRIDS = {   # from docs/tier4/handoff/PA.md
     "anti_folder": {"x_bluff_max": [0.45, 0.60, 0.75], "x_river_bluff_mult": [1.5, 2.5, 3.5],
                     "x_vo_margin": [0.06, 0.12, 0.18]},
-    "anti_value": {"x_vo_margin": [0.06, 0.12, 0.18], "av_raise_fold_eq": [0.45, 0.55, 0.65]},
+    "anti_value": {"x_vo_margin": [0.06, 0.12, 0.18], "av_raise_fold_eq": [0.45, 0.65]},   # default 0.60 is off the PA grid: the two extremes
     "anti_aggro": {"aa_call_margin": [-0.06, -0.03, 0.0], "aa_mdf_mult": [1.0, 1.1, 1.2],
                    "aa_bluff_mult": [0.25, 0.50, 0.75]},
 }
@@ -31,10 +33,12 @@ def tag(pt: dict) -> str:
 
 
 def points(member: str) -> list[dict]:
-    g = GRIDS[member]
-    pts = [dict(zip(g, vals)) for vals in itertools.product(*g.values())]
-    if START[member] not in pts:            # anti_value's start (0.60) is off the grid: add it
-        pts.append(dict(START[member]))
+    """Default point first, then one parameter moved at a time to each of its other grid values."""
+    pts = [dict(START[member])]
+    for k, vals in GRIDS[member].items():
+        for v in vals:
+            if v != START[member][k]:
+                pts.append({**START[member], k: v})
     return pts
 
 
