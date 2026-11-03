@@ -2,7 +2,7 @@
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §R (restricted, accounting, gate R),
 handoffs `RA.md`, `RB.md`, `S0.md`. Branch `tier4/r`. Files: the R row of the README's ownership table. Seeds 30000+.
-Laptop: `--processes` and the `flock` wrapper per README rule 3.
+`--processes` per README rule 3.
 
 ## Tasks
 1. **Accounting SE:** extend `lab/opps/accounting.py` (or `lab.eval --report accounting`) to report each bucket's

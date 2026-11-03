@@ -20,20 +20,20 @@ Sub-plan IDs use letters so they don't clash with the section labels (P0–P4, D
 
 | id | sub-plan | plan sections | branch | needs before starting | needs before its gate | model, where |
 |---|---|---|---|---|---|---|
-| **S0** | `S0_recordings.md`: recorder change, 12 fresh pairs per bot, match-score script | P0b | `tier4/s0` | — | — | Sonnet, laptop |
-| **PA** | `PA_members.md`: gate X, `tier4p` with forced members | P0a, P1 (code) | `tier4/p` | — | — | Opus, laptop |
+| **S0** | `S0_recordings.md`: recorder change, 12 fresh pairs per bot, match-score script | P0b | `tier4/s0` | — | — | Sonnet, cloud |
+| **PA** | `PA_members.md`: gate X, `tier4p` with forced members | P0a, P1 (code) | `tier4/p` | — | — | Opus, cloud |
 | **PB** | `PB_tuning.md`: member grids + confirmations | P1 (tuning) | `tier4/p-tune` | PA | — | Sonnet, cloud |
 | **PC** | `PC_selection.md`: selection, bail-out, stop-loss, adversary bot | P2 | `tier4/p-sel` | PA | — | Opus, cloud |
-| **PD** | `PD_gate.md`: merge PB + PC, gate P, timing, package | gate P | `tier4/p` | PB + PC | S0 | Sonnet, laptop |
+| **PD** | `PD_gate.md`: merge PB + PC, gate P, timing, package | gate P | `tier4/p` | PB + PC | S0 | Sonnet, cloud |
 | **DA** | `DA_rollouts.md`: smart rollouts on Tier 3 + retune | D1 | `tier4/d` | — | — | Sonnet, cloud |
 | **DB** | `DB_learn.md`: rule fit, "do they read our discard", learned keep rule if go | D0, D4, D2 | `tier4/d-learn` | S0 | — | Opus, cloud |
-| **DC** | `DC_our_discard.md`: merge DB, our discard vs their rule, discard budget | D3 | `tier4/d` | DA + DB | — | Sonnet, laptop |
+| **DC** | `DC_our_discard.md`: merge DB, our discard vs their rule, discard budget | D3 | `tier4/d` | DA + DB | — | Sonnet, cloud |
 | **RA** | `RA_spike.md`: solver + ranges, speed and exploitability | R0 | `tier4/r` | — | — | Opus, cloud |
-| **RB** | `RB_integrate.md`: solver in Tier 3's river behind a flag, own range, timing | R1 | `tier4/r` | RA (go) | — | Opus, laptop |
-| **RC** | `RC_gate.md`: accounting SE, gate R, restricted p | gate R, restricted p | `tier4/r` | RB | S0 | Sonnet, laptop |
-| **I1** | `I1_integrate.md`: merge P + D + R, combined gates, held-out, package | last | `tier4/main` | PD, DC, RC | — | Opus, laptop |
+| **RB** | `RB_integrate.md`: solver in Tier 3's river behind a flag, own range, timing | R1 | `tier4/r` | RA (go) | — | Opus, cloud |
+| **RC** | `RC_gate.md`: accounting SE, gate R, restricted p | gate R, restricted p | `tier4/r` | RB | S0 | Sonnet, cloud |
+| **I1** | `I1_integrate.md`: merge P + D + R, combined gates, held-out, package | last | `tier4/main` | PD, DC, RC | — | Opus, cloud |
 
-**First, four sessions run at once: S0 and PA on the laptop, DA and RA in the cloud.** After that, a session starts as soon as its
+**First, four sessions run at once: S0, PA, DA and RA.** After that, a session starts as soon as its
 "needs before starting" are pushed. "Needs before its gate" only blocks the final measurement, not the code.
 PB and PC run at the same time (different files).
 
@@ -47,26 +47,17 @@ Gate R therefore compares Tier 3 with vs without the solver.
    2 skipped). Push your branch at the end. Don't merge into `main` or into another stream's branch (I1 does that).
 2. **Edit only the files your stream owns** (table below). `bot/embedded.py` is generated: after changing params
    or data, run `.venv/bin/python -m tools.embed_data` and commit it. Never hand-merge it.
-3. **Where it runs, and CPU:**
-   - **Cloud** (own machine per session): RA, PC, DB, PB, DA. Start with `nproc` and set `--processes` to that
-     minus 1. **Cloud numbers are provisional (cloud).** Every binding measurement (go/no-go, KEEP confirmation,
-     timing) runs on the laptop; the next laptop sub-plan in the stream re-runs it as its step 0. Setup: `uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r requirements-dev.txt`.
-   - **Laptop** (14 cores, shared): S0, PA, PD, RB, RC, DC, I1, and **every timing check** (`tests/test_timing_slow.py`,
-     `tests/test_river_timing.py`, `lab.timing_bench`, the package check). The "server is ~2× slower" rule is calibrated
-     on this laptop; a cloud machine's timing numbers don't count. A cloud session that changed `bot/` writes
-     "timing not checked (cloud)" in its handoff, and the next laptop session runs the timing check first.
-     On the laptop, `--processes` = floor(12 / laptop sessions running when you start, counting yourself), at least 2,
-     fixed for the whole session (both arms of a comparison must match). I1 runs alone and uses 12. A session that
-     joins later may push the total above 12 for a while; that's fine, because binding comparisons are always within
-     one session, back to back.
-   - **The laptop lock** (no code, one wrapper): every `lab.eval` / `lab.opps.record` on the laptop runs under
-     `flock -s /tmp/pokerbot_laptop.lock <command>` (shared: evals run side by side); every timing check
-     (`tests/test_timing_slow.py`, `tests/test_river_timing.py`, `lab.timing_bench`, the package check) runs under
-     `flock -x /tmp/pokerbot_laptop.lock <command>` (exclusive: it waits for running evals, and new evals wait behind it).
-     Cloud sessions skip the lock.
-   - Budgets are wall-clock, so the two arms of a comparison run **back to back on the same machine**, and numbers
-     from different machines are never compared with each other. Every KEEP is confirmed once on fresh seeds.
-   - Each handoff says which machine its numbers came from (`nproc`, cloud or laptop).
+3. **Everything runs in the cloud**, each session on its own machine.
+   - Setup: `uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r requirements-dev.txt`.
+     Then run `nproc` and use `--processes` = nproc − 1 on every `lab.eval` / `lab.opps.record` run.
+   - Budgets are wall-clock, so the two arms of a comparison run **back to back in the same session**, and numbers from
+     different sessions (different machines) are never compared with each other. Every KEEP is confirmed once on fresh
+     seeds. Each handoff states the machine (`nproc` and `lscpu | grep "Model name"`).
+   - **Timing rule (machine-independent):** a session that changes `bot/` runs `lab.timing_bench` for its brain and for
+     `tier3`, back to back, same hands and seeds. The new brain's bank use must be **≤ 1.4 × Tier 3's** (on the
+     reference laptop Tier 3 uses ≤ 34 % of the bank at 2× slower; the limit is 50 %), and its hard-deadline hits ≤ Tier
+     3's + 2√(Tier 3's). This ratio is the binding timing check. Also run `tests/test_timing_slow.py`: if it fails, run it
+     for `tier3` alone on the same machine; if `tier3` fails too, the machine is the cause, and the ratio decides.
 4. **Seeds:** use only your block (below), so no two sessions reuse seeds.
 5. **Two-part KEEP** (every pool gate): `lab.eval --compare` on chips from a **locks-off** run (sum up, no bot down
    > 2 SE) **and** the mean match score from a **locks-on** run not lower by > 2 SE (S0's `lab/opps/score_compare.py`;
@@ -81,7 +72,7 @@ Gate R therefore compares Tier 3 with vs without the solver.
 
 ## User checkpoints
 
-The user reviews only the go/no-go handoffs: **PA** (gate X), **RA** (GO/NO-GO, provisional), **DB** part 1 (is there
+The user reviews only the go/no-go handoffs: **PA** (gate X), **RA** (GO/NO-GO), **DB** part 1 (is there
 a rule to learn), **PD** (gate P), **RC** (gate R) and **I1** (what ships). Every other session starts as soon as its
 prerequisite has pushed its handoff.
 

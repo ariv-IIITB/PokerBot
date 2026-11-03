@@ -1,4 +1,4 @@
-# PA: gate X and `tier4p` with forced members (Opus, laptop)
+# PA: gate X and `tier4p` with forced members (Opus, cloud)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, `docs/TIER4_PLAN.md` §P (P0a, P1 only), and on
 `tier4/base`: `bot/brains/exploit.py`, `bot/brains/tier3x.py`, `docs/reports/TRACK_X.md` (X2/X3 sections).
@@ -9,7 +9,7 @@ Branch `tier4/p` from `origin/tier4/base`. Files: the P row of the README's owne
 1. **Gate X baseline (start it first, it runs while you code).** `tier3x` vs `tier3` on the training pool, 50 pairs,
    seeds 8000+, both locks on (score) and off (chips), the two arms back to back. Two-part KEEP
    (README rule 5). Record the numbers in `docs/reports/TIER4P.md`. This decides the **incumbent**: `tier3x` if KEEP,
-   else `tier3`. These numbers are binding (laptop; `--processes` and the `flock -s` wrapper per README rule 3).
+   else `tier3`. `--processes` per README rule 3.
    Gate X only picks the development base (the incumbent); only I1's bar decides what ships.
 2. **`bot/brains/tier4p.py`:** `Tier4PBrain(Tier3Brain)` with members as parameter overrides applied after
    `adjusted()` (same mechanism as `exploit.adjust`, a pure function over the params dict):

@@ -1,8 +1,8 @@
-# I1: integrate and decide what ships (Opus, laptop, last)
+# I1: integrate and decide what ships (Opus, cloud, last)
 
 Read: `CLAUDE.md`, `docs/tier4/README.md`, this file, the final handoffs `PD.md`, `DC.md`, `RC.md` (and `RA.md` if R
 stopped at the spike). Don't read the other sub-plans unless a handoff leaves a question open.
-Branch `tier4/main` from `origin/tier4/base`. Seeds 40000+. Laptop, alone: `--processes 12`, `flock` per README rule 3.
+Branch `tier4/main` from `origin/tier4/base`. Seeds 40000+. `--processes` per README rule 3.
 
 **What ships by default:** `tier3` as packaged in upload candidate #5, unless a candidate passes every gate below.
 Level within noise means `tier3` ships.
@@ -14,7 +14,7 @@ Level within noise means `tier3` ships.
 2. **Candidates:** the incumbent (from PA: `tier3x` or `tier3`) with D's and R's KEEPs, and, if gate P passed,
    `tier4p` (its members inherit D's and R's changes through Tier 3).
 3. **Combined gates** (the pieces were tested alone; now together):
-   - combined timing at 2× slower, 400/60 s and 1000/150 s, vs calling_station and trapper: ≤ 50 % of the bank;
+   - combined timing, 400/60 s and 1000/150 s, vs calling_station and trapper: README rule 3's ratio (≤ 1.4 × Tier 3);
      deadline hits ≤ baseline + 2√baseline; `lab.memory_check` < 500 MB;
    - best candidate vs the incumbent as currently shipped (`tier3` on `main`): head-to-head 100 pairs, score ≥ 0.5 + 2 SE
      to call it an improvement; training pool two-part KEEP; a Stage 2 run (1000 hands, 30 pairs).
@@ -26,7 +26,8 @@ Level within noise means `tier3` ships.
    the combined gates have picked the candidate, never before a retry. If the candidate is below the incumbent by
    > 2 SE on the sum, the incumbent ships.
 5. **Package:** `tools.package_submission --zip --stage2 --brain <chosen>`; record the sha256 in `docs/SUBMISSIONS.md`.
-   Don't upload: the user does.
+   Don't upload: the user does. Optional, if the user can: one `tests/test_timing_slow.py` run of the final package on
+   the user's laptop (the machine the 2× rule was calibrated on) before upload.
 6. Update `docs/STATUS.md` (Tier 4 row, what shipped, what was dropped and why). Fast suite and slow timing green. Push
    `tier4/main`, and ask the user before merging it into `main`.
 

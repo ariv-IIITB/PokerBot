@@ -12,7 +12,7 @@ the thresholds were tuned on random-discard equity.
 
 ## Tasks
 1. **Cost first:** time Tier 3 decisions with `smart_rollout_discard` on vs off (`lab.timing_bench` or `--report stats`).
-   If the bank use at 2× would pass 50 %, stop and write the handoff.
+   If it breaks the README rule 3 timing ratio (≤ 1.4 × Tier 3's bank use), stop and write the handoff.
 2. **(a) On, no retune:** `tier3:{"smart_rollout_discard":true}` vs `tier3`, training pool + tier1 + tier2, 30 pairs,
    locks off and on.
 3. **(b) On + retune:** a 3 × 3 grid on `raise_equity` (shift all streets by −0.04 / 0 / +0.04) × `call_margin`
@@ -23,9 +23,6 @@ the thresholds were tuned on random-discard equity.
    test that the embedded tier3 params carry the new values. On DROP: change nothing in `bot/`.
 6. Record every result, kept or dropped, in `docs/reports/TIER4_DISCARD.md`.
 7. Fast suite green, `-m slow tests/test_timing_slow.py` green, push, handoff.
-
-**Provisional (cloud):** task 1's timing and task 4's 50-pair confirmation are cloud numbers. DC's step 0 re-runs
-them on the laptop and makes them binding.
 
 ## Done when
 - `docs/tier4/handoff/DA.md`: KEEP or DROP with numbers (± SE, pairs), the timing cost, the values set, the commit.
