@@ -134,9 +134,6 @@ DEFAULTS.update({
     "river_budget_s": TimingConfig.river_budget_s,    # ceiling of the time box (ranges + solve), seconds
     "river_box_mult": TimingConfig.river_box_mult,    # box = min(this x the decision budget, river_budget_s)
     "river_min_iters": 20,         # fewer CFR+ passes than this: Tier 3's own river decides
-    "river_buckets": 64,           # strength buckets per player (the spike's GO variant)
-    "river_combos": 300,           # score at most this many random combos per side (ours + theirs): ranges cost ~linearly
-    "river_max_iters": 150,        # stop at this many passes even with time left (0.011 pot exploitability at 200)
 })
 
 SPOT_STREET = {1: "flop", 2: "turn", 3: "river"}
@@ -455,14 +452,6 @@ class Tier3Brain(Tier2Brain):
         i, j = np.triu_indices(len(mine), 1)
         hero_cards = np.stack([mine[i], mine[j]], axis=1)
         idx = int(np.nonzero((hero_cards[:, 0] == hole[0]) & (hero_cards[:, 1] == hole[1]))[0][0])
-        cap = int(p["river_combos"])                               # a random sample of each range; ours holds our hand
-        if 0 < cap < len(opp_cards):
-            opp_cards = opp_cards[self.rng.choice(len(opp_cards), cap, replace=False)]
-        if 0 < cap < len(hero_cards):
-            pick = self.rng.choice(len(hero_cards), cap, replace=False)
-            if idx not in pick:
-                pick[0] = idx
-            hero_cards, idx = hero_cards[pick], int(np.nonzero(pick == idx)[0][0])
         w_opp = self.opponent.range_weights(rec, opp_cards, self.rng)
         w_hero = own_range_weights(rec, hero_cards, self.rng)
         w_opp = np.maximum(w_opp, 1e-9 * max(float(w_opp.max()), 1e-300))   # no empty buckets
@@ -474,8 +463,7 @@ class Tier3Brain(Tier2Brain):
                          checked=bool(h.tocall <= 0 and any(rr.street == 3 and rr.actor != ME for rr in h.history)))
         cfg = TreeCfg(bet_sizes=(1.0, INF), raise_sizes=(1.0, INF), min_bet=float(h.bb or 2))
         res = solve_river(spot, hero_cards, w_hero, hand_ranks(ev, hero_cards, board), opp_cards, w_opp,
-                          hand_ranks(ev, opp_cards, board), idx, deadline, cfg=cfg,
-                          max_iters=int(p["river_max_iters"]) or 10**9, buckets=int(p["river_buckets"]))
+                          hand_ranks(ev, opp_cards, board), idx, deadline, cfg=cfg, auto=True)
         if res is None:
             st["river_no_pass"] += 1
             return None
