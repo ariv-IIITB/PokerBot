@@ -1,0 +1,90 @@
+== rep1 maniac tier3
+400 hands, 1903 decisions: bank used 7.22s of 60s -> projected x2 = 14.45s (24% of bank)
+mean decision 3.80 ms, worst 20.1 ms (projected 40.1 ms); first decision incl. start-up overlap 193 ms
+== rep1 maniac tier3:{"special_budget_frac":1.5,"discard_max_samples":8000}
+400 hands, 1842 decisions: bank used 7.02s of 60s -> projected x2 = 14.05s (23% of bank)
+mean decision 3.81 ms, worst 20.0 ms (projected 39.9 ms); first decision incl. start-up overlap 192 ms
+== rep1 maniac tier3:{"special_budget_frac":3.0,"discard_max_samples":16000}
+400 hands, 1914 decisions: bank used 7.23s of 60s -> projected x2 = 14.47s (24% of bank)
+mean decision 3.78 ms, worst 20.1 ms (projected 40.3 ms); first decision incl. start-up overlap 192 ms
+== rep1 maniac tier3:{"special_budget_frac":5.0,"discard_max_samples":32000}
+400 hands, 1900 decisions: bank used 7.31s of 60s -> projected x2 = 14.63s (24% of bank)
+mean decision 3.85 ms, worst 20.0 ms (projected 40.0 ms); first decision incl. start-up overlap 230 ms
+== rep1 maniac tier3:{"discard_learn":true}
+400 hands, 1894 decisions: bank used 7.20s of 60s -> projected x2 = 14.41s (24% of bank)
+mean decision 3.80 ms, worst 19.9 ms (projected 39.8 ms); first decision incl. start-up overlap 193 ms
+== rep1 tier1 tier3
+400 hands, 1718 decisions: bank used 7.02s of 60s -> projected x2 = 14.04s (23% of bank)
+mean decision 4.09 ms, worst 20.0 ms (projected 40.0 ms); first decision incl. start-up overlap 174 ms
+== rep1 tier1 tier3:{"special_budget_frac":1.5,"discard_max_samples":8000}
+400 hands, 1773 decisions: bank used 7.33s of 60s -> projected x2 = 14.66s (24% of bank)
+mean decision 4.13 ms, worst 20.3 ms (projected 40.6 ms); first decision incl. start-up overlap 175 ms
+== rep1 tier1 tier3:{"special_budget_frac":3.0,"discard_max_samples":16000}
+400 hands, 1828 decisions: bank used 7.77s of 60s -> projected x2 = 15.54s (26% of bank)
+mean decision 4.25 ms, worst 20.1 ms (projected 40.2 ms); first decision incl. start-up overlap 214 ms
+== rep1 tier1 tier3:{"special_budget_frac":5.0,"discard_max_samples":32000}
+400 hands, 1794 decisions: bank used 7.45s of 60s -> projected x2 = 14.90s (25% of bank)
+mean decision 4.15 ms, worst 21.3 ms (projected 42.5 ms); first decision incl. start-up overlap 186 ms
+== rep1 tier1 tier3:{"discard_learn":true}
+400 hands, 1705 decisions: bank used 6.99s of 60s -> projected x2 = 13.98s (23% of bank)
+mean decision 4.10 ms, worst 20.1 ms (projected 40.2 ms); first decision incl. start-up overlap 175 ms
+== rep1 tier2-nolock tier3
+400 hands, 1699 decisions: bank used 6.94s of 60s -> projected x2 = 13.88s (23% of bank)
+mean decision 4.08 ms, worst 20.2 ms (projected 40.4 ms); first decision incl. start-up overlap 172 ms
+== rep1 tier2-nolock tier3:{"special_budget_frac":1.5,"discard_max_samples":8000}
+400 hands, 1816 decisions: bank used 7.59s of 60s -> projected x2 = 15.17s (25% of bank)
+mean decision 4.18 ms, worst 20.1 ms (projected 40.2 ms); first decision incl. start-up overlap 175 ms
+== rep1 tier2-nolock tier3:{"special_budget_frac":3.0,"discard_max_samples":16000}
+400 hands, 1786 decisions: bank used 7.41s of 60s -> projected x2 = 14.82s (25% of bank)
+mean decision 4.15 ms, worst 20.1 ms (projected 40.2 ms); first decision incl. start-up overlap 174 ms
+== rep1 tier2-nolock tier3:{"special_budget_frac":5.0,"discard_max_samples":32000}
+400 hands, 1773 decisions: bank used 7.28s of 60s -> projected x2 = 14.56s (24% of bank)
+mean decision 4.11 ms, worst 20.4 ms (projected 40.9 ms); first decision incl. start-up overlap 175 ms
+== rep1 tier2-nolock tier3:{"discard_learn":true}
+400 hands, 1822 decisions: bank used 7.64s of 60s -> projected x2 = 15.28s (25% of bank)
+mean decision 4.19 ms, worst 20.3 ms (projected 40.6 ms); first decision incl. start-up overlap 172 ms
+== rep2 maniac tier3
+400 hands, 1867 decisions: bank used 6.95s of 60s -> projected x2 = 13.89s (23% of bank)
+mean decision 3.72 ms, worst 19.8 ms (projected 39.5 ms); first decision incl. start-up overlap 193 ms
+== rep2 maniac tier3:{"special_budget_frac":1.5,"discard_max_samples":8000}
+400 hands, 1928 decisions: bank used 7.38s of 60s -> projected x2 = 14.76s (25% of bank)
+mean decision 3.83 ms, worst 19.9 ms (projected 39.9 ms); first decision incl. start-up overlap 226 ms
+== rep2 maniac tier3:{"special_budget_frac":3.0,"discard_max_samples":16000}
+400 hands, 1822 decisions: bank used 6.80s of 60s -> projected x2 = 13.59s (23% of bank)
+mean decision 3.73 ms, worst 20.1 ms (projected 40.2 ms); first decision incl. start-up overlap 192 ms
+== rep2 maniac tier3:{"special_budget_frac":5.0,"discard_max_samples":32000}
+400 hands, 1836 decisions: bank used 6.87s of 60s -> projected x2 = 13.75s (23% of bank)
+mean decision 3.74 ms, worst 19.8 ms (projected 39.6 ms); first decision incl. start-up overlap 203 ms
+== rep2 maniac tier3:{"discard_learn":true}
+400 hands, 1876 decisions: bank used 7.09s of 60s -> projected x2 = 14.18s (24% of bank)
+mean decision 3.78 ms, worst 20.0 ms (projected 40.0 ms); first decision incl. start-up overlap 192 ms
+== rep2 tier1 tier3
+400 hands, 1736 decisions: bank used 7.05s of 60s -> projected x2 = 14.10s (23% of bank)
+mean decision 4.06 ms, worst 19.9 ms (projected 39.9 ms); first decision incl. start-up overlap 176 ms
+== rep2 tier1 tier3:{"special_budget_frac":1.5,"discard_max_samples":8000}
+400 hands, 1689 decisions: bank used 7.11s of 60s -> projected x2 = 14.22s (24% of bank)
+mean decision 4.21 ms, worst 20.1 ms (projected 40.2 ms); first decision incl. start-up overlap 174 ms
+== rep2 tier1 tier3:{"special_budget_frac":3.0,"discard_max_samples":16000}
+400 hands, 1727 decisions: bank used 7.06s of 60s -> projected x2 = 14.13s (24% of bank)
+mean decision 4.09 ms, worst 20.0 ms (projected 40.0 ms); first decision incl. start-up overlap 174 ms
+== rep2 tier1 tier3:{"special_budget_frac":5.0,"discard_max_samples":32000}
+400 hands, 1708 decisions: bank used 7.01s of 60s -> projected x2 = 14.02s (23% of bank)
+mean decision 4.10 ms, worst 20.5 ms (projected 41.0 ms); first decision incl. start-up overlap 174 ms
+== rep2 tier1 tier3:{"discard_learn":true}
+400 hands, 1721 decisions: bank used 7.23s of 60s -> projected x2 = 14.45s (24% of bank)
+mean decision 4.20 ms, worst 20.0 ms (projected 40.0 ms); first decision incl. start-up overlap 176 ms
+== rep2 tier2-nolock tier3
+400 hands, 1741 decisions: bank used 7.34s of 60s -> projected x2 = 14.68s (24% of bank)
+mean decision 4.22 ms, worst 20.1 ms (projected 40.1 ms); first decision incl. start-up overlap 174 ms
+== rep2 tier2-nolock tier3:{"special_budget_frac":1.5,"discard_max_samples":8000}
+400 hands, 1748 decisions: bank used 7.33s of 60s -> projected x2 = 14.66s (24% of bank)
+mean decision 4.19 ms, worst 20.1 ms (projected 40.3 ms); first decision incl. start-up overlap 182 ms
+== rep2 tier2-nolock tier3:{"special_budget_frac":3.0,"discard_max_samples":16000}
+400 hands, 1743 decisions: bank used 7.08s of 60s -> projected x2 = 14.16s (24% of bank)
+mean decision 4.06 ms, worst 20.2 ms (projected 40.4 ms); first decision incl. start-up overlap 175 ms
+== rep2 tier2-nolock tier3:{"special_budget_frac":5.0,"discard_max_samples":32000}
+400 hands, 1768 decisions: bank used 7.34s of 60s -> projected x2 = 14.68s (24% of bank)
+mean decision 4.15 ms, worst 21.5 ms (projected 43.1 ms); first decision incl. start-up overlap 186 ms
+== rep2 tier2-nolock tier3:{"discard_learn":true}
+400 hands, 1750 decisions: bank used 7.26s of 60s -> projected x2 = 14.52s (24% of bank)
+mean decision 4.15 ms, worst 21.6 ms (projected 43.2 ms); first decision incl. start-up overlap 176 ms
