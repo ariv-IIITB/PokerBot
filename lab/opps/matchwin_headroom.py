@@ -1,5 +1,5 @@
 """MW headroom: how often is a match still open late, and the best a free variance scale could add.
-Usage: python lab/opps/matchwin_headroom.py DIR_OF_RECORDINGS (e.g. logs/records/s0_9000 from tier4/s0); never reads d_new_rules."""
+Usage: python -m lab.opps.matchwin_headroom DIR_OF_RECORDINGS (e.g. logs/records/s0_9000 from tier4/s0); never reads d_new_rules."""
 import gzip, json, glob, os, math, sys
 import numpy as np
 D = sys.argv[1]

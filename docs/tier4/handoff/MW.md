@@ -4,7 +4,7 @@ Branch `claude/mw-360090` = `tier4/mw`. Machine: shared laptop, 1 process. No `b
 
 ## Headroom measurement (stop rule applied)
 Data: S0 recordings `logs/records/s0_9000` (tier3, locks off, 12 pairs = 24 matches x 400 hands per bot, seeds 9000-9011),
-`d_new_rules` excluded and not analysed; held-out/blind2 never touched. Script: `lab/opps/matchwin_headroom.py DIR`.
+`d_new_rules` excluded and not analysed; held-out/blind2 never touched. Script: `python -m lab.opps.matchwin_headroom DIR`.
 "Open" = |lead| < 1 SD of the remaining hands, SD = this match's per-hand SD x sqrt(hands left). "Flip" = sign of lead at
 hand k differs from the final sign.
 
