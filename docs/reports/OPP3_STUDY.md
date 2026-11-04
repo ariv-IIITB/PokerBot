@@ -42,6 +42,13 @@ weak), wins by value-betting big when we have a bluff-catcher. Also true of `d_n
 (over-folders with value-only river bets); the trapper/minraise are the same shape with fewer bets.
 Observable online: X1 over-folder verdict, river-bet rate, bluff index, the size distribution of faced bets.
 
+## The same two leaks in `d_new_exploiter` (−2.06 S0) and `d_new_rules` (−0.90 S0)
+Different code, same shape (S0 recordings, 9,600 hands each): their river bets are value-only (weak share 0–6 % at every
+size), they fold to our bets (exploiter 83 % to .75–1.1 pot river bets, 85 % to .4–.75 turn bets, 96 % on the turn when
+we hold air; rules 61–63 %), and the chips go into **river showdowns** (exploiter −3.18, rules −1.39, conv_opp3 −2.8
+chips/hand) while we bet weak turns 11–24 % and weak rivers 0–17 %. So the shared weakness is: **we pay off value bets
+and under-bluff folders**. River call EV vs their bets .4–1.1 pot: win 0–18 %, −15 to −37 per call.
+
 ## Candidates (all adaptive; both flags off by default; seeds 71000+, 30 pairs, locks off, vs conv_opp3)
 1. **`x_narrow`: bet-range narrowing on river calls.** Re-read our equity against the bettor's top slice:
    slice = `f·(λ + (1−λ)·F)·(1−b)`, f = their river-bet rate, b = bluff index, F = share of their faced river bets
@@ -54,6 +61,9 @@ Observable online: X1 over-folder verdict, river-bet rate, bluff index, the size
    confidence, so weak hands bet the river (checked-to bet rate 43 → 52 %; its river folds +2.08 chips/hand).
    With 1: **+0.18 ± 0.17, match score 0.650 ± 0.062** (+0.86 ± 0.23 vs candidate 1 alone, z +3.8).
    Total vs tier3: +1.9 chips/hand, from a loss to a small win (30 pairs, same seeds, load ~20).
-3. Not built: the same narrowing for turn/flop bets (+0.1–0.2 expected; those calls go through MDF in `tier3.py`,
+3. **`x_stab`: bluff weak hands when unfaced, at the rate the street's measured fold rate pays** (flop, turn, river;
+   needs the over-folder verdict; chance = `lam·(fold − break-even)/0.5`). Built for the exploiter/rules/conv_opp3 turn
+   shape; results in the handoff.
+4. Not built: the same narrowing for turn/flop bets (+0.1–0.2 expected; those calls go through MDF in `tier3.py`,
    not `choose`), and size-aware flop/turn bluffing (it folds 58–78 % to .4–.75 pot bets). Held-out bots not run.
 Pool and simple-bot guard results: `docs/tier4/handoff/O3.md`.
