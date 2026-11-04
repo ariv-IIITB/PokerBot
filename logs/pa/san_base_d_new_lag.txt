@@ -1,0 +1,2 @@
+tier4p[{"member":"base"}]-nolock vs d_new_lag-nolock: +4.88 ± 1.04 chips/hand | match score 0.812 ± 0.101 over 16 matches | errors A/B 0/0 | forfeits A/B 0/0 | 6400 hands in 95.6s (67/s)
+tier4p[{"member":"base"}]-nolock vs maniac-nolock: +46.39 ± 1.09 chips/hand | match score 1.000 ± 0.000 over 16 matches | errors A/B 0/0 | forfeits A/B 0/0 | 6400 hands in 61.0s (105/s)

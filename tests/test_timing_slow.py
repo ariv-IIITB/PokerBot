@@ -65,3 +65,14 @@ def test_the_real_subprocess_bot_over_the_real_protocol_at_2x() -> None:
     m = play_match([bot, PlayerSpec.brain("maniac").build()], load_variant("discard_holdem"),
                    seed=5, hands=400, time_bank_s=60.0, clock_scale=2.0, reply_limit_s=5.0)
     check_bank(m, 400, 60.0, None, None)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("hands,bank", [(400, 60.0), (1000, 150.0)])
+@pytest.mark.parametrize("opponent", ["calling_station", "d_new_trapper"])
+def test_tier4p_on_a_machine_twice_as_slow(hands, bank, opponent) -> None:
+    """Gate P item 7: tier4p (auto selection) keeps the bank at 2x slower, against a station and the trapper."""
+    a = PlayerSpec.brain("tier4p", NO_LOCK).build()
+    m = play_match([a, PlayerSpec.brain(opponent).build()], load_variant("discard_holdem"), seed=7, hands=hands,
+                   time_bank_s=bank, clock_scale=2.0, reply_limit_s=5.0)
+    check_bank(m, hands, bank, a.bot, None)

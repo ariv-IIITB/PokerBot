@@ -1,0 +1,2 @@
+tier4p-nolock vs d_new_trapper-nolock: +1.86 ± 0.14 chips/hand | match score 0.850 ± 0.036 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 511.6s (78/s)
+--- brain stats: tier4p-nolock: decisions_anti_aggro=0 decisions_anti_folder=0 decisions_anti_value=119767 decisions_base=9660 hands200_anti_aggro=0 hands200_anti_folder=0 hands200_anti_value=15602 hands200_base=163 hands_anti_aggro=0 hands_anti_folder=0 hands_anti_value=29315 hands_base=2392 p_errors=0 p_raise_folds=3743 sel_stoploss=1 sel_switches=125 t3_decisions=92638 t3_errors=0 t3_fallbacks=14046

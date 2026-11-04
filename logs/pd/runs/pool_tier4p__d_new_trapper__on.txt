@@ -1,0 +1,1 @@
+tier4p vs d_new_trapper: +0.53 ± 0.08 chips/hand | match score 0.950 ± 0.022 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 276.5s (145/s)

@@ -21,10 +21,15 @@ One file per opponent, <out>/<opponent>.json.gz:
 `seat` 0 = button (small blind, acts first preflop); `hole3` = the hole cards dealt, `hole` =
 the hole cards at the end (after the discard); `opp` = the opponent's cards at showdown, else [];
 `rv` = revealed cards (in Discard Hold'em, each player's discard). Card ints are bot.cards ids.
+
+Lab-only fields (hidden from our bot during play; read from the engine's full game state):
+`opp_hole3` = the opponent's dealt hole cards on EVERY hand (fold hands too), `opp_dis` = the
+cards they discarded (dealt but not held at the end; [] if none). Older files lack both.
 """
 from __future__ import annotations
 
 import argparse
+import contextlib
 import gzip
 import json
 import multiprocessing as mp
@@ -45,16 +50,29 @@ ACTOR_BACK = {"m": ME, "o": OPP}
 
 # --------------------------------------------------------------------------- one hand
 
-def hand_record(h: HandState) -> dict:
-    """A finished HandState as a compact JSON-able dict (see the module docstring)."""
+def hand_record(h: HandState, truth: Optional[dict] = None) -> dict:
+    """A finished HandState as a compact JSON-able dict (see the module docstring).
+    `truth` (lab only) = {"opp_hole3", "opp_dis"} from the engine; added when given."""
     hole3 = next((list(cards) for kind, cards in h.card_log if kind == "hole"), list(h.hole))
-    return {
+    rec = {
         "id": h.hand_id, "seat": h.seat, "hole3": hole3, "hole": list(h.hole),
         "board": list(h.board), "opp": list(h.opp_cards), "delta": h.delta,
         "h": [[r.street, ACTOR[r.actor], r.action.kind, r.action.amount, r.action.choice]
               for r in h.history],
         "rv": [[ACTOR.get(i.who, i.who), list(i.cards)] for i in h.info if i.kind == "reveal"],
     }
+    if truth is not None:
+        rec["opp_hole3"] = list(truth["opp_hole3"])
+        rec["opp_dis"] = list(truth["opp_dis"])
+    return rec
+
+
+def dealt_and_discarded(st, role: int) -> tuple[list[int], list[int]]:
+    """(dealt hole cards, discarded cards) of `role` from a lab engine GameState."""
+    final = list(st.hole[role])
+    dealt = next((list(e.data["cards"]) for e in st.events
+                  if e.kind == "hole" and e.player == role), final)
+    return dealt, [c for c in dealt if c not in final]
 
 
 def to_hand_state(rec: dict) -> HandState:
@@ -71,6 +89,31 @@ def to_hand_state(rec: dict) -> HandState:
 
 # --------------------------------------------------------------------------- one pair
 
+_CURRENT: list = [None]       # the lab engine Hand being played in this process
+
+
+@contextlib.contextmanager
+def _patched_engine():
+    """Make lab.engine remember the Hand it is playing, so the recorder can read the full
+    game state (the opponent's dealt cards). Lab only; the bot never sees it."""
+    import lab.engine as engine
+    base = engine.Hand
+
+    class RecordedHand(base):
+        def play(self):
+            _CURRENT[0] = self
+            try:
+                return super().play()
+            finally:
+                _CURRENT[0] = None
+
+    engine.Hand = RecordedHand
+    try:
+        yield
+    finally:
+        engine.Hand = base
+
+
 def _hook(player, hands: list) -> None:
     """Append a hand_record to `hands` after every hand our in-process brain sees."""
     brain = player.bot.brain
@@ -79,7 +122,12 @@ def _hook(player, hands: list) -> None:
     def recording_observe(state, msg):
         observe(state, msg)
         if isinstance(msg, HandEnd) and state.hand is not None:
-            hands.append(hand_record(state.hand))
+            truth = None
+            hand = _CURRENT[0]
+            if hand is not None:
+                dealt, dis = dealt_and_discarded(hand.st, 1 - state.hand.seat)
+                truth = {"opp_hole3": dealt, "opp_dis": dis}
+            hands.append(hand_record(state.hand, truth))
 
     brain.observe = recording_observe
 
@@ -97,7 +145,8 @@ def record_pair(brain, opponent, cfg, seed: int, hands: Optional[int],
         players[1 - ours] = opponent.build(cfg)
         recorded: list = []
         _hook(players[ours], recorded)
-        res = play_match(players, cfg, seed, hands, time_bank_s=time_bank_s)
+        with _patched_engine():
+            res = play_match(players, cfg, seed, hands, time_bank_s=time_bank_s)
         matches.append({"chips": res.chips[ours], "score": res.score(ours),
                         "forfeit": None if res.forfeit is None else
                         ("us" if res.forfeit == ours else "opp"),

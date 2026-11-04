@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_aggro","members":{"anti_aggro":{"aa_bluff_mult":0.75,"aa_call_margin":-0.03,"aa_mdf_mult":1.0}}}] vs d_new_lag: +0.17 ± 0.06 chips/hand | match score 0.990 ± 0.010 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 56.6s (707/s)

@@ -1,0 +1,1 @@
+tier3x-nolock vs d_new_rules-nolock: -0.60 ± 0.18 chips/hand | match score 0.380 ± 0.049 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 198.2s (202/s)

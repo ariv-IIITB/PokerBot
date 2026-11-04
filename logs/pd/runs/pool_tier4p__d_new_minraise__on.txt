@@ -1,0 +1,1 @@
+tier4p vs d_new_minraise: -0.20 ± 0.09 chips/hand | match score 0.830 ± 0.038 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 129.1s (310/s)

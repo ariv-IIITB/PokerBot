@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_aggro"}] vs tier3: -0.01 ± 0.02 chips/hand | match score 0.460 ± 0.050 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 102.1s (392/s)
