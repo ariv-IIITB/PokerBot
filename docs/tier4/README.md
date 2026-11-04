@@ -131,6 +131,8 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 | 71000–71999 | O3: conv_opp3 study (light) |
 | 72000–72999 | AD: faster adaptation in long matches |
 | 73000–73999 | RF: fix the CFR river + RNR (diagnose and repair) |
+| 74000–74999 | O3C: O3 arm B confirmation on tier4/int |
+| 75000–75999 | L3: 3-bet-pot leak study |
 | 51000–51999 | PB redo (laptop) tuning; 52000–52999 its confirmations |
 | 53000–53999 | DA redo (laptop) tuning; 54000–54999 its confirmations |
 
