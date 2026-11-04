@@ -21,4 +21,4 @@ Machine: 14 cores (`nproc` 14), Intel(R) Core(TM) Ultra 5 225H, load average 25-
 
 **For DC:** build on this branch; `bot/sim/rollout.py` and `bot/sim/discard.py` are untouched. The baseline to beat is now the new tier3 (smart on).
 **For I1:** merge `bot/config/tier3.json` + the regenerated `bot/embedded.py` (regenerate with `.venv/bin/python -m tools.embed_data`, never hand-merge).
-Commit: see `git log -1` on `tier4/d`.
+Commit: c6aae08 (tier4/d).
