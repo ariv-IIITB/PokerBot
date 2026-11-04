@@ -1,0 +1,7 @@
+d_conv_opp3 -1.37 -> -0.46  diff +0.91 ± 0.18 (z +5.0)  improved
+d_new_exploiter -0.72 -> +0.07  diff +0.79 ± 0.14 (z +5.6)  improved
+d_new_lag +6.27 -> +5.68  diff -0.59 ± 0.33 (z -1.8)
+d_new_minraise +0.42 -> +0.87  diff +0.45 ± 0.15 (z +3.0)  improved
+d_new_trapper +0.02 -> +2.21  diff +2.19 ± 0.15 (z +14.6)  improved
+sum      diff +3.75 ± 0.46 (z +8.2)
+verdict: KEEP
