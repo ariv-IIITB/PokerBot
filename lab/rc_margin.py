@@ -6,6 +6,7 @@ the 2x-slower stand-in: engine clock x2, solver box halved as in lab.rc_ratio). 
 The stand-in only changes the clock the bank is charged on; a decision's real server time is ~2 x the laptop time
 (solver box excepted, which is wall-clock and was halved), so the table gives laptop ms and ms x2 next to the limit."""
 import argparse
+import json
 import time
 
 import numpy as np
@@ -21,11 +22,13 @@ def main() -> None:
     ap.add_argument("--hands", type=int, default=400)
     ap.add_argument("--opponents", default="calling_station,d_new_trapper")
     ap.add_argument("--seed", type=int, default=30000)
+    ap.add_argument("--extra", default="", help="JSON of more brain parameters (RD: narrow/rnr/shifts)")
     a = ap.parse_args()
     c = TimingConfig()
     bank = 60.0 if a.hands <= 400 else 150.0
     cfg = {"lock_enabled": False, "t3_river_solver": True, "river_budget_s": c.river_budget_s / 2,
            "river_box_mult": c.river_box_mult / 2}
+    cfg.update(json.loads(a.extra) if a.extra else {})
     for opp in a.opponents.split(","):
         p = PlayerSpec.brain("tier3", dict(cfg)).build()
         rows = []                                    # (wall, hard limit, is river)
