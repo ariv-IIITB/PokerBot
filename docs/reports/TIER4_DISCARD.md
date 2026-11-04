@@ -145,3 +145,5 @@ likelihood gate on every bot but is flat in play (30 pairs, ± 1.2); the online 
 -0.08 ± 0.69); 1.5/8000 worlds -1.64 ± 1.18, 2.5/12000 (1.33x time) -0.02 ± 1.16. All stay default off, shipped config unchanged. DA's smart
 rollouts cost 0.99x (corrected `lab.timing_bench`). Logs and drivers: `logs/dc/`.
 Fast suite: 1312 passed, 2 skipped.
+
+DC lever 3 (`discard_stake`, pot-size weighted keep value, default off): stake 1 -0.60 ± 1.26, stake 2 -1.42 ± 1.33 vs tier4/int (30 pairs, seeds 21100+). DROP.

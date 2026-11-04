@@ -17,5 +17,5 @@ Machine: 14 cores (`nproc` 14), Intel Core Ultra 5 225H, load 6-9 from other ses
 **Files touched outside the D stream:** `bot/brains/tier1.py` (DEFAULTS + Opponent inference dict pass `discard_mix`, `discard_eps`, `discard_learn`, `discard_max_samples`), `lab/timing_bench.py`. Also `bot/sim/discard.py`, `bot/sim/inference.py`, `tests/test_discard_mix.py` (5 tests).
 **Tests:** fast suite 1312 passed, 2 skipped (`-n 4`, after merging tier4/int). Slow suite not run.
 
-**Not tested:** choosing our keep for post-discard play (equity vs their likely range after their discard); the manager's lever 3.
+**Lever 3 (keep for post-discard play): DROP.** `discard_stake` (default 0, off): each keep scored by (share - 0.5) x (1 + stake x [either hand two pair or better]), i.e. big hands play bigger pots; the existing score already measures equity against the simulated post-discard opponent keep, so this weighting was the new part. 30 pairs, seeds 21100-21129, locks off, train+tier1+tier2, base = merged tier4/int, laptop load 15 after a reboot: stake 1 -0.60 ± 1.26 (z -0.5), stake 2 -1.42 ± 1.33 (z -1.1). Flat, no 50-pair run. Fast suite 1314 passed, 2 skipped. Files: `logs/dc/driver3.py`, `l3_*`. The manager asked for no more runs.
 Merged `origin/tier4/int` 683bd1a. Commit: see `git log -1 tier4/dc`.
