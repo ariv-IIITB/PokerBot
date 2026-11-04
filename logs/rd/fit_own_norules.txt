@@ -1,0 +1,18 @@
+16390 river hands from 5 files
+board 0 facing False: n=4086 fit ll -0.274, default ll -0.600 | cross-fit -0.369 vs default -0.600
+board 0 facing True: n=13248 fit ll -0.579, default ll -0.685 | cross-fit -0.591 vs default -0.685
+board 3 facing False: n=14246 fit ll -0.432, default ll -0.920 | cross-fit -0.454 vs default -0.920
+board 3 facing True: n=5800 fit ll -0.226, default ll -0.848 | cross-fit -0.232 vs default -0.848
+board 4 facing False: n=14279 fit ll -0.424, default ll -1.133 | cross-fit -0.453 vs default -1.133
+board 4 facing True: n=6100 fit ll -0.232, default ll -0.721 | cross-fit -0.236 vs default -0.721
+board 5 facing False: n=3180 fit ll -0.245, default ll -1.335 | cross-fit -0.259 vs default -1.335
+board 5 facing True: n=91 fit ll -0.042, default ll -0.985 | cross-fit -0.059 vs default -0.985
+OWN_BET = {(0, False): {'K': (4.89, -6.87), 'R': (-4.89, 6.87)}, (0, True): {'F': (-3.37, -1.95), 'C': (3.59, -1.58), 'R': (-0.22, 3.52)}, (3, False): {'K': (1.33, -0.94), 'R': (-1.33, 0.94)}, (3, True): {'F': (-2.99, -1.28), 'C': (2.7, 0.95), 'R': (0.29, 0.33)}, (4, False): {'K': (2.02, -1.79), 'R': (-2.02, 1.79)}, (4, True): {'F': (-2.36, -1.81), 'C': (6.05, -3.64), 'R': (-3.7, 5.45)}, (5, False): {'K': (2.05, -1.11), 'R': (-2.05, 1.11)}, (5, True): {'F': (-0.92, -0.54), 'C': (-0.92, -0.54), 'R': (1.84, 1.09)}}
+discard beta 0.5: mean ll -1.0328 over 16390
+discard beta 1: mean ll -0.9769 over 16390
+discard beta 2: mean ll -0.8910 over 16390
+discard beta 3: mean ll -0.8323 over 16390
+discard beta 4.5: mean ll -0.7793 over 16390
+discard beta 6: mean ll -0.7529 over 16390
+discard beta 9: mean ll -0.7426 over 16390
+discard beta 12: mean ll -0.7617 over 16390

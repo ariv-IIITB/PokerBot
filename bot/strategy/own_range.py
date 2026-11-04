@@ -28,19 +28,19 @@ import numpy as np
 from bot.sim.inference import DEFAULTS as INFERENCE_DEFAULTS
 from bot.sim.inference import Inference
 
-# Our betting model, FITTED on our own Tier 3 river hands (lab/rd_trace.py, lab/rd_fit_own.py; 19,227 hands over the
-# 6 training bots, seeds 70000-70007, cross-fit by opponent): P(kind | board size, facing) = softmax of a_k + b_k * s,
+# Our betting model, FITTED on our own Tier 3 river hands (lab/rd_trace.py, lab/rd_fit_own.py; 16,390 hands over 5
+# training bots (the blind d_new_rules excluded), seeds 70000-70007, cross-fit by opponent): P(kind | board size, facing) = softmax of a_k + b_k * s,
 # s = the strength percentile of the hand at that moment (Inference.strength). The generic BET_MODEL (gamma 3) scored
 # our real hand BELOW a flat range (mean log(N*w) -1.8 vs 0); this model beats it in every cell out of sample
 # (e.g. flop facing a bet: log-lik per decision -0.23 vs -0.85).
-OWN_BET = {(0, False): {'K': (5.06, -7.02), 'R': (-5.06, 7.02)},
-           (0, True): {'F': (-3.45, -1.97), 'C': (3.63, -1.53), 'R': (-0.19, 3.48)},
-           (3, False): {'K': (1.35, -0.89), 'R': (-1.35, 0.89)},
-           (3, True): {'F': (-3.04, -1.29), 'C': (2.7, 1.04), 'R': (0.35, 0.25)},
-           (4, False): {'K': (1.96, -1.65), 'R': (-1.96, 1.65)},
-           (4, True): {'F': (-2.38, -1.85), 'C': (6.32, -3.9), 'R': (-3.94, 5.75)},
-           (5, False): {'K': (2.06, -1.08), 'R': (-2.06, 1.08)},
-           (5, True): {'F': (-0.93, -0.55), 'C': (-0.93, -0.55), 'R': (1.87, 1.1)}}
+OWN_BET = {(0, False): {'K': (4.89, -6.87), 'R': (-4.89, 6.87)},
+           (0, True): {'F': (-3.37, -1.95), 'C': (3.59, -1.58), 'R': (-0.22, 3.52)},
+           (3, False): {'K': (1.33, -0.94), 'R': (-1.33, 0.94)},
+           (3, True): {'F': (-2.99, -1.28), 'C': (2.7, 0.95), 'R': (0.29, 0.33)},
+           (4, False): {'K': (2.02, -1.79), 'R': (-2.02, 1.79)},
+           (4, True): {'F': (-2.36, -1.81), 'C': (6.05, -3.64), 'R': (-3.7, 5.45)},
+           (5, False): {'K': (2.05, -1.11), 'R': (-2.05, 1.11)},
+           (5, True): {'F': (-0.92, -0.54), 'C': (-0.92, -0.54), 'R': (1.84, 1.09)}}
 OWN_BETA = 8.0            # discard softmax sharpness for our own discards (fitted: 6 -> -0.752, 9 -> -0.741)
 
 
