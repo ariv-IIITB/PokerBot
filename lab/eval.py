@@ -134,7 +134,7 @@ def run_pool(brain: str, pool: list[str], pairs: int, variant: str = DEFAULT_VAR
             if "profile" in report:
                 blocks.append(track.format_profile(merged, names))
             if "accounting" in report:
-                blocks.append(track.format_accounting(merged, names, rep.total_hands))
+                blocks.append(track.format_accounting(merged, names, rep.total_hands, [p.track for p in rep.pairs if p.track]))
             if "stats" in report:
                 blocks.append(track.format_stats(merged, names))
             out += blocks

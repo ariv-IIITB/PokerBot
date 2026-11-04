@@ -1,0 +1,4 @@
+calling_station 400h box 40 ms: used 14.2s -> 18.9s (x1.338; 32% of bank); deadline hits 0 -> 0 (limit 0.0); worst reply 25 ms; emergency 0; solves 399, 143 passes, fallbacks 0 (few 0, nopass 0, err 0)
+calling_station 400h box 80 ms: used 14.2s -> 18.9s (x1.337; 32% of bank); deadline hits 0 -> 0 (limit 0.0); worst reply 22 ms; emergency 0; solves 399, 143 passes, fallbacks 0 (few 0, nopass 0, err 0)
+d_new_trapper 400h box 40 ms: used 8.7s -> 12.0s (x1.374; 20% of bank); deadline hits 0 -> 0 (limit 0.0); worst reply 23 ms; emergency 0; solves 245, 98 passes, fallbacks 0 (few 0, nopass 0, err 0)
+d_new_trapper 400h box 80 ms: used 8.7s -> 12.3s (x1.406; 20% of bank); deadline hits 0 -> 0 (limit 0.0); worst reply 22 ms; emergency 0; solves 254, 114 passes, fallbacks 0 (few 0, nopass 0, err 0)

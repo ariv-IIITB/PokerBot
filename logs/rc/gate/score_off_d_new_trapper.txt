@@ -1,0 +1,2 @@
+tier3 vs d_new_trapper: -1.10 ± 0.14 chips/hand | match score 0.380 ± 0.049 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 443.6s (90/s)
+--- brain stats: tier3: t3_decisions=0 t3_errors=0 t3_fallbacks=0

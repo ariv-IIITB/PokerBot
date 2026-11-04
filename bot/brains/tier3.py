@@ -23,6 +23,7 @@ Tier 2. The default brain stays Tier 2 until the ship decision (docs/PART4_PLAN.
 """
 from __future__ import annotations
 
+import time
 from typing import Any, Optional
 
 import numpy as np
@@ -37,8 +38,11 @@ from bot.state import ME, OPP, GameState, HandState
 from bot.strategy.potmath import bluff_share, mdf
 from bot.strategy.preflop import (FOLD_COL, PASSIVE_COL, RAISE_COL, PreflopModel, Spot, blend_above,
                                   preflop_spot)
+from bot.strategy.own_range import own_range_weights
 from bot.strategy.ranges import OwnRange
+from bot.strategy.river_solver import INF, RiverSpot, TreeCfg, hand_ranks, solve_river
 from bot.strategy.texture import best_keep, blocker_score, board_texture
+from bot.timing import TimingConfig
 
 DEFAULTS: dict[str, Any] = dict(TIER2_DEFAULTS)
 DEFAULTS.update({
@@ -125,6 +129,12 @@ DEFAULTS.update({
     "river_overbet_prob": 0.30,
     "river_air_eq": 0.18,          # bluff only with less equity than this
     "river_air_share": 0.35,       # roughly how much of our range that is
+    # ---- river solver (Tier 4, sub-plan R): off unless asked for, falls back to the rules above
+    "t3_river_solver": False,      # solve each river decision (CFR+ on bucketed ranges) instead of the rules above
+    "river_budget_s": TimingConfig.river_budget_s,    # ceiling of the time box (ranges + solve), seconds
+    "river_box_mult": TimingConfig.river_box_mult,    # box = min(this x the decision budget, river_budget_s)
+    "river_max_iters": 0,          # >0: stop at this many passes (lab gates pin the work by passes, not by a wall-clock box)
+    "river_min_iters": 20,         # fewer CFR+ passes than this: Tier 3's own river decides
 })
 
 SPOT_STREET = {1: "flop", 2: "turn", 3: "river"}
@@ -162,6 +172,13 @@ class Tier3Brain(Tier2Brain):
         self._floated = False
         # t3_fallbacks: Tier 2 decided (a spot Tier 3 leaves to it, or an error); t3_errors: the style code threw
         self.stats = {"t3_decisions": 0, "t3_fallbacks": 0, "t3_errors": 0}
+        # river solver (all ints, summed by the lab's `--report stats`): decisions it took, CFR+ passes and
+        # microseconds over them, and why it handed a decision back to Tier 3's river
+        # (only with the flag on, so a flag-off Tier 3 reports exactly the counters it always did)
+        if self.p.get("t3_river_solver"):
+            self.stats.update({"river_solves": 0, "river_iters": 0, "river_us": 0, "river_fallbacks": 0,
+                               "river_errors": 0, "river_few_iters": 0, "river_no_pass": 0, "river_missing": 0})
+        self.river_iters_log: list[int] = []            # passes per solved decision (capped, for benches)
 
     @classmethod
     def defaults(cls) -> dict[str, Any]:
@@ -368,6 +385,10 @@ class Tier3Brain(Tier2Brain):
         h = s.hand
         assert h is not None and self._own is not None
         street = h.street
+        if street == 3 and p.get("t3_river_solver"):
+            a = self._river_solved(s, legal, budget_s, p)
+            if a is not None:
+                return a                                           # else: Tier 3's own river below
         eq = s.equity(budget_s)
         board = list(h.board)
         tex = board_texture(board)
@@ -386,6 +407,88 @@ class Tier3Brain(Tier2Brain):
         if h.tocall > 0:
             return self._facing_bet(ctx, s, legal, p)
         return self._unfaced(ctx, s, legal, p)
+
+    # ======================================================================= river solver (Tier 4, R1)
+    def _river_solved(self, s: Situation, legal: LegalActions, budget_s: float, p: dict) -> Optional[Action]:
+        """The river decision from a live CFR+ solve, or None (the caller plays Tier 3's river).
+
+        Both ranges (theirs: Opponent.range_weights; ours: own_range_weights) and the solve share ONE time
+        box of min(river_box_mult x budget, river_budget_s) seconds. None on any exception, when not even
+        one pass fits, with fewer than river_min_iters passes, or when a piece is missing (a hand that
+        isn't a plain river with two hole cards, unknown street bets, the reconstruction)."""
+        t0 = time.perf_counter()
+        st = self.stats
+        try:
+            r = self._river_solve(s, legal, budget_s, p, t0)
+        except Exception as e:
+            st["river_errors"] += 1
+            st["river_fallbacks"] += 1
+            warn(f"river solver failed: {e!r}")
+            return None
+        if r is None:
+            st["river_fallbacks"] += 1
+        return r
+
+    def _river_solve(self, s: Situation, legal: LegalActions, budget_s: float, p: dict,
+                     t0: float) -> Optional[Action]:
+        h, rec, st = s.hand, s.rec, self.stats
+        if (h is None or rec is None or legal.can_special or len(h.hole) != 2 or len(h.board) != 5
+                or len(rec.state.hole[rec.me]) != 2 or h.my_bet is None or h.opp_bet is None):
+            st["river_missing"] += 1
+            return None
+        box = min(float(p["river_box_mult"]) * budget_s, float(p["river_budget_s"]))
+        if box <= 0.0:
+            st["river_no_pass"] += 1
+            return None
+        deadline = t0 + box
+        ev = self.rules.evaluator
+        board = np.array(h.board, dtype=np.intp)
+        hole = sorted(int(c) for c in h.hole)
+        # their combos: every pair of cards we have not seen; ours: every pair consistent with the public cards
+        pool = np.array(sorted(rec.pool), dtype=np.int64)
+        i, j = np.triu_indices(len(pool), 1)
+        opp_cards = np.stack([pool[i], pool[j]], axis=1)
+        seen = set(int(c) for c in rec.mapping.values()) - set(hole)
+        mine = np.array([c for c in self.rules.deck if c not in seen], dtype=np.int64)
+        i, j = np.triu_indices(len(mine), 1)
+        hero_cards = np.stack([mine[i], mine[j]], axis=1)
+        idx = int(np.nonzero((hero_cards[:, 0] == hole[0]) & (hero_cards[:, 1] == hole[1]))[0][0])
+        w_opp = self.opponent.range_weights(rec, opp_cards, self.rng)
+        w_hero = own_range_weights(rec, hero_cards, self.rng)
+        w_opp = np.maximum(w_opp, 1e-9 * max(float(w_opp.max()), 1e-300))   # no empty buckets
+        w_hero = np.maximum(w_hero, 1e-9 * max(float(w_hero.max()), 1e-300))
+        spot = RiverSpot(pot=float(h.pot), hero_bet=float(h.my_bet), opp_bet=float(h.opp_bet),
+                         hero_stack=float(h.my_stack), opp_stack=float(h.opp_stack),
+                         last_raise=float(h.tocall) if h.tocall > 0 else 0.0,
+                         aggr_so_far=sum(1 for rr in h.history if rr.street == 3 and rr.action.kind == RAISE),
+                         checked=bool(h.tocall <= 0 and any(rr.street == 3 and rr.actor != ME for rr in h.history)))
+        cfg = TreeCfg(bet_sizes=(1.0, INF), raise_sizes=(1.0, INF), min_bet=float(h.bb or 2))
+        res = solve_river(spot, hero_cards, w_hero, hand_ranks(ev, hero_cards, board), opp_cards, w_opp,
+                          hand_ranks(ev, opp_cards, board), idx, deadline, cfg=cfg, auto=True,
+                          max_iters=int(p["river_max_iters"]) or 10**9)
+        if res is None:
+            st["river_no_pass"] += 1
+            return None
+        st["river_solves"] += 1
+        st["river_iters"] += res.iterations
+        st["river_us"] += int((time.perf_counter() - t0) * 1e6)
+        if len(self.river_iters_log) < 20000:
+            self.river_iters_log.append(res.iterations)
+        if res.iterations < int(p["river_min_iters"]):
+            st["river_few_iters"] += 1
+            return None
+        k = self._draw(res.probs)
+        kind, level = res.labels[k]
+        if kind == FOLD and legal.fold:
+            return Action.fold()
+        if kind == CALL and legal.call:
+            return Action.call()
+        if kind == CHECK and legal.check:
+            return Action.check()
+        if kind == RAISE and legal.can_raise:
+            return Action.raise_to(legal.nearest_raise(int(round(level))))
+        st["river_missing"] += 1                                   # the tree and the engine disagree
+        return None
 
     @staticmethod
     def t2_raises(h: HandState, eq: float, legal: LegalActions, p: dict) -> bool:

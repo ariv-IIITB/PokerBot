@@ -1,0 +1,2 @@
+calling_station 1000h box 40 ms x3.9: used 35.3s -> 46.8s (x1.326; 31% of bank); deadline hits 0 -> 0 (limit 0.0); worst reply 25 ms; emergency 0; solves 999, 138 passes, fallbacks 0 (few 0, nopass 0, err 0)
+d_new_trapper 1000h box 40 ms x3.9: used 22.1s -> 28.9s (x1.312; 19% of bank); deadline hits 0 -> 0 (limit 0.0); worst reply 21 ms; emergency 0; solves 588, 102 passes, fallbacks 0 (few 0, nopass 0, err 0)

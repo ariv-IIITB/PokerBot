@@ -1,0 +1,17 @@
+machine: Intel(R) Xeon(R) Processor @ 2.30GHz, nproc=4
+recorded 30 river spots in 6s
+range building (all variants pay it): combos 0.06 ms, inference 2.9 ms (p90 3.7), ranks 1.3 ms; opp weights above 1e-3 of the max: 903 of 903 (median)
+[bucket64/small-tree] passes in a 20 ms box, ranges included: median 212, p10 170, p90 271, share >= 100: 1.00 | ranges 4.3 ms + setup 2.0 ms + 0.06 ms/pass | n0/n1 64/64 | tree 6 decisions | passes if ranges were free: 309
+        after 25 passes: exploitability (pot = 1) in the solved game mean 0.0633 ± 0.0100, max 0.1927 | translated to the exact full game: mean 0.0646 ± 0.0102, max 0.1919 (30 spots)
+        after 50 passes: exploitability (pot = 1) in the solved game mean 0.0266 ± 0.0038, max 0.0720 | translated to the exact full game: mean 0.0288 ± 0.0040, max 0.0782 (30 spots)
+        after 100 passes: exploitability (pot = 1) in the solved game mean 0.0122 ± 0.0015, max 0.0401 | translated to the exact full game: mean 0.0152 ± 0.0018, max 0.0503 (30 spots)
+        after 200 passes: exploitability (pot = 1) in the solved game mean 0.0060 ± 0.0006, max 0.0148 | translated to the exact full game: mean 0.0106 ± 0.0011, max 0.0226 (30 spots)
+        after 400 passes: exploitability (pot = 1) in the solved game mean 0.0032 ± 0.0004, max 0.0075 | translated to the exact full game: mean 0.0087 ± 0.0009, max 0.0206 (30 spots)
+        after 3000 passes: exploitability (pot = 1) in the solved game mean 0.0006 ± 0.0001, max 0.0021 | translated to the exact full game: mean 0.0076 ± 0.0011, max 0.0228 (30 spots)
+[bucket32/small-tree] passes in a 20 ms box, ranges included: median 286, p10 240, p90 341, share >= 100: 1.00 | ranges 4.3 ms + setup 0.9 ms + 0.05 ms/pass | n0/n1 32/32 | tree 6 decisions | passes if ranges were free: 389
+        after 25 passes: exploitability (pot = 1) in the solved game mean 0.0613 ± 0.0097, max 0.1744 | translated to the exact full game: mean 0.0643 ± 0.0102, max 0.1784 (30 spots)
+        after 50 passes: exploitability (pot = 1) in the solved game mean 0.0258 ± 0.0039, max 0.0757 | translated to the exact full game: mean 0.0293 ± 0.0043, max 0.0858 (30 spots)
+        after 100 passes: exploitability (pot = 1) in the solved game mean 0.0125 ± 0.0027, max 0.0832 | translated to the exact full game: mean 0.0165 ± 0.0030, max 0.0894 (30 spots)
+        after 200 passes: exploitability (pot = 1) in the solved game mean 0.0058 ± 0.0009, max 0.0219 | translated to the exact full game: mean 0.0109 ± 0.0015, max 0.0357 (30 spots)
+        after 400 passes: exploitability (pot = 1) in the solved game mean 0.0026 ± 0.0003, max 0.0055 | translated to the exact full game: mean 0.0089 ± 0.0011, max 0.0265 (30 spots)
+        after 3000 passes: exploitability (pot = 1) in the solved game mean 0.0005 ± 0.0001, max 0.0011 | translated to the exact full game: mean 0.0083 ± 0.0012, max 0.0264 (30 spots)

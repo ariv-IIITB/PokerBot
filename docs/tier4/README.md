@@ -129,8 +129,37 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 | 60000–60999 | PF preflop chart |
 | 70000–70999 | RD: river solver ON + exploit layer + tuning (user decision 2026-11-04: accept the CFR river) |
 | 71000–71999 | O3: conv_opp3 study (light) |
+| 72000–72999 | AD: faster adaptation in long matches |
+| 73000–73999 | RF: fix the CFR river + RNR (diagnose and repair) |
+| 74000–74999 | O3C: O3 arm B confirmation on tier4/int |
+| 75000–75999 | L3: 3-bet-pot leak study |
 | 51000–51999 | PB redo (laptop) tuning; 52000–52999 its confirmations |
 | 53000–53999 | DA redo (laptop) tuning; 54000–54999 its confirmations |
+
+## Integration branch `tier4/int` (user, 2026-11-04)
+
+Pieces are added to `tier4/int` one at a time, as soon as their own testing is complete and above noise (handoff says
+KEEP, confirmed on fresh seeds, locks-on score checked, timing ratio checked), never mid-testing. Later improvements are
+then tested on top of `tier4/int`, not on `tier4/base`. A session that finishes a piece rebases its work on `tier4/int`
+before its confirmation run. In: DA (smart rollouts + raise_equity, `tier4/d` f70bee9). Not yet: O3 (x_narrow, x_air_eq:
+screening only), PB/PD portfolio (gate P open), DC, RD, AD. I1 still runs the final combined gates and the stacking test.
+Note: O3 was merged by mistake at 65da08c/811d54c and reverted; to re-add it, revert those two reverts or re-apply.
+
+## River solver + RNR stays a ship candidate (user, 2026-11-04)
+
+RD found no gain over Tier 3 on our pool (head to head 0.540 ± 0.050; pool chips +0.42 ± 0.48; `tier4/rd` 3c5e376), but the
+user wants the CFR river with RNR kept in play: it is the principled choice against stronger, balanced bots, which our pool
+barely contains. I1 therefore carries `t3_river_solver` (+ RNR, narrowing) as a candidate stack step and decides it on the
+held-out bots, the blind2 set (when built) and head to head, with the rule "no worse than the stack without it, and inside
+the timing limit". Before I1: lower the 400h trapper ratio (x1.408) under 1.4 (smaller box), and test on top of `tier4/int` + O3.
+
+## No soft timelines (user, 2026-11-04)
+
+The user removed all soft timelines: aim for the best bot, not the fastest. The only hard date is the deadline
+(15 Nov 23:59 IST). Nothing is dropped, rushed or cut short before about 12 Nov; the slip rule below applies only from
+then. Benefits of time go first to more improvement rounds (new leaks found, fixed as general adaptive rules), then to
+bigger confirmation runs for ship decisions (a 50-pair run cannot resolve +-0.2 chips/hand; use more pairs for the
+final candidates). PF and the restricted river are built, not dropped. The upload candidate is ready by 13 Nov.
 
 ## Slip rule
 

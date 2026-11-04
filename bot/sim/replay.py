@@ -46,6 +46,7 @@ class Reconstruction:
     smart_discard: bool = True       # rollouts keep the best two cards (False: a random discard)
     tries: int = 1
     opp_decisions: list = field(default_factory=list)   # visible opponent choices (inference)
+    my_decisions: list = field(default_factory=list)    # our own choices so far (own range, bot/strategy/own_range.py)
     bet_log: list = field(default_factory=list)         # (player, action, pot, to_call, bet,
                                                         #  all_in, street, legal) per betting action
 
@@ -115,6 +116,7 @@ def replay_once(rules, hand: HandState, rng, level=None) -> Reconstruction:
     theirs = [r.action for r in hand.history if r.actor == OPP]
     guessed = 0
     decisions: list = []
+    my_decisions: list = []
     bet_log: list = []
 
     def log_bet(p, a, legal):
@@ -130,6 +132,7 @@ def replay_once(rules, hand: HandState, rng, level=None) -> Reconstruction:
             if not mine:
                 break                                    # our current decision
             a = clamp(mine.pop(0), legal)
+            _record(my_decisions, st, p, a, legal)
             log_bet(p, a, legal)
             act(st, p, a)
             continue
@@ -180,7 +183,7 @@ def replay_once(rules, hand: HandState, rng, level=None) -> Reconstruction:
         in_play |= set(v)
     unknown = sorted(t for t in in_play if t < 0 and t not in mapping)
     return Reconstruction(st, me, mapping, unknown, pool, guessed, opp_decisions=decisions,
-                          bet_log=bet_log)
+                          my_decisions=my_decisions, bet_log=bet_log)
 
 
 def _record(decisions: list, st: GameState, p: int, a: Action, legal) -> None:
