@@ -1,0 +1,1 @@
+tier4p vs tier3x: -0.01 ± 0.02 chips/hand | match score 0.450 ± 0.050 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 94.2s (425/s)

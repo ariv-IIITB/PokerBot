@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_aggro","members":{"anti_aggro":{"aa_bluff_mult":0.5,"aa_mdf_mult":1.1}}}]-nolock vs maniac-nolock: +52.19 ± 0.52 chips/hand | match score 1.000 ± 0.000 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 290.1s (138/s)

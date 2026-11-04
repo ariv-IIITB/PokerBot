@@ -1,0 +1,1 @@
+tier4p vs d_new_lag: +0.03 ± 0.09 chips/hand | match score 0.950 ± 0.022 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 97.7s (409/s)

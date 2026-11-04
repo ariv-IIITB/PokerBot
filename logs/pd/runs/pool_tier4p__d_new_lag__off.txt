@@ -1,0 +1,2 @@
+tier4p-nolock vs d_new_lag-nolock: +5.96 ± 0.33 chips/hand | match score 0.890 ± 0.031 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 398.2s (100/s)
+--- brain stats: tier4p-nolock: decisions_anti_aggro=169096 decisions_anti_folder=0 decisions_anti_value=0 decisions_base=10157 hands200_anti_aggro=19454 hands200_anti_folder=0 hands200_anti_value=0 hands200_base=98 hands_anti_aggro=36735 hands_anti_folder=0 hands_anti_value=0 hands_base=2472 p_errors=0 p_raise_folds=0 sel_stoploss=1 sel_switches=133 t3_decisions=129259 t3_errors=0 t3_fallbacks=22315

@@ -75,6 +75,16 @@ def gate() -> None:
         run("i5_tier3x", "tier3x", opp, 12600, "off")
 
 
+def extra() -> None:
+    # item 3's anti_aggro family needs maniac (not in the training pool); same seeds for both arms
+    for locks in ("off", "on"):
+        run("pool_tier4p", "tier4p", "maniac", 12400, locks, stats=(locks == "off"))
+        run("pool_tier3x", "tier3x", "maniac", 12400, locks)
+    # information only: item 2's anti_value score on fresh seeds
+    for locks in ("off", "on"):
+        run("i2b_anti_value", forced("anti_value"), "tier3", 12250, locks)
+
+
 if __name__ == "__main__":
-    {"step0": step0, "gate": gate}[sys.argv[1]]()
+    {"step0": step0, "gate": gate, "extra": extra}[sys.argv[1]]()
     print("done", sys.argv[1], flush=True)

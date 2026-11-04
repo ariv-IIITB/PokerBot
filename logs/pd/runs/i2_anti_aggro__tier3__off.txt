@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_aggro"}]-nolock vs tier3-nolock: +0.75 ± 0.17 chips/hand | match score 0.240 ± 0.043 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 232.4s (172/s)

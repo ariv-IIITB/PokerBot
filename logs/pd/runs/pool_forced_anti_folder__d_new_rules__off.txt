@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_folder"}]-nolock vs d_new_rules-nolock: -0.36 ± 0.16 chips/hand | match score 0.430 ± 0.050 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 171.5s (233/s)

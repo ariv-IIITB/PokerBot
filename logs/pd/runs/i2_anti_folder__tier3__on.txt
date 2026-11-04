@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_folder"}] vs tier3: +0.02 ± 0.02 chips/hand | match score 0.560 ± 0.050 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 94.1s (425/s)
