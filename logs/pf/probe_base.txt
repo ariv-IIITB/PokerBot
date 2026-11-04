@@ -1,0 +1,3 @@
+tier3-nolock vs d_conv_opp3-nolock: -1.25 ± 0.26 chips/hand | match score 0.300 ± 0.073 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 586.1s (27/s)
+tier3-nolock vs d_new_exploiter-nolock: -1.05 ± 0.31 chips/hand | match score 0.275 ± 0.071 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 948.5s (17/s)
+tier3-nolock vs d_new_lag-nolock: +6.47 ± 0.52 chips/hand | match score 0.825 ± 0.061 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 468.6s (34/s)
