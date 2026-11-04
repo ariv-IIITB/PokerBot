@@ -1,0 +1,2 @@
+tier3[{"discard_learn":true}]-nolock vs starter: +21.58 ± 0.31 chips/hand | match score 1.000 ± 0.000 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 187.0s (128/s)
+tier3[{"discard_learn":true}]-nolock vs calling_station-nolock: +25.39 ± 0.37 chips/hand | match score 1.000 ± 0.000 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 181.6s (132/s)

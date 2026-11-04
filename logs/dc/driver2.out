@@ -1,0 +1,4 @@
+learn vs base: -0.34 ± 1.22 (z -0.3) pool train+tier1+tier2
+learn vs base: -0.08 ± 0.69 (z -0.1) pool starter+calling_station
+budget 1.5/8000 vs base: -1.64 ± 1.18 (z -1.4) pool train+tier1+tier2
+budget 2.5/12000 vs base: -0.02 ± 1.16 (z -0.0) pool train+tier1+tier2

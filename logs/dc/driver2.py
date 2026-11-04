@@ -10,7 +10,7 @@ TRAIN = ("train", "tier1", "tier2")
 SPAR = ("starter", "calling_station")
 LEARN = {"discard_learn": True}
 B1 = {"special_budget_frac": 1.5, "discard_max_samples": 8000}
-B3 = {"special_budget_frac": 3.0, "discard_max_samples": 16000}
+B3 = {"special_budget_frac": 2.5, "discard_max_samples": 12000}
 B5 = {"special_budget_frac": 5.0, "discard_max_samples": 32000}
 
 def cmp(name, base_cfg, cfg, pool, prefix):
@@ -25,5 +25,5 @@ if __name__ == "__main__":
         cmp("learn vs base", BASE, LEARN, TRAIN, "cd")
         cmp("learn vs base", BASE, LEARN, SPAR, "sp")
     if "budget" in which:
-        for n, c in (("budget 1.5/8000", B1), ("budget 3/16000", B3), ("budget 5/32000", B5)):
+        for n, c in (("budget 1.5/8000", B1), ("budget 2.5/12000", B3)):
             cmp(n + " vs base", BASE, c, TRAIN, "cd")

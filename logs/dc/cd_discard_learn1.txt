@@ -1,0 +1,8 @@
+tier3[{"discard_learn":true}]-nolock vs d_conv_opp3-nolock: -1.78 ± 0.29 chips/hand | match score 0.317 ± 0.061 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 226.2s (106/s)
+tier3[{"discard_learn":true}]-nolock vs d_new_rules-nolock: -0.64 ± 0.23 chips/hand | match score 0.417 ± 0.064 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 103.0s (233/s)
+tier3[{"discard_learn":true}]-nolock vs d_new_lag-nolock: +6.00 ± 0.45 chips/hand | match score 0.950 ± 0.028 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 190.5s (126/s)
+tier3[{"discard_learn":true}]-nolock vs d_new_trapper-nolock: +0.72 ± 0.19 chips/hand | match score 0.650 ± 0.062 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 272.5s (88/s)
+tier3[{"discard_learn":true}]-nolock vs d_new_exploiter-nolock: -1.26 ± 0.30 chips/hand | match score 0.267 ± 0.058 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 421.1s (57/s)
+tier3[{"discard_learn":true}]-nolock vs d_new_minraise-nolock: +0.62 ± 0.16 chips/hand | match score 0.633 ± 0.063 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 130.4s (184/s)
+tier3[{"discard_learn":true}]-nolock vs tier1-nolock: +1.04 ± 0.42 chips/hand | match score 0.517 ± 0.065 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 262.8s (91/s)
+tier3[{"discard_learn":true}]-nolock vs tier2-nolock: +1.25 ± 0.30 chips/hand | match score 0.367 ± 0.063 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 168.9s (142/s)

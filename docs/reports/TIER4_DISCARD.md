@@ -137,3 +137,11 @@ the training set). Folding is flat across the three classes for the others. `sta
 turn and `all_in` never faces a turn decision, so they cannot be tested. The `hide_discard` A/B has no bot to be measured on:
 DC should not spend a gate on it. The weak low-to-high trend for `d_new_rules` (59.9 % -> 48.5 %) and `d_new_minraise`
 (38.1 % -> 29.3 %) is the only thing that could be followed up, with more seeds; it is not a result.
+
+## DC: our discard on top of DA + DB (all levers DROP)
+
+Setup, numbers and the timing caveat are in `docs/tier4/handoff/DC.md`. Summary: the 2-rule keep mix (`discard_mix`, `discard_eps`) passes the
+likelihood gate on every bot but is flat in play (30 pairs, ± 1.2); the online keep-rule learner (`discard_learn`) is flat (-0.34 ± 1.22,
+-0.08 ± 0.69); 1.5/8000 worlds -1.64 ± 1.18, 2.5/12000 (1.33x time) -0.02 ± 1.16. All stay default off, shipped config unchanged. DA's smart
+rollouts cost 0.99x (corrected `lab.timing_bench`). Logs and drivers: `logs/dc/`.
+Fast suite: 1312 passed, 2 skipped.
