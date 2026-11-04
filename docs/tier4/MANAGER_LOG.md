@@ -22,3 +22,4 @@
 - DC handoff addendum verified (origin/tier4/dc ee9f16e). DC done; not merged (all levers DROP). Archive DC when the user agrees.
 - 2026-11-04 23:55 USER DECISION: drop the portfolio tier4p (flat on top of O3: locks-off sum ~0, lag -0.45). PS told to stop and write a short handoff. USER DECISION: I1 (final merge and checks) waits until after the weekly usage reset (2026-11-08 ~09:30 IST); weekly limit was 75% used at 2026-11-04 ~midnight. Until then: AD, RF, O3 (arm A + timing), L3 finish their pieces; merges into tier4/int still happen as handoffs land.
 - PS handoff verified (origin/tier4/ps, PS.md): DROP, sum -0.02 +- ~0.54. PS done.
+- O3C handoff verified (origin/tier4/o3c c21122a): arm B vs base +4.33+-0.62 (lag -0.70+-0.45), arm A +3.34 (lag -1.10, fails), B vs A +0.99+-0.56. Timing tier3x/tier3 1.05-1.10 (limit 1.4). DECISION: arm B stays in tier4/int. O3 done.
