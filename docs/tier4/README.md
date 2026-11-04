@@ -132,6 +132,14 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 | 51000–51999 | PB redo (laptop) tuning; 52000–52999 its confirmations |
 | 53000–53999 | DA redo (laptop) tuning; 54000–54999 its confirmations |
 
+## No soft timelines (user, 2026-11-04)
+
+The user removed all soft timelines: aim for the best bot, not the fastest. The only hard date is the deadline
+(15 Nov 23:59 IST). Nothing is dropped, rushed or cut short before about 12 Nov; the slip rule below applies only from
+then. Benefits of time go first to more improvement rounds (new leaks found, fixed as general adaptive rules), then to
+bigger confirmation runs for ship decisions (a 50-pair run cannot resolve +-0.2 chips/hand; use more pairs for the
+final candidates). PF and the restricted river are built, not dropped. The upload candidate is ready by 13 Nov.
+
 ## Slip rule
 
 This README is the source of truth for the slip order (it replaces the one in `TIER4_PLAN.md`). I1's retry rule is in
