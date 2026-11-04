@@ -551,6 +551,68 @@ class RiverSolver:
         return 0.5 * total / z
 
 
+    # ---- exploiting a read on the opponent (Tier 4 RD)
+    def locked_values(self, fold_obs: float, width: float = 0.04):
+        """Our best-response value of each root action against the average strategy opponent whose
+        fold rate at the nodes where it faces our bet or raise is moved to `fold_obs`.
+
+        Returns (values (k, n0) in pot units per root action and hand of ours, fold rate at the
+        reference node before, after the move). The move is the same additive shift at every such node,
+        taken from the first one (the smallest bet): the opponent folds its weakest hands (by showdown
+        value against our range) first, with a soft edge `width` (share of its range). Deeper
+        opponent nodes and its call / raise mix stay at the equilibrium. Needs track_all=True."""
+        t, V = self.tree, self.V
+        avg = self.average()
+        n0, n1, N = self.n0, self.n1, self.N
+        w0, w1 = self.w0[:n0].astype(np.float64), self.w1[:n1].astype(np.float64)
+        w1 = w1 / w1.sum()
+        k = self.kernel
+        ev = np.asarray(k.show1(self.w0[None, :n0].astype(self.dt))[0], dtype=np.float64)
+        order = np.argsort(ev, kind="stable")
+        u = np.empty(n1)
+        u[order] = (np.cumsum(w1[order]) - 0.5 * w1[order])             # mass strictly below, mid-rank
+        rows = [self.row_of[n] for n in t.dec_ids
+                if t.depth[n] == 1 and t.legal_labels[n] and t.legal_labels[n][0][0] == FOLD]
+        if not rows:
+            return None, 0.0, 0.0
+        f_ref = float((w1 * avg[rows[0], 0, :n1]).sum())
+        shift = float(fold_obs) - f_ref
+        for r in rows:
+            f_eq = avg[r, 0, :n1]
+            target = float(np.clip((w1 * f_eq).sum() + shift, 0.01, 0.99))
+            lo, hi = -1.0, 2.0                                          # bisect the threshold for the aggregate
+            for _ in range(30):
+                mid = 0.5 * (lo + hi)
+                fm = 1.0 / (1.0 + np.exp(-(target + mid - u) / width))
+                lo, hi = (mid, hi) if (w1 * fm).sum() < target else (lo, mid)
+            fm = 1.0 / (1.0 + np.exp(-(target + 0.5 * (lo + hi) - u) / width))
+            rest = np.maximum(1.0 - f_eq, 1e-12)
+            for a in range(1, avg.shape[1]):
+                if self.mask[r, a, 0]:
+                    share = avg[r, a, :n1] / rest
+                    avg[r, a, :n1] = np.where(f_eq >= 1.0 - 1e-9, 1.0 if a == 1 else 0.0, share) * (1.0 - fm)
+            avg[r, 0, :n1] = fm
+        Q = np.zeros((V + 1, 2, N))
+        Q[0, 0, :n0] = w0 / w0.sum()
+        Q[0, 1, :n1] = w1
+        F = np.ones((V + 1, 2, N))
+        F[self.f_ids, self.f_actor] = avg[self.f_row, self.f_slot]
+        for dn, cs, ce, par, starts in self.levels:
+            Q[cs:ce] = Q[par] * F[cs:ce]
+        Val = np.zeros((V + 1, N))
+        if len(self.fold_ids):
+            Val[self.fold_ids, :n0] = self.fold_c0 * k.fold0(Q[self.fold_ids, 1, :n1].astype(self.dt))
+        if len(self.show_ids):
+            Val[self.show_ids, :n0] = self.show_c * k.show0(Q[self.show_ids, 1, :n1].astype(self.dt))
+        for dn, cs, ce, par, starts in reversed(self.levels):
+            if (t.depth[int(dn[0])] % 2) == 0:
+                Val[dn] = np.maximum.reduceat(Val[cs:ce], starts, axis=0)
+            else:
+                Val[dn] = np.add.reduceat(Val[cs:ce], starts, axis=0)
+        kids = t.children[0]
+        return Val[kids, :n0].copy(), f_ref, f_ref + shift
+
+
 @dataclass
 class SolveResult:
     labels: list                 # root actions: (kind, level) -- level = our street total for a raise
@@ -559,6 +621,9 @@ class SolveResult:
     setup_s: float
     run_s: float
     solver: Optional[RiverSolver] = None
+    values: Optional[np.ndarray] = None      # fold_obs given: our best-response value (pot units) of each root action vs the moved opponent
+    fold_eq: float = 0.0                     # the equilibrium fold rate at the reference node, and where fold_obs moved it
+    fold_to: float = 0.0
 
 
 def make_kernel(hero_cards, hero_rank, opp_cards, opp_rank, kernel: str = "auto", dtype=np.float32):
@@ -628,13 +693,16 @@ def solve_river(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w
                 max_iters: int = 10**9, min_iters: int = 0, keep_solver: bool = False,
                 dtype=np.float32, buckets: int = 0, kernel: str = "auto",
                 track_all: bool = False, card_removal: bool = False,
-                auto: bool = False) -> Optional[SolveResult]:
+                auto: bool = False, fold_obs: Optional[float] = None) -> Optional[SolveResult]:
     """Solve the river spot until `deadline` (a time.perf_counter() value) and return our
     root strategy for the hand at `hero_index` in `hero_cards`.
 
     buckets > 0   : play the bucketed game (that many strength buckets per player); the
                     strategy returned is that of our hand's bucket.
     card_removal  : bucketed game only: keep card removal at bucket level (see bucket_kernel).
+    fold_obs      : an observed fold rate of the opponent to our bets: the result also carries `values`, our
+                    best-response value of each root action against an opponent moved to that rate
+                    (RiverSolver.locked_values); costs track_all and about one more pass.
     auto          : choose the best of all that for the time left (ignores `buckets`, `kernel`,
                     `card_removal`, `dtype`): combos with zero weight are dropped; if both ranges then
                     fit in the bucket count, the exact game (dense kernel); else bucketed with
@@ -644,7 +712,7 @@ def solve_river(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w
     not a single pass fit (the caller falls back to its own river policy)."""
     t0 = time.perf_counter()
     s, idx, _ = build_game(spot, hero_cards, hero_w, hero_rank, opp_cards, opp_w, opp_rank, hero_index, cfg,
-                           dtype, buckets, kernel, track_all, card_removal, auto, deadline - t0)
+                           dtype, buckets, kernel, track_all or fold_obs is not None, card_removal, auto, deadline - t0)
     t1 = time.perf_counter()
     if t1 >= deadline and min_iters <= 0:
         return None
@@ -652,8 +720,12 @@ def solve_river(spot: RiverSpot, hero_cards, hero_w, hero_rank, opp_cards, opp_w
     t2 = time.perf_counter()
     if n == 0:
         return None
-    return SolveResult(s.tree.root_labels, s.root_strategy(idx), n, t1 - t0, t2 - t1,
-                       s if keep_solver else None)
+    vals, f0, f1 = (None, 0.0, 0.0)
+    if fold_obs is not None:
+        v, f0, f1 = s.locked_values(float(fold_obs))
+        vals = None if v is None else v[:, idx]
+    return SolveResult(s.tree.root_labels, s.root_strategy(idx), n, t1 - t0, time.perf_counter() - t1,
+                       s if keep_solver else None, vals, f0, f1)
 
 
 # ------------------------------------------------------------------ helpers for callers

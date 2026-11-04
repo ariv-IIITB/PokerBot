@@ -11,8 +11,8 @@ was X plus our discarded card, which is public (`rec.mapping` holds it), after t
 Combos holding a card we have seen on the board or in a public discard get weight 0.
 
 THIS IS AN APPROXIMATION, and the main risk of re-solving the river without a safety gadget:
-  * the model is a generic "sensible player" (default beta / gamma, not scaled by any trust), not
-    the real Tier 3 policy, which randomises, bluffs by blockers and follows the opponent's stats;
+  * the model is a fit of our real choices on hand strength (OWN_BET above), not the real Tier 3 policy,
+    which randomises, bluffs by blockers and follows the opponent's stats;
   * hand strength is a percentile against random hands on the board, so draws and blockers don't count;
   * each decision is treated as independent given the hand.
 The weights are flatter than the truth where Tier 3 mixes and sharper where it is value-heavy. The
@@ -28,13 +28,42 @@ import numpy as np
 from bot.sim.inference import DEFAULTS as INFERENCE_DEFAULTS
 from bot.sim.inference import Inference
 
+# Our betting model, FITTED on our own Tier 3 river hands (lab/rd_trace.py, lab/rd_fit_own.py; 19,227 hands over the
+# 6 training bots, seeds 70000-70007, cross-fit by opponent): P(kind | board size, facing) = softmax of a_k + b_k * s,
+# s = the strength percentile of the hand at that moment (Inference.strength). The generic BET_MODEL (gamma 3) scored
+# our real hand BELOW a flat range (mean log(N*w) -1.8 vs 0); this model beats it in every cell out of sample
+# (e.g. flop facing a bet: log-lik per decision -0.23 vs -0.85).
+OWN_BET = {(0, False): {'K': (5.06, -7.02), 'R': (-5.06, 7.02)},
+           (0, True): {'F': (-3.45, -1.97), 'C': (3.63, -1.53), 'R': (-0.19, 3.48)},
+           (3, False): {'K': (1.35, -0.89), 'R': (-1.35, 0.89)},
+           (3, True): {'F': (-3.04, -1.29), 'C': (2.7, 1.04), 'R': (0.35, 0.25)},
+           (4, False): {'K': (1.96, -1.65), 'R': (-1.96, 1.65)},
+           (4, True): {'F': (-2.38, -1.85), 'C': (6.32, -3.9), 'R': (-3.94, 5.75)},
+           (5, False): {'K': (2.06, -1.08), 'R': (-2.06, 1.08)},
+           (5, True): {'F': (-0.93, -0.55), 'C': (-0.93, -0.55), 'R': (1.87, 1.1)}}
+OWN_BETA = 8.0            # discard softmax sharpness for our own discards (fitted: 6 -> -0.752, 9 -> -0.741)
+
+
+class OwnInference(Inference):
+    """Inference with the fitted OWN_BET table in place of the generic bet model (our decisions only)."""
+
+    def _bet_ll(self, rec, d, holes, board, rng) -> np.ndarray:
+        tab = OWN_BET.get((len(board), "C" in d.legal_kinds or "F" in d.legal_kinds))
+        kinds = [k for k in d.legal_kinds if tab and k in tab]
+        if d.action.kind not in kinds or len(kinds) < 2:
+            return np.zeros(holes.shape[0])
+        s = self.strength(rec, holes, board, rng)
+        L = np.stack([tab[k][0] + tab[k][1] * s for k in kinds], axis=1)
+        L = L - L.max(axis=1, keepdims=True)
+        return (L - np.log(np.exp(L).sum(axis=1, keepdims=True)))[:, kinds.index(d.action.kind)]
+
 
 def own_range_weights(rec, combos: np.ndarray, rng, inference: Optional[Inference] = None) -> np.ndarray:
     """Probability of each of our candidate 2-card hands given our line (sums to 1).
 
     rec        the Reconstruction at our current decision (needs `my_decisions`, `mapping`, `state`)
     combos     (n, k) real cards for our k still-held hole tokens, in hole order (k = 2 on the river)
-    inference  the likelihood model (default: the standard parameters, enabled, no trust scaling)
+    inference  the likelihood model (default: OwnInference, the fitted table above)
     If nothing in our line is informative the weights are uniform over the combos that are possible.
     """
     combos = np.asarray(combos, dtype=np.intp)
@@ -45,7 +74,7 @@ def own_range_weights(rec, combos: np.ndarray, rng, inference: Optional[Inferenc
     mapping = {t: c for t, c in rec.mapping.items() if t not in final}   # board + public discards
     shim = SimpleNamespace(state=rec.state, mapping=mapping, opp_decisions=list(rec.my_decisions),
                            me=rec.me)
-    inf = inference or Inference(dict(INFERENCE_DEFAULTS, enabled=True))
+    inf = inference or OwnInference(dict(INFERENCE_DEFAULTS, enabled=True, beta=OWN_BETA))
     logw = inf.log_weights(shim, {t: combos[:, i] for i, t in enumerate(final)}, n, rng)
     w = np.ones(n) if logw is None else np.exp(logw - logw.max())
     seen = np.array(sorted(set(mapping.values())), dtype=np.intp)

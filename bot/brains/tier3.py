@@ -33,6 +33,8 @@ from bot.brains.tier2 import DEFAULTS as TIER2_DEFAULTS
 from bot.brains.params import load_params, per_street
 from bot.brains.tier2 import Tier2Brain
 from bot.log import warn
+from bot.sim.inference import DEFAULTS as INFERENCE_DEFAULTS
+from bot.sim.inference import Inference
 from bot.situation import Situation
 from bot.state import ME, OPP, GameState, HandState
 from bot.strategy.potmath import bluff_share, mdf
@@ -135,6 +137,15 @@ DEFAULTS.update({
     "river_box_mult": TimingConfig.river_box_mult,    # box = min(this x the decision budget, river_budget_s)
     "river_max_iters": 0,          # >0: stop at this many passes (lab gates pin the work by passes, not by a wall-clock box)
     "river_min_iters": 20,         # fewer CFR+ passes than this: Tier 3's own river decides
+    "t3_river_rnr": False,         # restricted river: mix the solved strategy with our best response to the opponent's OBSERVED fold rate,
+    "rnr_pmax": 0.5,               #   weight pmax * n / (n + n0) from the n river bets they answered (nothing below rnr_min_n), and
+    "rnr_n0": 40,                  #   the weak-hand share of their betting range set to the observed bluff index
+    "rnr_min_n": 20,
+    "rnr_temp": 0.05,              # soft best response: softmax of the action values / this (pot units)
+    "t3_river_shifts": False,      # stack the X1-X3 counter-moves (over-folder: bluff more, value-only bettor: fold more) on the solver's root strategy
+    "river_own_fit": True,         # our own range from the fitted model (bot/strategy/own_range.py); False: the generic inference model
+    "river_opp_beta": 6.0,         # opponent range for the solver: fixed discard / bet sharpness (None: the trust-scaled model).
+    "river_opp_gamma": 0.6,        # Fitted on 12k showdowns: pooled log(N*w) of their real hand +0.26 vs +0.11 for the trust-scaled model
 })
 
 SPOT_STREET = {1: "flop", 2: "turn", 3: "river"}
@@ -177,7 +188,8 @@ class Tier3Brain(Tier2Brain):
         # (only with the flag on, so a flag-off Tier 3 reports exactly the counters it always did)
         if self.p.get("t3_river_solver"):
             self.stats.update({"river_solves": 0, "river_iters": 0, "river_us": 0, "river_fallbacks": 0,
-                               "river_errors": 0, "river_few_iters": 0, "river_no_pass": 0, "river_missing": 0})
+                               "river_errors": 0, "river_few_iters": 0, "river_no_pass": 0, "river_missing": 0,
+                               "river_rnr": 0, "river_shifted": 0})
         self.river_iters_log: list[int] = []            # passes per solved decision (capped, for benches)
 
     @classmethod
@@ -453,8 +465,16 @@ class Tier3Brain(Tier2Brain):
         i, j = np.triu_indices(len(mine), 1)
         hero_cards = np.stack([mine[i], mine[j]], axis=1)
         idx = int(np.nonzero((hero_cards[:, 0] == hole[0]) & (hero_cards[:, 1] == hole[1]))[0][0])
-        w_opp = self.opponent.range_weights(rec, opp_cards, self.rng)
-        w_hero = own_range_weights(rec, hero_cards, self.rng)
+        w_opp = self.opponent.range_weights(rec, opp_cards, self.rng, self._river_opp_model(p))
+        w_hero = own_range_weights(rec, hero_cards, self.rng, None if p["river_own_fit"] else Inference(
+            dict(INFERENCE_DEFAULTS, enabled=True)))
+        hr_opp = hand_ranks(ev, opp_cards, board)
+        fold_obs, pmix = None, 0.0
+        if p.get("t3_river_rnr") and self.opponent.spots is not None:
+            w_opp = self._weak_share(w_opp, hr_opp, h, p)
+            fr = self.opponent.spots.spots["fold_river"]
+            if fr.n >= int(p["rnr_min_n"]):
+                fold_obs, pmix = fr.mean(), float(p["rnr_pmax"]) * fr.n / (fr.n + float(p["rnr_n0"]))
         w_opp = np.maximum(w_opp, 1e-9 * max(float(w_opp.max()), 1e-300))   # no empty buckets
         w_hero = np.maximum(w_hero, 1e-9 * max(float(w_hero.max()), 1e-300))
         spot = RiverSpot(pot=float(h.pot), hero_bet=float(h.my_bet), opp_bet=float(h.opp_bet),
@@ -463,9 +483,9 @@ class Tier3Brain(Tier2Brain):
                          aggr_so_far=sum(1 for rr in h.history if rr.street == 3 and rr.action.kind == RAISE),
                          checked=bool(h.tocall <= 0 and any(rr.street == 3 and rr.actor != ME for rr in h.history)))
         cfg = TreeCfg(bet_sizes=(1.0, INF), raise_sizes=(1.0, INF), min_bet=float(h.bb or 2))
-        res = solve_river(spot, hero_cards, w_hero, hand_ranks(ev, hero_cards, board), opp_cards, w_opp,
-                          hand_ranks(ev, opp_cards, board), idx, deadline, cfg=cfg, auto=True,
-                          max_iters=int(p["river_max_iters"]) or 10**9)
+        res = solve_river(spot, hero_cards, w_hero, hand_ranks(ev, hero_cards, board), opp_cards, w_opp, hr_opp,
+                          idx, deadline, cfg=cfg, auto=True, max_iters=int(p["river_max_iters"]) or 10**9,
+                          fold_obs=fold_obs)
         if res is None:
             st["river_no_pass"] += 1
             return None
@@ -489,6 +509,19 @@ class Tier3Brain(Tier2Brain):
             return Action.raise_to(legal.nearest_raise(int(round(level))))
         st["river_missing"] += 1                                   # the tree and the engine disagree
         return None
+
+    def _weak_share(self, w: np.ndarray, rank: np.ndarray, h: HandState, p: dict) -> np.ndarray:
+        """TODO(RD): set the weak-hand share of their betting range to the observed bluff index (not built yet)."""
+        return w
+
+    def _river_opp_model(self, p: dict) -> Optional[Inference]:
+        if p.get("river_opp_beta") is None:
+            return None
+        key = (float(p["river_opp_beta"]), float(p["river_opp_gamma"]))
+        if getattr(self, "_ropp_key", None) != key:
+            self._ropp_key = key
+            self._ropp = Inference(dict(self.opponent.base, enabled=True, beta=key[0], gamma=key[1]))
+        return self._ropp
 
     @staticmethod
     def t2_raises(h: HandState, eq: float, legal: LegalActions, p: dict) -> bool:
