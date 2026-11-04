@@ -64,6 +64,67 @@ def opponent_keeps(evaluator, hole3: np.ndarray, board: np.ndarray) -> np.ndarra
     return kept
 
 
+def _opp_drop(evaluator, hole3: np.ndarray, board: np.ndarray) -> np.ndarray:
+    """(B,) index (0..2) of the card `opponent_keeps` drops; same pair order and ties."""
+    best = np.full(hole3.shape[0], -1, dtype=np.int64)
+    drop = np.zeros(hole3.shape[0], dtype=np.intp)
+    for pair, d in (((0, 1), 2), ((0, 2), 1), ((1, 2), 0)):
+        cards = hole3[:, list(pair)]
+        v = evaluator.evaluate_batch(cards, board).astype(np.int64) * RANK_WEIGHT \
+            + (cards >> 2).sum(axis=1)
+        better = v > best
+        best = np.where(better, v, best)
+        drop = np.where(better, d, drop)
+    return drop
+
+
+def straight_draw_batch(kept: np.ndarray, flop: np.ndarray) -> np.ndarray:
+    """(B,) True when both kept (B,2) cards sit in a 5-rank window holding at least four distinct
+    ranks of kept + flop (open-ended, gutshot or made); the ace counts high and low.
+    Same rule as lab/opps/discard_rules._straight_draw."""
+    b = kept.shape[0]
+    kr, fr = kept >> 2, np.asarray(flop) >> 2
+    rows = np.arange(b)
+    out = np.zeros(b, dtype=bool)
+    for ace_low in (False, True):
+        ki = np.where(ace_low & (kr == 12), 0, kr + 1)           # slot 0 = ace low, slots 1..13 = ranks
+        fi = np.where(ace_low & (fr == 12), 0, fr + 1)
+        present = np.zeros((b, 14), dtype=bool)
+        present[rows[:, None], ki] = True
+        present[:, fi] = True
+        for lo in range(10):
+            inside = ((ki >= lo) & (ki <= lo + 4)).all(axis=1)
+            out |= inside & (present[:, lo:lo + 5].sum(axis=1) >= 4)
+    return out
+
+
+def _draw_keeps(hole3: np.ndarray, board: np.ndarray) -> np.ndarray:
+    """(B,3) bool: the drops the draw rule accepts (keep a straight draw, else drop the lowest)."""
+    rank = hole3 >> 2
+    score = np.empty(hole3.shape, dtype=np.int64)
+    for i in range(3):
+        score[:, i] = 16 * straight_draw_batch(hole3[:, [k for k in range(3) if k != i]], board) - rank[:, i]
+    return score == score.max(axis=1, keepdims=True)
+
+
+def opp_drop_probs(evaluator, hole3: np.ndarray, board: np.ndarray, w: float, eps: float) -> np.ndarray:
+    """(B,3) P(opponent drops card i): with probability 1-w the `opponent_keeps` rule, with w the
+    straight-draw rule (DB: together they explain 83-94 % of the training bots' discards), and
+    probability eps a uniformly random card."""
+    ok = np.eye(3)[_opp_drop(evaluator, hole3, board)]
+    dk = _draw_keeps(hole3, board).astype(float)
+    return (1 - eps) * ((1 - w) * ok + w * dk / dk.sum(axis=1, keepdims=True)) + eps / 3
+
+
+def mixed_keeps(evaluator, hole3: np.ndarray, board: np.ndarray, w: float,
+                rng: np.random.Generator) -> np.ndarray:
+    """Like `opponent_keeps`, but each sampled opponent follows the straight-draw rule with probability w."""
+    drop = np.where(rng.random(hole3.shape[0]) < w, _draw_keeps(hole3, board).argmax(axis=1),
+                    _opp_drop(evaluator, hole3, board))
+    cols = np.stack([np.where(drop == 0, 1, 0), np.where(drop == 2, 1, 2)], axis=1)
+    return np.take_along_axis(hole3, cols, axis=1)
+
+
 def _simple_discard(rec: Reconstruction) -> bool:
     step = rec.state.rules.program[rec.state.pc]
     return (step.type_name == "discard" and getattr(step, "n", 0) == 1
@@ -106,6 +167,7 @@ def choose_discard(rec: Reconstruction, legal: LegalActions, rng: np.random.Gene
         return Action.special(next(o for o, v in cats.items() if v == top))
 
     board_np = np.array(board, dtype=np.intp)
+    mix = float(inference.params.get("discard_mix", 0.0)) if inference is not None else 0.0
     t0 = time.perf_counter()
     totals = {o: [] for o in cands}
     logws: list[np.ndarray] = []
@@ -116,7 +178,8 @@ def choose_discard(rec: Reconstruction, legal: LegalActions, rng: np.random.Gene
             cols = {t: draw[:, i] for i, t in enumerate(st.hole[opp])}
             lw = inference.log_weights(rec, cols, chunk, rng)
             logws.append(lw if lw is not None else np.zeros(chunk))
-        opp_kept = opponent_keeps(scorer, draw[:, :3], board_np)
+        opp_kept = (mixed_keeps(scorer, draw[:, :3], board_np, mix, rng) if mix > 0
+                    else opponent_keeps(scorer, draw[:, :3], board_np))
         full = np.concatenate([np.broadcast_to(board_np, (chunk, 3)), draw[:, 3:3 + to_deal]], axis=1)
         for o, cards in cands.items():
             totals[o].append(scorer.shares_batch(np.broadcast_to(np.array(cards, dtype=np.intp),

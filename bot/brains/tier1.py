@@ -52,6 +52,8 @@ DEFAULTS: dict[str, Any] = {
     "inference": True,             # weight opponent hands by their visible choices
     "inference_beta": 6.0,
     "inference_gamma": 3.0,
+    "discard_mix": 0.0,            # DC: weight of the straight-draw rule in the opponent's discard model (0 = off)
+    "discard_eps": 0.25,           # ... share of random discards in it
     "inference_trust": True,       # scale inference by how well it predicted past showdowns
     "use_tables": True,            # precomputed start-of-hand shares, if valid data exists
     "table_range_weight": 0.0,     # facing a preflop raise: blend in the share vs a top-range opponent
@@ -71,7 +73,9 @@ class Tier1Brain(Brain):
         self.opponent = Opponent({"enabled": bool(self.p["inference"]),
                                   "beta": float(self.p["inference_beta"]),
                                   "gamma": float(self.p["inference_gamma"]),
-                                  "ref_hands": 120, "min_ess": 0.08},
+                                  "ref_hands": 120, "min_ess": 0.08,
+                                  "discard_mix": float(self.p["discard_mix"]),
+                                  "discard_eps": float(self.p["discard_eps"])},
                                  use_trust=bool(self.p["inference_trust"]),
                                  priors=self.p.get("priors"), k=float(self.p.get("prior_k", 15.0)))
         self.perception = Perception(self.rules, self.p, self.rng, self.opponent)

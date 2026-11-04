@@ -34,6 +34,8 @@ DEFAULTS = {
     "gamma": 3.0,         # betting sharpness
     "ref_hands": 120,     # random hands used to turn hand values into percentiles
     "min_ess": 0.08,      # fall back to unweighted below this fraction
+    "discard_mix": 0.0,   # >0: discard likelihood = 2-rule mixture (bot/sim/discard.opp_drop_probs), this weight on the draw rule
+    "discard_eps": 0.25,  # ... plus this share of random discards
 }
 
 # logit = gamma * slope * (strength - pivot)
@@ -120,6 +122,17 @@ class Inference:
         beta = float(self.params["beta"])
         opts = [o for o in d.options if o != "none"]
         h = holes.shape[1]
+        mix = float(self.params.get("discard_mix", 0.0))
+        if mix > 0 and h == 3 and len(board) == 3 and sorted(opts) == ["0", "1", "2"] \
+                and d.action.choice in opts:
+            from bot.sim.discard import opp_drop_probs
+            p = opp_drop_probs(rec.state.rules.evaluator, holes, np.array(board, dtype=np.intp), mix,
+                               float(self.params.get("discard_eps", 0.25)))
+            # trust scales beta; tempering the mixture by beta / full beta gives uniform at 0
+            L = np.log(p) * (beta / DEFAULTS["beta"])
+            L = L - L.max(axis=1, keepdims=True)
+            logp = L - np.log(np.exp(L).sum(axis=1, keepdims=True))
+            return logp[:, int(d.action.choice)]
         logits = []
         for o in opts:
             drop = [int(x) for x in o.split("+")]
