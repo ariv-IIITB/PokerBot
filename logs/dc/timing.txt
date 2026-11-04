@@ -1,0 +1,8 @@
+NOTE: the raw per-run output (30 runs) was overwritten by an accidental `git checkout` on 2026-11-04. Only the per-arm means survive
+(bank used per 400-hand match, s; 2 reps x 3 opponents, exclusive lock, load ~8). Re-run `bash logs/dc/timing.sh` to regenerate raw lines.
+arm                                                    maniac  tier1  tier2-nolock  mean
+tier3                                                   7.29    7.43   7.32          7.35
+tier3:{"smart_rollout_discard":false}                   7.50    7.41   7.47          7.46
+tier3:{"special_budget_frac":1.5,"discard_max_samples":8000}   7.96  8.20  8.53    8.23
+tier3:{"special_budget_frac":2.5,"discard_max_samples":12000}  9.76  9.78  9.71    9.75
+tier3:{"discard_learn":true}                            7.31    7.20   7.59          7.37
