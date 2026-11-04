@@ -15,9 +15,14 @@ Level within noise means `tier3` ships.
    `tier4p` (its members inherit D's and R's changes through Tier 3).
 3. **Combined gates** (the pieces were tested alone; now together):
    - combined timing, 400/60 s and 1000/150 s, vs calling_station and trapper: README rule 3's ratio (≤ 1.4 × Tier 3);
-     deadline hits ≤ baseline + 2√baseline; `lab.memory_check` < 500 MB;
+     deadline hits ≤ baseline + 2√baseline; `lab.memory_check` < 500 MB with the river solver on (the old 43 MB figure was Tier 3 without it); `lab.fuzz --subprocess --hands 2000` on the final package;
+   - **Stacking order test (user, 2026-11-04):** before the head-to-head, add the KEEPs one at a time on top of the
+     incumbent (order: DA, PB/PD portfolio, O3 river narrowing, DC discard, RD/RC river solver if it was kept), each step
+     a 30-pair training-pool run (locks off, same seeds, back to back), and record the sum of chips/hand after each step.
+     A piece that lowers the running sum by > 1 SE is dropped or re-tuned in the stack (pieces were only tested alone);
+     the candidate is the best stack, not "everything kept".
    - best candidate vs the incumbent as currently shipped (`tier3` on `main`): head-to-head 100 pairs, score ≥ 0.5 + 2 SE
-     to call it an improvement; training pool two-part KEEP; a Stage 2 run (1000 hands, 30 pairs).
+     to call it an improvement; training pool two-part KEEP; a Stage 2 run (1000 hands, 30 pairs, then sequential). All comparisons use the README's sequential test.
    **Retries, at most 2.** Retry 1 drops the piece the failing gate points at (if unclear, the next in slip order:
    R's restricted p → DC → DB's learned rule → R entirely → `tier4p`'s portfolio), and re-runs only the failing gate.
    Retry 2 falls back to the incumbent (`tier3x` or `tier3`) plus the KEEPs that survived. If that fails too, `tier3`

@@ -1,0 +1,5 @@
+{
+  "_comment": "Tier 3 overrides on top of Tier 2's parameters (DA, Tier 4): flop equity rollouts with real discards, thresholds retuned by coordinate descent (see docs/reports/TIER4_DISCARD.md).",
+  "smart_rollout_discard": true,
+  "raise_equity": [0.7, 0.68, 0.68, 0.74]
+}
