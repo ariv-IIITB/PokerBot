@@ -1,0 +1,17 @@
+3-bet pots (opp re-raises our preflop raise, flop seen), locks off, 40 pairs = 32000 hands, seeds 71950-71989
+base_d_conv_opp3: pots=1312 (4.1% of hands) chips=-11338 = -8.6/pot, -0.354/hand of match -44501 | we_fold 532 -31.9/pot | showdown 436 -21.0/pot | opp_fold 344 +43.1/pot
+     we_fold on flop: 339 pots, -7595 chips
+     we_fold on turn: 144 pots, -6109 chips
+     we_fold on river: 49 pots, -3287 chips
+B_d_conv_opp3: pots=1288 (4.0% of hands) chips=-5954 = -4.6/pot, -0.186/hand of match -2203 | we_fold 585 -35.4/pot | showdown 384 -1.3/pot | opp_fold 319 +47.9/pot
+     we_fold on flop: 322 pots, -7423 chips
+     we_fold on turn: 166 pots, -6486 chips
+     we_fold on river: 97 pots, -6813 chips
+base_d_new_exploiter: pots=983 (3.1% of hands) chips=-7779 = -7.9/pot, -0.243/hand of match -26220 | we_fold 320 -35.8/pot | showdown 286 -31.2/pot | opp_fold 377 +33.4/pot
+     we_fold on flop: 144 pots, -3105 chips
+     we_fold on turn: 123 pots, -4734 chips
+     we_fold on river: 53 pots, -3608 chips
+B_d_new_exploiter: pots=1033 (3.2% of hands) chips=-2120 = -2.1/pot, -0.066/hand of match +7618 | we_fold 376 -40.2/pot | showdown 246 -6.0/pot | opp_fold 411 +35.2/pot
+     we_fold on flop: 150 pots, -3219 chips
+     we_fold on turn: 130 pots, -4994 chips
+     we_fold on river: 96 pots, -6896 chips
