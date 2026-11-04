@@ -1,0 +1,1 @@
+tier4p vs d_conv_opp3: -0.45 ± 0.10 chips/hand | match score 0.660 ± 0.048 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 366.0s (109/s)

@@ -1,0 +1,1 @@
+tier3x-nolock vs d_new_trapper-nolock: +2.28 ± 0.14 chips/hand | match score 0.910 ± 0.029 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 693.1s (58/s)
