@@ -42,10 +42,11 @@ hardcode to bot names or constants (general adaptive rules). The `Opps/` bots ar
 - River solver + RNR (RD, RC): no gain over Tier 3 on our pool (h2h 0.540 +- 0.050, chips +0.42 +- 0.48), flag `t3_river_solver` OFF. **The user wants it kept
   as a ship candidate** (principled vs strong balanced bots): RF is trying to fix it; I1 decides it on held-out/blind bots with "no worse than the stack without it".
   RC's fallback fix (`Controller.choose` retries Tier 3 at budget 0) is on `origin/tier4/r`, not yet in int: merge it (safety).
-- Portfolio `tier4p` (PD): strict gate-P fail (anti_value score 0.405 +- 0.035 vs floor 0.43); gains only on weak bots; PS re-tests it on top of O3.
+- Portfolio `tier4p` (PD): strict gate-P fail; re-tested on top of O3 by PS: flat (locks-off sum ~0, lag -0.45). **Dropped (user, 2026-11-04).** Not in I1's stack.
 - O3 arm C (`x_stab`) dropped (hurt lag). DB: no single discard rule, no bot reacts to our discard; `discard_mix`/`discard_eps` flat.
 
 ## Open leads and ideas (queue them yourself)
+- **I1 waits until after the weekly usage reset (2026-11-08 ~09:30 IST), user decision 2026-11-04** (weekly limit 75% used then). Keep turns cheap until then.
 - After PS: keep or remove `tier4p`. After DC/AD/RF: merge confirmed pieces, then re-run the stack.
 - Exploit layer gaps (TRACK_X): station, preflop-folder and trapper moves not built. 3-bet pots we call lose ~19 chips/pot vs conv_opp3 and exploiter (postflop):
   per-street accounting (`lab.opps.accounting`) is the next study.
