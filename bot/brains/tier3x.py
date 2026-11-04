@@ -26,6 +26,9 @@ class Tier3XBrain(Tier3Brain):
     def defaults(cls) -> dict[str, Any]:
         d = Tier3Brain.defaults()
         d.update(EXPLOIT_DEFAULTS)
+        # RF's D4 (docs/tier4/handoff/RF.md): river solver + sharp narrowing + RNR vs callers only; plain tier3 keeps it off
+        d.update({"t3_river_solver": True, "t3_river_narrow": True, "narrow_n0": 0.001, "t3_river_rnr": True,
+                  "rnr_pmax": 0.9, "rnr_n0": 10, "rnr_min_n": 10, "rnr_dir": -1})
         return d
 
     def adjusted(self, street: int = 0) -> dict[str, Any]:
