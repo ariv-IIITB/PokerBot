@@ -9,3 +9,4 @@
 - O3C (arm B confirmation on int: locks-on scores, simple-bot guard, arm A vs B, blind d_new_rules once, timing) given to the local O3 session (seeds 74000+), handoff docs/tier4/handoff/O3C.md, branch tier4/o3c.
 - L3 (3-bet-pot leak study, seeds 75000+) proposed as a card (task_8292d771); needs the user's click.
 - Open: PS (tier4p on top of O3) handoff, DC, AD, RF status; then merge DC/AD pieces; RF river fix; blind2 pool; I1.
+- AD status: branch claude/ad-fe9a68 on int 0ca4a45, round 1 trust/push arms vs exploiter noise-level (+0.08/+0.14); ETA round 1 ~3-4 h, then round 2, 50-pair confirmation, timing, handoff.
