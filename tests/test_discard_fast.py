@@ -98,3 +98,16 @@ def test_rollout_discard_keeps_the_best_two() -> None:
     st.board = P("Ah,7d,2s")
     assert _best_discard(st, 0, ("0", "1", "2")) == "1"          # drop Kd: keep the two pair
     assert _best_discard(st, 1, ("0", "1", "2")) == "1"          # pair of deuces with the 4 kicker: drop the 3
+
+
+@pytest.mark.parametrize("hole,flop,drop", [
+    ("Ah,Kh,2c", "Qh,7h,3d", "2"),
+    ("Kc,Kd,4h", "Ah,Kh,2d", "2"),
+])
+def test_the_stake_weighted_discard_picks_the_same_obvious_drop(hole, flop, drop) -> None:
+    from bot.sim.inference import Inference
+    rec, legal = at_discard(hole, flop)
+    out: dict = {}
+    got = choose_discard(rec, legal, np.random.default_rng(3), 0.05,
+                         inference=Inference({"discard_stake": 1.0}), out=out)
+    assert got == Action.special(drop) and 0.0 <= min(out["means"].values()) <= max(out["means"].values()) <= 1.5   # (share - 0.5) * (1 + stake) + 0.5

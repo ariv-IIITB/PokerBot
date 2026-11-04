@@ -26,7 +26,7 @@ import numpy as np
 
 from bot.actions import Action, LegalActions
 from bot.equity import sample_without_replacement
-from bot.evaluator import CATEGORY_SHIFT, PAIR, STRAIGHT, category
+from bot.evaluator import CATEGORY_SHIFT, PAIR, STRAIGHT, TWO_PAIR, category
 from bot.sim.replay import Reconstruction
 
 RANK_WEIGHT = 128            # tie-break scale: hand value * 128 + sum of kept ranks (<= 24)
@@ -236,7 +236,10 @@ def choose_discard(rec: Reconstruction, legal: LegalActions, rng: np.random.Gene
     board_np = np.array(board, dtype=np.intp)
     mix = float(inference.params.get("discard_mix", 0.0)) if inference is not None else 0.0
     learned = None
+    stake = 0.0
     if inference is not None:
+        if not getattr(scorer, "hilo", False) and getattr(scorer, "low", None) is None:
+            stake = float(inference.params.get("discard_stake", 0.0))
         max_samples = int(inference.params.get("discard_max_samples", max_samples))
         if inference.params.get("discard_learn") and inference.rules.n > 0:
             learned = inference.rules.posterior()
@@ -257,9 +260,16 @@ def choose_discard(rec: Reconstruction, legal: LegalActions, rng: np.random.Gene
         else:
             opp_kept = opponent_keeps(scorer, draw[:, :3], board_np)
         full = np.concatenate([np.broadcast_to(board_np, (chunk, 3)), draw[:, 3:3 + to_deal]], axis=1)
+        v1 = scorer.primary.evaluate_batch(opp_kept, full) if stake > 0 else None
         for o, cards in cands.items():
-            totals[o].append(scorer.shares_batch(np.broadcast_to(np.array(cards, dtype=np.intp),
-                                                                 (chunk, 2)), opp_kept, [full]))
+            mine_b = np.broadcast_to(np.array(cards, dtype=np.intp), (chunk, 2))
+            if stake > 0:
+                v0 = scorer.primary.evaluate_batch(mine_b, full)
+                share = (v0 > v1) + 0.5 * (v0 == v1)
+                big = (np.maximum(v0, v1) >> CATEGORY_SHIFT) >= TWO_PAIR
+                totals[o].append(0.5 + (share - 0.5) * (1.0 + stake * big))   # pot grows when someone holds two pair or better
+            else:
+                totals[o].append(scorer.shares_batch(mine_b, opp_kept, [full]))
         n += chunk
         left = budget_s - (time.perf_counter() - t0)
         if left <= 0:

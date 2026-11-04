@@ -56,6 +56,7 @@ DEFAULTS: dict[str, Any] = {
     "discard_eps": 0.25,           # ... share of random discards in it
     "discard_learn": False,        # DC: learn the opponent's keep rule online from showdown discards
     "discard_max_samples": 4000,   # worlds sampled per fast discard at most (the budget stops it earlier)
+    "discard_stake": 0.0,          # >0: discard value weights showdowns by pot size (inference.DEFAULTS)
     "inference_trust": True,       # scale inference by how well it predicted past showdowns
     "use_tables": True,            # precomputed start-of-hand shares, if valid data exists
     "table_range_weight": 0.0,     # facing a preflop raise: blend in the share vs a top-range opponent
@@ -79,7 +80,8 @@ class Tier1Brain(Brain):
                                   "discard_mix": float(self.p["discard_mix"]),
                                   "discard_eps": float(self.p["discard_eps"]),
                                   "discard_max_samples": int(self.p["discard_max_samples"]),
-                                  "discard_learn": bool(self.p["discard_learn"])},
+                                  "discard_learn": bool(self.p["discard_learn"]),
+                                  "discard_stake": float(self.p["discard_stake"])},
                                  use_trust=bool(self.p["inference_trust"]),
                                  priors=self.p.get("priors"), k=float(self.p.get("prior_k", 15.0)))
         self.perception = Perception(self.rules, self.p, self.rng, self.opponent)

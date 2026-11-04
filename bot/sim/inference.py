@@ -38,6 +38,7 @@ DEFAULTS = {
     "discard_eps": 0.25,  # ... plus this share of random discards
     "discard_learn": False,        # learn which keep rule the opponent follows from showdown discards (bot/sim/discard.DiscardRules)
     "discard_max_samples": 4000,   # cap on sampled worlds in choose_discard (the time budget also stops it)
+    "discard_stake": 0.0,          # >0: score keeps by share weighted with pot size (big hands play bigger pots), see choose_discard
 }
 
 # logit = gamma * slope * (strength - pivot)
