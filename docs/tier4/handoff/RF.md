@@ -23,7 +23,7 @@ D1 solver + narrow(n0 0.001) only: +0.68 / -0.03 / -0.67, -0.02 +- 0.42. D2 D1 +
 ## D4 confirmation: 50 pairs, seeds 73100, 5 training bots, vs BASE on the same seeds
 Config: `tier3x:{"x_narrow":true,"x_air_eq":0.45,"t3_river_solver":true,"river_max_iters":110,"river_box_mult":50,"river_budget_s":0.08,"t3_river_narrow":true,"narrow_n0":0.001,"t3_river_rnr":true,"rnr_pmax":0.9,"rnr_n0":10,"rnr_min_n":10,"rnr_dir":-1}` (shipped box: drop river_max_iters/box_mult/budget keys).
 * Locks off chips: conv +0.08 +- 0.21, trapper -0.32 +- 0.19 (-1.7 SE), exploiter 0.00 +- 0.16, **lag +1.78 +- 0.44 (z 4.0)**, minraise +0.40 +- 0.17 (z 2.4); **sum +1.94 +- 0.57 (z 3.4)**, no bot down > 2 SE: PASS.
-* Locks on mean match score: BASE 0.798 -> D4 0.808, diff +0.010 +- 0.023 (conv 0.51 -> 0.66, trapper 0.97 -> 0.91): PASS. (locks-on chips sum +0.02 +- 0.25.)
+* Locks on mean match score (`lab.opps.score_compare`: KEEP-score): BASE 0.798 -> D4 0.808, diff +0.010 +- 0.023 (z +0.4) (conv 0.51 -> 0.66, trapper 0.97 -> 0.91): PASS. (locks-on chips sum +0.02 +- 0.25.)
 * **KEEP (flag still off in DEFAULTS; manager decides the flip + embed).** Not run: held-out bots, d_new_rules, Stage 2.
 
 ## Timing and coverage (exclusive lock, shipped box 40 ms x3.9, 2x clock stand-in, extra = D4 flags, vs same-seed Tier 3)
