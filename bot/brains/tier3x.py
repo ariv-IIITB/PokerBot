@@ -5,8 +5,10 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from bot.brains.exploit import EXPLOIT_DEFAULTS, adjust, narrow_equity
+from bot.brains.exploit import EXPLOIT_DEFAULTS, adjust, narrow_equity, overfolder_lambda, stab_prob
+from bot.strategy.oppstats import STREET_SPOT
 from bot.brains.tier3 import Tier3Brain
+from bot.actions import RAISE
 from bot.log import warn
 
 
@@ -16,7 +18,7 @@ class Tier3XBrain(Tier3Brain):
 
     def __init__(self, config: Optional[dict] = None, **kw) -> None:
         super().__init__(config, **kw)
-        self.stats.update({"x_overfolder": 0, "x_valueonly": 0, "x_errors": 0, "x_narrowed": 0})
+        self.stats.update({"x_overfolder": 0, "x_valueonly": 0, "x_errors": 0, "x_narrowed": 0, "x_stabs": 0})
         self._faced: list[float] = []              # size (x pot before the bet) of each river bet we faced
         self._faced_key = None
 
@@ -65,3 +67,25 @@ class Tier3XBrain(Tier3Brain):
         q["bet_pressure"] = float(p["bet_pressure"]) * float(p["x_narrow_bp"])
         return narrow_equity(eq, spots.spots["river_bet"].mean(), spots.spots["bluff_index"].mean(),
                              rank, float(p["x_narrow_lam"])), q
+
+    def _unfaced(self, c, s, legal, p):
+        """Nothing to call, Tier 3 would check: with `x_stab` and an over-folder verdict, bet weak hands
+        at the rate the opponent's measured fold rate on this street pays."""
+        a = super()._unfaced(c, s, legal, p)
+        if not p.get("x_stab") or c.street not in STREET_SPOT or not legal.can_raise or c.eq >= float(p["x_stab_eq"]):
+            return a
+        if a is not None and a.kind == RAISE:
+            return a
+        try:
+            lam = overfolder_lambda(self.opponent.traits, p["x_ramp"])
+            if lam > 0.0:
+                fold = self.opponent.spots.spots[STREET_SPOT[c.street]].mean()
+                if self._chance(stab_prob(fold, float(p["x_stab_size"]), lam, float(p["x_stab_span"]))):
+                    b = self._size(float(p["x_stab_size"]), "bluff", c, s, legal, p)
+                    if b is not None:
+                        self.stats["x_stabs"] += 1
+                        return b
+        except Exception as e:
+            self.stats["x_errors"] += 1
+            warn(f"stab failed: {e!r}")
+        return a
