@@ -1,0 +1,11 @@
+=== d_new_trapper arm=na  pairs=25 river hands=10105 / 20000
+  fold_river: real fold rate to our river bets 0.360 (n=3479, 70/match); model mean at match end 0.377, n 70/match; RNR weight at match end 0.317 (max 0.339)
+  narrow bet 0.00-0.40 pot: n=185 top-30% range mass before 0.41 after 0.57; real showdown hands in top 30%: 1.00 (n=119, mean pct 0.86)
+  narrow bet 0.40-0.75 pot: n=1283 top-30% range mass before 0.40 after 0.58; real showdown hands in top 30%: 0.99 (n=548, mean pct 0.86)
+  narrow bet 0.75-1.20 pot: n=1140 top-30% range mass before 0.36 after 0.54; real showdown hands in top 30%: 1.00 (n=443, mean pct 0.94)
+  narrow bet 1.20-99.00 pot: n=53 top-30% range mass before 0.41 after 0.57; real showdown hands in top 30%: 1.00 (n=30, mean pct 0.93)
+  river chips per hand played: +6.632  (SE 0.309)
+  first       n= 4614 contrib/hand=+3.184  mean/spot +13.80+-0.89  K:0.71(+8.9)  R:0.29(+26.0)
+  checked_to  n= 4613 contrib/hand=+3.363  mean/spot +14.58+-0.88  K:0.61(+7.0)  R:0.39(+26.3)
+  face_small  n=  370 contrib/hand=+0.150  mean/spot +8.12+-3.76  C:0.36(+1.7)  F:0.47(+0.0)  R:0.17(+43.4)
+  face_big    n=  508 contrib/hand=-0.065  mean/spot -2.54+-2.71  C:0.26(-22.3)  F:0.61(+0.0)  R:0.13(+26.2)

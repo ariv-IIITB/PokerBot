@@ -148,6 +148,7 @@ DEFAULTS.update({
     "narrow_k": 8,                 #   prior weight (in faced bets) of the size rank, centred at 0.5
     "narrow_n0": 30,               #   showdown-seen bets worth half the weight of the observed profile
     "t3_river_shifts": False,      # stack the X1-X3 counter-moves (over-folder: bluff more, value-only bettor: fold more) on the solver's root strategy
+    "river_face_base": False,      # facing a river bet / raise: Tier 3's own logic decides (x_narrow in tier3x), the solver acts only when nothing is to call
     "river_own_fit": True,         # our own range from the fitted model (bot/strategy/own_range.py); False: the generic inference model
     "river_opp_beta": 6.0,         # opponent range for the solver: fixed discard / bet sharpness (None: the trust-scaled model).
     "river_opp_gamma": 0.6,        # Fitted on 12k showdowns: pooled log(N*w) of their real hand +0.26 vs +0.11 for the trust-scaled model
@@ -403,7 +404,7 @@ class Tier3Brain(Tier2Brain):
         h = s.hand
         assert h is not None and self._own is not None
         street = h.street
-        if street == 3 and p.get("t3_river_solver"):
+        if street == 3 and p.get("t3_river_solver") and not (p.get("river_face_base") and h.tocall > 0):
             a = self._river_solved(s, legal, budget_s, p)
             if a is not None:
                 return a                                           # else: Tier 3's own river below
