@@ -1,0 +1,21 @@
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+tier3x-nolock vs d_new_lag-nolock: +5.87 ± 0.32 chips/hand | match score 0.950 ± 0.022 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 365.0s (110/s)
+--- accounting: tier3x-nolock (+234705 chips over 40000 hands, +5.87/hand)
+  opp_fold       flop   hands=   919 chips=  +12585 (+0.315 +-0.014/hand)
+  opp_fold       pre    hands=  3492 chips=   +9161 (+0.229 +-0.005/hand)
+  opp_fold       river  hands=  1859 chips=  +79375 (+1.984 +-0.045/hand)
+  opp_fold       turn   hands=  1271 chips=  +33799 (+0.845 +-0.029/hand)
+  showdown_chop  river  hands=   363 chips=      +0 (+0.000 +-0.000/hand)
+  showdown_loss  river  hands=  3003 chips= -406040 (-10.151 +-0.384/hand)
+  showdown_win   river  hands=  6657 chips= +863783 (+21.595 +-0.441/hand)
+  we_fold        flop   hands=  8794 chips=  -69064 (-1.727 +-0.047/hand)
+  we_fold        pre    hands=  3771 chips=   -7766 (-0.194 +-0.003/hand)
+  we_fold        river  hands=  5976 chips= -212367 (-5.309 +-0.094/hand)
+  we_fold        turn   hands=  3895 chips=  -68761 (-1.719 +-0.064/hand)
+  river-all      river  hands= 17858 chips= +324751 (+8.119 +-0.281/hand over 50 pairs)
+--- accounting: d_new_lag-nolock (+0 chips over 40000 hands, +0.00/hand)
+  river-all      river  hands=     0 chips=      +0 (+0.000 +-0.000/hand over 50 pairs)
+--- brain stats: tier3x-nolock: t3_decisions=119617 t3_errors=0 t3_fallbacks=19536 x_errors=0 x_narrowed=8792 x_overfolder=0 x_stabs=0 x_valueonly=1

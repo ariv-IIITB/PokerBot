@@ -1,0 +1,89 @@
+[bot] WARN brain exceeded hard deadline (budget 5.4 ms)
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.4 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.4 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.4 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.4 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.4 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 5.4 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+[bot] WARN budget-0 retry exceeded its deadline
+tier3x[{"x_narrow":false,"x_air_eq":0.0}]-nolock vs d_new_trapper-nolock: +0.09 ± 0.17 chips/hand | match score 0.520 ± 0.050 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 692.1s (58/s)
+--- accounting: tier3x[{"x_narrow":false,"x_air_eq":0.0}]-nolock (+3748 chips over 40000 hands, +0.09/hand)
+  opp_fold       flop   hands=  3745 chips=  +17495 (+0.437 +-0.008/hand)
+  opp_fold       pre    hands= 13171 chips=  +17943 (+0.449 +-0.003/hand)
+  opp_fold       river  hands=  1761 chips=  +17359 (+0.434 +-0.016/hand)
+  opp_fold       turn   hands=  1484 chips=   +9294 (+0.232 +-0.009/hand)
+  showdown_chop  river  hands=   653 chips=      +0 (+0.000 +-0.000/hand)
+  showdown_loss  river  hands=  9318 chips= -322746 (-8.069 +-0.181/hand)
+  showdown_win   river  hands=  5910 chips= +292395 (+7.310 +-0.135/hand)
+  we_fold        flop   hands=   266 chips=   -1223 (-0.031 +-0.003/hand)
+  we_fold        pre    hands=   361 chips=    -688 (-0.017 +-0.001/hand)
+  we_fold        river  hands=  2616 chips=  -22179 (-0.554 +-0.024/hand)
+  we_fold        turn   hands=   715 chips=   -3902 (-0.098 +-0.006/hand)
+  river-all      river  hands= 20258 chips=  -35171 (-0.879 +-0.167/hand over 50 pairs)
+--- accounting: d_new_trapper-nolock (+0 chips over 40000 hands, +0.00/hand)
+  river-all      river  hands=     0 chips=      +0 (+0.000 +-0.000/hand over 50 pairs)
+--- brain stats: tier3x[{"x_narrow":false,"x_air_eq":0.0}]-nolock: t3_decisions=88221 t3_errors=0 t3_fallbacks=18983 x_errors=0 x_narrowed=0 x_overfolder=0 x_stabs=0 x_valueonly=23222

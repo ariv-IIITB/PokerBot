@@ -1,0 +1,17 @@
+=== tier3 vs d_conv_opp3
+startup 146 ms (x2: 292 ms)
+400 hands, 1369 decisions: bank used 5.04s of 60s -> projected x2 = 10.08s (17% of bank)
+mean decision 3.68 ms, worst 20.3 ms (projected 40.6 ms); first decision incl. start-up overlap 175 ms
+=== tier3x vs d_conv_opp3
+startup 148 ms (x2: 296 ms)
+400 hands, 1444 decisions: bank used 5.54s of 60s -> projected x2 = 11.09s (18% of bank)
+mean decision 3.84 ms, worst 20.5 ms (projected 41.0 ms); first decision incl. start-up overlap 179 ms
+=== tier3 vs d_new_exploiter
+startup 145 ms (x2: 291 ms)
+400 hands, 1350 decisions: bank used 4.99s of 60s -> projected x2 = 9.97s (17% of bank)
+mean decision 3.69 ms, worst 20.4 ms (projected 40.9 ms); first decision incl. start-up overlap 171 ms
+=== tier3x vs d_new_exploiter
+startup 147 ms (x2: 294 ms)
+400 hands, 1398 decisions: bank used 5.25s of 60s -> projected x2 = 10.49s (17% of bank)
+mean decision 3.75 ms, worst 20.0 ms (projected 40.1 ms); first decision incl. start-up overlap 175 ms
+TIMING_DONE
