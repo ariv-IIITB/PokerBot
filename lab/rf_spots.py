@@ -28,6 +28,9 @@ BASE = {"x_narrow": True, "x_air_eq": 0.45, "lock_enabled": False}
 SOLVER = dict(BASE, t3_river_solver=True, river_budget_s=0.080, river_box_mult=50, river_max_iters=110)
 ARMS = {"base": BASE, "solver": SOLVER,
         "na": dict(SOLVER, t3_river_narrow=True, t3_river_rnr=True, t3_river_shifts=True),
+        "d1": dict(SOLVER, t3_river_narrow=True, narrow_n0=0.001),
+        "d2": dict(SOLVER, t3_river_narrow=True, narrow_n0=0.001, river_face_base=True),
+        "d4": dict(SOLVER, t3_river_narrow=True, narrow_n0=0.001, t3_river_rnr=True, rnr_pmax=0.9, rnr_n0=10, rnr_min_n=10, rnr_dir=-1),
         "narrow": dict(SOLVER, t3_river_narrow=True), "rnr": dict(SOLVER, t3_river_rnr=True)}
 CLASSES = ("first", "checked_to", "face_small", "face_big")
 
@@ -48,8 +51,12 @@ def run_match(job):
         h = s.hand
         if h is not None and h.street == 3 and not legal.can_special and id(h) not in recs and h.tocall >= 0:
             fr = self.opponent.spots.spots["fold_river"]
+            try:
+                pct = self._own.percentile(h.hole, list(h.board), sorted(h.dead_cards), self._line, self.rng, 200)
+            except Exception:
+                pct = None
             recs[id(h)] = dict(h=h, cls=classify(h), kind=a.kind, pot0=h.pot - (h.my_bet or 0) - (h.opp_bet or 0),
-                               fr_n=fr.n, fr_mean=fr.mean(),
+                               fr_n=fr.n, fr_mean=fr.mean(), pct=pct,
                                ratio=h.tocall / max(1, h.pot - h.tocall) if h.tocall > 0 else 0.0, brain=self)
         return a
 
@@ -169,6 +176,8 @@ def main():
     ap.add_argument("--out")
     ap.add_argument("--report", nargs="+")
     a = ap.parse_args()
+    if a.opp == "pct":
+        return pct_table(a.report[0], a.report[1:])
     if a.opp == "diff":
         return diff_main(a.report)
     if a.report:
@@ -197,6 +206,16 @@ def class_diff(base_path, arm_path):
         x = out["arm"][c] - out["base"][c]
         res[c] = (out["base"][c].mean(), out["arm"][c].mean(), x.mean(), se(x))
     return res
+
+
+def pct_table(opp, arms):
+    """Unfaced river decisions by our hand percentile (decile): bet rate and river chips per spot."""
+    for arm in arms:
+        d = pickle.load(open(f"logs/rf/p_{opp}_{arm}.pkl", "rb"))
+        rs = [r for r in d["recs"] if r["cls"] in ("first", "checked_to") and r.get("pct") is not None]
+        print(f"{opp} {arm}: " + " ".join(
+            f"[{lo / 10:.1f}: bet {np.mean([r['kind'] == RAISE for r in g]):.2f} ev {np.mean([r['river_ev'] for r in g]):+.0f}]"
+            for lo in range(0, 10, 2) for g in [[r for r in rs if lo / 10 <= r["pct"] < (lo + 2) / 10 + (1e-9 if lo == 8 else 0)]] if g))
 
 
 def diff_main(argv):

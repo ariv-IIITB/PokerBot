@@ -54,6 +54,22 @@ def test_narrowing_follows_bet_size_and_is_inert_without_a_bet():
     assert abs(big.sum() - 1) < 1e-9 and (big > 0).all()
 
 
+def test_narrow_n0_sharpens_a_thin_sample_and_face_base_defaults_off():
+    from types import SimpleNamespace as NS
+    rank, w = np.arange(200), np.ones(200)
+    top = rank >= 150
+    mass = {}
+    for n0 in (30, 0.001):
+        b = Tier3Brain({"narrow_n0": n0})
+        h = _H()
+        h.history = [NS(street=3, actor=OPP, action=NS(kind="R"))]
+        for _ in range(3):                                                    # only three showdown-seen bets
+            b.opponent.spots.spots["bluff_index"].add(False)
+        mass[n0] = b._narrow_range(w, rank, h, b.p)[top].sum()
+    assert mass[0.001] > mass[30]
+    assert not Tier3Brain().p["river_face_base"] and Tier3Brain().p["rnr_dir"] == 0
+
+
 def test_own_bet_table_is_a_proper_model():
     for (nb, facing), tab in OWN_BET.items():
         assert nb in (0, 3, 4, 5) and ("F" in tab or "C" in tab) == facing and all(len(v) == 2 for v in tab.values())

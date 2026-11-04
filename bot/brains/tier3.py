@@ -142,6 +142,7 @@ DEFAULTS.update({
     "rnr_pmax": 0.5,               #   weight pmax * n / (n + n0) from the n river bets they answered (nothing below rnr_min_n), and
     "rnr_n0": 40,                  #   the weak-hand share of their betting range set to the observed bluff index
     "rnr_min_n": 20,
+    "rnr_dir": 0,                  #   -1: only when they fold LESS than the equilibrium (a caller / station), +1: only when more, 0: both
     "rnr_temp": 0.05,              # soft best response: softmax of the action values / this (pot units)
     "t3_river_narrow": False,      # facing a river bet: their range = the top slice their bet rate and this bet's SIZE RANK (among the river bets
     "narrow_lam": 0.4,             #   they made so far) allow, plus the bluff share seen at showdown (weak hands); blended in by sample size
@@ -508,7 +509,7 @@ class Tier3Brain(Tier2Brain):
             st["river_few_iters"] += 1
             return None
         probs = res.probs
-        if res.values is not None and pmix > 0.0:
+        if res.values is not None and pmix > 0.0 and (p["rnr_dir"] == 0 or (res.fold_to - res.fold_eq) * p["rnr_dir"] > 0):
             z = np.asarray(res.values, dtype=np.float64)
             br = np.exp((z - z.max()) / float(p["rnr_temp"]))
             probs = (1.0 - pmix) * probs + pmix * br / br.sum()
