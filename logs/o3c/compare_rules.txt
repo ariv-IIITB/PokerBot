@@ -1,0 +1,3 @@
+d_new_rules -0.25 -> +0.22  diff +0.47 ± 0.23 (z +2.0)  improved
+sum      diff +0.47 ± 0.23 (z +2.0)
+verdict: KEEP
