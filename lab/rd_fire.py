@@ -8,7 +8,9 @@ from lab.players import PlayerSpec
 opp, pairs = sys.argv[1], int(sys.argv[2])
 seed0 = int(sys.argv[3]) if len(sys.argv) > 3 else 70900
 cfg = {"lock_enabled": False, "t3_river_solver": True, "river_budget_s": 0.080, "river_box_mult": 50, "river_max_iters": 110,
-       "t3_river_rnr": True, "t3_river_shifts": True}
+       "t3_river_rnr": True, "t3_river_shifts": True, "t3_river_narrow": True}
+if len(sys.argv) > 4:
+    cfg.update(__import__("json").loads(sys.argv[4]))
 tot: dict = {}
 for seed in range(seed0, seed0 + pairs):
     for flip in (0, 1):

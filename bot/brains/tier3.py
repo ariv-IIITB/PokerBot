@@ -143,6 +143,10 @@ DEFAULTS.update({
     "rnr_n0": 40,                  #   the weak-hand share of their betting range set to the observed bluff index
     "rnr_min_n": 20,
     "rnr_temp": 0.05,              # soft best response: softmax of the action values / this (pot units)
+    "t3_river_narrow": False,      # facing a river bet: their range = the top slice their bet rate and this bet's SIZE RANK (among the river bets
+    "narrow_lam": 0.4,             #   they made so far) allow, plus the bluff share seen at showdown (weak hands); blended in by sample size
+    "narrow_k": 8,                 #   prior weight (in faced bets) of the size rank, centred at 0.5
+    "narrow_n0": 30,               #   showdown-seen bets worth half the weight of the observed profile
     "t3_river_shifts": False,      # stack the X1-X3 counter-moves (over-folder: bluff more, value-only bettor: fold more) on the solver's root strategy
     "river_own_fit": True,         # our own range from the fitted model (bot/strategy/own_range.py); False: the generic inference model
     "river_opp_beta": 6.0,         # opponent range for the solver: fixed discard / bet sharpness (None: the trust-scaled model).
@@ -191,6 +195,7 @@ class Tier3Brain(Tier2Brain):
             self.stats.update({"river_solves": 0, "river_iters": 0, "river_us": 0, "river_fallbacks": 0,
                                "river_errors": 0, "river_few_iters": 0, "river_no_pass": 0, "river_missing": 0,
                                "river_rnr": 0, "river_shifted": 0})
+        self._faced: list[float] = []                    # size (x pot) of each river bet we faced, for the size rank
         self.river_iters_log: list[int] = []            # passes per solved decision (capped, for benches)
 
     @classmethod
@@ -471,8 +476,11 @@ class Tier3Brain(Tier2Brain):
             dict(INFERENCE_DEFAULTS, enabled=True)))
         hr_opp = hand_ranks(ev, opp_cards, board)
         fold_obs, pmix = None, 0.0
+        if p.get("t3_river_narrow") and self.opponent.spots is not None:
+            w_opp = self._narrow_range(w_opp, hr_opp, h, p)
         if p.get("t3_river_rnr") and self.opponent.spots is not None:
-            w_opp = self._weak_share(w_opp, hr_opp, h, p)
+            if not p.get("t3_river_narrow"):
+                w_opp = self._weak_share(w_opp, hr_opp, h, p)
             fr = self.opponent.spots.spots["fold_river"]
             if fr.n >= int(p["rnr_min_n"]):
                 fold_obs, pmix = fr.mean(), float(p["rnr_pmax"]) * fr.n / (fr.n + float(p["rnr_n0"]))
@@ -540,6 +548,36 @@ class Tier3Brain(Tier2Brain):
             return w
         t = min(0.9, max(0.02, sp.mean()))
         return np.where(weak, w * min(5.0, max(0.2, t * (1 - m) / (m * (1 - t)))), w)
+
+    def _narrow_range(self, w: np.ndarray, rank: np.ndarray, h: HandState, p: dict) -> np.ndarray:
+        """Facing their river bet: the range that bets this big. A bet of size rank F (share of the river bets they have made
+        that were at least this large; bigger bets are rarer and stronger) comes from the top slice
+        f * (lam + (1 - lam) * F) * (1 - b) of all their hands (f = their river bet rate, b = bluff index) plus a
+        bluff share b of weak hands. Blended with the inferred range by how many bluff-index showdowns back it."""
+        st = self.opponent.spots
+        if h.tocall <= 0 or not any(rr.street == 3 and rr.actor == OPP and rr.action.kind == RAISE for rr in h.history):
+            return w
+        ratio = h.tocall / max(1, h.pot - h.tocall)
+        key = (h.hand_id, len(h.history))
+        if key != getattr(self, "_faced_key", None):           # one entry per bet, however often we are asked
+            self._faced_key = key
+            self._faced.append(ratio)
+        n, k = len(self._faced), float(p["narrow_k"])
+        F = (sum(1 for r in self._faced if r >= ratio) + 0.5 * k) / (n + k)
+        f = st.spots["river_bet"].mean()
+        b = min(0.9, max(0.0, st.spots["bluff_index"].mean()))
+        lam = float(p["narrow_lam"])
+        value = min(1.0, max(1e-3, f * (lam + (1.0 - lam) * F) * (1.0 - b)))
+        srt = np.sort(rank)
+        pct = (np.searchsorted(srt, rank, "left") + np.searchsorted(srt, rank, "right")) / (2.0 * len(rank))
+        top, weak = pct >= 1.0 - value, pct < 0.4
+        wt, ww = float(w[top].sum()), float(w[weak].sum())
+        if wt <= 0 or ww <= 0:
+            return w
+        target = np.where(top, (1.0 - b) * w / wt, 0.0) + np.where(weak, b * w / ww, 0.0)
+        target = target + 0.02 * w / w.sum()                    # a floor: a wrong read must not zero a hand out
+        alpha = st.spots["bluff_index"].n / (st.spots["bluff_index"].n + float(p["narrow_n0"]))
+        return (1.0 - alpha) * w / w.sum() + alpha * target / target.sum()
 
     def _river_shift(self, probs: np.ndarray, labels: list, pct: float, p: dict) -> np.ndarray:
         """The exploit layer's counter-moves on the solver's root strategy: an over-folder (X1) gets more bluffs from
