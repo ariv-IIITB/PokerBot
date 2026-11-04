@@ -18,6 +18,7 @@ CLI:  .venv/bin/python -m lab.timing_bench --hands 400 --brain tier2 --opponent 
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 import time
@@ -110,12 +111,15 @@ def run_timing(brain: str = "tier2", opponent: str = "maniac", hands: Optional[i
         from lab.harness import load_variant
         spec = load_variant(variant)
         path = variant if variant.endswith(".json") else str(ROOT / "variant" / "catalog" / f"{variant}.json")
+    # `NAME:{json}`: bot.main only knows plain names, so the config travels in $POKERBOT_BRAIN_CONFIG.
+    name, _, cfg_text = brain.partition(":")
+    config = json.loads(cfg_text) if cfg_text else {}
     rules = to_rules(spec)
     hands = hands or rules.hands_per_match
     bank = bank_s or rules.time_bank_s
-    startup = measure_startup(brain, cwd=cwd, protocol=protocol, cmd=cmd)
-    bot = SubprocessPlayer(cmd or [sys.executable, "-m", "bot.main", "--brain", brain], name=brain,
-                           brain_config=None if lock else {"lock_enabled": False},
+    startup = measure_startup(name, cwd=cwd, protocol=protocol, cmd=cmd)
+    bot = SubprocessPlayer(cmd or [sys.executable, "-m", "bot.main", "--brain", name], name=brain,
+                           brain_config=({} if lock else {"lock_enabled": False}) | config or None,
                            variant_path=bot_variant_path or (path if cwd is None and cmd is None else None),
                            cwd=str(cwd) if cwd else None, protocol=protocol)
     m = play_match([bot, _opponent(opponent)], spec, seed=seed, hands=hands, time_bank_s=bank,
