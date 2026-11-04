@@ -125,3 +125,21 @@ def test_river_compare_reads_the_river_all_lines(tmp_path) -> None:
     (tmp_path / "b").write_text(txt.format(m="+0.500"))
     assert river_compare.river_all(str(tmp_path / "a")) == {"conv": (0.1, 0.05)}
     assert river_compare.main([str(tmp_path / "a"), str(tmp_path / "b")]) == 0
+
+
+def test_preflop_lines_add_up_and_label() -> None:
+    from bot.actions import Action
+    from bot.state import ActionRecord, HandState
+    h = HandState(1, 0, 200, 200)
+    assert track.preflop_line(h) == "limp"
+    h.history = [ActionRecord(0, "me", Action.raise_to(5)), ActionRecord(0, "opp", Action.raise_to(18)),
+                 ActionRecord(0, "me", Action.call())]
+    assert track.preflop_line(h) == "3bet_opp"
+    h.history.insert(2, ActionRecord(0, "me", Action.raise_to(40)))
+    assert track.preflop_line(h) == "4bet+"
+    a, b = PlayerSpec.brain("tier1"), PlayerSpec.brain("maniac")
+    rep = run_duplicate(a, b, cfg=None, seeds=range(2), hands=40, processes=1, track=True)
+    merged = track.merge([p.track for p in rep.pairs])
+    assert sum(c for _, c in merged["A"]["lines"].values()) == sum(c for _, c in merged["A"]["acct"].values())
+    assert "--- preflop lines" in track.format_lines(merged, {"A": "a", "B": "b"}, rep.total_hands,
+                                                     [p.track for p in rep.pairs])

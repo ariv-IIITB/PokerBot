@@ -5,10 +5,12 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from bot.brains.exploit import EXPLOIT_DEFAULTS, adjust, narrow_equity, overfolder_lambda, stab_prob
+from bot.brains.exploit import (EXPLOIT_DEFAULTS, adjust, narrow_equity, overfolder_lambda, reraise_equity,
+                                stab_prob)
 from bot.strategy.oppstats import STREET_SPOT
 from bot.brains.tier3 import Tier3Brain
 from bot.actions import RAISE
+from bot.state import ME
 from bot.log import warn
 
 
@@ -18,7 +20,8 @@ class Tier3XBrain(Tier3Brain):
 
     def __init__(self, config: Optional[dict] = None, **kw) -> None:
         super().__init__(config, **kw)
-        self.stats.update({"x_overfolder": 0, "x_valueonly": 0, "x_errors": 0, "x_narrowed": 0, "x_stabs": 0})
+        self.stats.update({"x_overfolder": 0, "x_valueonly": 0, "x_errors": 0, "x_narrowed": 0, "x_stabs": 0,
+                           "x_3b_floor": 0})
         self._faced: list[float] = []              # size (x pot before the bet) of each river bet we faced
         self._faced_key = None
 
@@ -52,6 +55,23 @@ class Tier3XBrain(Tier3Brain):
                 self.stats["x_errors"] += 1
                 warn(f"range narrowing failed: {e!r}")
         return super().choose(state, legal, eq, p)
+
+    def t2_calls(self, h, eq: float, p: dict) -> bool:
+        """Tier 2's pot-odds rule; with `x_3b_floor`, facing a re-raise of our preflop raise, the equity is
+        re-read against the re-raiser's range (exploit.reraise_equity)."""
+        if p.get("x_3b_floor") and h.street == 0 and reraised(h):
+            try:
+                t = self.perception.tables
+                if t is not None and t.eq_range is not None:
+                    cls = t.classes.class_of(h.hole)
+                    eq = min(eq, reraise_equity(float(t.eq_random[cls]), float(t.eq_range[cls]),
+                                                float(t.meta.get("range_top", 0.3)),
+                                                self.opponent.spots.spots["three_bet"].mean()))
+                    self.stats["x_3b_floor"] += 1
+            except Exception as e:
+                self.stats["x_errors"] += 1
+                warn(f"re-raise floor failed: {e!r}")
+        return Tier3Brain.t2_calls(h, eq, p)
 
     def _narrowed(self, h, eq: float, p: dict):
         ratio = h.tocall / max(1, h.pot - h.tocall)
@@ -89,3 +109,15 @@ class Tier3XBrain(Tier3Brain):
             self.stats["x_errors"] += 1
             warn(f"stab failed: {e!r}")
         return a
+
+
+def reraised(h) -> bool:
+    """We raised preflop and the opponent raised after it."""
+    ours = False
+    for r in h.history:
+        if r.street == 0 and r.action.kind == RAISE:
+            if r.actor == ME:
+                ours = True
+            elif ours:
+                return True
+    return False

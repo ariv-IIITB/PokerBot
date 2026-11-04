@@ -135,6 +135,8 @@ def run_pool(brain: str, pool: list[str], pairs: int, variant: str = DEFAULT_VAR
                 blocks.append(track.format_profile(merged, names))
             if "accounting" in report:
                 blocks.append(track.format_accounting(merged, names, rep.total_hands, [p.track for p in rep.pairs if p.track]))
+            if "lines" in report:
+                blocks.append(track.format_lines(merged, names, rep.total_hands, [p.track for p in rep.pairs if p.track]))
             if "stats" in report:
                 blocks.append(track.format_stats(merged, names))
             out += blocks
@@ -224,7 +226,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--bank", type=float, default=None, help="time bank per match, seconds")
     ap.add_argument("--locks", choices=("on", "off"), default="on")
     ap.add_argument("--variant", default=DEFAULT_VARIANT, help="catalog name or spec JSON path")
-    ap.add_argument("--report", default="", help="comma list: accounting, profile, stats")
+    ap.add_argument("--report", default="", help="comma list: accounting, lines, profile, stats")
     ap.add_argument("--check-profile", action="store_true")
     ap.add_argument("--processes", type=int, default=None)
     ap.add_argument("--out", default=None)
@@ -242,7 +244,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         ap.error("a BRAIN is required (or --compare)")
     pool = resolve_pool(args.pool, args.final)
     report = tuple(r for r in args.report.split(",") if r)
-    bad = set(report) - {"accounting", "profile", "stats"}
+    bad = set(report) - {"accounting", "lines", "profile", "stats"}
     if bad:
         ap.error(f"unknown --report {sorted(bad)}")
     lines = run_pool(args.brain, pool, args.pairs, args.variant, args.hands, args.bank,
