@@ -1,0 +1,4 @@
+machine: Intel(R) Xeon(R) Processor @ 2.10GHz, nproc=4
+recorded 200 river spots in 33s
+range building (all variants pay it): combos 0.09 ms, inference 3.1 ms (p90 4.4), ranks 1.6 ms; opp weights above 1e-3 of the max: 903 of 903 (median)
+[bucket64/small-tree] passes in a 10 ms box, ranges included: median 32, p10 16, p90 51, share >= 100: 0.00 | ranges 4.8 ms + setup 2.3 ms + 0.09 ms/pass | n0/n1 64/64 | tree 6 decisions | passes if ranges were free: 90

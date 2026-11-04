@@ -1,0 +1,2 @@
+tier3 vs d_new_minraise: +0.41 ± 0.06 chips/hand | match score 0.810 ± 0.039 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 75.9s (527/s)
+--- brain stats: tier3: t3_decisions=0 t3_errors=0 t3_fallbacks=0

@@ -1,0 +1,6 @@
+board0   n= 1137 ms: p50 0.05 p99 0.19 max 12.71
+board3   n= 1043 ms: p50 1.19 p99 1.47 max 19.58
+board4   n=  907 ms: p50 1.27 p99 1.66 max 1.88
+board5   n=  779 ms: p50 1.53 p99 2.04 max 2.33
+special  n=  832 ms: p50 0.88 p99 1.13 max 1.24
+illegal or failed at budget 0: 0 (exceptions 0)

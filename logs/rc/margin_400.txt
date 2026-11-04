@@ -1,0 +1,4 @@
+calling_station 400h river n=399: wall ms p50 10.5 p99 10.5 max 10.7 | x2: p99 21.1 max 21.3 | hard limit min 80.0 median 80.0 | wall/limit max 0.13 (x2: 0.27) p99 0.13; deadline hits 0
+calling_station 400h other n=1597: wall ms p50 4.3 p99 4.8 max 20.6 | x2: p99 9.5 max 41.2 | hard limit min 80.0 median 80.0 | wall/limit max 0.26 (x2: 0.52) p99 0.06; deadline hits 0
+d_new_trapper 400h river n=242: wall ms p50 10.5 p99 10.6 max 10.6 | x2: p99 21.1 max 21.2 | hard limit min 80.0 median 80.0 | wall/limit max 0.13 (x2: 0.26) p99 0.13; deadline hits 0
+d_new_trapper 400h other n=1053: wall ms p50 4.4 p99 5.4 max 9.2 | x2: p99 10.7 max 18.3 | hard limit min 80.0 median 80.0 | wall/limit max 0.11 (x2: 0.23) p99 0.07; deadline hits 0
