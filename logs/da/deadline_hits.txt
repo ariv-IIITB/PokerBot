@@ -11,4 +11,13 @@ cd_re70-68-70-76_cm2                          0322:42  hits   19  per1000dec 0.0
 cd_re70-68-70-74_cm1                          0323:11  hits  344  per1000dec 0.40
 cd_re70-68-70-74_cm3                          0323:36  hits    1  per1000dec 0.00
 cd_re68-68-68-74_cm2                          0400:01  hits    1  per1000dec 0.00
-cd_re72-68-68-74_cm2                          0400:13  hits    3  per1000dec 0.00
+cd_re72-68-68-74_cm2                          0400:26  hits    3  per1000dec 0.00
+cd_re70-66-68-74_cm2                          0400:51  hits    0  per1000dec 0.00
+cd_re70-70-68-74_cm2                          0401:13  hits    0  per1000dec 0.00
+cd_re70-68-66-74_cm2                          0401:35  hits    0  per1000dec 0.00
+cd_re70-68-68-72_cm2                          0402:02  hits    3  per1000dec 0.00
+cd_re70-68-68-76_cm2                          0402:24  hits    0  per1000dec 0.00
+cd_re70-68-68-74_cm1                          0402:47  hits    0  per1000dec 0.00
+cd_re70-68-68-74_cm3                          0403:10  hits    2  per1000dec 0.00
+cd_re68-68-66-74_cm2                          0403:33  hits    0  per1000dec 0.00
+cd_re72-68-66-74_cm2                          0403:56  hits    0  per1000dec 0.00
