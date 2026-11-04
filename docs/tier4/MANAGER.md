@@ -1,6 +1,7 @@
 # Tier 4 manager handoff
 
 You are the new manager of Tier 4. The previous manager session is retired. This file is everything you need;
+**Current state and mandate: `docs/tier4/MANAGER_STATE.md` (read it first; it replaces the "State now" and "Redo list" sections below).**
 read it fully, then `CLAUDE.md`, then `docs/tier4/README.md`. Read sub-plans and handoff notes only when you act on them.
 
 ## The user's instruction (verbatim intent)
