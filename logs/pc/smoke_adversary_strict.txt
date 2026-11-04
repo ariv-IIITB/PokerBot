@@ -1,0 +1,2 @@
+tier4p-nolock vs adversary_strict-nolock: +16.81 ± 0.53 chips/hand | match score 1.000 ± 0.000 over 16 matches | errors A/B 0/0 | forfeits A/B 0/0 | 6400 hands in 64.7s (99/s)
+--- brain stats: tier4p-nolock: decisions_anti_aggro=0 decisions_anti_folder=0 decisions_anti_value=0 decisions_base=29929 hands_anti_aggro=0 hands_anti_folder=0 hands_anti_value=0 hands_base=6416 p_errors=0 p_raise_folds=0 sel_bailouts=16 t3_decisions=19362 t3_errors=0 t3_fallbacks=4795
