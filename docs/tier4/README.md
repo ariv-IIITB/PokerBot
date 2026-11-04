@@ -132,6 +132,15 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 | 51000–51999 | PB redo (laptop) tuning; 52000–52999 its confirmations |
 | 53000–53999 | DA redo (laptop) tuning; 54000–54999 its confirmations |
 
+## Integration branch `tier4/int` (user, 2026-11-04)
+
+Pieces are added to `tier4/int` one at a time, as soon as their own testing is complete and above noise (handoff says
+KEEP, confirmed on fresh seeds, locks-on score checked, timing ratio checked), never mid-testing. Later improvements are
+then tested on top of `tier4/int`, not on `tier4/base`. A session that finishes a piece rebases its work on `tier4/int`
+before its confirmation run. In: DA (smart rollouts + raise_equity, `tier4/d` f70bee9). Not yet: O3 (x_narrow, x_air_eq:
+screening only), PB/PD portfolio (gate P open), DC, RD, AD. I1 still runs the final combined gates and the stacking test.
+Note: O3 was merged by mistake at 65da08c/811d54c and reverted; to re-add it, revert those two reverts or re-apply.
+
 ## No soft timelines (user, 2026-11-04)
 
 The user removed all soft timelines: aim for the best bot, not the fastest. The only hard date is the deadline
