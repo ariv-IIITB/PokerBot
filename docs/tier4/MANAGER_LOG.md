@@ -21,3 +21,4 @@
 - 2026-11-04 23:46 DC lever 3 (discard_stake) flat: stake1 -0.60+-1.26, stake2 -1.42+-1.33 -> no-go; DC wraps up. PS at locks-on runs; O3 arm A run; RF candidate runs; AD round 1; L3 building x_3b_ref (tight-3-bettor continue cap, off) on int.
 - DC handoff addendum verified (origin/tier4/dc ee9f16e). DC done; not merged (all levers DROP). Archive DC when the user agrees.
 - 2026-11-04 23:55 USER DECISION: drop the portfolio tier4p (flat on top of O3: locks-off sum ~0, lag -0.45). PS told to stop and write a short handoff. USER DECISION: I1 (final merge and checks) waits until after the weekly usage reset (2026-11-08 ~09:30 IST); weekly limit was 75% used at 2026-11-04 ~midnight. Until then: AD, RF, O3 (arm A + timing), L3 finish their pieces; merges into tier4/int still happen as handoffs land.
+- PS handoff verified (origin/tier4/ps, PS.md): DROP, sum -0.02 +- ~0.54. PS done.
