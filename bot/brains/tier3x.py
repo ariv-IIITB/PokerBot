@@ -42,6 +42,10 @@ class Tier3XBrain(Tier3Brain):
             return p
         self.stats["x_overfolder"] += int(info.get("overfolder", 0.0) > 0)
         self.stats["x_valueonly"] += int(info.get("valueonly", 0.0) > 0 and street == 3)
+        k = float(p.get("x_3b_k", 0.0))
+        if k > 0 and street == 0:
+            q = dict(q)
+            q["pf_btn_continue"] = min(float(q["pf_btn_continue"]), k * self.opponent.spots.spots["three_bet"].mean())
         return q
 
     def choose(self, state, legal, eq: float, p: dict):
@@ -59,14 +63,15 @@ class Tier3XBrain(Tier3Brain):
     def t2_calls(self, h, eq: float, p: dict) -> bool:
         """Tier 2's pot-odds rule; with `x_3b_floor`, facing a re-raise of our preflop raise, the equity is
         re-read against the re-raiser's range (exploit.reraise_equity)."""
-        if p.get("x_3b_floor") and h.street == 0 and reraised(h):
+        if (p.get("x_3b_floor") or float(p.get("x_3b_k", 0.0)) > 0) and h.street == 0 and reraised(h):
             try:
                 t = self.perception.tables
                 if t is not None and t.eq_range is not None:
                     cls = t.classes.class_of(h.hole)
                     eq = min(eq, reraise_equity(float(t.eq_random[cls]), float(t.eq_range[cls]),
                                                 float(t.meta.get("range_top", 0.3)),
-                                                self.opponent.spots.spots["three_bet"].mean()))
+                                                self.opponent.spots.spots["three_bet"].mean(),
+                                                float(p.get("x_3b_k", 0.0)) > 0))
                     self.stats["x_3b_floor"] += 1
             except Exception as e:
                 self.stats["x_errors"] += 1
