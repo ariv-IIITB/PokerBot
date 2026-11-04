@@ -111,6 +111,7 @@ class Tier4PBrain(Tier3Brain):
         for m in MEMBER_NAMES:
             self.stats[f"hands_{m}"] = 0
             self.stats[f"decisions_{m}"] = 0
+            self.stats[f"hands200_{m}"] = 0           # hands from index 200 on (gate P item 4)
         self._counted_hand: Any = object()
 
     @classmethod
@@ -148,6 +149,8 @@ class Tier4PBrain(Tier3Brain):
         if hid != self._counted_hand:
             self._counted_hand = hid
             self.stats[f"hands_{member}"] += 1
+            if isinstance(hid, int) and hid >= 200:
+                self.stats[f"hands200_{member}"] += 1
         return q
 
     def _facing_bet(self, c, s, legal, p) -> Optional[Action]:
