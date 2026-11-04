@@ -10,7 +10,8 @@ module with three names:
     SPEC       the variant spec as a dict (variant/active.json, else the catalog's holdem_nl)
     PARAMS     {"tier1": {...}, "tier2": {...}}
     ARTIFACTS  {name: {"meta": {...}, "files": {file: <base64 of the .npy file>, ...}}}
-               (bot/artifacts.py); today only "tables" (data/<variant>/, bot/sim/tables.py)
+               (bot/artifacts.py): "tables" (data/<variant>/, bot/sim/tables.py) and "types"
+               (data/<variant>/types.json, the opponent type library, bot/strategy/types.py)
 
 An artifact is embedded only when it was built for the spec (spec hash) and is ready (the
 consumer's own rule, e.g. bot.sim.tables.ready). The file is capped at 3 MB (the submission limit is 5 MB). --check exits 1 if the
@@ -93,6 +94,20 @@ def _tables(spec: VariantSpec, data_dir: Path) -> tuple[Optional[dict], dict]:
     return {"meta": meta, "files": files}, sources
 
 
+def _types(spec: VariantSpec, data_dir: Path) -> tuple[Optional[dict], dict]:
+    """(the "types" artifact or None, {source: hash}): the opponent type library
+    (data/<variant>/types.json, lab/opps/types.py; read by bot/strategy/types.py)."""
+    f = data_dir / spec.name / "types.json"
+    try:
+        raw = f.read_bytes()
+        lib = json.loads(raw)
+    except (OSError, ValueError):
+        return None, {}
+    if not built_for(lib, spec):
+        return None, {}
+    return {"meta": lib, "files": {}}, {f"data/{spec.name}/types.json": _sha(raw)}
+
+
 def _literal(value) -> str:
     return pprint.pformat(value, width=100, sort_dicts=False)
 
@@ -119,9 +134,12 @@ def render(variant: Optional[str] = None, config_dir: Path = CONFIG_DIR,
     spec, label = load_spec(variant)
     params, src = _params(config_dir)
     tables, tsrc = _tables(spec, data_dir)
+    types, ysrc = _types(spec, data_dir)
     artifacts = {"tables": tables} if tables is not None else {}
+    if types is not None:
+        artifacts["types"] = types
     sources = {f"spec ({label})": _sha(json.dumps(spec.to_dict(), sort_keys=True).encode()),
-               **src, **tsrc}
+               **src, **tsrc, **ysrc}
     arg = "" if variant is None else f" --variant {variant}"
     text = (
         '"""GENERATED FILE, do not edit. Everything the bot used to read from disk.\n\n'

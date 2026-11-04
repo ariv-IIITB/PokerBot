@@ -1,0 +1,2 @@
+tier4p[{"member":"anti_value"}]-nolock vs d_new_minraise-nolock: +0.74 ± 0.36 chips/hand | match score 0.688 ± 0.120 over 16 matches | errors A/B 0/0 | forfeits A/B 0/0 | 6400 hands in 48.8s (131/s)
+tier4p[{"member":"anti_value"}]-nolock vs d_new_trapper-nolock: +0.77 ± 0.36 chips/hand | match score 0.562 ± 0.128 over 16 matches | errors A/B 0/0 | forfeits A/B 0/0 | 6400 hands in 140.3s (46/s)
