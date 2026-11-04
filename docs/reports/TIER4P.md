@@ -229,3 +229,29 @@ Two-part rule: chips pass (sum +0.90 ± 0.96), score pass -> KEEP
 
 #### Restriction vs tier3, 30 pairs, locks off: +0.56 ± 0.23 chips/hand (ok, limit -0.10); match score 0.183 ± 0.050 (info)
 VERDICT: KEEP {"aa_call_margin": -0.03, "aa_mdf_mult": 1.0, "aa_bluff_mult": 0.75}
+
+## PD (laptop): gate P, light testing
+
+Machine: 14 cores, Intel Core Ultra 5 225H, shared with other sessions (load 2–21), `--processes 3`, `nice -n 15`, shared `flock` for evals, exclusive for timing.
+Branch `claude/eloquent-snyder-5e78de` = `origin/tier4/pd`: `tier4/p` (PA) + `tier4/p-tune` (PB) + `tier4/p-sel` (PC) + `tier4/s0`. Seeds 12000–12999, 50 pairs per comparison (light testing: no sequential extension, item 6 skipped, I1 does the one Stage 2 check).
+Drivers and every run file: `logs/pd/` (`pd_gate.py`, `analyze.py`, `replay_detect.py`, `runs/`). Both arms always back to back.
+
+**Note on locks-off runs:** `lab.eval --locks off` switches the endgame lock off for our brain only; an opponent `tier3`/`tier3x` keeps its lock. So match scores of locks-off head-to-heads vs a Tier 3 brain are not meaningful (0.2–0.3); chips come from locks off, scores from locks on.
+
+### Step 0: PB's values binding (fresh seeds 12000 / 12100, vs PA defaults)
+- `anti_value` (av_raise_fold_eq 0.8): chips +1.25 ± 0.30 (minraise +0.01 ± 0.19, trapper +1.24 ± 0.23), score 0.705 → 0.785 (+0.080 ± 0.043). **KEEP.**
+- `anti_aggro` (mdf 1.0, bluff 0.75): chips −0.39 ± 0.84 (lag +0.43, maniac −0.82), score −0.010 ± 0.018. **DROP: MEMBERS back to PA defaults** (aa_mdf_mult 1.10, aa_bluff_mult 0.50). All later runs use the reverted values.
+- `anti_folder`: defaults (PB found no better point).
+
+### Gate P
+1. **Detection, offline (PASS).** S0 recordings, seeds 9000–9011, real selection code replayed decision by decision, 24 matches per bot, share of hands 200–400 by the right member: exploiter 0.85, conv_opp3 0.83, rules 0.75, minraise 0.90, trapper 0.75, lag 0.94, maniac 0.99; base 1.00 vs starter, calling_station, tight, random_legal, all_in (need 0.70; 0.90 for random_legal / all_in). In 1–7 of 24 matches per family bot the member never switched on (the mean passes). `logs/pd/item1.txt`.
+2. **Each forced member vs Tier 3 (FAIL, anti_value score).** 50 pairs. Chips, locks off: anti_folder +1.03 ± 0.20, anti_value +0.61 ± 0.15, anti_aggro +0.75 ± 0.17 (all ≥ −0.10). Match score, locks on (floor 0.5 − 2 SE ≈ 0.40): anti_folder 0.560 ± 0.050 ok, anti_aggro 0.460 ± 0.050 ok, **anti_value 0.380 ± 0.049 (< 0.402)**. A fresh-seed re-run (seeds 12250, information only): 0.430 ± 0.050; the two together 0.405 ± 0.035 (floor 0.43), still below. Locks-on chips are about −0.03 / 0.00 (the locks end the matches early).
+3. **vs the incumbent tier3x (PASS).** Head-to-head, auto tier4p, 50 pairs: score 0.450 ± 0.050 (locks on, floor 0.40); chips +0.93 ± 0.18 (locks off; tier3x keeps its lock). Training pool, 50 pairs per bot, same seeds: chips (locks off) sum +1.82 ± 0.74 (z +2.5), no bot down (lag −0.09 ± 0.46, conv_opp3 −0.13 ± 0.31, rules +0.02 ± 0.28, exploiter −0.06 ± 0.28, minraise +0.42 ± 0.22, trapper +1.66 ± 0.19); score (locks on) 0.673 → 0.718, +0.045 ± 0.024, no bot down by 2 SE. **Two-part KEEP.** Families that differ from tier3x: anti_value (minraise + trapper) +2.08 ± 0.29, up by > 2 SE; anti_aggro (lag + maniac, maniac run outside the pool) +2.97 ± 0.94 (lag −0.09, maniac +3.06 ± 0.9), up by > 2 SE. anti_folder = tier3x's own moves (family −0.17 ± 0.51, not required).
+4. **Live detection (PASS).** Locks-off pool runs, share of hands ≥ 200 by the right member: conv_opp3 0.91, rules 0.83 (anti_value 0.00), lag 0.99, trapper 0.99, exploiter 0.94, minraise 0.98, maniac 1.00. Stop-loss fired in 6/6/7/7 of 100 matches vs conv_opp3 / rules / exploiter (resp. lag 1, trapper 1, minraise 2); `p_errors` 0.
+5. **Adversary (PASS).** 50 pairs, locks off: adversary tier4p +19.49 ± 0.25 vs tier3x +19.43 ± 0.24; adversary_strict +17.18 ± 0.21 vs +16.88 ± 0.21; score 1.000 for both. Neither adversary is ever read as an over-folder (base 100 %; strict: 101 CUSUM alarms, no switch), so this only shows the selection does not misfire on them.
+6. **Stage 2: skipped** (user instruction, I1 runs the one final Stage 2 check).
+7. **Timing, memory, size (PASS).** `lab.timing_bench`, 400 hands, ×2 slower, seed 1, no `--lock`, alternating tier3 / tier4p / tier3 / tier4p under the exclusive lock: vs calling_station tier3 8.66 s (29 %) / 8.66 s, tier4p 8.76 s / 8.76 s (29 %), ratio 1.01; vs d_new_trapper tier3 5.35 s / 5.25 s (17–18 %), tier4p 5.23 s / 5.16 s (17 %), ratio 0.98. Limit 1.4. `tests/test_timing_slow.py` gained 4 tier4p cases (400/60 and 1000/150 vs calling_station and d_new_trapper): 4 passed. `lab.memory_check`: 50.5 MB (limit 500). Fast suite: 1353 passed, 2 skipped. `tools.package_submission --zip --stage2 --brain tier4p`: all checks passed.
+
+### Extra: auto tier4p vs forced anti_folder, and the strong bots
+Locks off, 50 pairs, same seeds, auto vs forced `anti_folder`: exploiter −0.92 ± 0.22 vs −0.73 ± 0.13; conv_opp3 −1.59 ± 0.24 vs −1.73 ± 0.24; rules −0.58 ± 0.22 vs −0.36 ± 0.16; lag +5.96 vs +5.80; trapper +1.86 ± 0.14 vs +0.33 ± 0.13; minraise +0.73 vs +0.44. On the over-folder family forced and auto are the same within noise; auto's gain is the other families.
+Auto tier4p vs tier3x on the three strong bots (chips locks off / score locks on): conv_opp3 −0.13 ± 0.31 / +0.03 ± 0.07, exploiter −0.06 ± 0.28 / −0.06 ± 0.07, rules +0.02 ± 0.28 / +0.06 ± 0.07. No gain, and we still lose chips to all three (−0.6 to −1.6 /hand in every arm).
