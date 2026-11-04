@@ -10,3 +10,5 @@
 - L3 (3-bet-pot leak study, seeds 75000+) proposed as a card (task_8292d771); needs the user's click.
 - Open: PS (tier4p on top of O3) handoff, DC, AD, RF status; then merge DC/AD pieces; RF river fix; blind2 pool; I1.
 - AD status: branch claude/ad-fe9a68 on int 0ca4a45, round 1 trust/push arms vs exploiter noise-level (+0.08/+0.14); ETA round 1 ~3-4 h, then round 2, 50-pair confirmation, timing, handoff.
+- DC status: all discard levers flat at 30 pairs (best -0.95+-1.18, learner -0.34+-1.22, budget 2.5/12000 -0.02+-1.16): DROP, defaults off. Asked for DC.md handoff, then lever 3 (keep choice for post-discard play), no-go if flat.
+- PS status: tier4p rebuilt on Tier3XBrain (inherits O3), gate running (5 bots, 50 pairs, seeds 74000 locks off/on, h2h 74500); ETA hours. NOTE seed clash: PS uses 74000 and O3C (my brief) also 74000: tell O3 to use 76000+.
