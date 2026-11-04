@@ -35,21 +35,25 @@ Accounting, Tier 3, chips/hand: opp folds +4.4 (pre .39, flop .58, turn 1.5, riv
 * Not the discard: kept-hand strength at the river is equal (ours .649, its .608 on shared hands; both lose
   .04 to hindsight). Not preflop: its folds and ours net about +0.3.
 
-## Candidates (ranked; "expected" = size vs conv_opp3 unless noted)
-1. **Bet-range narrowing on river calls (implemented, `x_narrow`, off by default).** Re-read our equity against the
-   bettor's top slice: slice = `f·(λ + (1−λ)·F)·(1−b)`, f = their river-bet rate, b = bluff index, F = share of
-   their faced river bets at least this large (their own size distribution; prior 0.5 for 8 bets); `λ = 0.4`;
-   bluffs count as beaten by anything above their 40th percentile; Tier 2's flat big-bet penalty removed.
-   General: needs only f, b and sizes, all observed online, no bot named. Offline (6 pool bots, 9,600 hands each,
-   chips/hand, in-sample): conv_opp3 −0.45 → +0.12, exploiter −1.14 → +0.06, rules −0.41 → +0.58, trapper −0.18 →
-   +1.37, minraise +0.21 → +0.65, lag +6.04 → +7.64. Measured: **vs conv_opp3 (30 pairs) −1.26 ± 0.23 → −0.68 ±
-   0.15, +0.58 ± 0.27 (z +2.1)**; river vs-bet profile: call 34 → 9 %, fold 55 → 88 %. Pool: see handoff.
-2. **Turn (and flop) narrowing with the same rule** (+0.1–0.2 expected): big turn bets are 3 % weak,
-   calls ≥ .75 pot lose (−1 .. −26 per call); .4–.75 calls win. Needs the flop discard in the slice, so test separately.
-3. **River bluffing vs over-folders** (+0.2–0.4, uncertain: counterfactual, no data on its reply to bets we did
-   not make): when X1 says over-folder and its measured river fold ≥ 55 %, bet every hand without showdown
-   value at ~0.6–0.75 pot (raise `river_air_eq` from .18 toward .45 by λ in `exploit.adjust`).
-   Risk: an adaptive opponent (opp3 itself) shifts to calling/raising once we fold less.
-4. **Guard against being narrowed ourselves** (not measured): it sizes by equity and we size by texture, so
-   we are already hard to read; skip.
-Held-out bots were not run.
+## The family (recognisable from play, no name needed)
+Loose-aggressive preflop (VPIP ~80 %, PFR 35 %), bets 50–60 % of unfaced flops/turns/rivers, **folds 40–70 % to
+our flop/turn/river bets**, rarely raises them, **bet size rises with hand strength** (large bets almost never
+weak), wins by value-betting big when we have a bluff-catcher. Also true of `d_new_rules` and `d_new_exploiter`
+(over-folders with value-only river bets); the trapper/minraise are the same shape with fewer bets.
+Observable online: X1 over-folder verdict, river-bet rate, bluff index, the size distribution of faced bets.
+
+## Candidates (all adaptive; both flags off by default; seeds 71000+, 30 pairs, locks off, vs conv_opp3)
+1. **`x_narrow`: bet-range narrowing on river calls.** Re-read our equity against the bettor's top slice:
+   slice = `f·(λ + (1−λ)·F)·(1−b)`, f = their river-bet rate, b = bluff index, F = share of their faced river bets
+   at least this large (own size distribution, prior 0.5 worth 8 bets), `λ = 0.4`; bluffs count as beaten by
+   anything above their 40th percentile; Tier 2's flat big-bet penalty dropped. No bot named. Offline replay on
+   6 pool bots (chips/hand, in-sample): conv_opp3 −0.45 → +0.12, exploiter −1.14 → +0.06, rules −0.41 → +0.58,
+   trapper −0.18 → +1.37, minraise +0.21 → +0.65, lag +6.04 → +7.64. Measured vs conv_opp3: tier3 −1.75 ± 0.35,
+   tier3x −1.26 ± 0.23, **+ x_narrow −0.68 ± 0.15** (+0.58 ± 0.27, z +2.1). River vs-bet: call 34 → 9 %, fold 55 → 88 %.
+2. **`x_air_eq` (0.45): river bluff pool vs a verdict over-folder.** `river_air_eq` grows from .18 toward .45 by the X1
+   confidence, so weak hands bet the river (checked-to bet rate 43 → 52 %; its river folds +2.08 chips/hand).
+   With 1: **+0.18 ± 0.17, match score 0.650 ± 0.062** (+0.86 ± 0.23 vs candidate 1 alone, z +3.8).
+   Total vs tier3: +1.9 chips/hand, from a loss to a small win (30 pairs, same seeds, load ~20).
+3. Not built: the same narrowing for turn/flop bets (+0.1–0.2 expected; those calls go through MDF in `tier3.py`,
+   not `choose`), and size-aware flop/turn bluffing (it folds 58–78 % to .4–.75 pot bets). Held-out bots not run.
+Pool and simple-bot guard results: `docs/tier4/handoff/O3.md`.
