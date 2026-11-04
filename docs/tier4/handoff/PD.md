@@ -1,7 +1,7 @@
 # Handoff PD (gate P, laptop)
 
 **Verdict: FAIL on item 2 (strict).** Per the sub-plan, **I1 ships the incumbent (`tier3x`)**; the candidate below is informational only (not uploaded). Items 1, 3, 4, 5, 7 PASS; item 6 skipped (I1 does the one final Stage 2 check).
-**Branch** `claude/eloquent-snyder-5e78de` = `origin/tier4/pd`, commit 8a12ecd: tier4/p (PA) + p-tune (PB) + p-sel (PC) + s0 + manager docs. Report: `docs/reports/TIER4P.md` ("PD"). Runs/drivers: `logs/pd/`.
+**Branch** `claude/eloquent-snyder-5e78de` = `origin/tier4/pd`, commit bd22414 (code and report at 8a12ecd): tier4/p (PA) + p-tune (PB) + p-sel (PC) + s0 + manager docs. Report: `docs/reports/TIER4P.md` ("PD"). Runs/drivers: `logs/pd/`.
 **Machine:** 14 cores, Core Ultra 5 225H, shared (load 2–21), `--processes 3`. Seeds 12000–12999, 50 pairs, light testing (no sequential extension).
 **Changes to bot/:** `MEMBERS["anti_aggro"]` back to PA defaults (aa_mdf_mult 1.10, aa_bluff_mult 0.50); `hands200_<member>` stats counters in `tier4p.py`; 4 tier4p cases in `tests/test_timing_slow.py`.
 
