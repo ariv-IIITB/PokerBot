@@ -1,0 +1,2 @@
+calling_station 400h box 40 ms x3.9: used 14.2s -> 19.0s (x1.338; 32% of bank); deadline hits 0 -> 0 (limit 0.0); worst reply 24 ms; emergency 0; solves 400, 133 passes, fallbacks 0 (few 0, nopass 0, err 0)
+calling_station 400h box 40 ms x3.9: used 14.2s -> 19.0s (x1.340; 32% of bank); deadline hits 0 -> 0 (limit 0.0); worst reply 24 ms; emergency 0; solves 400, 135 passes, fallbacks 0 (few 0, nopass 0, err 0)

@@ -5,6 +5,7 @@ every second twice; the solver's wall-clock box is halved to match, as tests/tes
 
 `--boxes` = river_budget_s as it would ship (server wall-clock seconds); box_mult is scaled like the test does."""
 import argparse
+import json
 import math
 
 from lab.engine import play_match
@@ -27,6 +28,7 @@ def main() -> None:
     ap.add_argument("--hands", type=int, default=400)
     ap.add_argument("--opponents", default="calling_station,d_new_trapper")
     ap.add_argument("--seed", type=int, default=30000)
+    ap.add_argument("--extra", default="", help="JSON of more brain parameters for the solver arm (RD: narrow/rnr/shifts)")
     a = ap.parse_args()
     bank = 60.0 if a.hands <= 400 else 150.0
     mults = [float(v) for v in a.mults.split(",")] if a.mults else [TimingConfig().river_box_mult]
@@ -34,7 +36,7 @@ def main() -> None:
         m0, b0, _ = run({}, a.hands, bank, opp, a.seed)
         u0 = bank - m0.bank_left[0]
         for x, mult in ((float(v), mu) for v in a.boxes.split(",") for mu in mults):
-            m1, b1, br = run({"t3_river_solver": True, "river_budget_s": x / 2, "river_box_mult": mult / 2},
+            m1, b1, br = run(dict({"t3_river_solver": True, "river_budget_s": x / 2, "river_box_mult": mult / 2}, **(json.loads(a.extra) if a.extra else {})),
                              a.hands, bank, opp, a.seed)
             u1 = bank - m1.bank_left[0]
             st = br.stats

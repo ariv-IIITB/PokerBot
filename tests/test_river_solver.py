@@ -311,3 +311,31 @@ def test_auto_keeps_our_hand_even_with_zero_weight() -> None:
     res = solve_river(SPOTS[0], combos, live, ranks, combos, live, ranks, 100, time.perf_counter() + 0.2,
                       keep_solver=True, auto=True, max_iters=50)
     assert res.solver.n0 == 41 and res.solver.n1 == 40 and abs(res.probs.sum() - 1.0) < 1e-9
+
+
+def test_locked_values_follow_the_fold_rate():
+    """RD: a best response to an opponent that folds more to our bet values a bluff higher; at the equilibrium
+    fold rate the best response matches the solved strategy's value (no move)."""
+    board, pool = _board_and_pool(11, 12)
+    combos = _combos(pool)
+    rank = hand_ranks(EV, combos, board)
+    spot = RiverSpot(pot=10.0, hero_stack=90.0, opp_stack=90.0)
+    cfg = TreeCfg(bet_sizes=(1.0, INF), raise_sizes=(1.0, INF))
+    w = np.ones(len(combos))
+    s = make_solver(spot, combos, w, rank, combos, w, rank, cfg, dtype=np.float64, track_all=True)
+    s.run(time.perf_counter() + 5.0, max_iters=400)
+    base, f_ref, f_to = s.locked_values(0.0 + _ref_fold(s))
+    assert abs(f_to - f_ref) < 1e-9 and base.shape == (len(s.tree.children[0]), len(combos))
+    more, _, f_more = s.locked_values(min(0.95, f_ref + 0.3))
+    assert f_more > f_ref + 0.2
+    weakest = int(np.argmin(rank))                       # a pure bluff: betting gains when they fold more
+    assert more[1, weakest] > base[1, weakest] + 0.05
+    assert np.isfinite(more).all()
+
+
+def _ref_fold(s) -> float:
+    avg = s.average()
+    t = s.tree
+    r = s.row_of[[n for n in t.dec_ids if t.depth[n] == 1 and t.legal_labels[n][0][0] == FOLD][0]]
+    w1 = s.w1[:s.n1].astype(np.float64)
+    return float((w1 / w1.sum() * avg[r, 0, :s.n1]).sum())

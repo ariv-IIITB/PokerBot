@@ -1,0 +1,4 @@
+[bot] WARN brain exceeded hard deadline (budget 4.5 ms)
+calling_station 400h box 40 ms x3.9: used 14.2s -> 19.4s (x1.362; 32% of bank); deadline hits 0 -> 1 (limit 0.0); worst reply 258 ms; emergency 0; solves 396, 130 passes, fallbacks 3 (few 0, nopass 3, err 0)
+d_new_trapper 400h box 40 ms x3.9: used 8.7s -> 11.5s (x1.325; 19% of bank); deadline hits 0 -> 0 (limit 0.0); worst reply 23 ms; emergency 0; solves 232, 94 passes, fallbacks 0 (few 0, nopass 0, err 0)
+d_conv_opp3 400h box 40 ms x3.9: used 9.1s -> 10.8s (x1.180; 18% of bank); deadline hits 0 -> 0 (limit 0.0); worst reply 22 ms; emergency 0; solves 134, 108 passes, fallbacks 0 (few 0, nopass 0, err 0)

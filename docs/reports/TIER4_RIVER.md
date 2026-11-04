@@ -181,4 +181,36 @@ So on a deadline hit or a brain exception `choose` now asks the brain again at b
 mode still goes straight to Tier 0. Counters `deadline_retries` / `retry_wins` (in the stderr summary). Tests in `tests/test_main.py`. The retry runs on a brain that was
 interrupted mid-decision; any exception from that goes to Tier 0.
 
-Restricted river (RNR, task 3): not built. Gate R failed, so there is nothing to build on.
+Restricted river (RNR): built later by RD, see the RD section below.
+
+## RD: leak analysis and exploit layer (2026-11-04; branch `tier4/rd`)
+
+**Leak analysis** (traces of river spots vs the 5 training bots, `lab/rd_trace.py`; `d_new_rules` excluded as the blind bot).
+* Own range: the default `own_range` line model was *worse than a flat range* (calibration = mean log(N·w[actual hand]) at showdown). Fixed with a fitted
+  table `OWN_BET` (softmax of a_k + b_k·s over legal kinds per board size and facing; 16,390 hands; `lab/rd_fit_own.py`), held-out likelihood improves. On by default (`river_own_fit`).
+* Opponent range: discard/bet sharpness refit pooled to (beta 6.0, gamma 0.6) (`river_opp_beta/gamma`). Trapper-type bots prefer gamma ~ 0; an online-adaptive gamma was not built.
+* Neither fix moved play results: the solver's deficit vs the pool is not range accuracy.
+
+**Exploit layer, all adaptive (no bot names or constants; every weight is a function of observed counts, inert below its sample gate).**
+* `t3_river_rnr`: soft best response against the opponent's *observed* river fold rate (threshold fold model), mixed with the equilibrium strategy at weight pmax·n/(n+n0)
+  (pmax 0.5, n0 40, needs n >= 20), plus a bluff-index reweight of the weak share.
+* `t3_river_narrow`: opponent range narrowed by bet-size rank among the river bets we have faced (O3's idea, strength narrow_lam 0.4, gated by narrow_n0).
+* `t3_river_shifts`: X1/X2-style shifts of the root strategy. Alone they hurt in the 30-pair screen, so they are only a gated add-on.
+* Tests: `tests/test_river_rd.py` (4; shifts inert without evidence, move the right way, narrowing follows bet size, table sanity), `tests/test_river_solver.py` (+`locked_values`).
+
+**Results** (solver on = river_max_iters 110, pinned; arm NA = solver + narrow + RNR + shifts; seeds 70300-70349 fresh, 50 pairs; baseline `tier3` = pre-DA):
+| | Tier 3 | NA | |
+|---|---|---|---|
+| pool chips, locks off, 5 bots | | sum +0.42 ± 0.48 | conv_opp3 -1.26 -> -1.45, exploiter +5.75 -> +6.10, lag +2.97 -> +3.07, trapper -1.33 -> -1.13, minraise +0.35 -> +0.31 |
+| pool match score, locks on | 0.632 | 0.618 | conv_opp3 0.16 -> 0.10, trapper 0.37 -> 0.33; others within 0.05 |
+| river-all bucket | | conv_opp3 -0.22 ± 0.29, exploiter +0.30 ± 0.26, trapper +0.21 ± 0.14 | all z < 1.5 |
+| head to head vs Tier 3 (seeds 70400, locks on) | | 0.540 ± 0.050, chips +0.02 ± 0.02 | PASS |
+| blind `d_new_rules` (run once, seeds 70500, locks off) | -1.52 (older baseline) | -0.74 ± 0.15, score 0.32 | different seeds/baseline, not a paired comparison |
+Earlier 30-pair screens (solver alone / + shifts / + RNR / + narrow) each came out -0.5 to -1.3 summed vs Tier 3, all within noise; none beat Tier 3.
+conv_opp3 and trapper stay below 0.5 in match score with or without the solver.
+
+**Timing** (exclusive lock, `lab/rc_ratio.py --extra`, 2x clock, shipped box 40 ms × 3.9, NA on, vs same-seed Tier 3):
+1000h calling_station x1.346 / trapper x1.303 / conv_opp3 x1.040; 400h x1.338 / **x1.408** / x1.320; 0 deadline hits, worst reply 22-27 ms.
+River decisions (`lab/rc_margin.py --extra`): max 11.2 ms wall, 0.14 of the hard limit (x2: 0.28); other decisions max 0.26 (x2: 0.51, one 20 ms spike, same as Tier 3).
+
+**Decision:** `t3_river_solver` stays OFF. Pool chips, pool score and head-to-head pass, but there is no measurable gain over Tier 3, and the 400h trapper timing ratio is 1.408 > 1.4.

@@ -176,16 +176,17 @@ class Opponent:
         dead = state.hand.dead_cards if state.hand is not None else ()
         return lambda hole, board: hand_percentile(rules.evaluator, hole, board, rules.deck, dead)
 
-    def range_weights(self, rec, combos: np.ndarray, rng) -> np.ndarray:
+    def range_weights(self, rec, combos: np.ndarray, rng, model: Optional[Inference] = None) -> np.ndarray:
         """Probability of each explicit opponent hand given their visible choices (sums to 1).
         combos (n, k): real cards for the opponent's k still-hidden hole tokens, in hole order.
-        Hands holding a card we have seen get 0; uniform over the rest if nothing is informative."""
+        Hands holding a card we have seen get 0; uniform over the rest if nothing is informative.
+        `model` replaces the trust-scaled inference model (the river solver fits its own sharpness)."""
         combos = np.asarray(combos, dtype=np.intp)
         n = len(combos)
         hidden = [t for t in rec.state.hole[1 - rec.me] if t not in rec.mapping]
         if n == 0 or combos.shape[1] != len(hidden):
             raise ValueError(f"combos need {len(hidden)} cards per row")
-        logw = self.model.log_weights(rec, {t: combos[:, i] for i, t in enumerate(hidden)}, n, rng)
+        logw = (model or self.model).log_weights(rec, {t: combos[:, i] for i, t in enumerate(hidden)}, n, rng)
         w = np.ones(n) if logw is None else np.exp(logw - logw.max())
         seen = np.array(sorted(set(rec.mapping.values())), dtype=np.intp)
         w[np.isin(combos, seen).any(axis=1)] = 0.0
