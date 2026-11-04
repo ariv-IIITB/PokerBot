@@ -24,3 +24,4 @@
 - PS handoff verified (origin/tier4/ps, PS.md): DROP, sum -0.02 +- ~0.54. PS done.
 - O3C handoff verified (origin/tier4/o3c c21122a): arm B vs base +4.33+-0.62 (lag -0.70+-0.45), arm A +3.34 (lag -1.10, fails), B vs A +0.99+-0.56. Timing tier3x/tier3 1.05-1.10 (limit 1.4). DECISION: arm B stays in tier4/int. O3 done.
 - 2026-11-05 02:00 After user reboot #2 (RF was in confirm.sh: D4 = solver + sharp narrowing + RNR vs BASE, 50 pairs seeds 73100, 20 runs, 1 done). Resumed RF (rerun from the cut-off run) and L3; AD stays paused.
+- 2026-11-05 03:21 RF status: D4 (solver + narrow n0 0.001 + one-sided RNR vs callers) vs tier4/int, 50 pairs 73100 locks off: sum +1.94+-0.57 (lag +1.78 z4.0, minraise +0.40, trapper -0.32 -1.7SE) chips KEEP; timing x1.17-1.36, 0 hits; coverage 100%. Locks-on run ~2h, then RF.md.
