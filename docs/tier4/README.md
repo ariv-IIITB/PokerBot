@@ -129,6 +129,8 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 | 60000–60999 | PF preflop chart |
 | 70000–70999 | RD: river solver ON + exploit layer + tuning (user decision 2026-11-04: accept the CFR river) |
 | 71000–71999 | O3: conv_opp3 study (light) |
+| 72000–72999 | AD: faster adaptation in long matches |
+| 73000–73999 | RF: fix the CFR river + RNR (diagnose and repair) |
 | 51000–51999 | PB redo (laptop) tuning; 52000–52999 its confirmations |
 | 53000–53999 | DA redo (laptop) tuning; 54000–54999 its confirmations |
 
@@ -140,6 +142,14 @@ then tested on top of `tier4/int`, not on `tier4/base`. A session that finishes 
 before its confirmation run. In: DA (smart rollouts + raise_equity, `tier4/d` f70bee9). Not yet: O3 (x_narrow, x_air_eq:
 screening only), PB/PD portfolio (gate P open), DC, RD, AD. I1 still runs the final combined gates and the stacking test.
 Note: O3 was merged by mistake at 65da08c/811d54c and reverted; to re-add it, revert those two reverts or re-apply.
+
+## River solver + RNR stays a ship candidate (user, 2026-11-04)
+
+RD found no gain over Tier 3 on our pool (head to head 0.540 ± 0.050; pool chips +0.42 ± 0.48; `tier4/rd` 3c5e376), but the
+user wants the CFR river with RNR kept in play: it is the principled choice against stronger, balanced bots, which our pool
+barely contains. I1 therefore carries `t3_river_solver` (+ RNR, narrowing) as a candidate stack step and decides it on the
+held-out bots, the blind2 set (when built) and head to head, with the rule "no worse than the stack without it, and inside
+the timing limit". Before I1: lower the 400h trapper ratio (x1.408) under 1.4 (smaller box), and test on top of `tier4/int` + O3.
 
 ## No soft timelines (user, 2026-11-04)
 
