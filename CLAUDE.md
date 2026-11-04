@@ -50,8 +50,9 @@ Source: `docs/rules/SUMMARY.md`. *(prov.)* = provisional, may change before the 
   (a round robin if <~64 bots, skipped if ≤ 32). Stage 2: the top 32 play a round robin of ~1000 hands
   per match, scores reset; Stage 2 alone decides the prizes.
 - **Code review / originality:** prize-winning code is reviewed and similarity-checked.
-  Copying from other teams or public bot repos is prohibited. **Never copy code from `Opps/`
-  into `bot/`** (ideas only). Exploiting the engine or evaluation system is prohibited and must be
+  Copying from other teams or public bot repos is prohibited. *(User decision 2026-11-04: the `Opps/`
+  bots were written by us, so reading them and reusing their ideas or code in `bot/` is allowed; the
+  old "ideas only" rule is lifted. Still never copy other teams' or public bot code.)* Exploiting the engine or evaluation system is prohibited and must be
   reported; exploiting other bots' play is fine.
 
 ## Architecture rules
