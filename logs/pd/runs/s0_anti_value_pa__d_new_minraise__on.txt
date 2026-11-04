@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_value","members":{"anti_value":{"av_raise_fold_eq":0.6}}}] vs d_new_minraise: -0.42 ± 0.09 chips/hand | match score 0.680 ± 0.047 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 98.0s (408/s)

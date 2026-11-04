@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_value"}] vs d_new_trapper: +0.47 ± 0.09 chips/hand | match score 0.890 ± 0.031 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 199.0s (201/s)
