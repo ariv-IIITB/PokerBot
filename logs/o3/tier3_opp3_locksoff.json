@@ -1,0 +1,26 @@
+tier3-nolock vs d_conv_opp3-nolock: -1.75 ± 0.35 chips/hand | match score 0.267 ± 0.058 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 345.4s (69/s)
+--- profile: tier3-nolock
+  flop  checked_to n=13225 K=71% R=29%
+  flop  vs_bet     n=10515 C=65% F=29% R=5%
+  pre   open       n=12000 C=20% F=0% R=80%
+  pre   other      n= 4670 K=59% R=41%
+  pre   vs_raise   n= 8491 C=72% F=15% R=13%
+  river checked_to n= 6390 K=60% R=40%
+  river vs_bet     n= 2772 C=37% F=52% R=11%
+  turn  checked_to n=10427 K=64% R=36%
+  turn  vs_bet     n= 6204 C=54% F=38% R=9%
+--- profile: d_conv_opp3-nolock
+--- accounting: tier3-nolock (-42069 chips over 24000 hands, -1.75/hand)
+  opp_fold       flop   hands=  1918 chips=  +13896 (+0.579/hand)
+  opp_fold       pre    hands=  4893 chips=   +9354 (+0.390/hand)
+  opp_fold       river  hands=  2007 chips=  +45389 (+1.891/hand)
+  opp_fold       turn   hands=  2812 chips=  +36832 (+1.535/hand)
+  showdown_chop  river  hands=   238 chips=      +0 (+0.000/hand)
+  showdown_loss  river  hands=  2015 chips= -153754 (-6.406/hand)
+  showdown_win   river  hands=  1951 chips=  +86449 (+3.602/hand)
+  we_fold        flop   hands=  3081 chips=  -18930 (-0.789/hand)
+  we_fold        pre    hands=  1321 chips=   -2731 (-0.114/hand)
+  we_fold        river  hands=  1434 chips=  -27835 (-1.160/hand)
+  we_fold        turn   hands=  2330 chips=  -30739 (-1.281/hand)
+--- accounting: d_conv_opp3-nolock (+0 chips over 24000 hands, +0.00/hand)
+--- brain stats: tier3-nolock: t3_decisions=71437 t3_errors=0 t3_fallbacks=3257
