@@ -141,6 +141,14 @@ before its confirmation run. In: DA (smart rollouts + raise_equity, `tier4/d` f7
 screening only), PB/PD portfolio (gate P open), DC, RD, AD. I1 still runs the final combined gates and the stacking test.
 Note: O3 was merged by mistake at 65da08c/811d54c and reverted; to re-add it, revert those two reverts or re-apply.
 
+## River solver + RNR stays a ship candidate (user, 2026-11-04)
+
+RD found no gain over Tier 3 on our pool (head to head 0.540 ± 0.050; pool chips +0.42 ± 0.48; `tier4/rd` 3c5e376), but the
+user wants the CFR river with RNR kept in play: it is the principled choice against stronger, balanced bots, which our pool
+barely contains. I1 therefore carries `t3_river_solver` (+ RNR, narrowing) as a candidate stack step and decides it on the
+held-out bots, the blind2 set (when built) and head to head, with the rule "no worse than the stack without it, and inside
+the timing limit". Before I1: lower the 400h trapper ratio (x1.408) under 1.4 (smaller box), and test on top of `tier4/int` + O3.
+
 ## No soft timelines (user, 2026-11-04)
 
 The user removed all soft timelines: aim for the best bot, not the fastest. The only hard date is the deadline
