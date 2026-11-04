@@ -86,7 +86,7 @@ def test_partial_overrides_through_members_param() -> None:
     b = Tier4PBrain(config=_cfg("anti_aggro", members={"anti_aggro": {"aa_call_margin": -0.1}}))
     base = Tier4PBrain(config=_cfg("base")).adjusted(3)
     assert b.adjusted(3)["call_margin"] == pytest.approx(base["call_margin"] - 0.1)
-    assert b.adjusted(3)["bluff_freq"] == pytest.approx(base["bluff_freq"] * 0.5)
+    assert b.adjusted(3)["bluff_freq"] == pytest.approx(base["bluff_freq"] * T.MEMBERS["anti_aggro"]["aa_bluff_mult"])
 
 
 def test_member_error_falls_back_to_tier3(monkeypatch) -> None:

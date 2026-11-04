@@ -25,5 +25,5 @@ anti_value used all 3 rounds (0.60 → 0.70 → 0.80, last round no move; grid n
 - `bot/embedded.py` regenerates identically (MEMBERS is not embedded); only 3 values in `tier4p.py` changed, so PC's merge should be clean.
 
 ## Checks
-TIMING_LINE
-FAST_LINE
+- `lab.timing_bench`, 400 hands, ×2 slower, `calling_station`, seed 1, locked, back to back (this laptop): tier3 29 % of the bank (8.72 s), tier4p 29 % (8.76 s), forced anti_value 29 % (8.73 s), forced anti_aggro 29 % (8.71 s). Ratio 1.00 (limit 1.4). (A first run with the endgame `--lock` flag read 6 % for both; not comparable to PA's, discarded.)
+- Fast suite `-n 4`: 1319 passed, 2 skipped. `tests/test_tier4p.py` line 89 hard-coded the old `aa_bluff_mult` 0.5; it now reads `MEMBERS` (the only test change). Slow suite not run (light testing).
