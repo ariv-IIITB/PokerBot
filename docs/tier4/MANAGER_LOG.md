@@ -13,3 +13,4 @@
 - DC status: all discard levers flat at 30 pairs (best -0.95+-1.18, learner -0.34+-1.22, budget 2.5/12000 -0.02+-1.16): DROP, defaults off. Asked for DC.md handoff, then lever 3 (keep choice for post-discard play), no-go if flat.
 - PS status: tier4p rebuilt on Tier3XBrain (inherits O3), gate running (5 bots, 50 pairs, seeds 74000 locks off/on, h2h 74500); ETA hours. NOTE seed clash: PS uses 74000 and O3C (my brief) also 74000: tell O3 to use 76000+.
 - DC handoff verified (origin/tier4/dc 2ee9627, DC.md): all levers DROP, flat within 1.2 SE. NOT merged into int (default-off code with no gain). Lever 3 requested.
+- 2026-11-04 18:59 User paused everything (laptop closing). Stopped DC and RF turns; O3/AD/PS were idle. Background evals left as-is: suspend freezes them and Python's perf_counter (CLOCK_MONOTONIC) excludes suspend time, so budgets stay valid. On resume: check each session's jobs, nudge to continue.
