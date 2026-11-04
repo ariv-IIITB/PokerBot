@@ -29,6 +29,7 @@ from typing import Any, Optional
 import numpy as np
 
 from bot.actions import CALL, CHECK, FOLD, RAISE, Action, LegalActions, safe_action
+from bot.brains.exploit import EXPLOIT_DEFAULTS, overfolder_lambda, valueonly_lambda
 from bot.brains.tier2 import DEFAULTS as TIER2_DEFAULTS
 from bot.brains.params import load_params, per_street
 from bot.brains.tier2 import Tier2Brain
@@ -497,7 +498,19 @@ class Tier3Brain(Tier2Brain):
         if res.iterations < int(p["river_min_iters"]):
             st["river_few_iters"] += 1
             return None
-        k = self._draw(res.probs)
+        probs = res.probs
+        if res.values is not None and pmix > 0.0:
+            z = np.asarray(res.values, dtype=np.float64)
+            br = np.exp((z - z.max()) / float(p["rnr_temp"]))
+            probs = (1.0 - pmix) * probs + pmix * br / br.sum()
+            st["river_rnr"] += 1
+        if p.get("t3_river_shifts"):
+            hr_h = hand_ranks(ev, hero_cards, board)
+            pct = float(((hr_h < hr_h[idx]).sum() + 0.5 * (hr_h == hr_h[idx]).sum()) / len(hr_h))
+            shifted = self._river_shift(probs, res.labels, pct, p)
+            st["river_shifted"] += int(not np.allclose(shifted, probs))
+            probs = shifted
+        k = self._draw(probs)
         kind, level = res.labels[k]
         if kind == FOLD and legal.fold:
             return Action.fold()
@@ -511,8 +524,45 @@ class Tier3Brain(Tier2Brain):
         return None
 
     def _weak_share(self, w: np.ndarray, rank: np.ndarray, h: HandState, p: dict) -> np.ndarray:
-        """TODO(RD): set the weak-hand share of their betting range to the observed bluff index (not built yet)."""
-        return w
+        """Their betting range with the weak-hand share set to what we have SEEN them bet (the bluff index of their
+        turn / river bets at showdown, shrunk to the population prior). Only after they bet or raised on this river
+        and once the stat is past its sample gate; else the inferred range unchanged."""
+        st = self.opponent.spots
+        sp = st.spots["bluff_index"]
+        if sp.n < st.gate or not any(rr.street == 3 and rr.actor == OPP and rr.action.kind == RAISE
+                                     for rr in h.history):
+            return w
+        srt = np.sort(rank)
+        pct = (np.searchsorted(srt, rank, "left") + np.searchsorted(srt, rank, "right")) / (2.0 * len(rank))
+        weak = pct < st.weak_below
+        m = float(w[weak].sum() / w.sum())
+        if not 1e-6 < m < 1 - 1e-6:
+            return w
+        t = min(0.9, max(0.02, sp.mean()))
+        return np.where(weak, w * min(5.0, max(0.2, t * (1 - m) / (m * (1 - t)))), w)
+
+    def _river_shift(self, probs: np.ndarray, labels: list, pct: float, p: dict) -> np.ndarray:
+        """The exploit layer's counter-moves on the solver's root strategy: an over-folder (X1) gets more bluffs from
+        our weak hands, a value-only bettor (X2) more folds from our bluff-catchers. Both scaled by the layer's own
+        confidence (zero without evidence, so the strategy comes back unchanged)."""
+        q = {**EXPLOIT_DEFAULTS, **p}
+        kinds = [k for k, _ in labels]
+        out = probs.copy()
+        lam_of = overfolder_lambda(self.opponent.traits, q["x_ramp"])
+        lam_vo = valueonly_lambda(self.opponent.types, q)
+        bets = [i for i, k in enumerate(kinds) if k == RAISE]
+        if CHECK in kinds and bets and lam_of > 0 and pct < 0.35:
+            b = float(out[bets].sum())
+            nb = min(float(q["x_bluff_max"]), b * (1 + lam_of * (float(q["x_river_bluff_mult"]) - 1)))
+            if 1e-9 < b < nb:
+                out[bets] *= nb / b
+                out[kinds.index(CHECK)] = 1.0 - nb
+        if FOLD in kinds and CALL in kinds and lam_vo > 0 and pct < 0.85:
+            c, f = kinds.index(CALL), kinds.index(FOLD)
+            mv = out[c] * min(1.0, 0.5 * lam_vo * float(q["x_vo_margin"]) / 0.12)
+            out[c] -= mv
+            out[f] += mv
+        return out
 
     def _river_opp_model(self, p: dict) -> Optional[Inference]:
         if p.get("river_opp_beta") is None:
