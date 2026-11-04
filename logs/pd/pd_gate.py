@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 RUNS = ROOT / "logs/pd/runs"
-PROCS = 5
+PROCS = 3
 PAIRS = 50
 TRAIN = ["d_conv_opp3", "d_new_rules", "d_new_lag", "d_new_trapper", "d_new_exploiter", "d_new_minraise"]
 FAMILY = {"anti_folder": ["d_new_exploiter", "d_conv_opp3", "d_new_rules"],
