@@ -1,0 +1,1 @@
+tier3x[{"x_3b_ref":0.10}] vs d_new_minraise: -0.08 ± 0.06 chips/hand | match score 0.790 ± 0.041 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 134.6s (297/s)

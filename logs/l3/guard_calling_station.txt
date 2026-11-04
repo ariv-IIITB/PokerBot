@@ -1,0 +1,1 @@
+tier3x[{"x_3b_ref":0.10}] vs calling_station: +1.21 ± 0.02 chips/hand | match score 1.000 ± 0.000 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 24.2s (662/s)

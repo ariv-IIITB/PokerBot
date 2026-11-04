@@ -1,0 +1,1 @@
+tier3x[{"x_3b_ref":0.10}] vs d_conv_opp3: -0.49 ± 0.10 chips/hand | match score 0.610 ± 0.049 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 274.1s (146/s)

@@ -1,0 +1,1 @@
+tier3x vs d_new_lag: +0.19 ± 0.05 chips/hand | match score 0.980 ± 0.014 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 96.9s (413/s)

@@ -1,0 +1,105 @@
+tier3x-nolock vs d_new_lag-nolock: +6.16 ± 0.34 chips/hand | match score 0.938 ± 0.027 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 32000 hands in 460.0s (70/s)
+--- accounting: tier3x-nolock (+197042 chips over 32000 hands, +6.16/hand)
+  opp_fold       flop   hands=   706 chips=   +9614 (+0.300 +-0.015/hand)
+  opp_fold       pre    hands=  2818 chips=   +7632 (+0.238 +-0.007/hand)
+  opp_fold       river  hands=  1578 chips=  +65851 (+2.058 +-0.062/hand)
+  opp_fold       turn   hands=  1017 chips=  +26912 (+0.841 +-0.037/hand)
+  showdown_chop  river  hands=   273 chips=      +0 (+0.000 +-0.000/hand)
+  showdown_loss  river  hands=  2490 chips= -338333 (-10.573 +-0.535/hand)
+  showdown_win   river  hands=  5431 chips= +708869 (+22.152 +-0.528/hand)
+  we_fold        flop   hands=  6735 chips=  -54170 (-1.693 +-0.055/hand)
+  we_fold        pre    hands=  3072 chips=   -6301 (-0.197 +-0.003/hand)
+  we_fold        river  hands=  4803 chips= -169762 (-5.305 +-0.139/hand)
+  we_fold        turn   hands=  3077 chips=  -53270 (-1.665 +-0.092/hand)
+  river-all      river  hands= 14575 chips= +266625 (+8.332 +-0.349/hand over 40 pairs)
+--- accounting: d_new_lag-nolock (+0 chips over 32000 hands, +0.00/hand)
+  river-all      river  hands=     0 chips=      +0 (+0.000 +-0.000/hand over 40 pairs)
+--- preflop lines: tier3x-nolock
+  3bet_me   hands=  1637 chips=  +37064 (+1.158 +-0.157/hand, +22.64/pot)
+      opp_fold       flop   hands=    67 chips=   +1627 (+0.051 +-0.008/hand, +24.28/pot)
+      opp_fold       pre    hands=   423 chips=   +2551 (+0.080 +-0.004/hand, +6.03/pot)
+      opp_fold       river  hands=    68 chips=   +6956 (+0.217 +-0.022/hand, +102.29/pot)
+      opp_fold       turn   hands=    94 chips=   +4390 (+0.137 +-0.015/hand, +46.70/pot)
+      showdown_chop  river  hands=    16 chips=      +0 (+0.000 +-0.000/hand, +0.00/pot)
+      showdown_loss  river  hands=   227 chips=  -41882 (-1.309 +-0.071/hand, -184.50/pot)
+      showdown_win   river  hands=   438 chips=  +79271 (+2.477 +-0.109/hand, +180.98/pot)
+      we_fold        flop   hands=   107 chips=   -2861 (-0.089 +-0.008/hand, -26.74/pot)
+      we_fold        river  hands=   110 chips=   -8879 (-0.277 +-0.026/hand, -80.72/pot)
+      we_fold        turn   hands=    87 chips=   -4109 (-0.128 +-0.017/hand, -47.23/pot)
+  3bet_opp  hands=  3252 chips=    -123 (-0.004 +-0.215/hand, -0.04/pot)
+      opp_fold       flop   hands=    51 chips=   +1455 (+0.045 +-0.006/hand, +28.53/pot)
+      opp_fold       river  hands=    81 chips=   +5770 (+0.180 +-0.023/hand, +71.23/pot)
+      opp_fold       turn   hands=    72 chips=   +3298 (+0.103 +-0.013/hand, +45.81/pot)
+      showdown_chop  river  hands=    28 chips=      +0 (+0.000 +-0.000/hand, +0.00/pot)
+      showdown_loss  river  hands=   416 chips=  -73488 (-2.296 +-0.183/hand, -176.65/pot)
+      showdown_win   river  hands=   733 chips= +130480 (+4.077 +-0.176/hand, +178.01/pot)
+      we_fold        flop   hands=   878 chips=  -14874 (-0.465 +-0.018/hand, -16.94/pot)
+      we_fold        pre    hands=    42 chips=    -252 (-0.008 +-0.001/hand, -6.00/pot)
+      we_fold        river  hands=   496 chips=  -36236 (-1.132 +-0.074/hand, -73.06/pot)
+      we_fold        turn   hands=   455 chips=  -16276 (-0.509 +-0.032/hand, -35.77/pot)
+  4bet+     hands=   539 chips=  +12996 (+0.406 +-0.083/hand, +24.11/pot)
+      opp_fold       flop   hands=     8 chips=    +556 (+0.017 +-0.007/hand, +69.50/pot)
+      opp_fold       pre    hands=    69 chips=   +1133 (+0.035 +-0.004/hand, +16.42/pot)
+      opp_fold       river  hands=     5 chips=    +458 (+0.014 +-0.007/hand, +91.60/pot)
+      opp_fold       turn   hands=     4 chips=    +345 (+0.011 +-0.006/hand, +86.25/pot)
+      showdown_chop  river  hands=    12 chips=      +0 (+0.000 +-0.000/hand, +0.00/pot)
+      showdown_loss  river  hands=   122 chips=  -24215 (-0.757 +-0.057/hand, -198.48/pot)
+      showdown_win   river  hands=   211 chips=  +41393 (+1.294 +-0.063/hand, +196.18/pot)
+      we_fold        flop   hands=    76 chips=   -3973 (-0.124 +-0.017/hand, -52.28/pot)
+      we_fold        river  hands=    13 chips=   -1215 (-0.038 +-0.010/hand, -93.46/pot)
+      we_fold        turn   hands=    19 chips=   -1486 (-0.046 +-0.015/hand, -78.21/pot)
+  limp      hands=  2945 chips=   +7904 (+0.247 +-0.069/hand, +2.68/pot)
+      opp_fold       flop   hands=    40 chips=    +160 (+0.005 +-0.001/hand, +4.00/pot)
+      opp_fold       pre    hands=   704 chips=    +704 (+0.022 +-0.001/hand, +1.00/pot)
+      opp_fold       river  hands=   187 chips=   +2943 (+0.092 +-0.011/hand, +15.74/pot)
+      opp_fold       turn   hands=    73 chips=    +863 (+0.027 +-0.004/hand, +11.82/pot)
+      showdown_chop  river  hands=    27 chips=      +0 (+0.000 +-0.000/hand, +0.00/pot)
+      showdown_loss  river  hands=   127 chips=   -7985 (-0.250 +-0.034/hand, -62.87/pot)
+      showdown_win   river  hands=   301 chips=  +18995 (+0.594 +-0.054/hand, +63.11/pot)
+      we_fold        flop   hands=   736 chips=   -1516 (-0.047 +-0.002/hand, -2.06/pot)
+      we_fold        pre    hands=    11 chips=     -11 (-0.000 +-0.000/hand, -1.00/pot)
+      we_fold        river  hands=   446 chips=   -4921 (-0.154 +-0.010/hand, -11.03/pot)
+      we_fold        turn   hands=   293 chips=   -1328 (-0.042 +-0.004/hand, -4.53/pot)
+  open_me   hands= 10247 chips= +106888 (+3.340 +-0.232/hand, +10.43/pot)
+      opp_fold       flop   hands=   325 chips=   +3487 (+0.109 +-0.008/hand, +10.73/pot)
+      opp_fold       pre    hands=  1622 chips=   +3244 (+0.101 +-0.003/hand, +2.00/pot)
+      opp_fold       river  hands=   451 chips=  +22042 (+0.689 +-0.038/hand, +48.87/pot)
+      opp_fold       turn   hands=   432 chips=  +10752 (+0.336 +-0.019/hand, +24.89/pot)
+      showdown_chop  river  hands=    91 chips=      +0 (+0.000 +-0.000/hand, +0.00/pot)
+      showdown_loss  river  hands=   722 chips=  -92461 (-2.889 +-0.178/hand, -128.06/pot)
+      showdown_win   river  hands=  1886 chips= +245743 (+7.679 +-0.270/hand, +130.30/pot)
+      we_fold        flop   hands=  2017 chips=  -12647 (-0.395 +-0.014/hand, -6.27/pot)
+      we_fold        river  hands=  1760 chips=  -59952 (-1.873 +-0.057/hand, -34.06/pot)
+      we_fold        turn   hands=   941 chips=  -13320 (-0.416 +-0.029/hand, -14.16/pot)
+  open_opp  hands= 13380 chips=  +32313 (+1.010 +-0.266/hand, +2.42/pot)
+      opp_fold       flop   hands=   215 chips=   +2329 (+0.073 +-0.007/hand, +10.83/pot)
+      opp_fold       river  hands=   786 chips=  +27682 (+0.865 +-0.044/hand, +35.22/pot)
+      opp_fold       turn   hands=   342 chips=   +7264 (+0.227 +-0.017/hand, +21.24/pot)
+      showdown_chop  river  hands=    99 chips=      +0 (+0.000 +-0.000/hand, +0.00/pot)
+      showdown_loss  river  hands=   876 chips=  -98302 (-3.072 +-0.223/hand, -112.22/pot)
+      showdown_win   river  hands=  1862 chips= +192987 (+6.031 +-0.205/hand, +103.65/pot)
+      we_fold        flop   hands=  2921 chips=  -18299 (-0.572 +-0.019/hand, -6.26/pot)
+      we_fold        pre    hands=  3019 chips=   -6038 (-0.189 +-0.003/hand, -2.00/pot)
+      we_fold        river  hands=  1978 chips=  -58559 (-1.830 +-0.070/hand, -29.61/pot)
+      we_fold        turn   hands=  1282 chips=  -16751 (-0.523 +-0.027/hand, -13.07/pot)
+  spot 3bet_me:flop/cbet        n= 1160 K=23% R=77%
+  spot 3bet_me:flop/vs_bet      n=  446 C=60% F=24% R=16%
+  spot 3bet_me:river/bet        n=  538 K=57% R=43%
+  spot 3bet_me:river/vs_bet     n=  222 C=50% F=50%
+  spot 3bet_me:turn/bet         n=  916 K=38% R=62%
+  spot 3bet_me:turn/vs_bet      n=  397 C=76% F=22% R=2%
+  spot 3bet_opp:flop/cbet       n=  764 K=62% R=38%
+  spot 3bet_opp:flop/vs_bet     n= 2649 C=50% F=33% R=17%
+  spot 3bet_opp:pre/vs_raise    n= 3557 C=90% F=1% R=9%
+  spot 3bet_opp:river/bet       n=  320 K=61% R=39%
+  spot 3bet_opp:river/vs_bet    n=  867 C=39% F=57% R=3%
+  spot 3bet_opp:turn/bet        n=  590 K=41% R=59%
+  spot 3bet_opp:turn/vs_bet     n= 1712 C=61% F=27% R=13%
+  spot 4bet+:flop/cbet          n=  289 K=64% R=36%
+  spot 4bet+:flop/vs_bet        n=  338 C=61% F=22% R=17%
+  spot 4bet+:pre/vs_raise       n=  234 C=100%
+  spot 4bet+:river/bet          n=   31 K=65% R=35%
+  spot 4bet+:river/vs_bet       n=   28 C=54% F=46%
+  spot 4bet+:turn/bet           n=  136 K=52% R=48%
+  spot 4bet+:turn/vs_bet        n=  146 C=82% F=13% R=5%
+--- preflop lines: d_new_lag-nolock

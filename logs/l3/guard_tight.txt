@@ -1,0 +1,1 @@
+tier3x[{"x_3b_ref":0.10}] vs tight: +0.98 ± 0.03 chips/hand | match score 1.000 ± 0.000 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 17.8s (899/s)
