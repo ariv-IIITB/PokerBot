@@ -129,6 +129,8 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 | 60000–60999 | PF preflop chart |
 | 70000–70999 | RD: river solver ON + exploit layer + tuning (user decision 2026-11-04: accept the CFR river) |
 | 71000–71999 | O3: conv_opp3 study (light) |
+| 72000–72999 | AD: faster adaptation in long matches |
+| 73000–73999 | RF: fix the CFR river + RNR (diagnose and repair) |
 | 51000–51999 | PB redo (laptop) tuning; 52000–52999 its confirmations |
 | 53000–53999 | DA redo (laptop) tuning; 54000–54999 its confirmations |
 
