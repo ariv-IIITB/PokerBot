@@ -1,0 +1,1 @@
+tier3x vs maniac: +0.27 ± 0.02 chips/hand | match score 1.000 ± 0.000 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 16.3s (2,451/s)
