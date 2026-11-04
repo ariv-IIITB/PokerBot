@@ -1,0 +1,7 @@
+start discard_eps0.25_discard_mix0.15 vs base (smart on, mix off), same seeds: -0.95 ± 1.18
+round 1 discard_eps0.25_discard_mix0.05 vs discard_eps0.25_discard_mix0.15: +0.31 ± 1.19 (z +0.3)
+round 1 discard_eps0.25_discard_mix0.25 vs discard_eps0.25_discard_mix0.15: +0.54 ± 1.20 (z +0.5)
+round 1 discard_eps0.1_discard_mix0.15 vs discard_eps0.25_discard_mix0.15: +0.06 ± 1.21 (z +0.0)
+round 1 discard_eps0.4_discard_mix0.15 vs discard_eps0.25_discard_mix0.15: +0.53 ± 1.14 (z +0.5)
+round 1 STOP: best discard_eps0.25_discard_mix0.25 +0.54 ± 1.20 not > 1 SE
+FINAL discard_eps0.25_discard_mix0.15 vs base: -0.95 ± 1.18

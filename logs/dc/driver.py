@@ -14,7 +14,7 @@ BASE = {"discard_mix": 0.0}
 
 def key(cfg): return "_".join(f"{k}{v:g}" for k, v in sorted(cfg.items())) or "base"
 
-def run(cfg, seed=SEED, pairs=PAIRS, locks="off", prefix="cd"):
+def run(cfg, seed=SEED, pairs=PAIRS, locks="off", prefix="cd", pool=("train", "tier1", "tier2")):
     f = OUT / f"{prefix}_{key(cfg)}.txt"
     tmp = f.with_suffix(".tmp")
     while subprocess.run(["pgrep", "-f", "[-]-out " + str(tmp)], capture_output=True).returncode == 0:
@@ -25,7 +25,7 @@ def run(cfg, seed=SEED, pairs=PAIRS, locks="off", prefix="cd"):
         brain = "tier3:" + json.dumps(cfg, separators=(",", ":")) if cfg else "tier3"
         subprocess.run(["flock", "/tmp/pokerbot_turnstile.lock", "true"])
         cmd = ["flock", "-s", "/tmp/pokerbot_laptop.lock", "nice", "-n", "15", ".venv/bin/python", "-m", "lab.eval", brain,
-               "--pool", "train", "tier1", "tier2", "--pairs", str(pairs), "--first-seed", str(seed),
+               "--pool", *pool, "--pairs", str(pairs), "--first-seed", str(seed),
                "--locks", locks, "--variant", "discard_holdem", "--processes", (OUT / "processes").read_text().strip(),
                "--out", str(tmp)]
         with open(f.with_suffix(".log"), "w") as lg:

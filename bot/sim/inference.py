@@ -36,10 +36,17 @@ DEFAULTS = {
     "min_ess": 0.08,      # fall back to unweighted below this fraction
     "discard_mix": 0.0,   # >0: discard likelihood = 2-rule mixture (bot/sim/discard.opp_drop_probs), this weight on the draw rule
     "discard_eps": 0.25,  # ... plus this share of random discards
+    "discard_learn": False,        # learn which keep rule the opponent follows from showdown discards (bot/sim/discard.DiscardRules)
+    "discard_max_samples": 4000,   # cap on sampled worlds in choose_discard (the time budget also stops it)
 }
 
 # logit = gamma * slope * (strength - pivot)
 BET_MODEL = {RAISE: (2.0, 0.55), CALL: (1.0, 0.35), CHECK: (-0.5, 0.5), FOLD: (-2.0, 0.25)}
+
+
+def _new_rules():
+    from bot.sim.discard import DiscardRules
+    return DiscardRules()
 
 
 @dataclass
@@ -55,6 +62,7 @@ class OppDecision:
 @dataclass
 class Inference:
     params: dict = field(default_factory=lambda: dict(DEFAULTS))
+    rules: object = field(default_factory=lambda: _new_rules())
 
     @property
     def enabled(self) -> bool:
@@ -123,11 +131,14 @@ class Inference:
         opts = [o for o in d.options if o != "none"]
         h = holes.shape[1]
         mix = float(self.params.get("discard_mix", 0.0))
-        if mix > 0 and h == 3 and len(board) == 3 and sorted(opts) == ["0", "1", "2"] \
+        learn = bool(self.params.get("discard_learn")) and self.rules.n > 0
+        if (learn or mix > 0) and h == 3 and len(board) == 3 and sorted(opts) == ["0", "1", "2"] \
                 and d.action.choice in opts:
-            from bot.sim.discard import opp_drop_probs
-            p = opp_drop_probs(rec.state.rules.evaluator, holes, np.array(board, dtype=np.intp), mix,
-                               float(self.params.get("discard_eps", 0.25)))
+            from bot.sim.discard import drop_dist, opp_drop_probs
+            ev, flop = rec.state.rules.evaluator, np.array(board, dtype=np.intp)
+            eps = float(self.params.get("discard_eps", 0.25))
+            p = drop_dist(ev, holes, flop, self.rules.posterior(), eps) if learn \
+                else opp_drop_probs(ev, holes, flop, mix, eps)
             # trust scales beta; tempering the mixture by beta / full beta gives uniform at 0
             L = np.log(p) * (beta / DEFAULTS["beta"])
             L = L - L.max(axis=1, keepdims=True)
@@ -167,6 +178,8 @@ class Inference:
             return {}
         cols = {t: np.array([c]) for t, c in zip(toks, opp_cards) if t not in rec.mapping}
         out = {}
+        if self.params.get("discard_learn"):
+            self._learn_discard(rec, cols)
         for kind in ("bet", "discard"):
             ds = [d for d in getattr(rec, "opp_decisions", ()) if d.kind == kind]
             if not ds:
@@ -180,6 +193,18 @@ class Inference:
             if a is not None and b is not None:
                 out[kind] = (float(a[0] - b[0]), len(ds))
         return out
+
+    def _learn_discard(self, rec, cols: dict) -> None:
+        """Feed the shown hand's real discard (their three cards are now all known) to `rules`."""
+        m = rec.mapping
+        for d in getattr(rec, "opp_decisions", ()):
+            if d.kind != "discard" or len(d.hole) != 3 or len(d.board) != 3 or not str(d.action.choice).isdigit():
+                continue
+            hole = [m[t] if t in m else (int(cols[t][0]) if t in cols else None) for t in d.hole]
+            flop = [m.get(t) for t in d.board]
+            if None in hole or None in flop or int(d.action.choice) > 2:
+                continue
+            self.rules.update(rec.state.rules.evaluator, hole, flop, int(d.action.choice))
 
     def weights(self, rec, columns: dict, n: int, rng) -> Optional[np.ndarray]:
         """Normalized weights (mean 1), or None (no information / weights collapsed)."""

@@ -26,7 +26,7 @@ import numpy as np
 
 from bot.actions import Action, LegalActions
 from bot.equity import sample_without_replacement
-from bot.evaluator import STRAIGHT, category
+from bot.evaluator import CATEGORY_SHIFT, PAIR, STRAIGHT, category
 from bot.sim.replay import Reconstruction
 
 RANK_WEIGHT = 128            # tie-break scale: hand value * 128 + sum of kept ranks (<= 24)
@@ -125,6 +125,73 @@ def mixed_keeps(evaluator, hole3: np.ndarray, board: np.ndarray, w: float,
     return np.take_along_axis(hole3, cols, axis=1)
 
 
+RULES = ("opponent_keeps", "drop_lowest", "keep_pair", "keep_straight_draw", "keep_flush_draw", "random")
+
+
+def rule_masks(evaluator, hole3: np.ndarray, board: np.ndarray) -> np.ndarray:
+    """(R, B, 3) bool: the drops each rule in RULES accepts (ties give several). Same rules as
+    lab/opps/discard_rules (DB's fit); `board` is the 3-card flop."""
+    b = hole3.shape[0]
+    rank = hole3 >> 2
+    out = np.zeros((len(RULES), b, 3), dtype=bool)
+    out[0, np.arange(b), _opp_drop(evaluator, hole3, board)] = True
+    out[1] = rank == rank.min(axis=1, keepdims=True)
+    pair = np.empty((b, 3), dtype=bool)
+    flush = np.empty((b, 3), dtype=bool)
+    for i in range(3):
+        kept = hole3[:, [k for k in range(3) if k != i]]
+        pair[:, i] = (evaluator.evaluate_batch(kept, board).astype(np.int64) >> CATEGORY_SHIFT) >= PAIR
+        suit = kept[:, 0] & 3
+        flush[:, i] = (kept[:, 1] & 3 == suit) & ((np.asarray(board)[None, :] & 3 == suit[:, None]).sum(axis=1) >= 2)
+    for r, flag in ((2, pair), (4, flush)):
+        sc = 16 * flag - rank
+        out[r] = sc == sc.max(axis=1, keepdims=True)
+    out[3] = _draw_keeps(hole3, board)
+    out[5] = True
+    return out
+
+
+class DiscardRules:
+    """Online posterior over which rule in RULES the opponent discards by, from the discards we
+    see at showdown (their three cards are then known). Each rule predicts a uniform pick among the
+    drops it accepts, with probability `eps` of a random card instead; the prior favours the
+    usual rule, so the posterior only moves when the evidence does."""
+
+    def __init__(self, prior_usual: float = 0.5, eps: float = 0.1) -> None:
+        self.eps = eps
+        self.logprior = np.log(np.array([prior_usual] + [(1 - prior_usual) / (len(RULES) - 1)] * (len(RULES) - 1)))
+        self.ll = np.zeros(len(RULES))
+        self.n = 0
+
+    def update(self, evaluator, hole3, flop, drop: int) -> None:
+        m = rule_masks(evaluator, np.array([hole3], dtype=np.intp), np.array(flop, dtype=np.intp))[:, 0, :]
+        p = (1 - self.eps) * m[:, drop] / m.sum(axis=1) + self.eps / 3
+        self.ll += np.log(p)
+        self.n += 1
+
+    def posterior(self) -> np.ndarray:
+        lp = self.logprior + self.ll
+        w = np.exp(lp - lp.max())
+        return w / w.sum()
+
+
+def drop_dist(evaluator, hole3: np.ndarray, board: np.ndarray, post: np.ndarray, eps: float) -> np.ndarray:
+    """(B,3) P(opponent drops card i) under the rule posterior."""
+    m = rule_masks(evaluator, hole3, board).astype(float)
+    p = np.einsum("r,rbi->bi", post, m / m.sum(axis=2, keepdims=True))
+    return (1 - eps) * p + eps / 3
+
+
+def learned_keeps(evaluator, hole3: np.ndarray, board: np.ndarray, post: np.ndarray,
+                  rng: np.random.Generator) -> np.ndarray:
+    """(B,2) kept cards when each sampled opponent follows a rule drawn from `post`."""
+    b = hole3.shape[0]
+    m = rule_masks(evaluator, hole3, board)[rng.choice(len(RULES), size=b, p=post), np.arange(b)]
+    drop = np.argmax(m * rng.random((b, 3)), axis=1)      # random among the accepted drops
+    cols = np.stack([np.where(drop == 0, 1, 0), np.where(drop == 2, 1, 2)], axis=1)
+    return np.take_along_axis(hole3, cols, axis=1)
+
+
 def _simple_discard(rec: Reconstruction) -> bool:
     step = rec.state.rules.program[rec.state.pc]
     return (step.type_name == "discard" and getattr(step, "n", 0) == 1
@@ -168,6 +235,11 @@ def choose_discard(rec: Reconstruction, legal: LegalActions, rng: np.random.Gene
 
     board_np = np.array(board, dtype=np.intp)
     mix = float(inference.params.get("discard_mix", 0.0)) if inference is not None else 0.0
+    learned = None
+    if inference is not None:
+        max_samples = int(inference.params.get("discard_max_samples", max_samples))
+        if inference.params.get("discard_learn") and inference.rules.n > 0:
+            learned = inference.rules.posterior()
     t0 = time.perf_counter()
     totals = {o: [] for o in cands}
     logws: list[np.ndarray] = []
@@ -178,8 +250,12 @@ def choose_discard(rec: Reconstruction, legal: LegalActions, rng: np.random.Gene
             cols = {t: draw[:, i] for i, t in enumerate(st.hole[opp])}
             lw = inference.log_weights(rec, cols, chunk, rng)
             logws.append(lw if lw is not None else np.zeros(chunk))
-        opp_kept = (mixed_keeps(scorer, draw[:, :3], board_np, mix, rng) if mix > 0
-                    else opponent_keeps(scorer, draw[:, :3], board_np))
+        if learned is not None:
+            opp_kept = learned_keeps(scorer, draw[:, :3], board_np, learned, rng)
+        elif mix > 0:
+            opp_kept = mixed_keeps(scorer, draw[:, :3], board_np, mix, rng)
+        else:
+            opp_kept = opponent_keeps(scorer, draw[:, :3], board_np)
         full = np.concatenate([np.broadcast_to(board_np, (chunk, 3)), draw[:, 3:3 + to_deal]], axis=1)
         for o, cards in cands.items():
             totals[o].append(scorer.shares_batch(np.broadcast_to(np.array(cards, dtype=np.intp),

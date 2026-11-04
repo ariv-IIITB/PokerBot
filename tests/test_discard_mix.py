@@ -49,3 +49,22 @@ def test_inference_discard_ll_mixture_uniform_at_zero_beta():
         d.action.choice = c
         lls.append(np.exp(inf._discard_ll(rec, d, h3[None], list(flop), rng)[0]))
     assert np.isclose(sum(lls), 1)
+
+
+def test_rule_masks_match_the_lab_rules():
+    for h3, flop in _deals(300, 11):
+        m = S.rule_masks(EV, h3[None], flop)[:, 0, :]
+        for r, name in enumerate(S.RULES):
+            assert set(np.flatnonzero(m[r])) == set(D.accepted_drops(name, EV, list(h3), list(flop))) or name == "opponent_keeps", name
+
+
+def test_rules_posterior_moves_to_the_rule_the_opponent_follows():
+    rules = S.DiscardRules()
+    assert rules.posterior()[0] == max(rules.posterior())           # the prior favours the usual rule
+    for h3, flop in _deals(60, 13):
+        rules.update(EV, list(h3), list(flop), D.accepted_drops("drop_lowest", EV, list(h3), list(flop))[0])
+    assert S.RULES[int(np.argmax(rules.posterior()))] == "drop_lowest"
+    h3 = np.array([d[0] for d in _deals(50, 14)])
+    flop = next(_deals(1, 15))[1]
+    assert np.allclose(S.drop_dist(EV, h3, flop, rules.posterior(), 0.1).sum(axis=1), 1)
+    assert S.learned_keeps(EV, h3, flop, rules.posterior(), np.random.default_rng(0)).shape == (50, 2)
