@@ -1,0 +1,12 @@
+tier3x[{"x_narrow":true,"x_air_eq":0.45}] vs calling_station: +1.23 ± 0.02 chips/hand | match score 1.000 ± 0.000 over 40 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 31.6s (506/s)
+--- accounting: tier3x[{"x_narrow":true,"x_air_eq":0.45}] (+19649 chips over 16000 hands, +1.23/hand)
+  showdown_chop  river  hands=   307 chips=      +0 (+0.000/hand)
+  showdown_loss  river  hands=  3213 chips=  -12328 (-0.770/hand)
+  showdown_win   river  hands=  5270 chips=  +39187 (+2.449/hand)
+  we_fold        pre    hands=  7210 chips=   -7210 (-0.451/hand)
+--- accounting: calling_station (-19649 chips over 16000 hands, -1.23/hand)
+  opp_fold       pre    hands=  7210 chips=   +7210 (+0.451/hand)
+  showdown_chop  river  hands=   307 chips=      +0 (+0.000/hand)
+  showdown_loss  river  hands=  5270 chips=  -39187 (-2.449/hand)
+  showdown_win   river  hands=  3213 chips=  +12328 (+0.770/hand)
+--- brain stats: tier3x[{"x_narrow":true,"x_air_eq":0.45}]: t3_decisions=6216 t3_errors=0 t3_fallbacks=129 x_errors=0 x_narrowed=0 x_overfolder=0 x_stabs=0 x_valueonly=1566

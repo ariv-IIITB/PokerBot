@@ -1,0 +1,7 @@
+d_conv_opp3      0.450 -> 0.640  diff +0.190 ± 0.049
+d_new_exploiter  0.555 -> 0.655  diff +0.100 ± 0.049
+d_new_lag        0.990 -> 0.975  diff -0.015 ± 0.013
+d_new_minraise   0.720 -> 0.810  diff +0.090 ± 0.043
+d_new_trapper    0.695 -> 0.945  diff +0.250 ± 0.037
+overall          0.682 -> 0.805  diff +0.123 ± 0.018 (z +6.8, 5 bots)
+verdict: KEEP-score
