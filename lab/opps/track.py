@@ -163,16 +163,37 @@ def format_profile(merged: dict, names: dict[str, str]) -> str:
     return "\n".join(lines)
 
 
-def format_accounting(merged: dict, names: dict[str, str], hands: int) -> str:
+def _per_pair(parts: list[dict], who: str, pair_hands: float):
+    """{bucket: array of chips/hand, one entry per duplicate pair} and the same for all river buckets."""
+    import numpy as np
+    keys = sorted({k for part in parts for k in part[who]["acct"]})
+    per = {k: np.array([part[who]["acct"].get(k, (0, 0))[1] for part in parts], float) / pair_hands for k in keys}
+    per[("river", "all")] = sum((v for (e, st), v in per.items() if st == "river"), np.zeros(len(parts)))
+    return per
+
+
+def format_accounting(merged: dict, names: dict[str, str], hands: int,
+                      parts: Optional[list[dict]] = None) -> str:
+    """With `parts` (one Tracker.to_plain() per duplicate pair) each bucket also gets `+-SE` (the standard
+    error of its chips/hand over pairs) and one extra line sums every river bucket (showdown + we_fold
+    + opp_fold on the river): the number to read when a change folds or calls more, as the showdown
+    buckets alone can be gamed by folding."""
     lines = []
     for who in ("A", "B"):
         acct = merged[who]["acct"]
         total = sum(c for _, c in acct.values())
         lines.append(f"--- accounting: {names[who]} ({total:+d} chips over {hands} hands, "
                      f"{total / max(1, hands):+.2f}/hand)")
+        per = _per_pair(parts, who, hands / len(parts)) if parts and len(parts) > 1 else {}
+        se = lambda k: (f" +-{per[k].std(ddof=1) / len(per[k]) ** 0.5:.3f}" if k in per else "")
         for (end, street), (n, chips) in sorted(acct.items()):
             lines.append(f"  {end:14} {street:6} hands={n:6} chips={chips:+8d} "
-                         f"({chips / max(1, hands):+.3f}/hand)")
+                         f"({chips / max(1, hands):+.3f}{se((end, street))}/hand)")
+        if per:
+            k = ("river", "all")
+            lines.append(f"  {'river-all':14} {'river':6} hands={sum(n for (e, st), (n, _) in acct.items() if st == 'river'):6} "
+                         f"chips={sum(c for (e, st), (_, c) in acct.items() if st == 'river'):+8d} "
+                         f"({per[k].mean():+.3f}{se(k)}/hand over {len(parts)} pairs)")
     return "\n".join(lines)
 
 

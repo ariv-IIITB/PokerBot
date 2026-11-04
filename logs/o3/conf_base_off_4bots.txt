@@ -1,0 +1,130 @@
+tier3x-nolock vs d_conv_opp3-nolock: -1.48 ± 0.17 chips/hand | match score 0.270 ± 0.031 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 1056.8s (76/s)
+--- accounting: tier3x-nolock (-118389 chips over 80000 hands, -1.48/hand)
+  opp_fold       flop   hands=  6373 chips=  +44804 (+0.560/hand)
+  opp_fold       pre    hands= 16391 chips=  +31349 (+0.392/hand)
+  opp_fold       river  hands=  6773 chips= +146573 (+1.832/hand)
+  opp_fold       turn   hands=  9811 chips= +129248 (+1.616/hand)
+  showdown_chop  river  hands=   709 chips=      +0 (+0.000/hand)
+  showdown_loss  river  hands=  6337 chips= -488114 (-6.101/hand)
+  showdown_win   river  hands=  6163 chips= +287687 (+3.596/hand)
+  we_fold        flop   hands= 10284 chips=  -63260 (-0.791/hand)
+  we_fold        pre    hands=  4595 chips=   -9562 (-0.120/hand)
+  we_fold        river  hands=  4684 chips=  -95118 (-1.189/hand)
+  we_fold        turn   hands=  7880 chips= -101996 (-1.275/hand)
+--- accounting: d_conv_opp3-nolock (+0 chips over 80000 hands, +0.00/hand)
+--- brain stats: tier3x-nolock: t3_decisions=237123 t3_errors=0 t3_fallbacks=10409 x_errors=0 x_narrowed=0 x_overfolder=193728 x_stabs=0 x_valueonly=130
+tier3x-nolock vs d_new_lag-nolock: +6.07 ± 0.28 chips/hand | match score 0.905 ± 0.021 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 872.0s (92/s)
+--- accounting: tier3x-nolock (+485892 chips over 80000 hands, +6.07/hand)
+  opp_fold       flop   hands=  1539 chips=  +17582 (+0.220/hand)
+  opp_fold       pre    hands=  6891 chips=  +18805 (+0.235/hand)
+  opp_fold       river  hands=  4959 chips= +207520 (+2.594/hand)
+  opp_fold       turn   hands=  2982 chips=  +69032 (+0.863/hand)
+  showdown_chop  river  hands=   978 chips=      +0 (+0.000/hand)
+  showdown_loss  river  hands= 10212 chips=-1235968 (-15.450/hand)
+  showdown_win   river  hands= 15779 chips=+1917222 (+23.965/hand)
+  we_fold        flop   hands= 12431 chips=  -96478 (-1.206/hand)
+  we_fold        pre    hands=  7494 chips=  -15298 (-0.191/hand)
+  we_fold        river  hands=  6540 chips= -207736 (-2.597/hand)
+  we_fold        turn   hands= 10195 chips= -188789 (-2.360/hand)
+--- accounting: d_new_lag-nolock (+0 chips over 80000 hands, +0.00/hand)
+--- brain stats: tier3x-nolock: t3_decisions=247887 t3_errors=0 t3_fallbacks=41735 x_errors=0 x_narrowed=0 x_overfolder=0 x_stabs=0 x_valueonly=6
+tier3x-nolock vs d_new_trapper-nolock: -0.01 ± 0.11 chips/hand | match score 0.465 ± 0.035 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 1232.9s (65/s)
+--- accounting: tier3x-nolock (-578 chips over 80000 hands, -0.01/hand)
+  opp_fold       flop   hands=  5952 chips=  +28359 (+0.354/hand)
+  opp_fold       pre    hands= 26250 chips=  +35790 (+0.447/hand)
+  opp_fold       river  hands=  3645 chips=  +34752 (+0.434/hand)
+  opp_fold       turn   hands=  3635 chips=  +22725 (+0.284/hand)
+  showdown_chop  river  hands=  1303 chips=      +0 (+0.000/hand)
+  showdown_loss  river  hands= 19081 chips= -639300 (-7.991/hand)
+  showdown_win   river  hands= 12367 chips= +572628 (+7.158/hand)
+  we_fold        flop   hands=   341 chips=   -1210 (-0.015/hand)
+  we_fold        pre    hands=   722 chips=   -1395 (-0.017/hand)
+  we_fold        river  hands=  5177 chips=  -43705 (-0.546/hand)
+  we_fold        turn   hands=  1527 chips=   -9222 (-0.115/hand)
+--- accounting: d_new_trapper-nolock (+0 chips over 80000 hands, +0.00/hand)
+--- brain stats: tier3x-nolock: t3_decisions=183124 t3_errors=0 t3_fallbacks=35033 x_errors=0 x_narrowed=0 x_overfolder=0 x_stabs=0 x_valueonly=47685
+tier3x-nolock vs d_new_exploiter-nolock: -0.80 ± 0.13 chips/hand | match score 0.340 ± 0.034 over 200 matches | errors A/B 0/0 | forfeits A/B 0/0 | 80000 hands in 1802.6s (44/s)
+--- accounting: tier3x-nolock (-63612 chips over 80000 hands, -0.80/hand)
+  opp_fold       flop   hands= 13363 chips=  +82087 (+1.026/hand)
+  opp_fold       pre    hands= 12802 chips=  +25817 (+0.323/hand)
+  opp_fold       river  hands=  7574 chips=  +96555 (+1.207/hand)
+  opp_fold       turn   hands=  9305 chips= +104331 (+1.304/hand)
+  showdown_chop  river  hands=   888 chips=      +0 (+0.000/hand)
+  showdown_loss  river  hands=  7407 chips= -332868 (-4.161/hand)
+  showdown_win   river  hands=  5732 chips= +160164 (+2.002/hand)
+  we_fold        flop   hands=  5584 chips=  -31331 (-0.392/hand)
+  we_fold        pre    hands=  6496 chips=  -12967 (-0.162/hand)
+  we_fold        river  hands=  4347 chips=  -79793 (-0.997/hand)
+  we_fold        turn   hands=  6502 chips=  -75607 (-0.945/hand)
+--- accounting: d_new_exploiter-nolock (+0 chips over 80000 hands, +0.00/hand)
+--- brain stats: tier3x-nolock: t3_decisions=231167 t3_errors=0 t3_fallbacks=7587 x_errors=0 x_narrowed=0 x_overfolder=247515 x_stabs=0 x_valueonly=28252
+Process SpawnPoolWorker-10:
+Traceback (most recent call last):
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/pool.py", line 131, in worker
+    put((job, i, result))
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/queues.py", line 377, in put
+    self._writer.send_bytes(obj)
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 200, in send_bytes
+    self._send_bytes(m[offset:offset + size])
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 427, in _send_bytes
+    self._send(header + buf)
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 384, in _send
+    n = write(self._handle, buf)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/pool.py", line 136, in worker
+    put((job, i, (False, wrapped)))
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/queues.py", line 377, in put
+    self._writer.send_bytes(obj)
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 200, in send_bytes
+    self._send_bytes(m[offset:offset + size])
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 427, in _send_bytes
+    self._send(header + buf)
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 384, in _send
+    n = write(self._handle, buf)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+Process SpawnPoolWorker-9:
+Traceback (most recent call last):
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/pool.py", line 131, in worker
+    put((job, i, result))
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/queues.py", line 377, in put
+    self._writer.send_bytes(obj)
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 200, in send_bytes
+    self._send_bytes(m[offset:offset + size])
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 427, in _send_bytes
+    self._send(header + buf)
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 384, in _send
+    n = write(self._handle, buf)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/pool.py", line 136, in worker
+    put((job, i, (False, wrapped)))
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/queues.py", line 377, in put
+    self._writer.send_bytes(obj)
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 200, in send_bytes
+    self._send_bytes(m[offset:offset + size])
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 427, in _send_bytes
+    self._send(header + buf)
+  File "/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/connection.py", line 384, in _send
+    n = write(self._handle, buf)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+BrokenPipeError: [Errno 32] Broken pipe
+/home/fioriv/.local/share/uv/python/cpython-3.11.18-linux-x86_64-gnu/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 6 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
