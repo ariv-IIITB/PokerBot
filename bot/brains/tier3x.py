@@ -53,7 +53,8 @@ class Tier3XBrain(Tier3Brain):
         return tight3_lambda(self.opponent.spots.spots["three_bet"].mean(), float(p.get("x_3b_ref", 0.0)))
 
     def choose(self, state, legal, eq: float, p: dict):
-        """Facing a river bet with `x_narrow` on: the equity is re-read against the bettor's betting range."""
+        """Facing a river bet with `x_narrow` on: the equity is re-read against the bettor's betting range.
+        Facing a re-raise preflop (Tier 2's spots, e.g. their limp-raise of our raise): see `_vs_tight3`."""
         h = state.hand
         if p.get("x_narrow") and h is not None and h.street == 3 and h.tocall > 0:
             try:
@@ -62,22 +63,29 @@ class Tier3XBrain(Tier3Brain):
             except Exception as e:
                 self.stats["x_errors"] += 1
                 warn(f"range narrowing failed: {e!r}")
+        if h is not None:
+            eq = self._vs_tight3(h, eq, p)
         return super().choose(state, legal, eq, p)
 
     def t2_calls(self, h, eq: float, p: dict) -> bool:
-        """Tier 2's pot-odds rule; facing a re-raise of our preflop raise by a tight 3-bettor (`x_3b_ref`), the
-        equity moves from the share vs a random hand toward the share vs the top-30 % table."""
-        if h.street == 0 and float(p.get("x_3b_ref", 0.0)) > 0 and reraised(h):
-            try:
-                t, lam = self.perception.tables, self._tight3(p)
-                if lam > 0 and t is not None and t.eq_range is not None:
-                    top = float(t.eq_range[t.classes.class_of(h.hole)])
-                    eq = min(eq, eq - lam * (eq - top))
-                    self.stats["x_3b_floor"] += 1
-            except Exception as e:
-                self.stats["x_errors"] += 1
-                warn(f"re-raise floor failed: {e!r}")
-        return Tier3Brain.t2_calls(h, eq, p)
+        """Tier 2's pot-odds rule (Tier 3's eq_floor), with the equity of `_vs_tight3`."""
+        return Tier3Brain.t2_calls(h, self._vs_tight3(h, eq, p), p)
+
+    def _vs_tight3(self, h, eq: float, p: dict) -> float:
+        """Facing a re-raise of our preflop raise by a tight 3-bettor (`x_3b_ref`): the equity moves from the
+        share vs a random hand toward the share vs the top-30 % table, by the tight-3-bettor confidence."""
+        if h.street != 0 or float(p.get("x_3b_ref", 0.0)) <= 0 or h.tocall <= 0 or not reraised(h):
+            return eq
+        try:
+            t, lam = self.perception.tables, self._tight3(p)
+            if lam > 0 and t is not None and t.eq_range is not None:
+                top = float(t.eq_range[t.classes.class_of(h.hole)])
+                self.stats["x_3b_floor"] += 1
+                return min(eq, eq - lam * (eq - top))
+        except Exception as e:
+            self.stats["x_errors"] += 1
+            warn(f"re-raise floor failed: {e!r}")
+        return eq
 
     def _narrowed(self, h, eq: float, p: dict):
         ratio = h.tocall / max(1, h.pot - h.tocall)
