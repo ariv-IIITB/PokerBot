@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_aggro","members":{"anti_aggro":{"aa_bluff_mult":0.5,"aa_call_margin":0.0,"aa_mdf_mult":1.0}}}]-nolock vs d_new_lag-nolock: +5.06 ± 0.42 chips/hand | match score 0.867 ± 0.044 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 117.3s (205/s)

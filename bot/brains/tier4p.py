@@ -38,12 +38,12 @@ MEMBERS: dict[str, dict[str, Any]] = {
     },
     "anti_value": {
         "x_vo_margin": 0.12,
-        "av_raise_fold_eq": 0.60,      # fold below this equity to a raise on a street we had acted on (0 = off)
+        "av_raise_fold_eq": 0.80,      # fold below this equity to a raise on a street we had acted on (0 = off)
     },
     "anti_aggro": {
         "aa_call_margin": -0.03,       # added to call_margin on every street
-        "aa_mdf_mult": 1.10,           # x mdf_flop / mdf_turn (capped at 1.0)
-        "aa_bluff_mult": 0.50,         # x pure-bluff frequencies; river_air_share / this
+        "aa_mdf_mult": 1.00,           # x mdf_flop / mdf_turn (capped at 1.0)
+        "aa_bluff_mult": 0.75,         # x pure-bluff frequencies; river_air_share / this
     },
 }
 BLUFF_PARAMS = ("cbet_air_wet", "stab_dry_freq", "stab_wet_freq", "barrel_bluff_prob", "bluff_freq")

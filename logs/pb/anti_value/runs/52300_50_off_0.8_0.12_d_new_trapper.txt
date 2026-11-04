@@ -1,0 +1,1 @@
+tier4p[{"member":"anti_value","members":{"anti_value":{"av_raise_fold_eq":0.8,"x_vo_margin":0.12}}}]-nolock vs d_new_trapper-nolock: +1.86 ± 0.15 chips/hand | match score 0.830 ± 0.038 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 265.0s (151/s)
