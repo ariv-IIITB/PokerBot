@@ -5,8 +5,8 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from bot.brains.exploit import (EXPLOIT_DEFAULTS, adjust, narrow_equity, overfolder_lambda, reraise_equity,
-                                stab_prob)
+from bot.brains.exploit import (EXPLOIT_DEFAULTS, adjust, narrow_equity, overfolder_lambda, stab_prob,
+                                tight3_lambda)
 from bot.strategy.oppstats import STREET_SPOT
 from bot.brains.tier3 import Tier3Brain
 from bot.actions import RAISE
@@ -42,11 +42,15 @@ class Tier3XBrain(Tier3Brain):
             return p
         self.stats["x_overfolder"] += int(info.get("overfolder", 0.0) > 0)
         self.stats["x_valueonly"] += int(info.get("valueonly", 0.0) > 0 and street == 3)
-        k = float(p.get("x_3b_k", 0.0))
-        if k > 0 and street == 0:
+        lam = self._tight3(p) if street == 0 else 0.0
+        if lam > 0:
             q = dict(q)
-            q["pf_btn_continue"] = min(float(q["pf_btn_continue"]), k * self.opponent.spots.spots["three_bet"].mean())
+            c = float(q["pf_btn_continue"])
+            q["pf_btn_continue"] = c - lam * max(0.0, c - float(p["x_3b_min"]))
         return q
+
+    def _tight3(self, p: dict) -> float:
+        return tight3_lambda(self.opponent.spots.spots["three_bet"].mean(), float(p.get("x_3b_ref", 0.0)))
 
     def choose(self, state, legal, eq: float, p: dict):
         """Facing a river bet with `x_narrow` on: the equity is re-read against the bettor's betting range."""
@@ -61,17 +65,14 @@ class Tier3XBrain(Tier3Brain):
         return super().choose(state, legal, eq, p)
 
     def t2_calls(self, h, eq: float, p: dict) -> bool:
-        """Tier 2's pot-odds rule; with `x_3b_floor`, facing a re-raise of our preflop raise, the equity is
-        re-read against the re-raiser's range (exploit.reraise_equity)."""
-        if (p.get("x_3b_floor") or float(p.get("x_3b_k", 0.0)) > 0) and h.street == 0 and reraised(h):
+        """Tier 2's pot-odds rule; facing a re-raise of our preflop raise by a tight 3-bettor (`x_3b_ref`), the
+        equity moves from the share vs a random hand toward the share vs the top-30 % table."""
+        if h.street == 0 and float(p.get("x_3b_ref", 0.0)) > 0 and reraised(h):
             try:
-                t = self.perception.tables
-                if t is not None and t.eq_range is not None:
-                    cls = t.classes.class_of(h.hole)
-                    eq = min(eq, reraise_equity(float(t.eq_random[cls]), float(t.eq_range[cls]),
-                                                float(t.meta.get("range_top", 0.3)),
-                                                self.opponent.spots.spots["three_bet"].mean(),
-                                                float(p.get("x_3b_k", 0.0)) > 0))
+                t, lam = self.perception.tables, self._tight3(p)
+                if lam > 0 and t is not None and t.eq_range is not None:
+                    top = float(t.eq_range[t.classes.class_of(h.hole)])
+                    eq = min(eq, eq - lam * (eq - top))
                     self.stats["x_3b_floor"] += 1
             except Exception as e:
                 self.stats["x_errors"] += 1
