@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from bot.brains.exploit import EXPLOIT_DEFAULTS, adjust, narrow_equity, overfolder_lambda, stab_prob
+from bot.brains.exploit import EXPLOIT_DEFAULTS, adjust, defence_lambda, narrow_equity, overfolder_lambda, stab_prob
 from bot.strategy.oppstats import STREET_SPOT
 from bot.brains.tier3 import Tier3Brain
 from bot.actions import RAISE
@@ -18,7 +18,7 @@ class Tier3XBrain(Tier3Brain):
 
     def __init__(self, config: Optional[dict] = None, **kw) -> None:
         super().__init__(config, **kw)
-        self.stats.update({"x_overfolder": 0, "x_valueonly": 0, "x_errors": 0, "x_narrowed": 0, "x_stabs": 0})
+        self.stats.update({"x_overfolder": 0, "x_valueonly": 0, "x_errors": 0, "x_narrowed": 0, "x_stabs": 0, "x_def": 0})
         self._faced: list[float] = []              # size (x pot before the bet) of each river bet we faced
         self._faced_key = None
 
@@ -70,6 +70,24 @@ class Tier3XBrain(Tier3Brain):
         q["bet_pressure"] = float(p["bet_pressure"]) * float(p["x_narrow_bp"])
         return narrow_equity(eq, spots.spots["river_bet"].mean(), spots.spots["bluff_index"].mean(),
                              rank, float(p["x_narrow_lam"])), q
+
+    def _facing_bet(self, c, s, legal, p):
+        """Flop/turn bet to face with `x_def` on: defend less against a bettor whose bets are value-heavy
+        (MDF share and Tier 2's pot-odds floor both tightened by the confidence lam)."""
+        if float(p.get("x_def", 0.0)) > 0.0 and c.street in (1, 2):
+            try:
+                lam = defence_lambda(p, self.opponent.types, self.opponent.spots)
+                if lam > 0.0:
+                    q = dict(p)
+                    k = 1.0 - float(p["x_def"]) * lam
+                    q["mdf_flop"], q["mdf_turn"] = float(p["mdf_flop"]) * k, float(p["mdf_turn"]) * k
+                    q["call_margin"] = float(p["call_margin"]) + float(p["x_def_margin"]) * lam
+                    self.stats["x_def"] += 1
+                    p = q
+            except Exception as e:
+                self.stats["x_errors"] += 1
+                warn(f"defence tightening failed: {e!r}")
+        return super()._facing_bet(c, s, legal, p)
 
     def _unfaced(self, c, s, legal, p):
         """Nothing to call, Tier 3 would check: with `x_stab` and an over-folder verdict, bet weak hands
