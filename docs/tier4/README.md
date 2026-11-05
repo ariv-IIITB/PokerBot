@@ -133,6 +133,8 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 | 73000–73999 | RF: fix the CFR river + RNR (diagnose and repair) |
 | 74000–74999 | O3C: O3 arm B confirmation on tier4/int |
 | 75000–75999 | L3: 3-bet-pot leak study |
+| 76000–76999 | O3C (local) |
+| 77000–77999 | H1: held-out bots study (cloud) |
 | 51000–51999 | PB redo (laptop) tuning; 52000–52999 its confirmations |
 | 53000–53999 | DA redo (laptop) tuning; 54000–54999 its confirmations |
 

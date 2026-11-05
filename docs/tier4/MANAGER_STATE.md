@@ -46,6 +46,7 @@ hardcode to bot names or constants (general adaptive rules). The `Opps/` bots ar
 - O3 arm C (`x_stab`) dropped (hurt lag). DB: no single discard rule, no bot reacts to our discard; `discard_mix`/`discard_eps` flat.
 
 ## Open leads and ideas (queue them yourself)
+- **User decisions 2026-11-05:** AD skipped (dropped). The held-out bots (conv_opp4, eqrandom, geometric) are released for study: cloud session H1 (branch `tier4/h1`, seeds 77000+) studies them O3-style with general adaptive fixes; the user builds a NEW blind set, which takes over the held-out role for I1.
 - **I1 waits until after the weekly usage reset (2026-11-08 ~09:30 IST), user decision 2026-11-04** (weekly limit 75% used then). Keep turns cheap until then.
 - After PS: keep or remove `tier4p`. After DC/AD/RF: merge confirmed pieces, then re-run the stack.
 - Exploit layer gaps (TRACK_X): station, preflop-folder and trapper moves not built. 3-bet pots we call lose ~19 chips/pot vs conv_opp3 and exploiter (postflop):
