@@ -1,0 +1,2 @@
+tier3x-nolock vs d_conv_opp4-nolock: +0.74 ± 0.18 chips/hand | match score 0.690 ± 0.046 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 651.4s (61/s)
+--- brain stats: tier3x-nolock: river_errors=0 river_fallbacks=1205 river_few_iters=1084 river_iters=414415 river_missing=0 river_no_pass=121 river_rnr=2044 river_shifted=0 river_solves=8284 river_us=175813963 t3_decisions=81468 t3_errors=0 t3_fallbacks=714 x_def=0 x_errors=0 x_narrowed=278 x_overfolder=2578 x_stabs=0 x_valueonly=1
