@@ -1,0 +1,11 @@
+d_conv_opp3 -0.45 -> +0.06  diff +0.51 ± 0.21 (z +2.4)  improved
+d_conv_opp4 +0.74 -> +0.90  diff +0.16 ± 0.25 (z +0.6)
+d_new_eqrandom +1.07 -> +1.42  diff +0.35 ± 0.22 (z +1.6)
+d_new_exploiter +0.05 -> +0.13  diff +0.08 ± 0.16 (z +0.5)
+d_new_geometric -0.36 -> -0.19  diff +0.17 ± 0.25 (z +0.7)
+d_new_lag +6.35 -> +6.96  diff +0.61 ± 0.43 (z +1.4)
+d_new_minraise +1.20 -> +1.19  diff -0.01 ± 0.16 (z -0.1)
+d_new_rules +0.13 -> +0.54  diff +0.41 ± 0.20 (z +2.1)  improved
+d_new_trapper +2.04 -> +1.86  diff -0.18 ± 0.23 (z -0.8)
+sum      diff +2.10 ± 0.74 (z +2.8)
+verdict: KEEP

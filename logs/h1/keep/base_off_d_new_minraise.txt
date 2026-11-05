@@ -1,0 +1,2 @@
+tier3x-nolock vs d_new_minraise-nolock: +1.20 ± 0.12 chips/hand | match score 0.760 ± 0.043 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 438.5s (91/s)
+--- brain stats: tier3x-nolock: river_errors=0 river_fallbacks=1417 river_few_iters=1289 river_iters=1403159 river_missing=0 river_no_pass=128 river_rnr=10666 river_shifted=0 river_solves=24506 river_us=524920561 t3_decisions=134407 t3_errors=0 t3_fallbacks=2302 x_def=0 x_errors=0 x_narrowed=509 x_overfolder=12846 x_stabs=0 x_valueonly=23789
