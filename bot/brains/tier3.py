@@ -18,8 +18,8 @@ the bluff index) with a different policy for the betting rounds:
 
 Every behaviour sits behind a flag in DEFAULTS and every number is a parameter, so `lab.eval
 tier3:{json}` can ablate and sweep it. If anything is missing (tables, a feature) or raises, the decision
-falls back to Tier 2's, so Tier 3 can never play worse than Tier 2 by crashing. With "t3": false it IS
-Tier 2. The default brain stays Tier 2 until the ship decision (docs/PART4_PLAN.md, G8).
+falls back to Tier 2's, so Tier 3 can never play worse than Tier 2 by crashing. With "t3": false it is
+Tier 2 plus DA's bot/config/tier3.json (smart rollouts, raise_equity): use `tier2` itself as a Tier 2 baseline. The default brain stays Tier 2 until the ship decision (docs/PART4_PLAN.md, G8).
 """
 from __future__ import annotations
 
@@ -203,7 +203,7 @@ class Tier3Brain(Tier2Brain):
     @classmethod
     def defaults(cls) -> dict[str, Any]:
         """Tier 2's parameters as Tier 2 loads them (its defaults + the shipped bot/config/tier2.json),
-        plus Tier 3's own keys: "t3": false then plays exactly like the shipped Tier 2."""
+        plus Tier 3's own keys and bot/config/tier3.json (DA): "t3": false is Tier 2 with DA's overrides."""
         base = load_params(Tier2Brain.param_file, Tier2Brain.defaults())
         base.update({k: (dict(v) if isinstance(v, dict) else v) for k, v in DEFAULTS.items()
                      if k not in TIER2_DEFAULTS})
@@ -609,8 +609,9 @@ class Tier3Brain(Tier2Brain):
             return None
         key = (float(p["river_opp_beta"]), float(p["river_opp_gamma"]))
         if getattr(self, "_ropp_key", None) != key:
-            self._ropp_key = key
+            # model before key: a SIGALRM deadline between the two stores then only forces a rebuild
             self._ropp = Inference(dict(self.opponent.base, enabled=True, beta=key[0], gamma=key[1]))
+            self._ropp_key = key
         return self._ropp
 
     @staticmethod

@@ -30,9 +30,8 @@ from bot.protocol import ActRequest, MatchEnd, MatchInfo, Message, ProtocolError
 from bot.protocols import ADAPTERS, DEFAULT, get_adapter
 from bot.protocols.base import as_messages
 from bot.state import GameState
-from bot.timing import DeadlineExceeded, Stopwatch, TimeManager, hard_deadline
+from bot.timing import DeadlineExceeded, Stopwatch, TimeManager, TimingConfig, hard_deadline
 
-RETRY_DEADLINE_S = 0.030   # the budget-0 retry in Bot.choose (Tier 3 needs ~1-2 ms there)
 
 # Brain registry: name -> "module:Class", imported lazily so startup stays fast.
 BRAINS = {
@@ -184,7 +183,7 @@ class Bot:
     def retry_cheap(self, legal: LegalActions) -> Action:
         self.deadline_retries += 1
         try:
-            with hard_deadline(RETRY_DEADLINE_S):
+            with hard_deadline(TimingConfig.retry_deadline_s):   # Tier 3 needs ~1-2 ms at budget 0
                 a = self.brain.decide(self.state, legal, 0.0)
             if isinstance(a, Action):                  # on_message validates and clamps it like any other
                 self.retry_wins += 1

@@ -764,6 +764,6 @@ def hand_ranks(evaluator, combos: np.ndarray, board: Sequence[int]) -> np.ndarra
         allk = np.concatenate([c["keys"], new_keys])
         allv = np.concatenate([c["val"], new_val])
         o = np.argsort(allk, kind="stable")
-        c["keys"], c["val"] = allk[o], allv[o]
+        c.update(keys=allk[o], val=allv[o])    # one C call: a SIGALRM deadline can't split keys from val
         pos = np.searchsorted(c["keys"], keys)
     return c["val"][pos]
