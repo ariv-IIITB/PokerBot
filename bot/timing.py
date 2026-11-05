@@ -42,6 +42,7 @@ class TimingConfig:
     default_reply_s: float = 5.0      # per-reply limit when the engine doesn't say
     river_budget_s: float = 0.040     # ceiling of the river solver's time box (Tier 3's t3_river_solver)
     river_box_mult: float = 3.9       # ...whose box is min(this x the decision budget, river_budget_s)
+    retry_deadline_s: float = 0.030   # the budget-0 brain retry after a deadline hit or error (bot/main.py retry_cheap)
 
 
 class TimeManager:
