@@ -1,0 +1,48 @@
+=== tier3 vs d_new_geometric 400 hands
+startup 251 ms (x2: 502 ms)
+400 hands, 1373 decisions: bank used 7.26s of 60s -> projected x2 = 14.51s (24% of bank)
+mean decision 5.29 ms, worst 19.2 ms (projected 38.3 ms); first decision incl. start-up overlap 288 ms
+=== tier3x vs d_new_geometric 400 hands
+startup 259 ms (x2: 517 ms)
+400 hands, 1328 decisions: bank used 10.04s of 60s -> projected x2 = 20.09s (33% of bank)
+mean decision 7.56 ms, worst 98.6 ms (projected 197.3 ms); first decision incl. start-up overlap 279 ms
+=== tier3x:{"x_def":0.5,"x_def_margin":0.05} vs d_new_geometric 400 hands
+startup 270 ms (x2: 540 ms)
+400 hands, 1366 decisions: bank used 10.55s of 60s -> projected x2 = 21.09s (35% of bank)
+mean decision 7.72 ms, worst 87.4 ms (projected 174.8 ms); first decision incl. start-up overlap 264 ms
+=== tier3 vs d_new_trapper 400 hands
+startup 268 ms (x2: 537 ms)
+400 hands, 1243 decisions: bank used 7.52s of 60s -> projected x2 = 15.03s (25% of bank)
+mean decision 6.05 ms, worst 16.8 ms (projected 33.6 ms); first decision incl. start-up overlap 253 ms
+=== tier3x vs d_new_trapper 400 hands
+startup 263 ms (x2: 525 ms)
+400 hands, 1283 decisions: bank used 11.85s of 60s -> projected x2 = 23.70s (39% of bank)
+mean decision 9.23 ms, worst 33.6 ms (projected 67.1 ms); first decision incl. start-up overlap 239 ms
+=== tier3x:{"x_def":0.5,"x_def_margin":0.05} vs d_new_trapper 400 hands
+startup 285 ms (x2: 570 ms)
+400 hands, 1257 decisions: bank used 11.19s of 60s -> projected x2 = 22.39s (37% of bank)
+mean decision 8.91 ms, worst 33.5 ms (projected 67.1 ms); first decision incl. start-up overlap 272 ms
+=== tier3 vs d_new_geometric 1000 hands
+startup 274 ms (x2: 547 ms)
+1000 hands, 3269 decisions: bank used 12.74s of 60s -> projected x2 = 25.47s (42% of bank)
+mean decision 3.90 ms, worst 145.6 ms (projected 291.3 ms); first decision incl. start-up overlap 277 ms
+=== tier3x vs d_new_geometric 1000 hands
+startup 248 ms (x2: 495 ms)
+1000 hands, 3331 decisions: bank used 19.21s of 60s -> projected x2 = 38.41s (64% of bank)
+mean decision 5.77 ms, worst 39.1 ms (projected 78.2 ms); first decision incl. start-up overlap 294 ms
+=== tier3x:{"x_def":0.5,"x_def_margin":0.05} vs d_new_geometric 1000 hands
+startup 250 ms (x2: 499 ms)
+1000 hands, 3280 decisions: bank used 19.17s of 60s -> projected x2 = 38.33s (64% of bank)
+mean decision 5.84 ms, worst 39.9 ms (projected 79.7 ms); first decision incl. start-up overlap 311 ms
+=== tier3 vs d_new_trapper 1000 hands
+startup 281 ms (x2: 562 ms)
+1000 hands, 3083 decisions: bank used 15.64s of 60s -> projected x2 = 31.28s (52% of bank)
+mean decision 5.07 ms, worst 33.5 ms (projected 67.0 ms); first decision incl. start-up overlap 365 ms
+=== tier3x vs d_new_trapper 1000 hands
+startup 291 ms (x2: 583 ms)
+1000 hands, 3081 decisions: bank used 23.91s of 60s -> projected x2 = 47.83s (80% of bank)
+mean decision 7.76 ms, worst 43.9 ms (projected 87.9 ms); first decision incl. start-up overlap 322 ms
+=== tier3x:{"x_def":0.5,"x_def_margin":0.05} vs d_new_trapper 1000 hands
+startup 374 ms (x2: 748 ms)
+1000 hands, 3091 decisions: bank used 23.00s of 60s -> projected x2 = 46.01s (77% of bank)
+mean decision 7.44 ms, worst 50.7 ms (projected 101.5 ms); first decision incl. start-up overlap 334 ms
