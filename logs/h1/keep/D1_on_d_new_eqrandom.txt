@@ -1,0 +1,1 @@
+tier3x[{"x_def":0.5,"x_def_margin":0.05}] vs d_new_eqrandom: +0.25 ± 0.06 chips/hand | match score 0.840 ± 0.037 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 518.1s (77/s)
