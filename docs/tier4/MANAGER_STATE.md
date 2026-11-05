@@ -46,6 +46,7 @@ hardcode to bot names or constants (general adaptive rules). The `Opps/` bots ar
 - O3 arm C (`x_stab`) dropped (hurt lag). DB: no single discard rule, no bot reacts to our discard; `discard_mix`/`discard_eps` flat.
 
 ## Open leads and ideas (queue them yourself)
+- **I1 timing (found 2026-11-05):** `lab.timing_bench` projects x2 linearly, which overstates the D4 solver (it fills a wall-clock box): tier3x vs calling_station 15.3 s vs tier3 8.65 s at x1 (ratio 1.77, "51 % at x2"); d_new_trapper 9.4 vs 5.5 (1.69). RF's `lab/rc_ratio.py` (clock_scale 2, box halved) gives x1.17-1.36. I1 must use the clock_scale-2 harness for the ratio AND add `tier3x` to `tests/test_timing_slow.py` (it only covers tier3/tier2). If the real-2x figure for station is > 45 % of the bank, lower `river_box_mult`.
 - **User decisions 2026-11-05:** AD skipped (dropped). The held-out bots (conv_opp4, eqrandom, geometric) are released for study: cloud session H1 (branch `tier4/h1`, seeds 77000+) studies them O3-style with general adaptive fixes; the user builds a NEW blind set, which takes over the held-out role for I1.
 - **I1 waits until after the weekly usage reset (2026-11-08 ~09:30 IST), user decision 2026-11-04** (weekly limit 75% used then). Keep turns cheap until then.
 - After PS: keep or remove `tier4p`. After DC/AD/RF: merge confirmed pieces, then re-run the stack.

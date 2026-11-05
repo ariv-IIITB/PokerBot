@@ -77,7 +77,7 @@ Source: `docs/rules/SUMMARY.md`. *(prov.)* = provisional, may change before the 
   (one adapter per format). Brains see only neutral objects (state, legal actions, budget).
 - `lab/` is offline tooling, never submitted; it may use anything in the dev venv.
 - Safety, three layers: (1) brain in try/except → Tier 0 on error; (2) every action
-  validated + clamped before sending; (3) hard deadline / emergency mode → Tier 0.
+  validated + clamped before sending; (3) hard deadline or brain error → one retry of the brain at budget 0 (RC, `bot/main.py` `retry_cheap`), then Tier 0; emergency mode → Tier 0.
   The main loop never lets an exception escape (clean exit on EOF only).
 - macOS uses `spawn` for multiprocessing: `if __name__ == "__main__":` guards and
   picklable top-level worker functions.
