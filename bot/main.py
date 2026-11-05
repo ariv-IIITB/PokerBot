@@ -38,10 +38,10 @@ BRAINS = {
     "tier0": "bot.brains.tier0:Tier0Brain",
     "tier1": "bot.brains.tier1:Tier1Brain",
     "tier2": "bot.brains.tier2:Tier2Brain",
-    "tier3": "bot.brains.tier3:Tier3Brain",        # Phase G; the default since G8
-    "tier3x": "bot.brains.tier3x:Tier3XBrain",     # Tier 3 + the exploit layer (build map X3); not the default
+    "tier3": "bot.brains.tier3:Tier3Brain",        # Phase G; plain Tier 3 (no exploit layer, no river solver)
+    "tier3x": "bot.brains.tier3x:Tier3XBrain",     # Tier 3 + exploit layer + O3 rules + river solver: the default
 }
-DEFAULT_BRAIN = "tier3"    # Phase G8 (2026-10-30): Tier 3 passed the ship checks (docs/reports/TIER3.md)
+DEFAULT_BRAIN = "tier3x"   # was tier3 (G8, 2026-10-30); tier3x since 2026-11-05 so a package built without --brain is not the worse bot
 
 
 def load_brain(name: str) -> Brain:

@@ -41,7 +41,7 @@ Source: `docs/rules/SUMMARY.md`. *(prov.)* = provisional, may change before the 
 - Randomness is allowed. No state is kept between matches (fresh process per match).
 - **Submission:** `python3.11 bot.py`; a single `bot.py`, or a `.zip` with `bot.py` at the top
   level, ≤ 5 MB including any tables. Build + verify: `.venv/bin/python -m tools.package_submission --zip --stage2`
-  (writes `dist/submission.zip`; all checks run on the unpacked zip).
+  (writes `dist/submission.zip`; all checks run on the unpacked zip). The packaged default brain is `bot.main.DEFAULT_BRAIN` = `tier3x` (Tier 3 + exploit layer + O3 rules + river solver); pass `--brain tier3` only to ship plain Tier 3 on purpose.
 - **Scoring:** every deal is played twice with seats swapped (the bot isn't told which deals are pairs).
   The match is won by the bot with more net chips: win 1, draw 0.5, loss 0. Tie-break: capped chips
   per hand Σ clip(Δm, −C, C) / Σ Hm, with C = 400 (Stage 1) and 1000 (Stage 2) *(prov.)*. We
