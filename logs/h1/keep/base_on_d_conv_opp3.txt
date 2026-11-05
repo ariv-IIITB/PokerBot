@@ -1,0 +1,1 @@
+tier3x vs d_conv_opp3: -0.73 ± 0.14 chips/hand | match score 0.570 ± 0.050 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 507.5s (79/s)

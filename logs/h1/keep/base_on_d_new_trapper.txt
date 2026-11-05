@@ -1,0 +1,1 @@
+tier3x vs d_new_trapper: +0.54 ± 0.10 chips/hand | match score 0.920 ± 0.027 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 559.8s (71/s)
