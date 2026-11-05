@@ -1,0 +1,1 @@
+tier3x[{"x_def":0.5,"x_def_margin":0.05}]-nolock vs d_new_minraise-nolock: +1.20 ± 0.16 chips/hand | match score 0.767 ± 0.055 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 258.4s (93/s)
