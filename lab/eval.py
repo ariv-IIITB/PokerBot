@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import math
 import re
 import sys
@@ -100,6 +101,12 @@ def _pool_file(which: str, final: bool) -> list[str]:
 
 
 def opponent_spec(name: str, locks: str) -> PlayerSpec:
+    if name.startswith("remote:"):              # remote:PORT, a friend's bot on another machine (docs/REMOTE_PLAY.md)
+        if not os.environ.get("REMOTE_TOKEN"):
+            raise SystemExit("remote opponents need REMOTE_TOKEN set (the secret shared with your friend)")
+        port = name.split(":", 1)[1]
+        return PlayerSpec.subprocess([sys.executable, "-m", "lab.remote_seat", "--port", port],
+                                     label=f"remote{port}", protocol="pokerbots")
     if name == "starter":                       # the organisers' starter bot, over the real protocol
         return PlayerSpec.subprocess([sys.executable, str(ROOT / "lab" / "sparring" / "starter_bot.py")],
                                      label="starter", protocol="pokerbots")
@@ -115,6 +122,8 @@ def run_pool(brain: str, pool: list[str], pairs: int, variant: str = DEFAULT_VAR
              processes: Optional[int] = None) -> list[str]:
     """Play `pairs` duplicate pairs against each opponent; returns the output lines."""
     from lab.opps import track
+    if any(o.startswith("remote:") for o in pool):
+        processes = 1                           # one friend, one port: matches must run one at a time
     a = parse_brain(brain, locks)
     cfg = load_variant(variant)
     want_track = bool(report) or check_profile
