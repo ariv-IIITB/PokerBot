@@ -1,0 +1,2 @@
+tier3x-nolock vs d_new_lag-nolock: +6.35 ± 0.29 chips/hand | match score 0.940 ± 0.024 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 656.3s (61/s)
+--- brain stats: tier3x-nolock: river_errors=0 river_fallbacks=4897 river_few_iters=3669 river_iters=804031 river_missing=0 river_no_pass=1228 river_rnr=7510 river_shifted=0 river_solves=17496 river_us=374324151 t3_decisions=127489 t3_errors=0 t3_fallbacks=10759 x_def=0 x_errors=0 x_narrowed=2384 x_overfolder=0 x_stabs=0 x_valueonly=5
