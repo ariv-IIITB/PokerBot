@@ -17,8 +17,11 @@ Rejected: preflop chart, match-win layer, portfolio `tier4p` (flat on top of O3)
 1. **Repo not yet updated for the new rules (do first):** `variant/catalog/discard_holdem.json` and `variant/active.json` still say 400 hands / 60 s: set 200 hands / 30 s (a leg), run
    `.venv/bin/python -m tools.embed_data`, check `tools/package_submission.py` smoke checks, `lab/timing_bench.py` and `tests/test_timing_slow.py` use the leg format,
    update `docs/rules/SUMMARY.md` and the hard-constraint lines of `CLAUDE.md` (they still say 60 s/400 hands, one process per match). Fast suite after.
-2. **Starter kit with `engine.py`:** the user said they would upload it; it did NOT arrive (only the three PDFs). Ask for it. Then run the packaged bot through the real engine
-   for a full two-leg Stage 1 match (the true final check) and compare with our lab's behaviour.
+2. **Official starter kit is now in `starter_kit/`** (organisers' `engine.py` local match runner, `bot.py`, `example_bots/random_bot.py`, README; its PDFs are identical to `docs/rules/`).
+   Not run yet (read it before running; it spawns the bots as subprocesses). Run: `python3.11 starter_kit/engine.py <our bot.py> starter_kit/example_bots/random_bot.py` (Stage 1, two legs of 200
+   hands, `--stage 2` for 2 x 500, `--seed S`, `--log-dir`). Build our package first (`.venv/bin/python -m tools.package_submission --zip --stage2`, unpack `dist/submission.zip`) and run its `bot.py`
+   through this engine: that is the true final check (zero notices, inside the per-leg bank). Also play our bot against `lab/sparring/starter_bot.py` and the `Opps/discard/*` bots through it.
+   Our lab engine should be compared with it (e.g. same seeds) to confirm the two-leg format and timing behave the same. The engine's hand evaluator may be reused (Rulebook 10.1).
 3. **Final check vs all bots, in the new format** (killed after 5 of 16 at the old 400-hand format; those 5 are in `logs/final/old400/`: conv_opp3 -0.56 score .650; exploiter -0.26 .662;
    lag +0.12 .975; rules -0.13 .762; trapper +0.61 .912; 40 pairs, locks on). Rerun with `--hands 200 --bank 30`, ~80 pairs, brain `tier3x`: training bots, simple bots
    (calling_station tight maniac random_legal all_in starter tier1), held-out (d_conv_opp4 d_new_eqrandom d_new_geometric, `--final`; released for study by the user), then plain
