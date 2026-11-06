@@ -98,7 +98,7 @@ class Tier3XBrain(Tier3Brain):
         if a is not None and a.kind == RAISE:
             return a
         try:
-            lam = overfolder_lambda(self.opponent.traits, p["x_ramp"])
+            lam = overfolder_lambda(self.opponent.traits, p["x_ramp"], p.get("x_of_tr", True), self.opponent.types, p)
             if lam > 0.0:
                 fold = self.opponent.spots.spots[STREET_SPOT[c.street]].mean()
                 if self._chance(stab_prob(fold, float(p["x_stab_size"]), lam, float(p["x_stab_span"]))):

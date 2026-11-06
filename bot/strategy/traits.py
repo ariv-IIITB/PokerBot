@@ -7,6 +7,10 @@ the other rate; an alarm makes the trait undecided again and restarts it, so a b
 style is noticed.
 
   overfolder      folds, per decision facing our postflop bet or raise      0.40 vs 0.60
+  overfolder_tr   the same, turn and river only (un-pooled from the flop:
+                  a bot's true rate there can sit far from either, diluting
+                  the pooled test; the exploit layer takes whichever test
+                  decides first)                                            0.40 vs 0.60
   station         continues (calls or raises), per decision facing our
                   river bet or raise                                        0.50 vs 0.80
   preflop_folder  folds to our preflop open (our first-in raise)            0.35 vs 0.55
@@ -40,6 +44,7 @@ class TraitSpec:
 
 SPECS: dict[str, TraitSpec] = {
     "overfolder": TraitSpec(0.40, 0.60, 0.40),
+    "overfolder_tr": TraitSpec(0.40, 0.60, 0.40),
     "station": TraitSpec(0.50, 0.80, 0.50),
     "preflop_folder": TraitSpec(0.35, 0.55, 0.35),
 }
@@ -75,6 +80,8 @@ def observations(ev: Event) -> dict[str, bool]:
     out: dict[str, bool] = {}
     if ev.facing and ev.street >= 1:
         out["overfolder"] = ev.kind == "F"
+        if ev.street >= 2:
+            out["overfolder_tr"] = ev.kind == "F"
         if ev.street == 3:
             out["station"] = ev.kind in ("C", "R")
     if ev.vs_open:

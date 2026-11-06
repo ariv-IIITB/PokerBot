@@ -588,7 +588,7 @@ class Tier3Brain(Tier2Brain):
         q = {**EXPLOIT_DEFAULTS, **p}
         kinds = [k for k, _ in labels]
         out = probs.copy()
-        lam_of = overfolder_lambda(self.opponent.traits, q["x_ramp"])
+        lam_of = overfolder_lambda(self.opponent.traits, q["x_ramp"], q.get("x_of_tr", True), self.opponent.types, q)
         lam_vo = valueonly_lambda(self.opponent.types, q)
         bets = [i for i, k in enumerate(kinds) if k == RAISE]
         if CHECK in kinds and bets and lam_of > 0 and pct < 0.35:
