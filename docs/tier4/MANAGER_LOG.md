@@ -64,6 +64,16 @@
 - (4) H1 (x_def) confirmation launched in the background at the new per-leg sizes (logs/final/h1conf.sh, fixed to --hands 200 --bank 30): tier3x vs
   tier3x:{"x_def":0}, chips locks-off 100 pairs then score locks-on 50 pairs, 9 bots, seeds 81000+. Will revert H1 (default x_def back to 0) if the sum isn't
   clearly up once this lands.
-- Next after H1 lands: (5) look at re-tuning the exploit layer's adaptation speed for 200-hand legs (x_ramp, the 0.8 posterior / 60-observation gates), given
-  the degradation found above against exploiter/trapper/conv_opp3 — this is the main lever the new rules put in play. Likely compute-heavy enough to hand to a
-  Sonnet sub-session rather than do inline.
+- (5) User asked to attack the adaptation-speed problem directly: started two parallel sub-sessions. ADT (hand-tune x_ramp/x_vo_min_obs/ALPHA-BETA directly,
+  seeds 82000s) finished: **NO-GO on everything**, verified (branch claude/adt-ac9719 / tier4/adt, on tier4/int 4b3dbc3, handoff docs/tier4/handoff/ADT.md,
+  fast suite green, tree clean, nothing merged). Diagnosis is the useful part: d_new_exploiter's bottleneck is a partial lambda ramp (x_ramp-fixable in
+  principle, but x_ramp 8/12/5 all washed to noise at n=60); d_conv_opp3's SPRT never reaches a verdict in 60% of 200-hand legs (not fixable by nudging
+  thresholds: ALPHA/BETA 0.05->0.10 only got it to 10/20 legs deciding, flat pool sum, and caused a feedback-loop side effect — looser alpha changes our own
+  early play enough to reduce conv_opp3's OWN value-only (X2) convergence, 0/20 legs vs 4/20 at baseline); d_new_trapper's .912->.800 drop isn't an X1/X2
+  timing problem at all (its traits/posterior already ramp fine) — needs its own diagnosis (x_narrow/x_def, or might just be the original 40-pair number's
+  noise, no SE was reported for it). ADT's suggested next lever: embed priors from logs/records/s0_9000 for conv_opp3 (changes hand-0 knowledge, not
+  learning speed) rather than more threshold tuning.
+  AD2 (revive+generalize the abandoned "AD" length-scaling machinery, bot/strategy/adapt.py, for legs shorter than the 400-hand reference too, seeds
+  83000s) is running in parallel on its own branch (tier4/ad2) — ported and passing the fast suite, not confirmed yet. Its core lever (loosening the SPRT's
+  alpha/beta, via a length factor) is mechanically close to ADT's lever 3, which just came back NO-GO with that feedback-loop warning — flagged to it.
+  User wants both compared, best one (or a merge of both) taken. Neither merged into tier4/int yet.
