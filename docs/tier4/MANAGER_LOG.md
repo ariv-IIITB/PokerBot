@@ -50,6 +50,20 @@
 - Step 3 launched in the background (logs/final/run.sh, nohup-equivalent): tier3x vs LLM+simple+held-out pools (40 pairs, seeds 80000+, locks on, --hands 200
   --bank 30), then plain tier3 on the 6 LLM bots for the delta. Results land under logs/final/<brain>__<opp>.txt as each finishes; logs/final/ALL_DONE when the
   whole matrix is done. Not yet looked at.
-- Next after step 3 lands: (4) H1 (x_def) confirmation at the new per-leg sizes (logs/final/h1conf.sh, already fixed to --hands 200 --bank 30) — revert H1 if the
-  sum isn't clearly up. (5) Re-measure adaptation speed at 200 hands (the exploit layer was tuned assuming ~100-300 hands to reach full strength in one process;
-  now it only gets 200 before a fresh restart) before trusting any number carried over from the 400-hand era.
+- Step 3 landed (logs/final/, 40 pairs, seeds 80000+, locks on, --hands 200 --bank 30, zero errors/forfeits everywhere): tier3x's match score vs EVERY bot in
+  the pool, training + held-out + simple, stayed above 0.5 (worst: d_new_exploiter 0.575, d_conv_opp3 0.625; best: the simple bots and d_new_lag at 0.96-1.00).
+  tier3x beats plain tier3 on every one of the 9 LLM bots (chips and score both up or flat; exploiter's score alone crosses 0.463 -> 0.575, i.e. tier3 loses that
+  match, tier3x wins it). Current default stays a clean ship candidate under the new rules.
+  BUT: comparing to the old-format partial run (logs/final/old400/, same 40 pairs/seeds, 400 hands in one process) shows the halved per-leg hand count hurts the
+  bots the exploit layer is slowest to read: d_new_exploiter score .662->.575 and chips -0.26->-0.57 (worse on both), d_new_trapper .912->.800 and chips
+  +0.61->+0.25 (worse), d_conv_opp3 .650->.625 and chips -0.56->-0.66 (slightly worse); d_new_lag flat (.975->.963) and d_new_rules slightly better
+  (.762->.800) are not hurt. This is exactly the adaptation risk the retired manager flagged (item 5): the exploit layer needed ~100 hands vs exploiter and
+  ~300 vs conv_opp3 to reach full strength in one continuous process: at 200 hands/leg it's cut short against the slow-to-read bots, especially conv_opp3's
+  300-hand estimate. Not a ship blocker (score still > 0.5 everywhere) but a real, measured degradation worth fixing: re-tuning x_ramp/the posterior gates for
+  200 hands (HANDOFF_NEXT idea c) is the most promising next lever, since it directly shortens the read time the exploit layer needs.
+- (4) H1 (x_def) confirmation launched in the background at the new per-leg sizes (logs/final/h1conf.sh, fixed to --hands 200 --bank 30): tier3x vs
+  tier3x:{"x_def":0}, chips locks-off 100 pairs then score locks-on 50 pairs, 9 bots, seeds 81000+. Will revert H1 (default x_def back to 0) if the sum isn't
+  clearly up once this lands.
+- Next after H1 lands: (5) look at re-tuning the exploit layer's adaptation speed for 200-hand legs (x_ramp, the 0.8 posterior / 60-observation gates), given
+  the degradation found above against exploiter/trapper/conv_opp3 — this is the main lever the new rules put in play. Likely compute-heavy enough to hand to a
+  Sonnet sub-session rather than do inline.
