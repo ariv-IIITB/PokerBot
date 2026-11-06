@@ -29,3 +29,16 @@
 - 2026-11-05 04:18 RF handoff verified (origin/tier4/rf d7f0313, on int): D4 KEEP. MERGED into tier4/int and switched on in tier3x defaults (plain tier3 unchanged); embed regenerated; fast suite 1351 passed; smoke vs calling_station: 185 solves, 0 errors/fallbacks. tier4/int now = tier3x + DA + O3 arm B + RC retry + RF D4. Next: I1 after the usage reset (2026-11-08); AD paused.
 - 2026-11-05 10:13 USER: skip AD. Held-out bots released for study; new blind set coming. Requested cloud session H1 (task_82525173, branch tier4/h1, seeds 77000+): tier3x vs held-out baseline, O3-style mechanisms, general adaptive fixes, KEEP on held-out + training + score + guard + timing. Cloud: read origin/tier4/h1, no messages.
 - 2026-11-05 10:56 /ultrareview items: fixed (1) deadline-split river caches, (3)(4) docstrings, (7) CLAUDE.md safety text; skipped (2) 52-card constant (not live), (5)(6) cosmetic. Timing finding for I1 written in MANAGER_STATE (timing_bench x2 projection overstates the solver; use rc_ratio, add tier3x to test_timing_slow).
+- 2026-11-06 (new manager, taking over after the retired one's handoff) Read HANDOFF_NEXT/RULE_CHANGES/MANAGER_STATE/MANAGER_LOG/README/starter_kit. New rules (two legs of
+  200/500 hands, 30s/75s bank per leg, fresh process per leg) confirmed (RULE_CHANGES_2026-11-06.md, starter_kit/README.md).
+- Step 1 done, pushed (434026d): variant/active.json + the discard_holdem catalog to 200 hands/30s; embed_data, package_submission's --stage2 check (500h/75s),
+  lab.timing_bench docstrings, tests/test_timing_slow.py + test_river_timing.py (slow) to the leg sizes; SUMMARY.md + CLAUDE.md hard-constraint lines rewritten for two
+  fresh-process legs (also: files may now be read inside the bot's own submission). Fast suite 1359 passed; slow timing/river tests green at the new sizes.
+  Found + fixed in passing: spec_hash() hashed match.hands/time_bank_s, so the hands=400->200 edit invalidated every precomputed artifact (equity tables, opponent type
+  library) though match length can't affect card equity; excluded those two fields and patched the stale spec_hash in data/discard_holdem/{meta,types}.json. Caught because
+  a first embed_data run silently dropped ARTIFACTS (bot/embedded.py fell from 199 KB to 4 KB) — always check the file size/ARTIFACTS block after regenerating.
+- package_submission --zip --stage2's own timing check flags tier3x vs starter 52%/51% (cap 50%): confirmed this is the already-known timing_bench linear-2x-projection
+  overstatement (MANAGER_STATE "I1 timing"), not a new regression — the accurate clock_scale=2 measurement (box halved) gives ratio 1.32 vs starter, within the 1.4 limit.
+  Left for I1 to fix the check's methodology (use the clock_scale-2 harness), as already planned. Not blocking.
+- Next: (2) run the packaged bot through starter_kit/engine.py for a real two-leg match (the true final check) vs random_bot, starter_bot, Opps/discard/*; compare with
+  the lab engine on the same seeds. Then (3) final check vs all bots at --hands 200 --bank 30, (4) H1 confirmation, (5) adaptation-under-200-hands measurement.
