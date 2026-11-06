@@ -11,7 +11,7 @@ run() { # tag locks pairs arm bot
   f="$OUT/${tag}_${arm}_${bot}.txt"; [ -s "$f" ] && return
   extra=""; case $bot in d_conv_opp4|d_new_eqrandom|d_new_geometric) extra="--final";; esac
   flock /tmp/pokerbot_turnstile.lock true
-  nice -n 15 flock -s /tmp/pokerbot_laptop.lock $PY -m lab.eval "$brain" --pool $bot --pairs $pairs --first-seed 81000 --locks $locks --variant discard_holdem --processes 3 $extra > "$f.tmp" 2>&1 && mv "$f.tmp" "$f"
+  nice -n 15 flock -s /tmp/pokerbot_laptop.lock $PY -m lab.eval "$brain" --pool $bot --pairs $pairs --first-seed 81000 --hands 200 --bank 30 --locks $locks --variant discard_holdem --processes 3 $extra > "$f.tmp" 2>&1 && mv "$f.tmp" "$f"
 }
 for bot in $BOTS; do run chips off 100 on $bot; run chips off 100 off $bot; done
 for arm in on off; do cat $OUT/chips_${arm}_*.txt | grep " vs " > $OUT/chips_${arm}_ALL.txt; done
