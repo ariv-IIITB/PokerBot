@@ -1,0 +1,1 @@
+tier3x vs d_new_rules: -0.13 ± 0.09 chips/hand | match score 0.762 ± 0.048 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 32000 hands in 115.0s (278/s)
