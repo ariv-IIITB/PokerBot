@@ -86,3 +86,12 @@
   classic noise signature (cf. ADT's x_ramp n=30->n=60 wash), not a real signal. **AD2 dropped**: session stopped, worktree and branch
   (claude/ad2-2976f1) deleted, nothing was merged or pushed. OVF remains the live lever for the adaptation-speed problem (principled zero-drift-SPRT fix,
   extending its own n=30 result to n=60).
+- (7) **Speculative merge, user decision 2026-11-06:** ovf's combined fix (overfolder_tr, "fix 2", + X2 type-posterior bridge via x_oft_*, "fix 1")
+  merged into tier4/int (69c8606/f8b33c0) ahead of its own confirmation, on the user's explicit call ("push it, we can remove it later"). Status at merge
+  time: fix-2-alone n=60 was flat at the chip level (sum +0.28±0.80, z 0.35) despite a verified real decision-speed win (overfolder_tr decides 57/60 legs
+  by hand 71 vs the pooled test's 42/60 by hand 99); the combined fix1+fix2 n=30 looked more promising (conv_opp3 -0.17->+0.62, pool sum +1.27±1.17) but
+  is NOT YET confirmed at n=60 — that run is still in progress in ovf's own worktree (seeds 84000s). Both `x_of_tr` and `x_oft_enabled` default to True,
+  so this is now live in tier4/int's default `tier3x` behaviour pending that confirmation. Fast suite green post-merge (1362 passed, 2 skipped; one
+  `test_river_solver.py` timing test flaked under shared-laptop load from ovf's concurrent eval run, passed clean in isolation — not a regression).
+  **Revert plan if ovf's n=60 doesn't hold up:** `git revert f8b33c0` on tier4/int (clean single merge commit, should revert cleanly since nothing else
+  has touched these files since).
