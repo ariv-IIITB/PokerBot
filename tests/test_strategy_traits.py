@@ -93,8 +93,10 @@ def test_classify_reads_the_context_of_the_last_opponent_action() -> None:
 
 
 def test_observations_map_events_to_traits() -> None:
-    assert T.observations(T.Event(3, "C", True, False)) == {"overfolder": False, "station": True}
+    assert T.observations(T.Event(3, "C", True, False)) == {
+        "overfolder": False, "overfolder_tr": False, "station": True}
     assert T.observations(T.Event(1, "F", True, False)) == {"overfolder": True}
+    assert T.observations(T.Event(2, "F", True, False)) == {"overfolder": True, "overfolder_tr": True}
     assert T.observations(T.Event(0, "F", True, True)) == {"preflop_folder": True}
     assert T.observations(T.Event(2, "R", False, False)) == {}
 
@@ -158,6 +160,17 @@ def test_overfolders_are_caught(name: str, budget: int) -> None:
     v = verdicts(name, "overfolder")
     assert all(final == "yes" for final, _ in v), v
     assert sorted(h for _, h in v)[len(v) // 2 - 1] <= budget, v     # lower median within budget
+
+
+def test_overfolder_tr_decides_no_slower_than_the_pooled_test_for_conv_opp3() -> None:
+    """conv_opp3 folds far more on turn/river than flop (O3 study): un-pooling the flop out of
+    the trait (overfolder_tr) must not decide later than the pooled "overfolder" test on any
+    fixture match, and should usually decide sooner."""
+    pooled = verdicts("d_conv_opp3", "overfolder")
+    tr = verdicts("d_conv_opp3", "overfolder_tr")
+    assert all(f == "yes" for f, _ in tr), tr
+    assert all(h_tr <= h_pooled for (_, h_pooled), (_, h_tr) in zip(pooled, tr)), (pooled, tr)
+    assert sorted(h for _, h in tr)[len(tr) // 2 - 1] <= 100, tr
 
 
 @pytest.mark.parametrize("name", ["starter", "calling_station", "d_new_lag", "maniac"])

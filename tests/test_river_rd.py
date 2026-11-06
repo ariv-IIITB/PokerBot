@@ -20,7 +20,7 @@ def test_shifts_do_nothing_without_evidence():
 
 def test_shifts_move_the_right_way(monkeypatch):
     b = Tier3Brain()
-    monkeypatch.setattr(t3, "overfolder_lambda", lambda tr, ramp: 1.0)
+    monkeypatch.setattr(t3, "overfolder_lambda", lambda tr, ramp, use_tr=True, types=None, p=None: 1.0)
     monkeypatch.setattr(t3, "valueonly_lambda", lambda ty, q: 1.0)
     bluff = b._river_shift(np.array([0.9, 0.05, 0.05]), UNFACED, 0.1, b.p)
     assert bluff[1] + bluff[2] > 0.1 and abs(bluff.sum() - 1) < 1e-9          # a weak hand bets more
