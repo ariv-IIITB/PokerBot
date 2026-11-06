@@ -77,3 +77,12 @@
   83000s) is running in parallel on its own branch (tier4/ad2) — ported and passing the fast suite, not confirmed yet. Its core lever (loosening the SPRT's
   alpha/beta, via a length factor) is mechanically close to ADT's lever 3, which just came back NO-GO with that feedback-loop warning — flagged to it.
   User wants both compared, best one (or a merge of both) taken. Neither merged into tier4/int yet.
+- (6) H1 confirmation landed (seeds 81000+, 200h/30s): chips (locks off, 100 pairs/bot) ON-minus-OFF sums to +0.28 chips/hand over the 9 bots, score
+  (locks on, 50 pairs/bot) sums to +0.08 match-score over the 9 bots — both near zero, mixed signs (conv_opp4/lag worse on chips; conv_opp4/rules worse on
+  score), nothing past 2SE either way on any single bot. Not clearly up -> **reverted H1**: `x_def` default back to 0.0 in `bot/brains/exploit.py`
+  (`EXPLOIT_DEFAULTS`), `tests/test_exploit.py::test_x_def_on_by_default` renamed/flipped to `test_x_def_off_by_default`. Fast suite green (1359 passed, 2
+  skipped). AD2 checked against its own baseline (n=60, seeds 83000s): `x_len_push` is non-monotonic on d_conv_opp3 (-0.23 baseline -> +0.19 at push=0.5,
+  +0.16 at push=1.0, but -0.41 at push=1.5 — should get *better* with more push if the lever were real) and drifts d_new_lag/d_new_trapper slightly worse —
+  classic noise signature (cf. ADT's x_ramp n=30->n=60 wash), not a real signal. **AD2 dropped**: session stopped, worktree and branch
+  (claude/ad2-2976f1) deleted, nothing was merged or pushed. OVF remains the live lever for the adaptation-speed problem (principled zero-drift-SPRT fix,
+  extending its own n=30 result to n=60).
