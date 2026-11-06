@@ -135,6 +135,11 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 | 75000–75999 | L3: 3-bet-pot leak study |
 | 76000–76999 | O3C (local) |
 | 77000–77999 | H1: held-out bots study (cloud) |
+| 80000–80999 | final-check (200h/30s, locks on) |
+| 81000–81999 | H1 confirmation at 200h/30s (reverted NO-GO) |
+| 82000–82999 | ADT: x_ramp/x_vo_min_obs/ALPHA-BETA tuning (NO-GO, closed) |
+| 83000–83999 | AD2: x_len length-scaling (dropped as noise) |
+| 90000–90999 | LC: stacked-layer sabotage check + new optimization ideas |
 | 51000–51999 | PB redo (laptop) tuning; 52000–52999 its confirmations |
 | 53000–53999 | DA redo (laptop) tuning; 54000–54999 its confirmations |
 
