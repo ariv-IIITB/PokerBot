@@ -40,5 +40,16 @@
 - package_submission --zip --stage2's own timing check flags tier3x vs starter 52%/51% (cap 50%): confirmed this is the already-known timing_bench linear-2x-projection
   overstatement (MANAGER_STATE "I1 timing"), not a new regression — the accurate clock_scale=2 measurement (box halved) gives ratio 1.32 vs starter, within the 1.4 limit.
   Left for I1 to fix the check's methodology (use the clock_scale-2 harness), as already planned. Not blocking.
-- Next: (2) run the packaged bot through starter_kit/engine.py for a real two-leg match (the true final check) vs random_bot, starter_bot, Opps/discard/*; compare with
-  the lab engine on the same seeds. Then (3) final check vs all bots at --hands 200 --bank 30, (4) H1 confirmation, (5) adaptation-under-200-hands measurement.
+- Step 2 done: packaged bot (dist/submission/bot.py) run through starter_kit/engine.py (the organisers' real local runner) for full two-leg matches vs
+  random_bot (seed 1, +337/-337, 0.00s/0.00s used), lab's starter_bot (seed 2, +435/-435), Opps/discard/new_exploiter (seed 3, -161/+161, 2.25s/4.84s used, B wins
+  — single seed, not a quality signal) and a --stage 2 (1000-hand) run vs random_bot (seed 4, +673/-673). All four: zero notices, well inside the per-leg bank and
+  wall clock. "0.00s used" vs weak opponents is correct, not a bug: the whole 200-hand leg finishes inside the 5s per-leg start-up grace, so nothing gets charged.
+- Found before starting the real final check: logs/final/run.sh and h1conf.sh passed no --hands/--bank, so they'd have defaulted to lab.eval's stale --hands 400
+  against the active spec's new 30s bank — starved pacing, not the new rules' 200-hand leg. Fixed (f6107b1): both now pass --hands 200 --bank 30 explicitly.
+  Recreated .claude/worktrees/final-check at tier4/int HEAD (db850f1; it was still pinned at 076d253, pre-rules-update).
+- Step 3 launched in the background (logs/final/run.sh, nohup-equivalent): tier3x vs LLM+simple+held-out pools (40 pairs, seeds 80000+, locks on, --hands 200
+  --bank 30), then plain tier3 on the 6 LLM bots for the delta. Results land under logs/final/<brain>__<opp>.txt as each finishes; logs/final/ALL_DONE when the
+  whole matrix is done. Not yet looked at.
+- Next after step 3 lands: (4) H1 (x_def) confirmation at the new per-leg sizes (logs/final/h1conf.sh, already fixed to --hands 200 --bank 30) — revert H1 if the
+  sum isn't clearly up. (5) Re-measure adaptation speed at 200 hands (the exploit layer was tuned assuming ~100-300 hands to reach full strength in one process;
+  now it only gets 200 before a fresh restart) before trusting any number carried over from the 400-hand era.
