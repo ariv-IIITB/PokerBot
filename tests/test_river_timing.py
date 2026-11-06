@@ -36,7 +36,7 @@ def run(flag: bool, hands: int, bank: float, opponent: str):
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("hands,bank", [(400, 60.0), (1000, 150.0)])
+@pytest.mark.parametrize("hands,bank", [(200, 30.0), (500, 75.0)])
 @pytest.mark.parametrize("opponent", ["calling_station", "d_new_trapper"])
 def test_river_solver_bank_use_and_deadline_hits_at_2x(hands, bank, opponent) -> None:
     m0, bot0, _ = run(False, hands, bank, opponent)

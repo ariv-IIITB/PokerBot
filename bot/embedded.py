@@ -3,15 +3,15 @@
 Regenerate with:  .venv/bin/python -m tools.embed_data
 Checked by tests/test_embed.py; see tools/embed_data.py for the layout.
 """
-SOURCES = {'spec (variant/active.json)': '96f3a316bb36f86f',
+SOURCES = {'spec (variant/active.json)': '49302e549d382b9b',
  'bot/config/tier1.json': '4550edd7edb53427',
  'bot/config/tier2.json': '7fa3a9f14b6b087f',
  'bot/config/tier3.json': '346cc47a9db22411',
- 'data/discard_holdem/meta.json': 'ed68703c8af666f4',
+ 'data/discard_holdem/meta.json': '815711206d2298c1',
  'data/discard_holdem/classes.npy': '24063b60ac8692e5',
  'data/discard_holdem/eq_random.npy': 'e81a37f2b11c8f95',
  'data/discard_holdem/eq_range.npy': 'daa983159e88ec11',
- 'data/discard_holdem/types.json': '9c02b3db03dd8e36'}
+ 'data/discard_holdem/types.json': 'd4f776c9e048ead1'}
 
 SPEC = {'name': 'discard_holdem',
  'description': 'Official Pokerbots 2026 game: 3 hole cards; 3-card flop; after flop betting both '
@@ -57,8 +57,8 @@ SPEC = {'name': 'discard_holdem',
              'preflop_first': 'SB',
              'postflop_first': 'BB'},
  'payoffs': [],
- 'match': {'hands': 400,
-           'time_bank_s': 60.0,
+ 'match': {'hands': 200,
+           'time_bank_s': 30.0,
            'starting_stack': 200,
            'reset_stacks': True,
            'bust_ends_match': True,
@@ -110,7 +110,7 @@ PARAMS = {'tier1': {'equity_budget_frac': 0.7,
 
 ARTIFACTS = {
     "tables": {
-        "meta": {'spec_hash': '67430f7ec9d87823',
+        "meta": {'spec_hash': 'af7e35b17a436a36',
  'variant': 'discard_holdem',
  'seed': 0,
  'samples': 6000,
@@ -1883,7 +1883,7 @@ ARTIFACTS = {
                        'decisions': 0}},
  'acts': ['F', 'P', 'R'],
  'n_ctx': 8,
- 'spec_hash': '67430f7ec9d87823',
+ 'spec_hash': 'af7e35b17a436a36',
  'built_from': 'lab.opps.record, Tier 3 lock off, pairs 2+ of each recording'},
         "files": {
         },

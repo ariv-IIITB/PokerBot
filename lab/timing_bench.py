@@ -12,8 +12,8 @@ lab brain, `NAME:{json}` (see lab.eval.parse_brain), `tier2-nolock`, or `starter
 organisers' starter bot as a subprocess). Locks are off for tier2 opponents: the lock
 shortens matches and hides the real cost.
 
-CLI:  .venv/bin/python -m lab.timing_bench --hands 400 --brain tier2 --opponent maniac
-      .venv/bin/python -m lab.timing_bench --hands 1000 --bank 150 --variant discard_holdem
+CLI:  .venv/bin/python -m lab.timing_bench --hands 200 --brain tier2 --opponent maniac
+      .venv/bin/python -m lab.timing_bench --hands 500 --bank 75 --variant discard_holdem
 """
 from __future__ import annotations
 
