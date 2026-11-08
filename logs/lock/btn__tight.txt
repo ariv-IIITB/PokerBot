@@ -1,0 +1,1 @@
+tier3x[{"pf_open_fold":0.0,"pf_open_limp":0.0,"pf_open_size_bb":2.0}]-nolock vs tight-nolock: +4.08 ± 0.21 chips/hand | match score 0.953 ± 0.015 over 200 matches | 2-leg score 0.970 ± 0.017 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 205.4s (195/s)
