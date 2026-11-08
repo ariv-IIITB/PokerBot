@@ -54,6 +54,9 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   adapts). tier3x is ~1.7x tier3's bank use (the old I1 "<= 1.4x" rule was set before the solver box was
   fixed); the absolute rule (<= 50 % at x2) holds. PASS.
 
+- Head-to-head tier3x vs plain tier3 (100 pairs, seeds 70100, locks on, 200h/30s): +0.09 +- 0.03 chips/hand, match
+  score 0.575 +- 0.035 over 200 matches, 0 errors/forfeits. PASS (tier3x > tier3 by > 2 SE).
+
 ## State / next (for a fresh context)
 - Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
   copy logs/combo/off/* into one dir, run `.venv/bin/python -m lab.combo_report off`, pick the best stack
