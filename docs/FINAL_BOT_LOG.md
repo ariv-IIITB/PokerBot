@@ -73,6 +73,11 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   (tier3x as if 4x faster vs x1, paired) running on cloud session session_014YAsY4g2tKxzZKRocfQCqR -> exp/compute.
   If x4 adds nothing, lookup tables add nothing.
 
+- Round 2 done (fresh seeds 50100, 60 pairs = 120 matches per cell, locks on, 10 bots; conv_opp3/starter lost to a
+  container restart). Mean match-score delta vs base (x1000): all -5 +- 12, allh +8 +- 12, hide +1 +- 14.
+  Decision: none of x_selfdef / x_cr / fast stats / hide_discard ships (noise both rounds). They stay as off flags.
+  Base tier3x with locks on: exploiter 0.675, rules 0.700, minraise 0.733, trapper 0.842, tier1 0.917.
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,

@@ -1,0 +1,2 @@
+tier3x[{"hide_discard":true}] vs tight: +0.93 ± 0.09 chips/hand | match score 0.967 ± 0.016 over 120 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 50.9s (471/s)
+--- brain stats: tier3x[{"hide_discard":true}]: river_errors=0 river_fallbacks=4 river_few_iters=3 river_iters=419727 river_missing=0 river_no_pass=1 river_rnr=413 river_shifted=0 river_solves=2856 river_us=57260130 t3_decisions=16551 t3_errors=0 t3_fallbacks=109 x_cr=0 x_errors=0 x_narrowed=1 x_overfolder=63 x_selfdef=0 x_valueonly=180

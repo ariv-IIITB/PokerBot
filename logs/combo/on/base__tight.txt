@@ -1,0 +1,2 @@
+tier3x vs tight: +0.92 ± 0.10 chips/hand | match score 0.958 ± 0.018 over 120 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 50.2s (478/s)
+--- brain stats: tier3x: river_errors=0 river_fallbacks=7 river_few_iters=5 river_iters=433786 river_missing=0 river_no_pass=2 river_rnr=530 river_shifted=0 river_solves=2863 river_us=57479968 t3_decisions=16729 t3_errors=0 t3_fallbacks=110 x_cr=0 x_errors=0 x_narrowed=2 x_overfolder=125 x_selfdef=0 x_valueonly=192
