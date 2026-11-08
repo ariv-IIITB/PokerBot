@@ -102,6 +102,12 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   Lock test arms, all tier3x, 100 pairs, seeds 96100, judged on 2-leg score: off / on (R=0) on exp/lock + local;
   R=150 on session_014YAsY2H6hWgK7Rma8aSUFu -> exp/lockr150; R=400 on session_014YAsY2oakjpJNxsFwx8V1d -> exp/lockr400.
 
+- Read speed: per 200-hand leg our opponent spots reach n = 30-120, but CAP 0.15 holds them back (vs exploiter:
+  fold_flop shrunk mean 0.59 vs prior 0.35, play moves only +0.15; disc_lowest 0.61 vs 0.30). The earlier "fast" arm
+  changed gate/strength only. New arms (locks off, 100 pairs, seeds 96100, baseline = lock-off arm of the lock
+  test): trust {cap 0.4, gate 8, strength 8} on session_014YAsY24Ze6sjwhT2RjjtZP -> exp/trust; cap 0.4 only on
+  session_014YAsY4TLf9b8UBrpnzfWM6 -> exp/cap.
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
