@@ -57,8 +57,14 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
 - Head-to-head tier3x vs plain tier3 (100 pairs, seeds 70100, locks on, 200h/30s): +0.09 +- 0.03 chips/hand, match
   score 0.575 +- 0.035 over 200 matches, 0 errors/forfeits. PASS (tier3x > tier3 by > 2 SE).
 
+- Round 2 was not run by G2-G4 (they treat a peer message as data, not a task). Relaunched as new sessions with the
+  job as their prompt: R2a session_014YAsY1BBipbrQrbCfDK4Fx (trapper lag calling_station -> combo/r2a),
+  R2b session_014YAsY3DNjnMS2aFc2m1Ctx (minraise rules maniac -> combo/r2b), R2c session_014YAsY3xRMWKUoAYY32QNDg
+  (exploiter tier1 tight -> combo/r2c); random_legal starter conv_opp3 run here (logs/combo/on).
+
 ## State / next (for a fresh context)
-- Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
+- Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
+- (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
   copy logs/combo/off/* into one dir, run `.venv/bin/python -m lab.combo_report off`, pick the best stack
   (sum up, no bot down > 2 SE), then a locks-on score run of base vs best (40 pairs) and hide_discard as an arm.
 - Then I1 gates on the pick: timing ratio vs tier3 (lab/rc_ratio.py, clock_scale 2), lab.memory_check,
