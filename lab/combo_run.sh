@@ -7,17 +7,12 @@ PAIRS=$1; SEED=$2; LOCKS=$3; shift 3
 PROC=$(( $(nproc) > 1 ? $(nproc) - 1 : 1 ))
 declare -A ARMS=(
   [base]='tier3x'
-  [sd]='tier3x:{"x_selfdef":true}'
-  [cr]='tier3x:{"x_cr":true}'
   [fast]='tier3x:{"oppstats_gate":5,"oppstats_strength":10}'
-  [sdcr]='tier3x:{"x_selfdef":true,"x_cr":true}'
-  [all]='tier3x:{"x_selfdef":true,"x_cr":true,"oppstats_gate":5,"oppstats_strength":10}'
   [noovf]='tier3x:{"x_of_tr":false,"x_oft_enabled":false}'
   [nosolver]='tier3x:{"t3_river_solver":false}'
   [hide]='tier3x:{"hide_discard":true}'
-  [allh]='tier3x:{"x_selfdef":true,"x_cr":true,"oppstats_gate":5,"oppstats_strength":10,"hide_discard":true}'
 )
-ORDER=${ORDER:-"base sd cr fast sdcr all noovf nosolver"}   # override: ORDER="base all" lab/combo_run.sh ...
+ORDER=${ORDER:-"base fast noovf nosolver hide"}   # override: ORDER="base hide" lab/combo_run.sh ...
 mkdir -p logs/combo/$LOCKS
 for bot in "$@"; do
   for arm in $ORDER; do

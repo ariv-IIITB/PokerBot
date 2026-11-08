@@ -5,13 +5,9 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from bot.brains.exploit import (EXPLOIT_DEFAULTS, adjust, checkraise_lambda, foldable_lambda,
-                                narrow_equity, overfolder_lambda)
-from bot.strategy.oppstats import STREET_SPOT
+from bot.brains.exploit import EXPLOIT_DEFAULTS, adjust, narrow_equity
 from bot.brains.tier3 import Tier3Brain
-from bot.actions import FOLD, RAISE
 from bot.log import warn
-from bot.state import ME
 
 
 class Tier3XBrain(Tier3Brain):
@@ -20,13 +16,9 @@ class Tier3XBrain(Tier3Brain):
 
     def __init__(self, config: Optional[dict] = None, **kw) -> None:
         super().__init__(config, **kw)
-        self.stats.update({"x_overfolder": 0, "x_valueonly": 0, "x_errors": 0, "x_narrowed": 0, 
-                           "x_selfdef": 0, "x_cr": 0, "x_bait": 0})
-        self._sd_faced = 0                         # flop/turn bets we faced (decisions), for the self-check
-        self._sd_folds = 0                         # ... and folded to
+        self.stats.update({"x_overfolder": 0, "x_valueonly": 0, "x_errors": 0, "x_narrowed": 0})
         self._faced: list[float] = []              # size (x pot before the bet) of each river bet we faced
         self._faced_key = None
-        self._hn = 0                               # hands completed this leg (for x_bait)
 
     @classmethod
     def defaults(cls) -> dict[str, Any]:
@@ -37,12 +29,8 @@ class Tier3XBrain(Tier3Brain):
                   "rnr_pmax": 0.9, "rnr_n0": 10, "rnr_min_n": 10, "rnr_dir": -1})
         return d
 
-    def decide(self, state, legal, budget_s):
-        self._hn = state.hands_played
-        return super().decide(state, legal, budget_s)
-
     def adjusted(self, street: int = 0) -> dict[str, Any]:
-        p = self._baited(super().adjusted(street), street)
+        p = super().adjusted(street)
         info: dict = {}
         try:
             q = adjust(p, street, self.opponent.traits, self.opponent.types, info)
@@ -52,20 +40,6 @@ class Tier3XBrain(Tier3Brain):
             return p
         self.stats["x_overfolder"] += int(info.get("overfolder", 0.0) > 0)
         self.stats["x_valueonly"] += int(info.get("valueonly", 0.0) > 0 and street == 3)
-        return q
-
-    def _baited(self, p: dict, street: int) -> dict:
-        """x_bait: fold more to flop/turn bets for the first `x_bait_n` hands of the leg, then defend wider."""
-        if not p.get("x_bait") or street not in (1, 2):
-            return p
-        q = dict(p)
-        early = self._hn < int(p["x_bait_n"])
-        m = float(p["x_bait_mdf"] if early else p["x_bait_post_mdf"])
-        d = float(p["x_bait_margin"]) if early else -float(p["x_bait_post_margin"])
-        q["mdf_flop"] = min(1.0, float(p["mdf_flop"]) * m)
-        q["mdf_turn"] = min(1.0, float(p["mdf_turn"]) * m)
-        q["call_margin"] = float(p["call_margin"]) + d
-        self.stats["x_bait"] += int(early)
         return q
 
     def choose(self, state, legal, eq: float, p: dict):
@@ -94,58 +68,3 @@ class Tier3XBrain(Tier3Brain):
         q["bet_pressure"] = float(p["bet_pressure"]) * float(p["x_narrow_bp"])
         return narrow_equity(eq, spots.spots["river_bet"].mean(), spots.spots["bluff_index"].mean(),
                              rank, float(p["x_narrow_lam"])), q
-
-    def _facing_bet(self, c, s, legal, p):
-        """Flop/turn bet to face with `x_selfdef` on: defend wider when we fold too often to a frequent bettor."""
-        if p.get("x_selfdef") and c.street in (1, 2):
-            try:
-                lam = foldable_lambda(p, self._sd_faced, self._sd_folds, self._bet_rate())
-                if lam > 0.0:
-                    q = dict(p)
-                    q["mdf_flop"] = min(1.0, float(p["mdf_flop"]) * (1.0 + float(p["x_sd_mdf"]) * lam))
-                    q["mdf_turn"] = min(1.0, float(p["mdf_turn"]) * (1.0 + float(p["x_sd_mdf"]) * lam))
-                    q["call_margin"] = float(p["call_margin"]) - float(p["x_sd_margin"]) * lam
-                    self.stats["x_selfdef"] += 1
-                    p = q
-            except Exception as e:
-                self.stats["x_errors"] += 1
-                warn(f"self-check failed: {e!r}")
-        return super()._facing_bet(c, s, legal, p)
-
-    def play(self, s, legal, budget_s, p):
-        a = super().play(s, legal, budget_s, p)
-        h = s.hand
-        if h is not None and h.street in (1, 2) and h.tocall > 0 and not legal.can_special:
-            self._sd_faced += 1                   # our own fold rate to flop/turn bets (exact, from hand 1)
-            self._sd_folds += int(a.kind == FOLD)
-        return a
-
-    def _bet_rate(self) -> float:
-        """How often the opponent bets when it may (c-bet and turn bet, shrunk means)."""
-        sp = self.opponent.spots.spots
-        cb, tb = sp["cbet"], sp["turn_bet"]
-        n = cb.n + tb.n
-        return (cb.mean() * (cb.n + 1) + tb.mean() * (tb.n + 1)) / (n + 2)
-
-    def _raise_a_bet(self, c, s, legal, p, frac):
-        """With `x_cr`: against a frequent bettor that folds to our flop/turn bets, raise its bet more often
-        with a hand that has some equity but would not raise on its own (bluff-size raise)."""
-        a = super()._raise_a_bet(c, s, legal, p, frac)
-        if a is not None or not p.get("x_cr") or c.street not in (1, 2) or not legal.can_raise:
-            return a
-        if any(r.street == c.street and r.actor == ME and r.action.kind == RAISE for r in c.hand.history):
-            return None                           # one raise per street, as Tier 3
-        try:
-            if not (float(p["x_cr_eq_lo"]) <= c.eq < float(p["x_cr_eq_hi"])):
-                return None
-            spot = self.opponent.spots.spots[STREET_SPOT[c.street]]
-            lam = checkraise_lambda(p, self._bet_rate(), spot.mean(), spot.n)
-            if lam > 0.0 and self._chance(float(p["x_cr_prob"]) * lam):
-                b = self._size(float(p["raise_frac"]), "bluff", c, s, legal, p)
-                if b is not None:
-                    self.stats["x_cr"] += 1
-                    return b
-        except Exception as e:
-            self.stats["x_errors"] += 1
-            warn(f"check-raise failed: {e!r}")
-        return None

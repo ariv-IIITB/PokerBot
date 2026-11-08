@@ -78,6 +78,12 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   Decision: none of x_selfdef / x_cr / fast stats / hide_discard ships (noise both rounds). They stay as off flags.
   Base tier3x with locks on: exploiter 0.675, rules 0.700, minraise 0.733, trapper 0.842, tier1 0.917.
 
+- x_bait A/B (60 pairs, off), chips/hand: exploiter base -0.03, post (wider defence only) +0.03, bait -0.22;
+  conv_opp3 base +0.47, post +0.04, bait +0.26. The bait costs more than it earns and wider defence loses vs opp3.
+  Stopped after 2 of 6 bots (clearly not a win).
+- Removed from the bot (failed in every test, no dead flags): x_selfdef, x_cr, x_bait (+ tests/test_ideas_v6.py,
+  combo arms). Kept: hide_discard (pre-existing, tiny), oppstats knobs (Tier 2 params). Suite: 1360 passed.
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
