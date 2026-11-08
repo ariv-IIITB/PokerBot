@@ -1,0 +1,1 @@
+tier3x[{"ev_bayes_called":true}]-nolock vs d_conv_opp3-nolock: +0.08 ± 0.16 chips/hand | match score 0.530 ± 0.035 over 200 matches | 2-leg score 0.470 ± 0.050 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 615.9s (65/s)
