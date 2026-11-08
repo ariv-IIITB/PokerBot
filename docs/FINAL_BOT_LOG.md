@@ -36,6 +36,15 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   nosolver: -18.33 +- 0.72 vs starter, -1.81 +- 0.64 vs random_legal. The river solver stays.
   G1 partial (conv_opp3) also all noise. A local hide_discard A/B (11 training bots, 40 pairs) is running here.
 
+- Combo round 1 complete except G1 (exploiter/tier1 partial), 40 pairs, off. vs base, mean match-score delta over
+  11-12 bots (x1000) / chips summed without maniac: all +15+-16 / +3.48+-1.84; sdcr +10 / +1.69; noovf +5 / +1.12;
+  cr +4 / +2.31; sd +3 / +0.09; fast -7 / +2.01; nosolver -18 / -41.3 (4 bots < -2SE). Nothing is significant
+  apart from nosolver. "all" (sd+cr+fast) is the best candidate. Local hide_discard A/B so far: + on 6 of 8 bots
+  (opp3 +0.23, exploiter +0.15, trapper +0.18, lag +0.58, minraise +0.19 chips/hand; rules -0.05, tier1 -0.14).
+- Round 2 (confirmation, fresh seeds 50100, 60 pairs, locks ON, decided on match score): arms base, all, allh
+  (all + hide_discard), hide; sent to G2 (trapper lag calling_station exploiter), G3 (minraise rules maniac tier1),
+  G4 (tight random_legal starter conv_opp3); results land in logs/combo/on on combo/g2..g4.
+
 ## State / next (for a fresh context)
 - Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
   copy logs/combo/off/* into one dir, run `.venv/bin/python -m lab.combo_report off`, pick the best stack
