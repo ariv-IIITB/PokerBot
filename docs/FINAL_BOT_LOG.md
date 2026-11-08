@@ -97,6 +97,11 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   (each duplicate pair = one match). Test lock on vs off with it: 8 bots x 100 pairs, seeds 96100; trapper lag
   minraise tier1 on session_014YAsY13VN5VwSd64GRphaQ -> exp/lock, exploiter conv_opp3 rules tight here -> logs/lock.
 
+- Held-out tier3 vs v6: -1.16 +- 0.23 chips/hand, per-leg score 0.600 (tier3x: -0.36, 0.775).
+- Added `lock_reserve` (default 0 = unchanged): lock a leg only when folding out still ends it N chips ahead.
+  Lock test arms, all tier3x, 100 pairs, seeds 96100, judged on 2-leg score: off / on (R=0) on exp/lock + local;
+  R=150 on session_014YAsY2H6hWgK7Rma8aSUFu -> exp/lockr150; R=400 on session_014YAsY2oakjpJNxsFwx8V1d -> exp/lockr400.
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
