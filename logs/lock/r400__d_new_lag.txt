@@ -1,0 +1,1 @@
+tier3x[{"lock_reserve":400}] vs d_new_lag: +2.03 ± 0.11 chips/hand | match score 0.940 ± 0.017 over 200 matches | 2-leg score 0.930 ± 0.026 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 198.4s (202/s)

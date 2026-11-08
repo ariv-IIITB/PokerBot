@@ -1,0 +1,1 @@
+tier3x[{"lock_reserve":150}] vs tier1: +1.01 ± 0.09 chips/hand | match score 0.900 ± 0.021 over 200 matches | 2-leg score 0.850 ± 0.036 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 351.5s (114/s)

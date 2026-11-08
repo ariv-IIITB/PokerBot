@@ -1,0 +1,1 @@
+tier3x[{"lock_reserve":150}] vs d_conv_opp3: -0.12 ± 0.11 chips/hand | match score 0.630 ± 0.034 over 200 matches | 2-leg score 0.480 ± 0.050 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 367.8s (109/s)

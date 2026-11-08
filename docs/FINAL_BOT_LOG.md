@@ -123,6 +123,12 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   we win the showdowns. (Not tuned on: the self-check defence aimed at this and was noise on the training pool.)
 - Lock test, first cell: exploiter, lock ON: per-leg 0.680 but 2-leg 0.450 +- 0.050 (100 pairs).
 
+- LOCK RESULT (8 bots x 100 pairs, seeds 96100, 2-leg score vs lock off): lock on -0.104 +- 0.020 (worse on all 8;
+  trapper -0.24, opp3 -0.14, tier1 -0.13), reserve 150 -0.103 +- 0.020, reserve 400 -0.049 +- 0.019. Lock off ships
+  (commit 7581fa7, zip sha256 f3b8cd4c..., sent to the user). Lock-off 2-leg scores: opp3 0.59, exploiter 0.52,
+  rules 0.57, minraise 0.77, trapper 0.87, lag 0.99, tier1 1.00, tight 0.99.
+- Partial (still running): bayes +0.06 (1 bot), btn +0.018 +- 0.031 (4), cap +0.006 (5), trust -0.008 (5).
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,

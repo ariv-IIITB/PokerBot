@@ -1,0 +1,1 @@
+tier3x vs tier1: +0.47 ± 0.08 chips/hand | match score 0.925 ± 0.019 over 200 matches | 2-leg score 0.870 ± 0.034 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 307.0s (130/s)
