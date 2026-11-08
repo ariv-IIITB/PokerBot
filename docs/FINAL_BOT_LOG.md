@@ -30,6 +30,12 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
 - Repo: binary logs removed (logs 23 MB -> 4 MB, history keeps them); Tier 4 plans/manager files and old phase
   plans moved to docs/archive/; tools/tier4_monitor.py removed.
 
+- I1 gates (tier3x, this machine): `lab.memory_check` peak RSS 42.4 MB (limit 1024); `lab.fuzz --subprocess`
+  2,000 hands / 20 matches, 0 failures (967 illegal opponent replies handled).
+- Combo G4 done (tight, random_legal, starter; 40 pairs, off, chips/hand vs base): every arm is within noise except
+  nosolver: -18.33 +- 0.72 vs starter, -1.81 +- 0.64 vs random_legal. The river solver stays.
+  G1 partial (conv_opp3) also all noise. A local hide_discard A/B (11 training bots, 40 pairs) is running here.
+
 ## State / next (for a fresh context)
 - Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
   copy logs/combo/off/* into one dir, run `.venv/bin/python -m lab.combo_report off`, pick the best stack
