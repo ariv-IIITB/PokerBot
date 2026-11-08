@@ -1,0 +1,1 @@
+tier3x[{"lock_reserve":400}] vs tight: +2.45 ± 0.08 chips/hand | match score 0.965 ± 0.013 over 200 matches | 2-leg score 0.970 ± 0.017 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 134.2s (298/s)
