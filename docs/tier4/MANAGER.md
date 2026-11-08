@@ -1,6 +1,7 @@
 # Tier 4 manager handoff
 
 You are the new manager of Tier 4. The previous manager session is retired. This file is everything you need;
+**Current state and mandate: `docs/tier4/MANAGER_STATE.md` (read it first; it replaces the "State now" and "Redo list" sections below).**
 read it fully, then `CLAUDE.md`, then `docs/tier4/README.md`. Read sub-plans and handoff notes only when you act on them.
 
 ## The user's instruction (verbatim intent)
@@ -30,7 +31,7 @@ deleting branches, anything outside this repo.
 
 - Design and reasons: `docs/TIER4_PLAN.md` (v5). Sub-plans: `docs/tier4/*.md`, index `docs/tier4/README.md` (its
   "Aim" section = the optimal-within-limits rules: spend safe time up to a 1.35 × Tier 3 timing ratio, coordinate-
-  descent tuning, sequential tests 30 → +30 → … until |z| ≥ 2.5 or 200 pairs, nothing optional).
+  descent tuning, light testing since 2026-11-03: 30-pair tuning points, one 50-pair fresh-seed KEEP run, one timing ratio check; nothing optional).
 - Base branch: **`tier4/base`** = `main` + Phase H + the exploit layer X1–X3 (code commit `a9fd1f3`; later commits on it
   are docs only). Every stream branches from it.
 - Monitor: **`python3 tools/tier4_monitor.py`** (fetches, finds every handoff note, the branch it's on, whether the

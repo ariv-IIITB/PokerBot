@@ -1,0 +1,2 @@
+tier3x-nolock vs d_new_geometric-nolock: -0.36 ± 0.17 chips/hand | match score 0.390 ± 0.049 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 872.3s (46/s)
+--- brain stats: tier3x-nolock: river_errors=0 river_fallbacks=2553 river_few_iters=2114 river_iters=770784 river_missing=0 river_no_pass=439 river_rnr=3689 river_shifted=0 river_solves=16149 river_us=346521259 t3_decisions=113740 t3_errors=0 t3_fallbacks=1339 x_def=0 x_errors=0 x_narrowed=489 x_overfolder=57215 x_stabs=0 x_valueonly=14780

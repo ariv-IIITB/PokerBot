@@ -1,0 +1,6 @@
+calling_station  clock x1: river decisions 399, full solve 100.0% (few 0, nopass 0, missing 0, err 0); 307 passes/solve; deadline hits 0
+calling_station  clock x2: river decisions 399, full solve 100.0% (few 0, nopass 0, missing 0, err 0); 137 passes/solve; deadline hits 0
+d_new_trapper    clock x1: river decisions 228, full solve 100.0% (few 0, nopass 0, missing 0, err 0); 332 passes/solve; deadline hits 0
+d_new_trapper    clock x2: river decisions 222, full solve 100.0% (few 0, nopass 0, missing 0, err 0); 129 passes/solve; deadline hits 0
+d_conv_opp3      clock x1: river decisions 139, full solve 100.0% (few 0, nopass 0, missing 0, err 0); 358 passes/solve; deadline hits 0
+d_conv_opp3      clock x2: river decisions 135, full solve 100.0% (few 0, nopass 0, missing 0, err 0); 153 passes/solve; deadline hits 0

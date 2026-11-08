@@ -1,0 +1,2 @@
+tier3 vs d_new_rules: -0.62 ± 0.09 chips/hand | match score 0.430 ± 0.050 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 193.0s (207/s)
+--- brain stats: tier3: t3_decisions=0 t3_errors=0 t3_fallbacks=0

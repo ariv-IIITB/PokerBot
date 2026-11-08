@@ -35,18 +35,21 @@ Values marked *(prov.)* are provisional and may change before the deadline.
 
 - Python 3.11, standard library + numpy + scipy only. No installs at runtime.
 - 1 vCPU, 1 GB RAM *(prov.)*. No network. Read-only filesystem.
-- **A bot may not read or write files, open sockets or start other processes.**
-- Time bank per match, not reset between hands: **60 s / 400 hands (Stage 1)** and
-  **150 s / ~1000 hands (Stage 2)** *(prov.)*. Time is charged from when a request is sent until the
-  reply line arrives, for both action and discard requests.
+- A bot may read files inside its own submission; it may not write files, open sockets or start
+  other processes.
+- **Two legs per match, each a fresh bot process** (no state crosses legs): leg 1 plays every deal
+  once, leg 2 replays the same deals with hole cards and seats swapped. Time bank per leg, not
+  reset between hands: **30 s / 200 hands (Stage 1 leg)** and **75 s / 500 hands (Stage 2 leg)**
+  *(prov.)*. Time is charged from when a request is sent until the reply line arrives, for both
+  action and discard requests.
 - Any single reply must arrive within **5 s** *(prov.)*.
-- Wall-clock kill per match: **180 s (Stage 1)** and **450 s (Stage 2)** *(prov.)*.
-- Start-up: 5 s from launch to ready for `init`. **Not charged** to the bank.
-- Crash, exhausted bank, a reply over 5 s, or the wall-clock kill all **forfeit** the rest of the
-  match: a loss, and the opponent gets Δ = +C.
+- Wall-clock kill per leg: **90 s (Stage 1)** and **225 s (Stage 2)** *(prov.)*.
+- Start-up: 5 s from launch to ready for `init`, per leg. **Not charged** to the bank.
+- Crash, exhausted bank, a reply over 5 s, or the wall-clock kill all **forfeit the whole match**
+  (the other leg is not played): a loss, and the opponent gets Δ = +C.
 - stdout carries protocol JSON only, flushed after each message. stderr is for debugging only,
   capped at 64 KB per match and never parsed.
-- No state is kept between matches (the bot starts fresh each match). Randomness is allowed.
+- No state is kept between legs (the bot starts fresh each leg). Randomness is allowed.
 - Submission: one `bot.py`, or a `.zip` with `bot.py` at the top level, **≤ 5 MB**. Run as
   `python3.11 bot.py`.
 

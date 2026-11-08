@@ -31,12 +31,20 @@ def capped_match(a: str, a_cfg: dict, b: str, seed: int, hands: int, b_cfg=None)
 def test_tier3_is_registered_and_is_the_default_since_g8() -> None:
     assert BRAINS["tier3"] == "bot.brains.tier3:Tier3Brain"
     assert BRAINS["tier2"] == "bot.brains.tier2:Tier2Brain"     # kept: the fallback if Tier 3 is reverted
-    assert DEFAULT_BRAIN == "tier3"
+    assert DEFAULT_BRAIN == "tier3x"
 
 
 def test_tier3_starts_from_the_shipped_tier2_parameters() -> None:
+    from bot import embedded
     t2, t3 = Tier2Brain().p, Tier3Brain().p
-    assert {k: (v, t3[k]) for k, v in t2.items() if t3.get(k) != v} == {}
+    own = set(embedded.PARAMS.get("tier3", {}))              # the keys bot/config/tier3.json sets on purpose
+    assert {k: (v, t3[k]) for k, v in t2.items() if t3.get(k) != v and k not in own} == {}
+
+
+def test_tier3_carries_the_da_values() -> None:
+    p = Tier3Brain().p
+    assert p["smart_rollout_discard"] is True and p["raise_equity"] == [0.7, 0.68, 0.68, 0.74]
+    assert Tier2Brain().p["smart_rollout_discard"] is False
 
 
 def test_tier3_follows_a_change_to_the_shipped_tier2_json(monkeypatch) -> None:

@@ -1,0 +1,7 @@
+=== d_conv_opp3 arm=base  pairs=25 river hands=5737 / 20000
+  fold_river: real fold rate to our river bets 0.716 (n=2423, 48/match); model mean at match end 0.651, n 48/match; RNR weight at match end 0.271 (max 0.325)
+  river chips per hand played: +5.948  (SE 0.209)
+  first       n= 3395 contrib/hand=+3.273  mean/spot +19.28+-0.90  K:0.49(+7.1)  R:0.51(+31.1)
+  checked_to  n= 1568 contrib/hand=+2.509  mean/spot +32.01+-1.18  K:0.59(+14.6)  R:0.41(+56.8)
+  face_small  n=  310 contrib/hand=+0.121  mean/spot +7.79+-3.64  C:0.16(+28.4)  F:0.78(+0.0)  R:0.06(+52.3)
+  face_big    n=  464 contrib/hand=+0.045  mean/spot +1.95+-2.32  C:0.10(+19.8)  F:0.85(+0.0)  R:0.05(+0.6)

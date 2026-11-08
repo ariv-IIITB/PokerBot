@@ -1,0 +1,2 @@
+tier3x-nolock vs d_new_eqrandom-nolock: +1.07 ± 0.14 chips/hand | match score 0.720 ± 0.045 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 925.5s (43/s)
+--- brain stats: tier3x-nolock: river_errors=0 river_fallbacks=3128 river_few_iters=2735 river_iters=623974 river_missing=0 river_no_pass=393 river_rnr=5241 river_shifted=0 river_solves=14711 river_us=316304610 t3_decisions=102514 t3_errors=0 t3_fallbacks=1419 x_def=0 x_errors=0 x_narrowed=871 x_overfolder=16175 x_stabs=0 x_valueonly=9325

@@ -1,0 +1,1 @@
+tier3x-nolock vs d_new_eqrandom-nolock: +0.98 ± 0.20 chips/hand | match score 0.717 ± 0.059 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 563.6s (43/s)

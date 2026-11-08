@@ -1,0 +1,2 @@
+tier3x-nolock vs d_new_trapper-nolock: +2.04 ± 0.18 chips/hand | match score 0.830 ± 0.038 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 963.6s (42/s)
+--- brain stats: tier3x-nolock: river_errors=0 river_fallbacks=5071 river_few_iters=4389 river_iters=946624 river_missing=0 river_no_pass=682 river_rnr=15275 river_shifted=0 river_solves=22897 river_us=495324728 t3_decisions=99184 t3_errors=0 t3_fallbacks=7916 x_def=0 x_errors=0 x_narrowed=1009 x_overfolder=0 x_stabs=0 x_valueonly=23054

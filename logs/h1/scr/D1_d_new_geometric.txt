@@ -1,0 +1,1 @@
+tier3x[{"x_def":0.5,"x_def_margin":0.05}]-nolock vs d_new_geometric-nolock: +0.37 ± 0.20 chips/hand | match score 0.600 ± 0.064 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 521.0s (46/s)

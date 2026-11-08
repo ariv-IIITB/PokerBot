@@ -1,0 +1,6 @@
+d_conv_opp3    river-all -1.004 -> -0.507  diff +0.497 +- 0.270 (z +1.8) not better by 2 SE
+d_new_exploiter river-all +7.563 -> +7.647  diff +0.084 +- 0.270 (z +0.3) not better by 2 SE
+d_new_lag      river-all +3.910 -> +3.925  diff +0.015 +- 0.248 (z +0.1) not better by 2 SE
+d_new_minraise river-all -0.104 -> -0.172  diff -0.068 +- 0.122 (z -0.6) not better by 2 SE
+d_new_rules    river-all -0.834 -> -0.884  diff -0.050 +- 0.155 (z -0.3) not better by 2 SE
+d_new_trapper  river-all -1.744 -> -1.780  diff -0.036 +- 0.164 (z -0.2) not better by 2 SE

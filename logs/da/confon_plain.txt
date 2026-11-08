@@ -1,0 +1,8 @@
+tier3 vs d_conv_opp3: -1.77 ± 0.21 chips/hand | match score 0.390 ± 0.049 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 222.1s (180/s)
+tier3 vs d_new_rules: -1.25 ± 0.16 chips/hand | match score 0.500 ± 0.050 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 97.0s (412/s)
+tier3 vs d_new_lag: +0.18 ± 0.04 chips/hand | match score 0.980 ± 0.014 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 56.1s (714/s)
+tier3 vs d_new_trapper: -0.02 ± 0.14 chips/hand | match score 0.720 ± 0.045 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 217.7s (184/s)
+tier3 vs d_new_exploiter: -1.43 ± 0.23 chips/hand | match score 0.400 ± 0.049 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 422.1s (95/s)
+tier3 vs d_new_minraise: -0.25 ± 0.10 chips/hand | match score 0.780 ± 0.042 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 96.2s (416/s)
+tier3 vs tier1: -0.53 ± 0.19 chips/hand | match score 0.730 ± 0.045 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 206.2s (194/s)
+tier3 vs tier2: +0.32 ± 0.04 chips/hand | match score 0.630 ± 0.049 over 100 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 118.5s (338/s)

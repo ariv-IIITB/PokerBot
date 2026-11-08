@@ -33,6 +33,7 @@ Sub-plan IDs use letters so they don't clash with the section labels (P0–P4, D
 | **RA2** | `RA2_exact.md`: solver as close to exact as the box allows (cheaper ranges, better buckets, card removal, exact when small, DCFR, reuse) | R0 (accuracy) | own branch from `tier4/r` | RA | — | Opus, cloud |
 | **RB** | `RB_integrate.md`: solver in Tier 3's river behind a flag, own range, timing | R1 | `tier4/r` | RA (go) | — | Opus, cloud |
 | **RC** | `RC_gate.md`: merge RA2 into RB's branch, accounting SE, gate R, restricted p | gate R, restricted p | `tier4/r` | RB + RA2 | S0 | Sonnet, cloud |
+| **PF** | `PF_preflop.md`: offline preflop chart behind a flag (go/no-go first; user-approved 2026-11-04) | new | `tier4/pf` | RC | — | Sonnet, local |
 | **I1** | `I1_integrate.md`: merge P + D + R, combined gates, held-out, package | last | `tier4/main` | PD, DC, RC | — | Opus, cloud |
 
 **First, four sessions run at once: S0, PA, DA and RA.** After that, a session starts as soon as its
@@ -84,8 +85,10 @@ convenience. Concretely:
 - **Tune by coordinate descent, not one pass.** Vary one parameter at a time around the current best, move to the
   best point, repeat until no single change improves by > 1 SE; then a full 3 × 3 grid on the two most sensitive
   parameters around the best. Every kept point is confirmed on fresh seeds.
-- **Sequential tests instead of fixed small samples.** A comparison starts at 30 pairs and adds 30 more at a time
-  until |z| ≥ 2.5 or 200 pairs; decide on the combined total. Confirmation runs are separate fresh seeds.
+- **Light testing (user, 2026-11-03): build near-optimal, test lightly.** Tuning points 30 pairs, descent capped at 3
+  rounds. A KEEP is one fresh-seed run of 50 pairs with the two-part rule; no sequential extension, no Stage 2 runs
+  except I1's final check. Timing: one `lab.timing_bench` ratio check per brain change (a hard limit, never skipped);
+  no slow suite; fast suite once before each push. Gate X is not redone (cloud result stands: incumbent `tier3x`).
 - **Nothing is optional.** Every piece is built and tested; its gate decides KEEP or DROP. A piece is dropped only by
   failing its gate, or by the slip rule when the deadline gets close.
 - **Hard limits stay hard.** Two things are out because they can't work, not to save time: solving earlier streets
@@ -104,7 +107,7 @@ prerequisite has pushed its handoff.
 | S0 | `lab/opps/record.py`, `lab/opps/score_compare.py` (new), `logs/records/` |
 | P | `bot/brains/tier4p.py` (new), `bot/brains/tier4p_select.py` (new, PC), `bot/brains/exploit.py`, `bot/main.py` (the registry line only), `lab/eval.py` (`LOCK_BRAINS` only), `lab/sparring/adversary.py` (new), `tests/test_tier4p*.py`, `tests/test_timing_slow.py`, `docs/reports/TIER4P.md` |
 | D | `bot/sim/rollout.py`, `bot/sim/inference.py`, `bot/sim/discard.py`, `bot/config/tier3.json` (new: D's tuned Tier 3 values), `lab/opps/discard_rules.py` (new), `tests/test_discard_*.py`, `docs/reports/TIER4_DISCARD.md` |
-| R | `bot/strategy/river_solver.py` (new; RA2 only, once RA2 starts), `bot/strategy/own_range.py` (new), `bot/brains/tier3.py`, `bot/timing.py`, `lab/opps/accounting.py`, `lab/river_bench.py` (new), `tests/test_river_*.py`, `docs/reports/TIER4_RIVER.md` |
+| R | `bot/strategy/river_solver.py` (new; RA2 only, once RA2 starts), `bot/strategy/own_range.py` (new), `bot/brains/tier3.py`, `bot/timing.py`, `bot/main.py` (`Controller.choose` only, for RC's fallback fix), `lab/opps/accounting.py`, `lab/river_bench.py` (new), `tests/test_river_*.py`, `docs/reports/TIER4_RIVER.md` |
 | I | merges only; `docs/STATUS.md`, `docs/SUBMISSIONS.md` |
 
 Not ours: `bot/cfr/`, `lab/cfr/fast/` and `docs/reports/TIER4.md` (the teammate's CFR, Tier 5).
@@ -122,12 +125,55 @@ A sub-plan that finds it must touch another stream's file stops and says so in i
 | 20000–20999 | DA; 21000–21999 DB and DC |
 | 30000–30999 | RC gate R |
 | 40000–40999 | I1 (incl. held-out `--final`) |
+| 50000–50999 | GX: gate X redo on the laptop |
+| 60000–60999 | PF preflop chart |
+| 70000–70999 | RD: river solver ON + exploit layer + tuning (user decision 2026-11-04: accept the CFR river) |
+| 71000–71999 | O3: conv_opp3 study (light) |
+| 72000–72999 | AD: faster adaptation in long matches |
+| 73000–73999 | RF: fix the CFR river + RNR (diagnose and repair) |
+| 74000–74999 | O3C: O3 arm B confirmation on tier4/int |
+| 75000–75999 | L3: 3-bet-pot leak study |
+| 76000–76999 | O3C (local) |
+| 77000–77999 | H1: held-out bots study (cloud) |
+| 80000–80999 | final-check (200h/30s, locks on) |
+| 81000–81999 | H1 confirmation at 200h/30s (reverted NO-GO) |
+| 82000–82999 | ADT: x_ramp/x_vo_min_obs/ALPHA-BETA tuning (NO-GO, closed) |
+| 83000–83999 | AD2: x_len length-scaling (dropped as noise) |
+| 84000–84999 | ovf: overfolder SPRT turn/river-only fix (`overfolder_tr`/`x_of_tr`) |
+| 90000–90999 | LC: stacked-layer sabotage check + new optimization ideas |
+| 51000–51999 | PB redo (laptop) tuning; 52000–52999 its confirmations |
+| 53000–53999 | DA redo (laptop) tuning; 54000–54999 its confirmations |
+
+## Integration branch `tier4/int` (user, 2026-11-04)
+
+Pieces are added to `tier4/int` one at a time, as soon as their own testing is complete and above noise (handoff says
+KEEP, confirmed on fresh seeds, locks-on score checked, timing ratio checked), never mid-testing. Later improvements are
+then tested on top of `tier4/int`, not on `tier4/base`. A session that finishes a piece rebases its work on `tier4/int`
+before its confirmation run. In: DA (smart rollouts + raise_equity, `tier4/d` f70bee9). Not yet: O3 (x_narrow, x_air_eq:
+screening only), PB/PD portfolio (gate P open), DC, RD, AD. I1 still runs the final combined gates and the stacking test.
+Note: O3 was merged by mistake at 65da08c/811d54c and reverted; to re-add it, revert those two reverts or re-apply.
+
+## River solver + RNR stays a ship candidate (user, 2026-11-04)
+
+RD found no gain over Tier 3 on our pool (head to head 0.540 ± 0.050; pool chips +0.42 ± 0.48; `tier4/rd` 3c5e376), but the
+user wants the CFR river with RNR kept in play: it is the principled choice against stronger, balanced bots, which our pool
+barely contains. I1 therefore carries `t3_river_solver` (+ RNR, narrowing) as a candidate stack step and decides it on the
+held-out bots, the blind2 set (when built) and head to head, with the rule "no worse than the stack without it, and inside
+the timing limit". Before I1: lower the 400h trapper ratio (x1.408) under 1.4 (smaller box), and test on top of `tier4/int` + O3.
+
+## No soft timelines (user, 2026-11-04)
+
+The user removed all soft timelines: aim for the best bot, not the fastest. The only hard date is the deadline
+(15 Nov 23:59 IST). Nothing is dropped, rushed or cut short before about 12 Nov; the slip rule below applies only from
+then. Benefits of time go first to more improvement rounds (new leaks found, fixed as general adaptive rules), then to
+bigger confirmation runs for ship decisions (a 50-pair run cannot resolve +-0.2 chips/hand; use more pairs for the
+final candidates). PF and the restricted river are built, not dropped. The upload candidate is ready by 13 Nov.
 
 ## Slip rule
 
 This README is the source of truth for the slip order (it replaces the one in `TIER4_PLAN.md`). I1's retry rule is in
 `I1_integrate.md`.
 
-If the deadline gets close, drop in this order: RC's restricted p → DC → DB's learned rule (keep its measurements) → R entirely.
+If the deadline gets close, drop in this order: PF → RC's restricted p → DC → DB's learned rule (keep its measurements) → R entirely.
 P and DA are not optional. If gate P fails, PD's handoff says so, and I1 ships the incumbent (`tier3x` if gate X
 passed, else `tier3`) plus any D and R KEEPs.

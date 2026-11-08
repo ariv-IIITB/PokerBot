@@ -418,6 +418,8 @@ def spec_hash(spec: VariantSpec) -> str:
     d["program"] = spec.full_program()            # shorthand and explicit programs agree
     d.pop("hole_cards", None)
     d.pop("streets", None)
+    d["match"].pop("hands", None)                  # match length and bank don't affect card
+    d["match"].pop("time_bank_s", None)            # equity/evaluation; don't force a rebuild
     if not d["betting"].get("blind_counts_as_raise"):
         d["betting"].pop("blind_counts_as_raise", None)   # keep the hash of older specs
     return hashlib.sha256(json.dumps(d, sort_keys=True).encode()).hexdigest()[:16]

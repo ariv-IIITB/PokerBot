@@ -3,7 +3,9 @@
 worst case: the lock would end a won match early), and the bank must last.
 
 These replay the red flag found in Phase C (one Tier 2 used ~34 s of its 60 s bank in a
-400-hand self-play match). Slow: ~1 minute each. Run with `-m slow`."""
+400-hand self-play match; the 2026-11-06 rules split a match into two legs, each a fresh
+process with its own bank, so these numbers now cover one 200-hand Stage 1 leg / one 500-hand
+Stage 2 leg). Slow: ~1 minute each. Run with `-m slow`."""
 import sys
 
 import pytest
@@ -27,7 +29,7 @@ def check_bank(m, hands, bank, *bots) -> None:
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("hands,bank", [(400, 60.0), (1000, 150.0)])
+@pytest.mark.parametrize("hands,bank", [(200, 30.0), (500, 75.0)])
 def test_tier2_self_play_on_a_machine_twice_as_slow(hands, bank) -> None:
     a = PlayerSpec.brain("tier2", NO_LOCK).build()
     b = PlayerSpec.brain("tier2", NO_LOCK).build()
@@ -41,13 +43,13 @@ def test_tier2_self_play_on_a_machine_twice_as_slow(hands, bank) -> None:
 def test_tier2_against_the_most_decisions_per_hand_at_2x(opponent) -> None:
     a = PlayerSpec.brain("tier2", NO_LOCK).build()
     m = play_match([a, PlayerSpec.brain(opponent).build()], load_variant("discard_holdem"),
-                   seed=4, hands=400, time_bank_s=60.0, clock_scale=2.0, reply_limit_s=5.0)
-    check_bank(m, 400, 60.0, a.bot, None)
+                   seed=4, hands=200, time_bank_s=30.0, clock_scale=2.0, reply_limit_s=5.0)
+    check_bank(m, 200, 30.0, a.bot, None)
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("hands,bank,opponent", [(400, 60.0, "tier3"), (1000, 150.0, "tier2"),
-                                                 (400, 60.0, "maniac"), (400, 60.0, "calling_station")])
+@pytest.mark.parametrize("hands,bank,opponent", [(200, 30.0, "tier3"), (500, 75.0, "tier2"),
+                                                 (200, 30.0, "maniac"), (200, 30.0, "calling_station")])
 def test_tier3_on_a_machine_twice_as_slow(hands, bank, opponent) -> None:
     """Phase G: Tier 3 adds an own-range sample to every postflop decision; the bank must still last."""
     a = PlayerSpec.brain("tier3", NO_LOCK).build()
@@ -63,5 +65,5 @@ def test_the_real_subprocess_bot_over_the_real_protocol_at_2x() -> None:
     bot = SubprocessPlayer([sys.executable, "-m", "bot.main"], protocol="pokerbots",
                            brain_config=NO_LOCK)
     m = play_match([bot, PlayerSpec.brain("maniac").build()], load_variant("discard_holdem"),
-                   seed=5, hands=400, time_bank_s=60.0, clock_scale=2.0, reply_limit_s=5.0)
-    check_bank(m, 400, 60.0, None, None)
+                   seed=5, hands=200, time_bank_s=30.0, clock_scale=2.0, reply_limit_s=5.0)
+    check_bank(m, 200, 30.0, None, None)

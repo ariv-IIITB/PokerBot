@@ -8,6 +8,7 @@ STATE = Path(".scratch/tier4_state.json")   # {"started": [...]}: sub-plans alre
 PLAN = {
     "S0": ("tier4/s0", ["tier4/base"], []),
     "PA": ("tier4/p", ["tier4/base"], []),
+    "GX": ("tier4/gx", ["tier4/p"], ["PA"]),   # gate X redo on the laptop (sequential test)
     "PB": ("tier4/p-tune", ["tier4/p"], ["PA"]),
     "PC": ("tier4/p-sel", ["tier4/p"], ["PA"]),
     "PD": ("tier4/p", ["tier4/p-tune", "tier4/p-sel"], ["PB", "PC"]),
@@ -18,6 +19,7 @@ PLAN = {
     "RA2": ("tier4/r", ["tier4/r"], ["RA"]),
     "RB": ("tier4/r", ["tier4/r"], ["RA"]),
     "RC": ("tier4/r", ["tier4/r"], ["RB", "RA2"]),
+    "PF": ("tier4/pf", ["tier4/r"], ["RC"]),
     "I1": ("tier4/main", ["tier4/p", "tier4/d", "tier4/r"], ["PD", "DC", "RC"]),
 }
 

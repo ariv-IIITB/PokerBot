@@ -1,0 +1,7 @@
+tests/test_river_timing.py (slow), Tier 3 flag off vs on, same seed back to back, clock x2, box halved (see solver_cfg), lock off
+Intel Xeon @ 2.10 GHz, nproc 4
+calling_station 400h: used 17.2s -> 22.1s (x1.28, charged x2); hard-deadline hits 0 -> 0; worst reply 36 ms; river solves 386, 37 passes each, fallbacks 95
+d_new_trapper 400h: used 10.4s -> 13.1s (x1.26, charged x2); hard-deadline hits 0 -> 0; worst reply 52 ms; river solves 215, 42 passes each, fallbacks 52
+calling_station 1000h: used 43.4s -> 53.3s (x1.23, charged x2); hard-deadline hits 0 -> 0; worst reply 50 ms; river solves 992, 41 passes each, fallbacks 136
+d_new_trapper 1000h: used 26.8s -> 33.3s (x1.24, charged x2); hard-deadline hits 0 -> 0; worst reply 94 ms; river solves 559, 42 passes each, fallbacks 131
+2 passed, 2 deselected in 156.07s (0:02:36)

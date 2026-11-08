@@ -1,0 +1,12 @@
+== calling_station 400 h box=off
+400 hands, 1996 decisions: bank used 8.65s of 60s -> projected x2 = 17.31s (29% of bank)
+== calling_station 400 h box=0.020
+400 hands, 1996 decisions: bank used 8.64s of 60s -> projected x2 = 17.28s (29% of bank)
+== calling_station 400 h box=0.040
+400 hands, 1996 decisions: bank used 8.64s of 60s -> projected x2 = 17.27s (29% of bank)
+== d_new_trapper 400 h box=off
+400 hands, 1277 decisions: bank used 5.43s of 60s -> projected x2 = 10.87s (18% of bank)
+== d_new_trapper 400 h box=0.020
+400 hands, 1307 decisions: bank used 5.59s of 60s -> projected x2 = 11.17s (19% of bank)
+== d_new_trapper 400 h box=0.040
+400 hands, 1288 decisions: bank used 5.47s of 60s -> projected x2 = 10.93s (18% of bank)

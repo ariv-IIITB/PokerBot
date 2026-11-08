@@ -1,0 +1,1 @@
+tier3x[{"x_def":0.5,"x_def_margin":0.05}]-nolock vs d_new_rules-nolock: +0.83 ± 0.19 chips/hand | match score 0.650 ± 0.062 over 60 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 202.4s (119/s)

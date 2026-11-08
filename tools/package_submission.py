@@ -19,7 +19,7 @@ run on the UNPACKED zip, i.e. on what the organisers will run:
   4. smoke matches over the real protocol: vs the organisers' starter bot and a random bot
   5. timing, as `python bot.py` over the real protocol: for each opponent in --opponents, the
      projected 2x bank use is <= 50 % of the bank and no reply takes over 0.5 s; --stage2 repeats
-     it at 1000 hands / 150 s
+     it at 500 hands / 75 s (one Stage 2 leg)
   6. peak memory below --max-mb (default 500 MB)
 """
 from __future__ import annotations
@@ -259,7 +259,7 @@ def check_package(out: Path, spec_path: Path, protocol: str, brain: str, hands: 
         print(f"  smoke match vs {name}: {'ok' if ok else 'FAILED'} (errors {m.errors[0]})")
         if not ok:
             problems.append(f"smoke match vs {name}: errors {m.errors}, forfeit {m.forfeit_reason!r}")
-    runs = [(hands, spec.match.time_bank_s)] + ([(1000, 150.0)] if stage2 else [])
+    runs = [(hands, spec.match.time_bank_s)] + ([(500, 75.0)] if stage2 else [])
     for n, bank in runs:
         for opp in opponents:
             rep = run_timing(brain, opp, hands=n, bank_s=bank, cwd=out, protocol=protocol,
@@ -291,7 +291,7 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     ap.add_argument("--protocol", default="pokerbots", choices=sorted(ADAPTERS))
     ap.add_argument("--out", default=str(ROOT / "dist" / "submission"))
     ap.add_argument("--zip", action="store_true", help="also build <out>.zip and check THAT, unpacked")
-    ap.add_argument("--stage2", action="store_true", help="also time 1000 hands / 150 s")
+    ap.add_argument("--stage2", action="store_true", help="also time 500 hands / 75 s (one Stage 2 leg)")
     ap.add_argument("--hands", type=int, default=None, help="timing match length (default: spec)")
     ap.add_argument("--opponents", default="tier2-nolock,maniac,starter")
     ap.add_argument("--max-startup", type=float, default=1.0)

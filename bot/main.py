@@ -30,16 +30,18 @@ from bot.protocol import ActRequest, MatchEnd, MatchInfo, Message, ProtocolError
 from bot.protocols import ADAPTERS, DEFAULT, get_adapter
 from bot.protocols.base import as_messages
 from bot.state import GameState
-from bot.timing import DeadlineExceeded, Stopwatch, TimeManager, hard_deadline
+from bot.timing import DeadlineExceeded, Stopwatch, TimeManager, TimingConfig, hard_deadline
+
 
 # Brain registry: name -> "module:Class", imported lazily so startup stays fast.
 BRAINS = {
     "tier0": "bot.brains.tier0:Tier0Brain",
     "tier1": "bot.brains.tier1:Tier1Brain",
     "tier2": "bot.brains.tier2:Tier2Brain",
-    "tier3": "bot.brains.tier3:Tier3Brain",        # Phase G; the default since G8
+    "tier3": "bot.brains.tier3:Tier3Brain",        # Phase G; plain Tier 3 (no exploit layer, no river solver)
+    "tier3x": "bot.brains.tier3x:Tier3XBrain",     # Tier 3 + exploit layer + O3 rules + river solver: the default
 }
-DEFAULT_BRAIN = "tier3"    # Phase G8 (2026-10-30): Tier 3 passed the ship checks (docs/reports/TIER3.md)
+DEFAULT_BRAIN = "tier3x"   # was tier3 (G8, 2026-10-30); tier3x since 2026-11-05 so a package built without --brain is not the worse bot
 
 
 def load_brain(name: str) -> Brain:
@@ -68,6 +70,8 @@ class Bot:
         self.brain_errors = 0
         self.deadline_hits = 0
         self.emergency_decisions = 0
+        self.deadline_retries = 0      # the brain asked again at budget 0 after a deadline hit or an error ...
+        self.retry_wins = 0            # ... and this many of those gave an action (the rest went to Tier 0)
         self.bad_lines = 0
 
     # ---- main loop
@@ -90,7 +94,8 @@ class Bot:
                 botlog.warn(f"unhandled error on line {line.strip()!r}: {e!r}")
         botlog.log(f"done: hands={self.state.hands_played} bankroll={self.state.bankroll} "
                    f"brain_errors={self.brain_errors} deadlines={self.deadline_hits} "
-                   f"emergency={self.emergency_decisions} bad_lines={self.bad_lines}")
+                   f"emergency={self.emergency_decisions} retries={self.retry_wins}/{self.deadline_retries} "
+                   f"bad_lines={self.bad_lines}")
         return 0
 
     def handle_line(self, line: str) -> bool:
@@ -158,7 +163,8 @@ class Bot:
         return safe_action_for_hole(legal, hand.hole if hand is not None else ())
 
     def choose(self, legal: LegalActions) -> Action:
-        """Ask the brain, with Tier 0 fallback on emergency, error or deadline."""
+        """Ask the brain; on a deadline hit or an error ask it once more at budget 0 (no rollouts, no
+        solver: ~1 ms for Tier 3), and only if that fails too play Tier 0. Emergency mode goes straight to Tier 0."""
         if self.timer.emergency():
             self.emergency_decisions += 1
             return self.fallback(legal)
@@ -172,6 +178,20 @@ class Bot:
         except Exception as e:
             self.brain_errors += 1
             botlog.warn(f"brain error: {e!r}")
+        return self.retry_cheap(legal)
+
+    def retry_cheap(self, legal: LegalActions) -> Action:
+        self.deadline_retries += 1
+        try:
+            with hard_deadline(TimingConfig.retry_deadline_s):   # Tier 3 needs ~1-2 ms at budget 0
+                a = self.brain.decide(self.state, legal, 0.0)
+            if isinstance(a, Action):                  # on_message validates and clamps it like any other
+                self.retry_wins += 1
+                return a
+        except DeadlineExceeded:
+            botlog.warn("budget-0 retry exceeded its deadline")
+        except Exception as e:
+            botlog.warn(f"budget-0 retry error: {e!r}")
         return self.fallback(legal)
 
 

@@ -1,0 +1,12 @@
+[bot] WARN brain exceeded hard deadline (budget 5.0 ms)
+=== d_conv_opp3 arm=d1  pairs=25 river hands=5610 / 20000
+  fold_river: real fold rate to our river bets 0.763 (n=1393, 28/match); model mean at match end 0.653, n 28/match; RNR weight at match end 0.197 (max 0.267)
+  narrow bet 0.00-0.40 pot: n=50 top-30% range mass before 0.54 after 0.70; real showdown hands in top 30%: 0.88 (n=40, mean pct 0.85)
+  narrow bet 0.40-0.75 pot: n=704 top-30% range mass before 0.46 after 0.71; real showdown hands in top 30%: 0.51 (n=318, mean pct 0.67)
+  narrow bet 0.75-1.20 pot: n=1619 top-30% range mass before 0.46 after 0.76; real showdown hands in top 30%: 0.73 (n=547, mean pct 0.78)
+  narrow bet 1.20-99.00 pot: n=237 top-30% range mass before 0.55 after 0.77; real showdown hands in top 30%: 0.99 (n=67, mean pct 0.91)
+  river chips per hand played: +6.223  (SE 0.245)
+  first       n= 3325 contrib/hand=+4.010  mean/spot +24.12+-1.10  K:0.82(+21.5)  R:0.18(+35.7)
+  checked_to  n= 1515 contrib/hand=+2.427  mean/spot +32.04+-1.25  K:0.64(+17.6)  R:0.36(+57.7)
+  face_small  n=  299 contrib/hand=+0.088  mean/spot +5.87+-4.59  C:0.48(-1.4)  F:0.43(+0.0)  R:0.09(+75.3)
+  face_big    n=  471 contrib/hand=-0.302  mean/spot -12.84+-3.17  C:0.28(-34.3)  F:0.64(+0.0)  R:0.08(-38.9)

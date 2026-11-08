@@ -1,0 +1,33 @@
+machine: Intel(R) Core(TM) Ultra 5 225H, nproc=14
+recorded 60 river spots in 15s
+range building (all variants pay it): combos 0.04 ms, inference 2.1 ms (p90 2.8), ranks 0.5 ms; opp weights above 1e-3 of the max: 903 of 903 (median)
+[bucket24cr/small-tree] passes in a 10 ms box, ranges included: median 203, p10 174, p90 272, share >= 100: 1.00 | ranges 2.6 ms + setup 0.4 ms + 0.03 ms/pass | n0/n1 24/24 | tree 6 decisions | passes if ranges were free: 296
+        after the in-box number of passes: exploitability (pot = 1) in the solved game mean 0.0067 ± 0.0007, max 0.0303 | exact full game: mean 0.0145 ± 0.0027, median 0.0099, max 0.1530 (60 spots)
+        second decisions in a hand (8 spots): 0.0058 ± 0.0012, first decisions 0.0159 ± 0.0031
+[bucket32cr/small-tree] passes in a 10 ms box, ranges included: median 191, p10 159, p90 258, share >= 100: 1.00 | ranges 2.6 ms + setup 0.4 ms + 0.03 ms/pass | n0/n1 32/32 | tree 6 decisions | passes if ranges were free: 275
+        after the in-box number of passes: exploitability (pot = 1) in the solved game mean 0.0073 ± 0.0007, max 0.0293 | exact full game: mean 0.0129 ± 0.0023, median 0.0091, max 0.1313 (60 spots)
+        second decisions in a hand (8 spots): 0.0057 ± 0.0010, first decisions 0.0140 ± 0.0026
+[bucket48cr/small-tree] passes in a 10 ms box, ranges included: median 161, p10 129, p90 222, share >= 100: 0.97 | ranges 2.6 ms + setup 0.5 ms + 0.04 ms/pass | n0/n1 48/48 | tree 6 decisions | passes if ranges were free: 233
+        after the in-box number of passes: exploitability (pot = 1) in the solved game mean 0.0095 ± 0.0010, max 0.0373 | exact full game: mean 0.0123 ± 0.0016, median 0.0106, max 0.0833 (60 spots)
+        second decisions in a hand (8 spots): 0.0066 ± 0.0012, first decisions 0.0132 ± 0.0018
+[bucket64cr/small-tree] passes in a 10 ms box, ranges included: median 136, p10 106, p90 189, share >= 100: 0.93 | ranges 2.6 ms + setup 0.6 ms + 0.05 ms/pass | n0/n1 64/64 | tree 6 decisions | passes if ranges were free: 196
+        after the in-box number of passes: exploitability (pot = 1) in the solved game mean 0.0122 ± 0.0013, max 0.0555 | exact full game: mean 0.0135 ± 0.0014, median 0.0119, max 0.0569 (60 spots)
+        second decisions in a hand (8 spots): 0.0070 ± 0.0014, first decisions 0.0145 ± 0.0015
+[bucket96cr/small-tree] passes in a 10 ms box, ranges included: median 96, p10 74, p90 140, share >= 100: 0.42 | ranges 2.6 ms + setup 0.7 ms + 0.06 ms/pass | n0/n1 96/96 | tree 6 decisions | passes if ranges were free: 141
+        after the in-box number of passes: exploitability (pot = 1) in the solved game mean 0.0174 ± 0.0019, max 0.0770 | exact full game: mean 0.0181 ± 0.0020, median 0.0149, max 0.0781 (60 spots)
+        second decisions in a hand (8 spots): 0.0089 ± 0.0015, first decisions 0.0195 ± 0.0022
+[bucket24cr/small-tree] passes in a 20 ms box, ranges included: median 516, p10 414, p90 663, share >= 100: 1.00 | ranges 2.6 ms + setup 0.4 ms + 0.03 ms/pass | n0/n1 24/24 | tree 6 decisions | passes if ranges were free: 606
+        after the in-box number of passes: exploitability (pot = 1) in the solved game mean 0.0028 ± 0.0004, max 0.0202 | exact full game: mean 0.0113 ± 0.0026, median 0.0061, max 0.1506 (60 spots)
+        second decisions in a hand (8 spots): 0.0041 ± 0.0008, first decisions 0.0125 ± 0.0030
+[bucket32cr/small-tree] passes in a 20 ms box, ranges included: median 478, p10 374, p90 622, share >= 100: 1.00 | ranges 2.6 ms + setup 0.5 ms + 0.03 ms/pass | n0/n1 32/32 | tree 6 decisions | passes if ranges were free: 561
+        after the in-box number of passes: exploitability (pot = 1) in the solved game mean 0.0030 ± 0.0003, max 0.0097 | exact full game: mean 0.0091 ± 0.0021, median 0.0059, max 0.1264 (60 spots)
+        second decisions in a hand (8 spots): 0.0039 ± 0.0008, first decisions 0.0099 ± 0.0024
+[bucket48cr/small-tree] passes in a 20 ms box, ranges included: median 404, p10 306, p90 537, share >= 100: 1.00 | ranges 2.6 ms + setup 0.5 ms + 0.04 ms/pass | n0/n1 48/48 | tree 6 decisions | passes if ranges were free: 480
+        after the in-box number of passes: exploitability (pot = 1) in the solved game mean 0.0038 ± 0.0004, max 0.0104 | exact full game: mean 0.0070 ± 0.0012, median 0.0050, max 0.0692 (60 spots)
+        second decisions in a hand (8 spots): 0.0038 ± 0.0007, first decisions 0.0075 ± 0.0013
+[bucket64cr/small-tree] passes in a 20 ms box, ranges included: median 342, p10 252, p90 463, share >= 100: 1.00 | ranges 2.6 ms + setup 0.6 ms + 0.05 ms/pass | n0/n1 64/64 | tree 6 decisions | passes if ranges were free: 410
+        after the in-box number of passes: exploitability (pot = 1) in the solved game mean 0.0048 ± 0.0005, max 0.0153 | exact full game: mean 0.0064 ± 0.0006, median 0.0055, max 0.0200 (60 spots)
+        second decisions in a hand (8 spots): 0.0040 ± 0.0009, first decisions 0.0068 ± 0.0006
+[bucket96cr/small-tree] passes in a 20 ms box, ranges included: median 244, p10 180, p90 341, share >= 100: 1.00 | ranges 2.6 ms + setup 0.7 ms + 0.06 ms/pass | n0/n1 96/96 | tree 6 decisions | passes if ranges were free: 293
+        after the in-box number of passes: exploitability (pot = 1) in the solved game mean 0.0067 ± 0.0006, max 0.0204 | exact full game: mean 0.0078 ± 0.0007, median 0.0072, max 0.0229 (60 spots)
+        second decisions in a hand (8 spots): 0.0047 ± 0.0010, first decisions 0.0083 ± 0.0008

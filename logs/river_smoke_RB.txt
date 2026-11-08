@@ -1,0 +1,4 @@
+tier3[{"t3_river_solver":true}]-nolock vs d_conv_opp3-nolock: -1.06 ± 0.50 chips/hand | match score 0.250 ± 0.112 over 16 matches | errors A/B 0/0 | forfeits A/B 0/0 | 6400 hands in 106.2s (60/s)
+--- brain stats: tier3[{"t3_river_solver":true}]-nolock: river_errors=0 river_fallbacks=2 river_few_iters=1 river_iters=341498 river_missing=0 river_no_pass=1 river_solves=2613 river_us=47473778 t3_decisions=19847 t3_errors=0 t3_fallbacks=114
+tier3[{"t3_river_solver":true}]-nolock vs d_new_trapper-nolock: -0.07 ± 0.42 chips/hand | match score 0.500 ± 0.129 over 16 matches | errors A/B 0/0 | forfeits A/B 0/0 | 6400 hands in 133.4s (48/s)
+--- brain stats: tier3[{"t3_river_solver":true}]-nolock: river_errors=0 river_fallbacks=6 river_few_iters=6 river_iters=499352 river_missing=0 river_no_pass=0 river_solves=3865 river_us=71793464 t3_decisions=16382 t3_errors=0 t3_fallbacks=864

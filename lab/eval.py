@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import math
 import re
 import sys
@@ -37,7 +38,7 @@ DEFAULT_VARIANT = "lab/opps/holdem_100bb.json"     # the rules the Opps/ bots we
 POOL_FILE = ROOT / "lab" / "opps" / "discard_pool.json"
 DEFAULT_TRAIN = ["opp1", "opp2", "opp3", "opp4"]
 OPP_CONFIG = {"opp3": {"fold_out": False}}          # opp3 would otherwise fold out when ahead
-LOCK_BRAINS = {"tier2", "tier3"}
+LOCK_BRAINS = {"tier2", "tier3", "tier3x", "tier4", "tier4lab"}
 
 # Action-profile targets for our brain, in percent: spot -> action kind -> (low, high).
 # Style targets from the Part 4 plan; winning matches beats hitting a target.
@@ -100,6 +101,12 @@ def _pool_file(which: str, final: bool) -> list[str]:
 
 
 def opponent_spec(name: str, locks: str) -> PlayerSpec:
+    if name.startswith("remote:"):              # remote:PORT, a friend's bot on another machine (docs/REMOTE_PLAY.md)
+        if not os.environ.get("REMOTE_TOKEN"):
+            raise SystemExit("remote opponents need REMOTE_TOKEN set (the secret shared with your friend)")
+        port = name.split(":", 1)[1]
+        return PlayerSpec.subprocess([sys.executable, "-m", "lab.remote_seat", "--port", port],
+                                     label=f"remote{port}", protocol="pokerbots")
     if name == "starter":                       # the organisers' starter bot, over the real protocol
         return PlayerSpec.subprocess([sys.executable, str(ROOT / "lab" / "sparring" / "starter_bot.py")],
                                      label="starter", protocol="pokerbots")
@@ -115,6 +122,8 @@ def run_pool(brain: str, pool: list[str], pairs: int, variant: str = DEFAULT_VAR
              processes: Optional[int] = None) -> list[str]:
     """Play `pairs` duplicate pairs against each opponent; returns the output lines."""
     from lab.opps import track
+    if any(o.startswith("remote:") for o in pool):
+        processes = 1                           # one friend, one port: matches must run one at a time
     a = parse_brain(brain, locks)
     cfg = load_variant(variant)
     want_track = bool(report) or check_profile
@@ -134,7 +143,9 @@ def run_pool(brain: str, pool: list[str], pairs: int, variant: str = DEFAULT_VAR
             if "profile" in report:
                 blocks.append(track.format_profile(merged, names))
             if "accounting" in report:
-                blocks.append(track.format_accounting(merged, names, rep.total_hands))
+                blocks.append(track.format_accounting(merged, names, rep.total_hands, [p.track for p in rep.pairs if p.track]))
+            if "lines" in report:
+                blocks.append(track.format_lines(merged, names, rep.total_hands, [p.track for p in rep.pairs if p.track]))
             if "stats" in report:
                 blocks.append(track.format_stats(merged, names))
             out += blocks
@@ -224,7 +235,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--bank", type=float, default=None, help="time bank per match, seconds")
     ap.add_argument("--locks", choices=("on", "off"), default="on")
     ap.add_argument("--variant", default=DEFAULT_VARIANT, help="catalog name or spec JSON path")
-    ap.add_argument("--report", default="", help="comma list: accounting, profile, stats")
+    ap.add_argument("--report", default="", help="comma list: accounting, lines, profile, stats")
     ap.add_argument("--check-profile", action="store_true")
     ap.add_argument("--processes", type=int, default=None)
     ap.add_argument("--out", default=None)
@@ -242,7 +253,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         ap.error("a BRAIN is required (or --compare)")
     pool = resolve_pool(args.pool, args.final)
     report = tuple(r for r in args.report.split(",") if r)
-    bad = set(report) - {"accounting", "profile", "stats"}
+    bad = set(report) - {"accounting", "lines", "profile", "stats"}
     if bad:
         ap.error(f"unknown --report {sorted(bad)}")
     lines = run_pool(args.brain, pool, args.pairs, args.variant, args.hands, args.bank,

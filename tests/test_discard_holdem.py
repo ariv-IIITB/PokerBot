@@ -38,7 +38,7 @@ def test_spec_matches_the_rulebook() -> None:
     assert spec.validate() == []
     b, m = spec.betting, spec.match
     assert (b.small_blind, b.big_blind, b.max_raises, b.blind_counts_as_raise) == (1, 2, 4, True)
-    assert (m.starting_stack, m.reset_stacks, m.hands, m.time_bank_s) == (200, True, 400, 60.0)
+    assert (m.starting_stack, m.reset_stacks, m.hands, m.time_bank_s) == (200, True, 200, 30.0)
     kinds = [s["type"] for s in spec.full_program()]
     assert kinds == ["post_blinds", "deal_hole", "betting", "deal_board", "betting", "discard",
                      "deal_board", "betting", "deal_board", "betting", "showdown"]
