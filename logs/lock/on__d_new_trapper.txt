@@ -1,0 +1,1 @@
+tier3x vs d_new_trapper: +0.17 ± 0.11 chips/hand | match score 0.785 ± 0.029 over 200 matches | 2-leg score 0.630 ± 0.049 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 516.6s (77/s)
