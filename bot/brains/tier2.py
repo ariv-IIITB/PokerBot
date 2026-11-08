@@ -36,6 +36,8 @@ DEFAULTS.update({
                                        # lead lost whole matches (2-leg score +0.089 +- 0.031 with it off, docs/FINAL_BOT_LOG.md)
     "lock_assume_alternating": True,   # blinds alternate each hand (False = assume BB always)
     "lock_reserve": 0,                 # lock only when folding out still ends the leg this many chips ahead (2-leg rule)
+    "ev_bayes_called": False,          # lab A/B: Bayes calling-range equity in EV sizing (off) ...
+    "ev_fold_eq": 0.72,                # ... our equity against the hands that fold
     # E3/E4: per-spot opponent stats (bot/strategy/oppstats.py) and the river bluff-catch rule
     "oppstats_strength": 15.0,     # prior worth this many observations
     "oppstats_gate": 20,           # a spot moves play only after this many samples...

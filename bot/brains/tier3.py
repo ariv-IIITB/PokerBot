@@ -57,6 +57,7 @@ DEFAULTS.update({
     "t3_river": True,
     "t3_adapt": True,              # use the per-spot opponent stats (gated, capped; always on the prior until 20 samples)
     "hide_discard": False,         # G7: among near-equal discards, reveal the least (A/B before use)
+    "phantom_raise": 0.0,              # lab A/B: chance to min-raise a flop bet with any cards (off)
     "hide_margin": 0.01,           # ... "near-equal" = within this much expected share of the best
     "range_samples": 300,          # hands sampled for our own-range percentile
     # ---- guards against wide, big-betting opponents (Phase G fix; see docs/reports/TIER3.md)
@@ -847,7 +848,7 @@ class Tier3Brain(Tier2Brain):
             return None                                            # one raise per street; then call or fold
         if c.eq >= float(p["raise_value_eq"]) and self._chance(float(p["raise_value_prob"])):
             return self._size(float(p["raise_frac"]), "value", c, s, legal, p)
-        if c.street == 1 and float(p.get("x_phantom", 0.0)) > 0 and self._chance(float(p["x_phantom"])):
+        if c.street == 1 and float(p.get("phantom_raise", 0.0)) > 0 and self._chance(float(p["phantom_raise"])):
             return Action.raise_to(legal.raise_min)                # phantom min-raise: any cards (lab A/B)
         if c.street == 1 and 0.20 <= c.eq <= 0.60:
             prob = 0.0
