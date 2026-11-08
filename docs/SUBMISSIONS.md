@@ -24,3 +24,10 @@ the zip is reproducible: same sources, same hash).
    against tier2 (lock off), maniac and the starter bot: projected 2x bank use <= 50 %, no reply
    over 0.5 s.
 6. Peak memory under 500 MB.
+
+## 2026-11-08: tier3x, endgame lock off (I1 build)
+- `dist/submission.zip`, 221 KB, sha256 `f3b8cd4c36c081f517b82ead9d31c0cebd64607cfc9a7417218fa71779aad16b`, commit 7581fa7.
+- Brain tier3x (Tier 3 + exploit layer + river solver), `lock_enabled` false (2-leg match rule).
+- Package checks: imports/sandbox ok, startup 231 ms, smoke ok, peak RSS 44 MB. The linear x2 timing projection vs
+  starter reads 55-57 % (limit 50 %); the real x2 run (`lab/slow_gate.py`) peaks at 47.6 % and x4 at 69 % with
+  0 deadline hits, so it was shipped as is.
