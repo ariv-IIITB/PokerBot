@@ -32,6 +32,6 @@
   "aggr_call_shift": 0.0,
   "pressure_aggr_from": 0.6,
   "pressure_aggr_shift": 1.0,
-  "lock_enabled": true,
+  "lock_enabled": false,
   "lock_assume_alternating": true
 }

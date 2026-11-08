@@ -5,7 +5,7 @@ Checked by tests/test_embed.py; see tools/embed_data.py for the layout.
 """
 SOURCES = {'spec (variant/active.json)': '49302e549d382b9b',
  'bot/config/tier1.json': '4550edd7edb53427',
- 'bot/config/tier2.json': '7fa3a9f14b6b087f',
+ 'bot/config/tier2.json': '71c28c0bae4fe8db',
  'bot/config/tier3.json': '346cc47a9db22411',
  'data/discard_holdem/meta.json': '815711206d2298c1',
  'data/discard_holdem/classes.npy': '24063b60ac8692e5',
@@ -104,7 +104,7 @@ PARAMS = {'tier1': {'equity_budget_frac': 0.7,
            'aggr_call_shift': 0.0,
            'pressure_aggr_from': 0.6,
            'pressure_aggr_shift': 1.0,
-           'lock_enabled': True,
+           'lock_enabled': False,
            'lock_assume_alternating': True},
  'tier3': {'smart_rollout_discard': True, 'raise_equity': [0.7, 0.68, 0.68, 0.74]}}
 

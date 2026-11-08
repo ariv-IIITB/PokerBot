@@ -1,0 +1,1 @@
+tier3x-nolock vs tight-nolock: +4.52 ± 0.21 chips/hand | match score 0.935 ± 0.017 over 200 matches | 2-leg score 0.990 ± 0.010 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 222.5s (180/s)

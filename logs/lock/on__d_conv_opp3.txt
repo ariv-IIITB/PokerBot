@@ -1,0 +1,1 @@
+tier3x vs d_conv_opp3: -0.45 ± 0.09 chips/hand | match score 0.690 ± 0.033 over 200 matches | 2-leg score 0.450 ± 0.050 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 300.2s (133/s)

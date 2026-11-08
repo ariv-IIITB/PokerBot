@@ -32,7 +32,8 @@ DEFAULTS.update({
     "aggr_call_shift": 0.0,        # call margin drop per unit of (aggression - prior); 0.10 cost ~0.6 vs tier1/opp4 (Phase F0), off
     "pressure_aggr_from": 0.6,     # all-street aggression above this shrinks bet_pressure...
     "pressure_aggr_shift": 1.0,    # ...to bet_pressure x (1 - shift * excess); 0 = off
-    "lock_enabled": True,
+    "lock_enabled": False,             # off since 2026-11-08: a match is two legs on net chips; locking a leg at a bare
+                                       # lead lost whole matches (2-leg score +0.089 +- 0.031 with it off, docs/FINAL_BOT_LOG.md)
     "lock_assume_alternating": True,   # blinds alternate each hand (False = assume BB always)
     "lock_reserve": 0,                 # lock only when folding out still ends the leg this many chips ahead (2-leg rule)
     # E3/E4: per-spot opponent stats (bot/strategy/oppstats.py) and the river bluff-catch rule

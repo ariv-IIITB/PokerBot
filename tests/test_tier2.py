@@ -131,7 +131,7 @@ def test_lock_margin_math() -> None:
 
 
 def test_lock_forces_check_fold() -> None:
-    brain = Tier2Brain({"bluff_freq": 0.0})
+    brain = Tier2Brain({"bluff_freq": 0.0, "lock_enabled": True})
     st = lock_state(10, 9, 50, 0, 1)            # last hand, +50 up
     st.apply(HoleCards(P("Ah,Ad")))
     legal = LegalActions(fold=True, call=True, raise_min=4, raise_max=400)
@@ -146,7 +146,7 @@ def test_lock_guarantees_win_in_real_match(opp: str, first_seat_player: int) -> 
     # 30-hand match (15 SB + 15 BB = 45, plus the blind in hand 0): we must finish ahead
     # whatever the opponent does and whichever seat we start in.
     lead = 45 + 2 + 1
-    me = InProcessPlayer(Tier2Brain())
+    me = InProcessPlayer(Tier2Brain({"lock_enabled": True}))
     me.bot.state.bankroll = lead
     players = [me, PlayerSpec.brain(opp).build()]
     if first_seat_player == 1:
@@ -158,7 +158,7 @@ def test_lock_guarantees_win_in_real_match(opp: str, first_seat_player: int) -> 
 
 
 def test_tier2_plays_legally() -> None:
-    m = play_match([PlayerSpec.brain("tier2").build(), PlayerSpec.brain("maniac").build()],
+    m = play_match([PlayerSpec.brain("tier2", {"lock_enabled": True}).build(), PlayerSpec.brain("maniac").build()],
                    seed=4, hands=120)
     assert m.errors == [0, 0] and m.forfeit is None
 
@@ -196,7 +196,7 @@ def test_it_never_locks_without_a_lead(hands: int, lead: int) -> None:
         for seat in (0, 1):
             st = lock_state(hands, played, lead, seat, 1 if seat == 0 else 2)
             assert lock_margin(st, rules=DH_RULES) < 0
-            brain = Tier2Brain({"bluff_freq": 0.0})
+            brain = Tier2Brain({"bluff_freq": 0.0, "lock_enabled": True})
             st.apply(HoleCards(P("Ah,Ad,Ac")))
             brain.decide(st, LegalActions(fold=True, call=True, raise_min=4, raise_max=200), 0.005)
             assert brain.locked_decisions == 0
@@ -205,7 +205,7 @@ def test_it_never_locks_without_a_lead(hands: int, lead: int) -> None:
 def test_the_lock_lifts_as_soon_as_the_lead_is_gone() -> None:
     """The lock is re-evaluated at every decision: it holds only while the lead covers the worst
     case, and a shrinking lead hands the decision back to the normal strategy."""
-    brain = Tier2Brain({"bluff_freq": 0.0})
+    brain = Tier2Brain({"bluff_freq": 0.0, "lock_enabled": True})
     legal = LegalActions(fold=True, call=True, raise_min=4, raise_max=200)
     for bankroll, locked in ((60, True), (4, True), (3, False), (-20, False)):
         st = lock_state(10, 8, bankroll, 0, 1)            # hand 8 of 10: one future hand, as BB (2)
@@ -218,7 +218,7 @@ def test_the_lock_lifts_as_soon_as_the_lead_is_gone() -> None:
 def test_a_locked_hand_still_discards_its_worst_card() -> None:
     """The lock stops betting, not discarding: a discard puts no chips in, so a locked hand
     plays it normally instead of throwing away whatever card is listed first (an ace here)."""
-    brain = Tier2Brain(game=DH_RULES)
+    brain = Tier2Brain({"lock_enabled": True}, game=DH_RULES)
     st = lock_state(10, 8, 60, 0, 1)                      # locked: see the test above
     st.apply(HoleCards(P("Ah,Ad,2c")))
     st.apply(BoardUpdate(1, P("Kh,Ks,7d")))
@@ -234,7 +234,7 @@ def test_a_locked_match_cannot_be_lost_on_discard_holdem(hands: int, opp: str, f
     ahead (match won) in both seat orders, because every decision is check/fold."""
     seat = first            # player 0 is the button in hand 0
     lead = worst_case_cost(hands, seat) + (1 if seat == 0 else 2) + 1
-    me = InProcessPlayer(Tier2Brain(game=DH_RULES))
+    me = InProcessPlayer(Tier2Brain({"lock_enabled": True}, game=DH_RULES))
     me.bot.state.bankroll = lead
     players = [me, PlayerSpec.brain(opp).build()]
     if first == 1:
