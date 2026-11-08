@@ -117,6 +117,12 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   bet_pressure), multi-slice preflop tables (Tier 3's preflop model is already range-based).
 - Report all: fetch exp/* branches, copy logs/lock/*.txt into logs/lock, `.venv/bin/python -m lab.exp_report logs/lock`.
 
+- v6 accounting (measure only; 40 pairs, seeds 97100, locks OFF): -0.18 +- 0.30 chips/hand, 2-leg score 0.500 +- 0.080
+  (even). Where it goes: we fold postflop 5,781 times (flop 3,205: -0.97/hand; turn 1,670: -1.18; river 906: -1.36)
+  vs v6's 4,131; at showdown we win 1,736 (+5.75/hand) and lose 912 (-5.09). v6 takes pots off us before showdown;
+  we win the showdowns. (Not tuned on: the self-check defence aimed at this and was noise on the training pool.)
+- Lock test, first cell: exploiter, lock ON: per-leg 0.680 but 2-leg 0.450 +- 0.050 (100 pairs).
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
