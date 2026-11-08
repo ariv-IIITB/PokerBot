@@ -89,6 +89,14 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   thinking time is worth nothing measurable, so lookup tables / a faster evaluator / using more of the 1 GB would
   not make the bot stronger. Not built.
 
+- Held-out final check (60 pairs, seeds 95100, locks on; per-leg score): tier3x vs conv_opp4 0.775, eqrandom 0.808,
+  geometric 0.675, v6 0.775 (-0.36 chips/hand); tier3 vs conv_opp4 0.733, eqrandom 0.742, geometric 0.483.
+- FOUND: every lab "match score" so far scores each 200-hand leg as its own match (pre-2026-11-06 rule). Since
+  2026-11-06 a match is both legs, won on net chips. The endgame lock folds out a leg as soon as that leg is safe,
+  so it ends the leg barely positive and throws away the lead leg 2 may need. Added `2-leg score` to lab summaries
+  (each duplicate pair = one match). Test lock on vs off with it: 8 bots x 100 pairs, seeds 96100; trapper lag
+  minraise tier1 on session_014YAsY13VN5VwSd64GRphaQ -> exp/lock, exploiter conv_opp3 rules tight here -> logs/lock.
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,

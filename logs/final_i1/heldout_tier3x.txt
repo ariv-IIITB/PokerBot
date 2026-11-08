@@ -1,0 +1,4 @@
+tier3x vs d_conv_opp4: -0.17 ± 0.17 chips/hand | match score 0.775 ± 0.038 over 120 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 139.0s (173/s)
+tier3x vs d_new_eqrandom: +0.16 ± 0.10 chips/hand | match score 0.808 ± 0.036 over 120 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 203.0s (118/s)
+tier3x vs d_new_geometric: -0.84 ± 0.17 chips/hand | match score 0.675 ± 0.043 over 120 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 208.1s (115/s)
+tier3x vs d_v6: -0.36 ± 0.14 chips/hand | match score 0.775 ± 0.038 over 120 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 279.4s (86/s)
