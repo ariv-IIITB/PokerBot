@@ -62,6 +62,17 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   R2b session_014YAsY3DNjnMS2aFc2m1Ctx (minraise rules maniac -> combo/r2b), R2c session_014YAsY3xRMWKUoAYY32QNDg
   (exploiter tier1 tight -> combo/r2c); random_legal starter conv_opp3 run here (logs/combo/on).
 
+- User: no more noise-level tweaks; wants real short-match exploits. Tried and dropped: clock pressure (v6 and
+  exploiter scale their per-decision time with the bank: 25 ms -> 8 ms per decision as the bank goes 30 -> 10 s at
+  x2, no forfeit). Built `x_bait` (bait and switch: fold more to flop/turn bets for the first 40 hands of a leg,
+  defend wider after; opponents that count our folds keep the early read in a 200-hand leg). A/B running here:
+  base / post (wider defence only) / bait, 6 bots, 60 pairs, seeds 81100 -> logs/bait. Keep only if bait > post
+  by a clear margin.
+- Profile (2 legs, tier3x): river solver 22 % (time-boxed), evaluator 23 % (already table lookups, 21 five-card
+  combos per 7-card hand), range inference 26 %. Test of whether speed matters at all: `lab/compute_value.py`
+  (tier3x as if 4x faster vs x1, paired) running on cloud session session_014YAsY4g2tKxzZKRocfQCqR -> exp/compute.
+  If x4 adds nothing, lookup tables add nothing.
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
