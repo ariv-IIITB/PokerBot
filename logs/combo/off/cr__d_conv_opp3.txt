@@ -1,0 +1,2 @@
+tier3x[{"x_cr":true}]-nolock vs d_conv_opp3-nolock: +0.02 ± 0.26 chips/hand | match score 0.562 ± 0.056 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 237.2s (67/s)
+--- brain stats: tier3x[{"x_cr":true}]-nolock: river_errors=0 river_fallbacks=18 river_few_iters=13 river_iters=812372 river_missing=0 river_no_pass=5 river_rnr=603 river_shifted=0 river_solves=5997 river_us=124498391 t3_decisions=48445 t3_errors=0 t3_fallbacks=407 x_cr=84 x_def=0 x_errors=0 x_narrowed=7 x_overfolder=53341 x_selfdef=0 x_stabs=0 x_valueonly=16
