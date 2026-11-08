@@ -1,0 +1,1 @@
+tier3x[{"phantom_raise":0.5}]-nolock vs d_new_trapper-nolock: +1.56 ± 0.13 chips/hand | match score 0.715 ± 0.032 over 200 matches | 2-leg score 0.860 ± 0.035 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 794.4s (50/s)
