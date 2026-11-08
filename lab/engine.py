@@ -213,12 +213,13 @@ def play_match(players: Sequence, cfg=None, seed: int = 0,
     """Play one match between players[0] and players[1]. Player (h % 2) is SB in hand h.
     `cfg` may be a VariantSpec or compiled Rules (default: Hold'em). audit=True checks every
     event's visibility and chip conservation in every hand (AssertionError on failure).
-    clock_scale charges every reply that many times its real duration (a slower machine);
+    clock_scale charges every reply that many times its real duration (a slower machine; a list gives one per seat);
     reply_limit_s forfeits a single reply that takes longer (the real engine's 5 s rule)."""
     rules = holdem_rules() if cfg is None else to_rules(cfg)
     hands = rules.hands_per_match if hands is None else hands
     bank = rules.time_bank_s if time_bank_s is None else time_bank_s
-    seats = [Seat(p, bank, clock_scale, reply_limit_s) for p in players]
+    scales = list(clock_scale) if isinstance(clock_scale, (list, tuple)) else [clock_scale] * len(players)
+    seats = [Seat(p, bank, sc, reply_limit_s) for p, sc in zip(players, scales)]
     info = MatchInfo(hands, bank, rules.small_blind, rules.big_blind, rules.starting_stack)
     start = rules.starting_stack
     stacks = [start, start]
