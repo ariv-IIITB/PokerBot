@@ -1,0 +1,1 @@
+tier3x[{"pf_open_fold":0.0,"pf_open_limp":0.0,"pf_open_size_bb":2.0}]-nolock vs d_new_trapper-nolock: +1.59 ± 0.16 chips/hand | match score 0.660 ± 0.034 over 200 matches | 2-leg score 0.830 ± 0.038 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 672.4s (59/s)
