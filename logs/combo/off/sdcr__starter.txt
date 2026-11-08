@@ -1,0 +1,2 @@
+tier3x[{"x_selfdef":true,"x_cr":true}]-nolock vs starter: +37.72 ± 0.64 chips/hand | match score 1.000 ± 0.000 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 245.9s (65/s)
+--- brain stats: tier3x[{"x_selfdef":true,"x_cr":true}]-nolock: river_errors=0 river_fallbacks=39 river_few_iters=27 river_iters=1599745 river_missing=0 river_no_pass=12 river_rnr=13755 river_shifted=0 river_solves=15978 river_us=337198420 t3_decisions=54196 t3_errors=0 t3_fallbacks=9774 x_cr=0 x_def=0 x_errors=0 x_narrowed=0 x_overfolder=0 x_selfdef=0 x_stabs=0 x_valueonly=15950

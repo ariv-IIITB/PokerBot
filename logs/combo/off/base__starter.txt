@@ -1,0 +1,2 @@
+tier3x-nolock vs starter: +38.27 ± 0.65 chips/hand | match score 1.000 ± 0.000 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 245.3s (65/s)
+--- brain stats: tier3x-nolock: river_errors=0 river_fallbacks=56 river_few_iters=40 river_iters=1642015 river_missing=0 river_no_pass=16 river_rnr=13708 river_shifted=0 river_solves=15974 river_us=336984482 t3_decisions=54199 t3_errors=0 t3_fallbacks=9771 x_cr=0 x_def=0 x_errors=0 x_narrowed=0 x_overfolder=0 x_selfdef=0 x_stabs=0 x_valueonly=15950
