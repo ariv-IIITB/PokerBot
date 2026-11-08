@@ -1,0 +1,1 @@
+tier3x[{"phantom_raise":1.0}]-nolock vs d_new_rules-nolock: -0.82 ± 0.20 chips/hand | match score 0.420 ± 0.035 over 200 matches | 2-leg score 0.330 ± 0.047 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 307.9s (130/s)
