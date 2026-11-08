@@ -34,6 +34,7 @@ DEFAULTS.update({
     "pressure_aggr_shift": 1.0,    # ...to bet_pressure x (1 - shift * excess); 0 = off
     "lock_enabled": True,
     "lock_assume_alternating": True,   # blinds alternate each hand (False = assume BB always)
+    "lock_reserve": 0,                 # lock only when folding out still ends the leg this many chips ahead (2-leg rule)
     # E3/E4: per-spot opponent stats (bot/strategy/oppstats.py) and the river bluff-catch rule
     "oppstats_strength": 15.0,     # prior worth this many observations
     "oppstats_gate": 20,           # a spot moves play only after this many samples...

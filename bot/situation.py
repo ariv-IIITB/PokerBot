@@ -107,7 +107,9 @@ class Situation:
             return False
         margin = lock_margin(self.state, bool(p.get("lock_assume_alternating", True)),
                              self.pc.rules)
-        return margin is not None and margin > 0
+        # lock_reserve: since 2026-11-06 a match is two legs on net chips, so a leg locked at a bare +1 throws away
+        # the lead leg 2 may need. Lock only once folding out still finishes this leg `lock_reserve` chips ahead.
+        return margin is not None and margin > int(p.get("lock_reserve", 0))
 
 
 class Perception:
