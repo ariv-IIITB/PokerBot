@@ -84,6 +84,11 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
 - Removed from the bot (failed in every test, no dead flags): x_selfdef, x_cr, x_bait (+ tests/test_ideas_v6.py,
   combo arms). Kept: hide_discard (pre-existing, tiny), oppstats knobs (Tier 2 params). Suite: 1360 passed.
 
+- Compute value (cloud, 60 pairs, tier3x as if on a 4x faster machine vs x1, paired chips/hand): exploiter
+  +0.18 +- 0.18, conv_opp3 +0.15 +- 0.23, lag -0.26 +- 0.42, rules -0.03 +- 0.16; pooled ~ +0.0. Four times the
+  thinking time is worth nothing measurable, so lookup tables / a faster evaluator / using more of the 1 GB would
+  not make the bot stronger. Not built.
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,

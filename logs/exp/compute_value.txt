@@ -1,0 +1,4 @@
+d_new_exploiter: speed x4 vs x1: +0.178 +- 0.183 chips/hand (paired, 60 pairs); x1 -0.03/hand
+d_conv_opp3: speed x4 vs x1: +0.151 +- 0.225 chips/hand (paired, 60 pairs); x1 +0.18/hand
+d_new_lag: speed x4 vs x1: -0.257 +- 0.418 chips/hand (paired, 60 pairs); x1 +7.35/hand
+d_new_rules: speed x4 vs x1: -0.030 +- 0.160 chips/hand (paired, 60 pairs); x1 +0.21/hand
