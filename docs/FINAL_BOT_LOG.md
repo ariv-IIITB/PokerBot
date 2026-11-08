@@ -129,6 +129,16 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   rules 0.57, minraise 0.77, trapper 0.87, lag 0.99, tier1 1.00, tight 0.99.
 - Partial (still running): bayes +0.06 (1 bot), btn +0.018 +- 0.031 (4), cap +0.006 (5), trust -0.008 (5).
 
+- Done (8 bots x 100 pairs, 2-leg delta vs lock off): button raise-all at 2 bb +0.010 +- 0.018; read cap 0.4
+  +0.016 +- 0.018; trust reads (cap 0.4, gate 8, strength 8) -0.007 +- 0.018. All noise; none ships.
+- BUG (mine): phantom and Bayes were not in the brain DEFAULTS, so their overrides were ignored ("unknown parameter")
+  and those A/Bs never ran (the cloud sessions caught it). Fixed in aebdcfd (`phantom_raise`, `ev_bayes_called`,
+  `ev_fold_eq`, all off). Rerun: phantom on session_014YAsY2WMRXxJS9wHojd7j4 -> exp/phantom2, Bayes on
+  session_014YAsY4cSLneRhJZ7SPAqUq -> exp/bayes2. lock_reserve, hide_discard and the oppstats knobs were in DEFAULTS,
+  so those results stand.
+- Shipped so far: tier3x lock off, zip sha256 f3b8cd4c (commit 7581fa7) and a one-file bot.py (tools/single_file.py).
+  An outside test by the user's friend: 16-4 over 20 matches vs another friend's bot (v3), +1.40 chips/hand.
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
