@@ -59,6 +59,19 @@ class DuplicateReport:
         return mean_se([s for p in self.pairs for s in p.a_scores])
 
     @property
+    def two_leg_score(self) -> tuple[float, float]:
+        """A's mean score with each duplicate pair as ONE match (the rules since 2026-11-06: a match is two legs,
+        won on net chips over both; a forfeit in either leg loses it)."""
+        out = []
+        for p in self.pairs:
+            if p.forfeits[0] or p.forfeits[1]:
+                out.append(0.0 if p.forfeits[0] >= p.forfeits[1] else 1.0)
+            else:
+                t = sum(p.a_chips)
+                out.append(1.0 if t > 0 else 0.5 if t == 0 else 0.0)
+        return mean_se(out)
+
+    @property
     def total_hands(self) -> int:
         return sum(p.hands for p in self.pairs)
 
@@ -68,8 +81,10 @@ class DuplicateReport:
         errs = (sum(p.errors[0] for p in self.pairs), sum(p.errors[1] for p in self.pairs))
         ffs = (sum(p.forfeits[0] for p in self.pairs), sum(p.forfeits[1] for p in self.pairs))
         rate = self.total_hands / self.elapsed_s if self.elapsed_s else 0.0
+        tl, tse = self.two_leg_score
         return (f"{self.a} vs {self.b}: {fmt_pm(cph, se, 2)} chips/hand | "
                 f"match score {wr:.3f} ± {wse:.3f} over {2 * len(self.pairs)} matches | "
+                f"2-leg score {tl:.3f} ± {tse:.3f} over {len(self.pairs)} pairs | "
                 f"errors A/B {errs[0]}/{errs[1]} | forfeits A/B {ffs[0]}/{ffs[1]} | "
                 f"{self.total_hands} hands in {self.elapsed_s:.1f}s ({rate:,.0f}/s)")
 
