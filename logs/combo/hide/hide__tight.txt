@@ -1,0 +1,2 @@
+tier3x[{"hide_discard":true}]-nolock vs tight-nolock: +5.00 ± 0.31 chips/hand | match score 0.938 ± 0.027 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 91.9s (174/s)
+--- brain stats: tier3x[{"hide_discard":true}]-nolock: river_errors=0 river_fallbacks=0 river_few_iters=0 river_iters=1204495 river_missing=0 river_no_pass=0 river_rnr=2786 river_shifted=0 river_solves=5911 river_us=122758236 t3_decisions=34088 t3_errors=0 t3_fallbacks=936 x_cr=0 x_errors=0 x_narrowed=0 x_overfolder=57 x_selfdef=0 x_valueonly=180

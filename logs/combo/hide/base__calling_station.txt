@@ -1,0 +1,2 @@
+tier3x-nolock vs calling_station-nolock: +42.06 ± 0.60 chips/hand | match score 1.000 ± 0.000 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 16000 hands in 224.4s (71/s)
+--- brain stats: tier3x-nolock: river_errors=0 river_fallbacks=12 river_few_iters=9 river_iters=2802695 river_missing=0 river_no_pass=3 river_rnr=13810 river_shifted=0 river_solves=15987 river_us=334587609 t3_decisions=53375 t3_errors=0 t3_fallbacks=10595 x_cr=0 x_errors=0 x_narrowed=0 x_overfolder=0 x_selfdef=0 x_valueonly=15950
