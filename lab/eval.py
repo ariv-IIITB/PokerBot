@@ -34,7 +34,7 @@ from lab.harness import load_variant, run_duplicate
 from lab.players import PlayerSpec
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_VARIANT = "lab/opps/holdem_100bb.json"     # the rules the Opps/ bots were written for
+DEFAULT_VARIANT = "discard_holdem"   # the competition game (was lab/opps/holdem_100bb.json, the old Hold'em Opps/ rules: runs without --variant silently played Hold'em, where Tier 3 is off)
 POOL_FILE = ROOT / "lab" / "opps" / "discard_pool.json"
 DEFAULT_TRAIN = ["opp1", "opp2", "opp3", "opp4"]
 OPP_CONFIG = {"opp3": {"fold_out": False}}          # opp3 would otherwise fold out when ahead

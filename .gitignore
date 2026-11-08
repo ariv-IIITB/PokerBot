@@ -30,3 +30,4 @@ env/
 *.log
 .scratch/
 Thumbs.db
+.claude/settings.local.json
