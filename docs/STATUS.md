@@ -4,6 +4,11 @@ Read this after `CLAUDE.md` to know where the project stands. Plan: `docs/PART4_
 31 Oct **`docs/CFR_BUILDMAP.md`** (Track X exploit layer, Track C CFR; supersedes `docs/CFR_PLAN.md`).
 Rules: `docs/rules/` (`SUMMARY.md` first).
 
+## Final bot (2026-11-08)
+
+**Ships: `tier3x` with the endgame lock off** (commit d1ba23c, zip sha256 efa931df...). Why and everything tested:
+`docs/FINAL_BOT_LOG.md` ("Final report"). Hashes: `docs/SUBMISSIONS.md`.
+
 ## Where we are
 
 | Phase | State | Commit |

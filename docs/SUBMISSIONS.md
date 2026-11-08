@@ -31,3 +31,8 @@ the zip is reproducible: same sources, same hash).
 - Package checks: imports/sandbox ok, startup 231 ms, smoke ok, peak RSS 44 MB. The linear x2 timing projection vs
   starter reads 55-57 % (limit 50 %); the real x2 run (`lab/slow_gate.py`) peaks at 47.6 % and x4 at 69 % with
   0 deadline hits, so it was shipped as is.
+
+## 2026-11-08: FINAL, tier3x lock off (commit d1ba23c)
+- `dist/submission.zip`, 221 KB, sha256 `efa931dfb57fe7baa9e6f87c61f4d97e7db30a4dafca3d3adf91ba4c50ca6ce5`.
+- One file: `dist/single/bot.py`, 664 KB, sha256 `931f1ce99ac9129410776df4c7bdf9881c4afe9d43f96193aba37f5a185712b8`.
+- Same play as f3b8cd4c (only off switches removed). Checks as before; see docs/FINAL_BOT_LOG.md "Final report".

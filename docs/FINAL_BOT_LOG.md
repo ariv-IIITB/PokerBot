@@ -143,14 +143,31 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   half the time: exploiter -0.21. Bots call or re-raise a cheap raise. Stopped early (clear loss), code removed.
 - Bayes calling equity so far: +0.008 +- 0.030 over 4 bots (noise); finishing on exp/bayes2.
 
+- Bayes calling equity (fixed rerun, 8 bots x 100 pairs): +0.005 +- 0.018 (noise), code removed.
+
+## Final report (2026-11-08)
+
+**Ships:** brain `tier3x` (Tier 3 + exploit layer + river CFR solver) with the endgame lock OFF, commit d1ba23c.
+`dist/submission.zip` sha256 `efa931dfb57fe7baa9e6f87c61f4d97e7db30a4dafca3d3adf91ba4c50ca6ce5`; one-file
+`dist/single/bot.py` (tools/single_file.py) sha256 `931f1ce99ac9129410776df4c7bdf9881c4afe9d43f96193aba37f5a185712b8`.
+Plays the same as the zip sent earlier (f3b8cd4c, commit 7581fa7): only off switches were removed since.
+
+**What changed the result:** the lock. A match is two legs on net chips (rule of 2026-11-06), and the lock threw
+away leg leads. Off vs on: +0.104 +- 0.020 2-leg score over 8 bots x 100 pairs (every bot better). Reserves 150 /
+400 also lose to off. Lock-off 2-leg scores: opp3 0.59, exploiter 0.52, rules 0.57, minraise 0.77, trapper 0.87,
+lag 0.99, tier1 1.00, tight 0.99. vs v6 (held-out, measure only): 0.500 +- 0.080 over 40 pairs. Outside: 16-4 vs a
+friend's bot (v3), +1.40 chips/hand.
+
+**Tested and not shipped (noise or worse):** x_selfdef, x_cr, faster/stronger opponent reads (gate/strength, cap
+0.4, trust), hide_discard, bait and switch, phantom min-raise (-0.3 to -0.5), button raise-all at the min, Bayes
+calling equity, 4x thinking time (so no lookup tables), clock pressure (v6/exploiter pace their bank).
+
+**Gates:** memory 44 MB; fuzz 2,000 hands 0 failures; real x2-slow bank use max 47.6 % (x4: 69 %, 0 deadline
+hits); head-to-head vs tier3 0.575 +- 0.035; package checks pass except the linear x2 projection vs starter (55-56 %),
+which the real slow runs contradict; suite 1360 passed.
+
+**Lab fixes found on the way:** `lab.eval` defaulted to Hold'em (Tier 3 off); match score counted legs, now
+`2-leg score`; new-param overrides are ignored unless the param is in the brain DEFAULTS.
+
 ## State / next (for a fresh context)
-- Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
-- (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
-  copy logs/combo/off/* into one dir, run `.venv/bin/python -m lab.combo_report off`, pick the best stack
-  (sum up, no bot down > 2 SE), then a locks-on score run of base vs best (40 pairs) and hide_discard as an arm.
-- Then I1 gates on the pick: timing ratio vs tier3 (lab/rc_ratio.py, clock_scale 2), lab.memory_check,
-  lab.fuzz --subprocess, head-to-head vs main's tier3 (100 pairs), Stage 2 (500h/75s), held-out --final once
-  (d_conv_opp4 d_new_eqrandom d_new_geometric d_v6), organisers' engine vs v6 (20+ matches) and vs starter.
-- Then package (`tools.package_submission --zip --stage2`; its x2 timing projection over-states the solver, known),
-  sha256 into docs/SUBMISSIONS.md, update docs/STATUS.md.
-- Hourly heartbeat: trigger trig_01KHWdDx8zvUqy4czGYDrwZo (minute 6).
+- Done. Final bot as above. Open idea, not started: a proper lab CFR sparring bot plus an off-tree bet-size probe.
