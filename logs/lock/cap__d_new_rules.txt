@@ -1,0 +1,1 @@
+tier3x[{"oppstats_cap":0.4}]-nolock vs d_new_rules-nolock: +0.33 ± 0.15 chips/hand | match score 0.573 ± 0.035 over 200 matches | 2-leg score 0.570 ± 0.050 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 296.5s (135/s)
