@@ -1,0 +1,2 @@
+tier3x[{"hide_discard":true}] vs d_new_rules: -0.43 ± 0.14 chips/hand | match score 0.713 ± 0.041 over 120 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 107.9s (222/s)
+--- brain stats: tier3x[{"hide_discard":true}]: river_errors=0 river_fallbacks=11 river_few_iters=8 river_iters=787523 river_missing=0 river_no_pass=3 river_rnr=553 river_shifted=0 river_solves=5874 river_us=120605297 t3_decisions=38870 t3_errors=0 t3_fallbacks=371 x_cr=0 x_errors=0 x_narrowed=2 x_overfolder=39888 x_selfdef=0 x_valueonly=4964

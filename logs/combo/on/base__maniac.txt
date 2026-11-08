@@ -1,0 +1,2 @@
+tier3x vs maniac: +0.47 ± 0.02 chips/hand | match score 1.000 ± 0.000 over 120 matches | errors A/B 0/0 | forfeits A/B 0/0 | 24000 hands in 18.5s (1,296/s)
+--- brain stats: tier3x: river_errors=0 river_fallbacks=1 river_few_iters=1 river_iters=119614 river_missing=0 river_no_pass=0 river_rnr=0 river_shifted=0 river_solves=824 river_us=15055868 t3_decisions=5952 t3_errors=0 t3_fallbacks=149 x_cr=0 x_errors=0 x_narrowed=1 x_overfolder=73 x_selfdef=0 x_valueonly=0
