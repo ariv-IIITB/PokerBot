@@ -36,8 +36,6 @@ DEFAULTS.update({
                                        # lead lost whole matches (2-leg score +0.089 +- 0.031 with it off, docs/FINAL_BOT_LOG.md)
     "lock_assume_alternating": True,   # blinds alternate each hand (False = assume BB always)
     "lock_reserve": 0,                 # lock only when folding out still ends the leg this many chips ahead (2-leg rule)
-    "ev_bayes_called": False,          # lab A/B: Bayes calling-range equity in EV sizing (off) ...
-    "ev_fold_eq": 0.72,                # ... our equity against the hands that fold
     # E3/E4: per-spot opponent stats (bot/strategy/oppstats.py) and the river bluff-catch rule
     "oppstats_strength": 15.0,     # prior worth this many observations
     "oppstats_gate": 20,           # a spot moves play only after this many samples...
@@ -134,11 +132,7 @@ class Tier2Brain(Tier1Brain):
                 continue
             size = extra / max(1, pot + to_call)
             pf = self.opponent.spots.fold_prob(size, h.street)
-            if p.get("ev_bayes_called"):                      # Bayes: the folds are weak hands we beat
-                e_fold = float(p.get("ev_fold_eq", 0.72))
-                eq_called = max(0.02, min(eq, (eq - pf * e_fold) / max(1e-4, 1.0 - pf)))
-            else:
-                eq_called = max(0.0, eq - p["ev_called_discount"] * size)
+            eq_called = max(0.0, eq - p["ev_called_discount"] * size)
             ev = pf * pot + (1 - pf) * (eq_called * (pot + to_call + 2 * extra) - (to_call + extra))
             scored.append((ev, amt))
         if not scored:

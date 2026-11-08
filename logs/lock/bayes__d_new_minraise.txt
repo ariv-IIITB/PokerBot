@@ -1,0 +1,1 @@
+tier3x[{"ev_bayes_called":true}]-nolock vs d_new_minraise-nolock: +1.22 ± 0.15 chips/hand | match score 0.665 ± 0.033 over 200 matches | 2-leg score 0.810 ± 0.039 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 417.8s (96/s)
