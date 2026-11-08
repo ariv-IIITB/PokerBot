@@ -108,6 +108,15 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   test): trust {cap 0.4, gate 8, strength 8} on session_014YAsY24Ze6sjwhT2RjjtZP -> exp/trust; cap 0.4 only on
   session_014YAsY4TLf9b8UBrpnzfWM6 -> exp/cap.
 
+- User's v6-derived ideas, mapped onto Tier 3 (the code that decides) and tested (100 pairs, seeds 96100, locks off,
+  2-leg score vs the lock test's "off" arm): `x_phantom` (min-raise any flop bet with any cards; 1.0 and 0.5) on
+  session_014YAsY1uqmJqei7xJSbAyRv -> exp/phantom; `ev_bayes_called` (Bayes calling-range equity in EV sizing) on
+  session_014YAsY11ChguWozviGfLHyC -> exp/bayes; button raise-everything at the min (pf_open_fold 0, limp 0, 2 bb)
+  on session_014YAsY2KhUMotw6EYHtwSNe -> exp/btn. Not built: "EV of every action" (x_cr was that idea for the
+  flop/turn and lost), size-bucketed showdown strength on flop/turn (Tier 3 defends by MDF of our range there, not by
+  bet_pressure), multi-slice preflop tables (Tier 3's preflop model is already range-based).
+- Report all: fetch exp/* branches, copy logs/lock/*.txt into logs/lock, `.venv/bin/python -m lab.exp_report logs/lock`.
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
