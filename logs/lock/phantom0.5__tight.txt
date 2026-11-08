@@ -1,0 +1,1 @@
+tier3x[{"phantom_raise":0.5}]-nolock vs tight-nolock: +4.08 ± 0.23 chips/hand | match score 0.905 ± 0.021 over 200 matches | 2-leg score 0.970 ± 0.017 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 236.5s (169/s)
