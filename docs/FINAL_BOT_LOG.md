@@ -139,6 +139,10 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
 - Shipped so far: tier3x lock off, zip sha256 f3b8cd4c (commit 7581fa7) and a one-file bot.py (tools/single_file.py).
   An outside test by the user's friend: 16-4 over 20 matches vs another friend's bot (v3), +1.40 chips/hand.
 
+- Phantom min-raise (fixed rerun, 100 pairs, 2-leg delta vs lock off): always: opp3 -0.51, exploiter -0.30;
+  half the time: exploiter -0.21. Bots call or re-raise a cheap raise. Stopped early (clear loss), code removed.
+- Bayes calling equity so far: +0.008 +- 0.030 over 4 bots (noise); finishing on exp/bayes2.
+
 ## State / next (for a fresh context)
 - Round 1 done (G1-G4). Waiting on round 2: combo/r2a..r2c + local logs/combo/on, then `lab.combo_report on`.
 - (old) Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,

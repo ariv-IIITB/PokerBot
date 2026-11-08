@@ -1,0 +1,1 @@
+tier3x[{"phantom_raise":1.0}]-nolock vs d_conv_opp3-nolock: -3.00 ± 0.21 chips/hand | match score 0.205 ± 0.029 over 200 matches | 2-leg score 0.080 ± 0.027 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 675.8s (59/s)
