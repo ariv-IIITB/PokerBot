@@ -847,6 +847,8 @@ class Tier3Brain(Tier2Brain):
             return None                                            # one raise per street; then call or fold
         if c.eq >= float(p["raise_value_eq"]) and self._chance(float(p["raise_value_prob"])):
             return self._size(float(p["raise_frac"]), "value", c, s, legal, p)
+        if c.street == 1 and float(p.get("x_phantom", 0.0)) > 0 and self._chance(float(p["x_phantom"])):
+            return Action.raise_to(legal.raise_min)                # phantom min-raise: any cards (lab A/B)
         if c.street == 1 and 0.20 <= c.eq <= 0.60:
             prob = 0.0
             if c.dr.outs_class == "strong":

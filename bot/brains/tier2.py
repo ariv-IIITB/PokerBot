@@ -131,7 +131,11 @@ class Tier2Brain(Tier1Brain):
                 continue
             size = extra / max(1, pot + to_call)
             pf = self.opponent.spots.fold_prob(size, h.street)
-            eq_called = max(0.0, eq - p["ev_called_discount"] * size)
+            if p.get("ev_bayes_called"):                      # Bayes: the folds are weak hands we beat
+                e_fold = float(p.get("ev_fold_eq", 0.72))
+                eq_called = max(0.02, min(eq, (eq - pf * e_fold) / max(1e-4, 1.0 - pf)))
+            else:
+                eq_called = max(0.0, eq - p["ev_called_discount"] * size)
             ev = pf * pot + (1 - pf) * (eq_called * (pot + to_call + 2 * extra) - (to_call + extra))
             scored.append((ev, amt))
         if not scored:
