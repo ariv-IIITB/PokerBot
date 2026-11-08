@@ -31,4 +31,4 @@ env/
 .scratch/
 Thumbs.db
 .claude/settings.local.json
-logs/combo/**/*.tmp
+logs/**/*.tmp
