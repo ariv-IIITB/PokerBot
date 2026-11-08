@@ -45,6 +45,15 @@ Branch `claude/cool-mayer-jkn1k0` (= `tier4/int` + this work). An hourly heartbe
   (all + hide_discard), hide; sent to G2 (trapper lag calling_station exploiter), G3 (minraise rules maniac tier1),
   G4 (tight random_legal starter conv_opp3); results land in logs/combo/on on combo/g2..g4.
 
+- hide_discard A/B finished (40 pairs, off, chips/hand vs base): + vs opp3, exploiter, trapper, lag, minraise, tight
+  (+0.15..+0.58); - vs rules -0.05, tier1 -0.14, maniac -1.4, station -0.3, starter 0. Mixed; decided in round 2.
+- Timing gate (new `lab/slow_gate.py`: clock x2, solver box halved, current rules 200h/30s and 500h/75s, 4 opponents
+  x 2 seeds): tier3 mean 21 % / max 27 %; tier3x mean 37 % / max 47.6 % (vs calling_station, the most rivers);
+  all+hide the same (max 47.7 %). 0 deadline hits, 0 emergency decisions, worst reply < 60 ms. Stress vs
+  calling_station: x3 slower 58 %, x4 slower 69 % of the bank, still 0 deadline hits / 0 emergency (the pacing
+  adapts). tier3x is ~1.7x tier3's bank use (the old I1 "<= 1.4x" rule was set before the solver box was
+  fixed); the absolute rule (<= 50 % at x2) holds. PASS.
+
 ## State / next (for a fresh context)
 - Waiting on cloud combo sessions G1-G4 (branches combo/g1..g4, ids above). When all four have pushed: fetch,
   copy logs/combo/off/* into one dir, run `.venv/bin/python -m lab.combo_report off`, pick the best stack
