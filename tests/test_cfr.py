@@ -5,7 +5,7 @@ import numpy as np
 
 from bot.actions import LegalActions
 from bot.game.compile import compile_spec
-from bot.abstraction import Bucketer, abstract_actions, raise_label
+from lab.cfr.abstraction import Bucketer, abstract_actions, raise_label
 from lab.cfr.abstract_game import AbstractGame
 from lab.cfr.kuhn import Kuhn
 from lab.cfr.mccfr import MCCFR, expected_value, exploitability, export_uint8
@@ -146,7 +146,7 @@ def test_train_cli_snapshots_and_resume(tmp_path) -> None:
 
 def test_history_and_observed_labels() -> None:
     # One history rule for trainer and runtime: label, then "/" when the action closed the street.
-    from bot.abstraction import extend_history, observed_label
+    from lab.cfr.abstraction import extend_history, observed_label
     from bot.actions import Action, LegalActions
     assert extend_history("", "C", 0, 0) == "C" and extend_history("C", "C", 0, 1) == "CC/"
     legal = LegalActions(fold=True, call=True, raise_min=4, raise_max=200)

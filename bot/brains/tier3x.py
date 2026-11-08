@@ -5,8 +5,8 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from bot.brains.exploit import (EXPLOIT_DEFAULTS, adjust, checkraise_lambda, defence_lambda, foldable_lambda,
-                                narrow_equity, overfolder_lambda, stab_prob)
+from bot.brains.exploit import (EXPLOIT_DEFAULTS, adjust, checkraise_lambda, foldable_lambda,
+                                narrow_equity, overfolder_lambda)
 from bot.strategy.oppstats import STREET_SPOT
 from bot.brains.tier3 import Tier3Brain
 from bot.actions import FOLD, RAISE
@@ -20,7 +20,7 @@ class Tier3XBrain(Tier3Brain):
 
     def __init__(self, config: Optional[dict] = None, **kw) -> None:
         super().__init__(config, **kw)
-        self.stats.update({"x_overfolder": 0, "x_valueonly": 0, "x_errors": 0, "x_narrowed": 0, "x_stabs": 0, "x_def": 0,
+        self.stats.update({"x_overfolder": 0, "x_valueonly": 0, "x_errors": 0, "x_narrowed": 0, 
                            "x_selfdef": 0, "x_cr": 0})
         self._sd_faced = 0                         # flop/turn bets we faced (decisions), for the self-check
         self._sd_folds = 0                         # ... and folded to
@@ -77,21 +77,7 @@ class Tier3XBrain(Tier3Brain):
                              rank, float(p["x_narrow_lam"])), q
 
     def _facing_bet(self, c, s, legal, p):
-        """Flop/turn bet to face with `x_def` on: defend less against a bettor whose bets are value-heavy
-        (MDF share and Tier 2's pot-odds floor both tightened by the confidence lam)."""
-        if float(p.get("x_def", 0.0)) > 0.0 and c.street in (1, 2):
-            try:
-                lam = defence_lambda(p, self.opponent.types, self.opponent.spots)
-                if lam > 0.0:
-                    q = dict(p)
-                    k = 1.0 - float(p["x_def"]) * lam
-                    q["mdf_flop"], q["mdf_turn"] = float(p["mdf_flop"]) * k, float(p["mdf_turn"]) * k
-                    q["call_margin"] = float(p["call_margin"]) + float(p["x_def_margin"]) * lam
-                    self.stats["x_def"] += 1
-                    p = q
-            except Exception as e:
-                self.stats["x_errors"] += 1
-                warn(f"defence tightening failed: {e!r}")
+        """Flop/turn bet to face with `x_selfdef` on: defend wider when we fold too often to a frequent bettor."""
         if p.get("x_selfdef") and c.street in (1, 2):
             try:
                 lam = foldable_lambda(p, self._sd_faced, self._sd_folds, self._bet_rate())
@@ -144,25 +130,3 @@ class Tier3XBrain(Tier3Brain):
             self.stats["x_errors"] += 1
             warn(f"check-raise failed: {e!r}")
         return None
-
-    def _unfaced(self, c, s, legal, p):
-        """Nothing to call, Tier 3 would check: with `x_stab` and an over-folder verdict, bet weak hands
-        at the rate the opponent's measured fold rate on this street pays."""
-        a = super()._unfaced(c, s, legal, p)
-        if not p.get("x_stab") or c.street not in STREET_SPOT or not legal.can_raise or c.eq >= float(p["x_stab_eq"]):
-            return a
-        if a is not None and a.kind == RAISE:
-            return a
-        try:
-            lam = overfolder_lambda(self.opponent.traits, p["x_ramp"], p.get("x_of_tr", True), self.opponent.types, p)
-            if lam > 0.0:
-                fold = self.opponent.spots.spots[STREET_SPOT[c.street]].mean()
-                if self._chance(stab_prob(fold, float(p["x_stab_size"]), lam, float(p["x_stab_span"]))):
-                    b = self._size(float(p["x_stab_size"]), "bluff", c, s, legal, p)
-                    if b is not None:
-                        self.stats["x_stabs"] += 1
-                        return b
-        except Exception as e:
-            self.stats["x_errors"] += 1
-            warn(f"stab failed: {e!r}")
-        return a

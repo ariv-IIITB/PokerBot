@@ -3,7 +3,7 @@
 Build map step **C0** (`docs/CFR_BUILDMAP.md` §4). Written 2026-10-31. Status: **draft, frozen
 after the Problem Statement (1 Nov)**; re-check §1 then.
 
-The trainer (`lab/cfr/fast/`, Numba) and the runtime (`bot/abstraction.py` v2, `bot/brains/tier4.py`,
+The trainer (`lab/cfr/fast/`, Numba) and the runtime (`lab/cfr/abstraction.py` v2, `bot/brains/tier4.py`,
 NumPy) must agree on every number below, or keys stop matching and the blueprint plays the wrong
 strategy without any error. The **reference implementation** of the betting part is
 `lab/cfr/fast/tree.py` (plain Python); its tests (`tests/test_cfr_tree.py`) check its chips against
@@ -64,11 +64,11 @@ Postflop unopened: `C H P A`; facing a bet `F C R(2.5×) A`; facing a raise `F C
 ## 3. History, key and table layout
 
 **History string:** the labels of every betting action this hand, in order, with `/` appended
-when a street closes (`bot.abstraction.extend_history`). The discard leaves no symbol.
+when a street closes (`lab.cfr.abstraction.extend_history`). The discard leaves no symbol.
 Example: `RRC/CHRC/CC/CP` = preflop open, 3-bet, call; flop check, ½-pot bet, raise, call; turn
 check-check; river check, pot bet.
 
-**Infoset key (string):** `f"{street}|{bucket}|{history}"` (`bot.abstraction.infoset_key`), where
+**Infoset key (string):** `f"{street}|{bucket}|{history}"` (`lab.cfr.abstraction.infoset_key`), where
 `bucket` is the **acting player's own** bucket (§5) and `history` is the string before the action.
 
 **Table (integer) layout** *(C3)*: per street `s`, the decision-node histories get dense ids
@@ -208,7 +208,7 @@ pair of kings beats queens; pot 318. A second example in `tests/test_cfr_tree.py
 
 1. Rebuild the abstract history from `state.hand.history` (betting actions only; `S` skipped).
 2. Our past actions were chosen from the menu, so they map exactly. An opponent action maps as
-   `bot.abstraction.observed_label` does: fold → `F`, check/call → `C`, a raise whose amount equals
+   `lab.cfr.abstraction.observed_label` does: fold → `F`, check/call → `C`, a raise whose amount equals
    a menu amount at that node → that label, an all-in → `A`, any other raise → **pseudo-harmonic**
    between the two neighbouring menu sizes, measured as pot fractions at that node
    (`x = (amount − own bet − to-call) / (pot + to-call)`), with the seeded RNG; counted in

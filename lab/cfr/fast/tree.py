@@ -189,7 +189,7 @@ def history_ids(par: Params) -> list[dict[str, int]]:
 
 
 def infoset_key(street: int, bucket: int, history: str) -> str:
-    """Same format as bot.abstraction.infoset_key."""
+    """Same format as lab.cfr.abstraction.infoset_key."""
     return f"{street}|{bucket}|{history}"
 
 

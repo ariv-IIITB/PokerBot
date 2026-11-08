@@ -12,7 +12,7 @@ import pytest
 from lab.cfr.brain import CFRBrain
 from bot.game.compile import compile_spec
 from bot.protocol import MatchInfo
-from bot.abstraction import Bucketer, abstract_actions, infoset_key
+from lab.cfr.abstraction import Bucketer, abstract_actions, infoset_key
 from lab.cfr.abstract_game import AbstractGame
 from lab.engine import Hand, Seat, deck_for
 from lab.players import InProcessPlayer

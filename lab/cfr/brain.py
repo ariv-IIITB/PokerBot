@@ -5,7 +5,7 @@ never packaged. Run it with `lab.harness tier2 cfr` or `lab.run_brain cfr`.
 
 At a betting decision it rebuilds the hand (bot/sim), maps the hand's betting so far onto
 the abstraction (a raise the abstraction could have made gets exactly its training label;
-other sizes use the pseudo-harmonic mapping, bot/abstraction.py), looks up (street,
+other sizes use the pseudo-harmonic mapping, lab/cfr/abstraction.py), looks up (street,
 hand-strength bucket, abstract history) in the strategy table and samples an abstract
 action. The runtime key equals the trainer's key (tests/test_cfr_runtime.py). Outside the
 table (or for any non-betting decision, or when the table is missing or for another
@@ -24,7 +24,7 @@ from typing import Any, Optional
 from bot.actions import Action, LegalActions
 from bot.brains.tier2 import Tier2Brain
 from bot.log import log
-from bot.abstraction import Bucketer, abstract_actions, extend_history, infoset_key, observed_label
+from lab.cfr.abstraction import Bucketer, abstract_actions, extend_history, infoset_key, observed_label
 from bot.state import GameState
 
 ROOT = Path(__file__).resolve().parents[2]

@@ -44,7 +44,7 @@ hands (`lock_margin`, `Situation.locked`).
 spec (`bot/artifacts.py`). Today: `"tables"`; later a CFR blueprint.
 
 **Abstraction**: the CFR view of the game: abstract actions, raise labels, hand buckets, betting
-history and infoset key (`bot/abstraction.py`), shared by the trainer and the runtime.
+history and infoset key (`lab/cfr/abstraction.py`), shared by the trainer and the runtime.
 
 **Tier 0 / 1 / 2 / 3 / 4**: brains: safe fallback / equity vs pot odds / + opponent adaptation and
 lock (shipped) / the "Ivey" style (planned) / CFR hybrid (planned, `docs/CFR_PLAN.md`).

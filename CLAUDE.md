@@ -74,9 +74,9 @@ Source: `docs/rules/SUMMARY.md`. *(prov.)* = provisional, may change before the 
   replay both use it).
 - Shared modules a brain builds on (terms in `GLOSSARY.md`): `bot/situation.py` (per decision:
   reconstruction, equity, special-step policy, endgame lock), `bot/opponent.py` (stats +
-  inference + trust, `range_weights`), `bot/artifacts.py` (embedded precomputed data),
-  `bot/abstraction.py` (the CFR abstraction, shared with the lab trainer). New brains are
-  policies over these; don't subclass Tier 1 just to get them.
+  inference + trust, `range_weights`), `bot/artifacts.py` (embedded precomputed data). New brains are
+  policies over these; don't subclass Tier 1 just to get them. The CFR abstraction is lab-only
+  (`lab/cfr/abstraction.py`, moved out of `bot/` on 2026-11-08: no shipped code used it).
 - Wire formats live only in `bot/protocol.py` (neutral messages) and `bot/protocols/`
   (one adapter per format). Brains see only neutral objects (state, legal actions, budget).
 - `lab/` is offline tooling, never submitted; it may use anything in the dev venv.
