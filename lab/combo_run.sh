@@ -14,8 +14,10 @@ declare -A ARMS=(
   [all]='tier3x:{"x_selfdef":true,"x_cr":true,"oppstats_gate":5,"oppstats_strength":10}'
   [noovf]='tier3x:{"x_of_tr":false,"x_oft_enabled":false}'
   [nosolver]='tier3x:{"t3_river_solver":false}'
+  [hide]='tier3x:{"hide_discard":true}'
+  [allh]='tier3x:{"x_selfdef":true,"x_cr":true,"oppstats_gate":5,"oppstats_strength":10,"hide_discard":true}'
 )
-ORDER="base sd cr fast sdcr all noovf nosolver"
+ORDER=${ORDER:-"base sd cr fast sdcr all noovf nosolver"}   # override: ORDER="base all" lab/combo_run.sh ...
 mkdir -p logs/combo/$LOCKS
 for bot in "$@"; do
   for arm in $ORDER; do
