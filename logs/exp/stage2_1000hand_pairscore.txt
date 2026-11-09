@@ -1,0 +1,5 @@
+locks on  | tier3x vs d_conv_opp3: -0.41 ± 0.12 chips/hand | match score 0.675 ± 0.053 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 366.9s (109/s) | MATCH (2 legs summed) score 0.425 ± 0.079, won 17/40
+locks on  | tier3x vs d_new_rules: -0.29 ± 0.10 chips/hand | match score 0.700 ± 0.052 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 190.2s (210/s) | MATCH (2 legs summed) score 0.525 ± 0.080, won 21/40
+locks on  | tier3x vs d_new_exploiter: -0.40 ± 0.08 chips/hand | match score 0.625 ± 0.054 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 677.5s (59/s) | MATCH (2 legs summed) score 0.350 ± 0.076, won 14/40
+locks on  | tier3x vs d_new_geometric: -0.60 ± 0.13 chips/hand | match score 0.675 ± 0.053 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 427.0s (94/s) | MATCH (2 legs summed) score 0.375 ± 0.078, won 15/40
+locks on  | tier3x vs d_v6: -0.39 ± 0.11 chips/hand | match score 0.688 ± 0.052 over 80 matches | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 519.5s (77/s) | MATCH (2 legs summed) score 0.450 ± 0.080, won 18/40
