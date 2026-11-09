@@ -1,0 +1,1 @@
+tier3x vs d_v6: +0.08 ± 0.19 chips/hand | match score 0.535 ± 0.035 over 200 matches | 2-leg score 0.590 ± 0.049 over 100 pairs | errors A/B 0/0 | forfeits A/B 0/0 | 40000 hands in 797.2s (50/s)
