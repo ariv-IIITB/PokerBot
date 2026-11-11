@@ -171,3 +171,9 @@ which the real slow runs contradict; suite 1360 passed.
 
 ## State / next (for a fresh context)
 - Done. Final bot as above. Open idea, not started: a proper lab CFR sparring bot plus an off-tree bet-size probe.
+
+## vs v16 (friend's bot, held-out `d_v16`, 2026-11-11)
+
+Final bot (tier3x, lock off) vs `Opps/discard/v16` (measure only), 100 two-leg matches (200h/30 s legs,
+seeds 99500–99599, `lab.stream_pairs`): **57–43, score 0.570 ± 0.050, +0.37 chips/hand**, no forfeits.
+v16 is tougher than v6 (0.590 over 200). Log: `logs/final_i1/v16_100.txt`.

@@ -1,0 +1,10 @@
+after  10 matches: tier3x 5-5  score 0.500 +- 0.158  chips/hand +0.69
+after  20 matches: tier3x 11-9  score 0.550 +- 0.111  chips/hand +0.61
+after  30 matches: tier3x 16-14  score 0.533 +- 0.091  chips/hand +0.46
+after  40 matches: tier3x 22-18  score 0.550 +- 0.079  chips/hand +0.37
+after  50 matches: tier3x 26-24  score 0.520 +- 0.071  chips/hand +0.28
+after  60 matches: tier3x 33-27  score 0.550 +- 0.064  chips/hand +0.30
+after  70 matches: tier3x 38-32  score 0.543 +- 0.060  chips/hand +0.32
+after  80 matches: tier3x 44-36  score 0.550 +- 0.056  chips/hand +0.36
+after  90 matches: tier3x 50-40  score 0.556 +- 0.052  chips/hand +0.39
+after 100 matches: tier3x 57-43  score 0.570 +- 0.050  chips/hand +0.37
