@@ -9,3 +9,4 @@ Everything from the owner's pokerbot repo that plays, in one additive folder. No
 - `eval_bots/oracle_lk.py`: EVAL ONLY, cheats on purpose (reads the deal from the match seed). Never ship.
 - `src_changes/`: botsrc/exploit.py with the new moves (overbetdef, foldbet, lkprior; all off by default), tools/build_bot.py, the tests,
   the lakshya1 report script and the analysis (lakshya1_analysis_12nov.md).
+- `opponents/lakshya1.py`: the external bot the 12 Nov tests were run against (not ours).
