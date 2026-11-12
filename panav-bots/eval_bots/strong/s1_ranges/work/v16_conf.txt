@@ -1,0 +1,10 @@
+eval/bots/strong/s1_ranges/bot.py (A) vs logs/v16.noindex/bot/bot.py (B): 8 Stage 1 matches, 1 at a time
+  seed 8100: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py   +467 chips
+  seed 8101: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py    +72 chips
+  seed 8102: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py  +1175 chips
+  seed 8103: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py   +696 chips
+  seed 8104: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py   +490 chips
+  seed 8105: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py   +798 chips
+  seed 8106: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py   +497 chips
+  seed 8107: logs/v16.noindex/bot/bot.py eval/bots/strong/s1_ranges/bot.py   -622 chips
+eval/bots/strong/s1_ranges/bot.py: 7 wins, 0 draws, 1 losses; +1.117 chips/hand (95% CI +0.190 .. +2.043); total +3573

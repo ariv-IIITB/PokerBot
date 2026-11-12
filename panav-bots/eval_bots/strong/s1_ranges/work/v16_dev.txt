@@ -1,0 +1,11 @@
+[slots] waited 48 s for a free slot
+eval/bots/strong/s1_ranges/bot.py (A) vs logs/v16.noindex/bot/bot.py (B): 8 Stage 1 matches, 1 at a time
+  seed 8000: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py   +586 chips
+  seed 8001: logs/v16.noindex/bot/bot.py eval/bots/strong/s1_ranges/bot.py   -248 chips
+  seed 8002: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py    +72 chips
+  seed 8003: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py   +609 chips
+  seed 8004: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py   +104 chips
+  seed 8005: logs/v16.noindex/bot/bot.py eval/bots/strong/s1_ranges/bot.py   -280 chips
+  seed 8006: eval/bots/strong/s1_ranges/bot.py eval/bots/strong/s1_ranges/bot.py  +1561 chips
+  seed 8007: logs/v16.noindex/bot/bot.py eval/bots/strong/s1_ranges/bot.py    -52 chips
+eval/bots/strong/s1_ranges/bot.py: 5 wins, 0 draws, 3 losses; +0.735 chips/hand (95% CI -0.324 .. +1.794); total +2352
