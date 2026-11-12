@@ -353,3 +353,8 @@
 {"bot": "d_xfin_rnr_shtypes", "opp": "d_new_exploiter", "seed": 140058, "chips": [-338, -17], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_rnr_shtypes", "opp": "d_xprobe_polar", "seed": 140058, "chips": [56, -544], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_rnr_shtypes", "opp": "d_v16", "seed": 140059, "chips": [204, 643], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "tier3x", "seed": 140059, "chips": [742, -445], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "d_new_lag", "seed": 140059, "chips": [1487, 1210], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "calling_station", "seed": 140059, "chips": [4768, 9177], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "d_xprobe_polar", "seed": 140059, "chips": [-87, 226], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "d_new_exploiter", "seed": 140059, "chips": [839, 238], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
