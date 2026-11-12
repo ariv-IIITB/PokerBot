@@ -1,0 +1,40 @@
+# s8_meta: final (A) vs s8_meta, 24 pairs x 200 hands, first-seed 300
+bot vs s8_meta: +0.36 ± 0.28 chips/hand | match score 0.479 | pairs 24 | forfeits A/B 0/0
+
+500-hand check (8 pairs, first-seed 400): bot vs s8_meta: -0.79 ± 0.35 chips/hand | match score 0.438 | pairs 8 | forfeits A/B 0/0
+
+hands 9600, net +3419, +0.356 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  590 chips= -39263  -4.090/hand
+  WE fold @turn          n=  556 chips= -10248  -1.067/hand
+  WE fold @river         n=  302 chips=  -8980  -0.935/hand
+  WE fold @flop          n= 1227 chips=  -8547  -0.890/hand
+  WE fold @preflop       n= 1697 chips=  -4057  -0.423/hand
+  showdown split         n=   66 chips=     +0  +0.000/hand
+  OPP folds @flop        n=  256 chips=  +1654  +0.172/hand
+  OPP folds @preflop     n= 2689 chips=  +5890  +0.614/hand
+  OPP folds @turn        n=  628 chips=  +8153  +0.849/hand
+  OPP folds @river       n=  528 chips= +11720  +1.221/hand
+  showdown WIN           n= 1061 chips= +47097  +4.906/hand
+
+BY SEAT
+  button       n= 4800 chips=  +6164  +1.284/hand
+  big_blind    n= 4800 chips=  -2745  -0.572/hand
+
+SIZE
+  small              n= 8859 chips=  +2318
+  pot>=40 (|net|)    n=  741 chips=  +1101
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=4056: fold 0.40 call 0.48 raise 0.12 | opp first-in n=6291: bet 0.65
+  flop     facing our bet n=1520: fold 0.17 call 0.79 raise 0.04 | opp first-in n=4582: bet 0.69
+  turn     facing our bet n=1219: fold 0.52 call 0.46 raise 0.02 | opp first-in n=3252: bet 0.42
+  river    facing our bet n=702: fold 0.75 call 0.24 raise 0.01 | opp first-in n=2142: bet 0.27
+
+TRAITS
+- preflop: first-in bet 0.65, fold-to-our-bet 0.40, raise-vs-our-bet 0.12
+- flop: first-in bet 0.69, fold-to-our-bet 0.17, raise-vs-our-bet 0.04
+- turn: first-in bet 0.42, fold-to-our-bet 0.52, raise-vs-our-bet 0.02
+- river: first-in bet 0.27, fold-to-our-bet 0.75, raise-vs-our-bet 0.01
+- showdown win rate when it bets: not reported by leak_report (see showdown WIN/LOSS counts above)

@@ -1,0 +1,40 @@
+# new_eqrandom: final (A) vs new_eqrandom, 24 pairs x 200 hands, first-seed 300
+bot vs new_eqrandom: +0.35 ± 0.24 chips/hand | match score 0.542 | pairs 24 | forfeits A/B 0/0
+
+500-hand check (8 pairs, first-seed 400): bot vs new_eqrandom: -0.46 ± 0.31 chips/hand | match score 0.312 | pairs 8 | forfeits A/B 0/0
+
+hands 9600, net +3406, +0.355 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  648 chips= -30102  -3.136/hand
+  WE fold @river         n=  515 chips= -11761  -1.225/hand
+  WE fold @turn          n=  561 chips=  -8496  -0.885/hand
+  WE fold @flop          n=  598 chips=  -5770  -0.601/hand
+  WE fold @preflop       n= 1243 chips=  -3048  -0.318/hand
+  showdown split         n=   74 chips=     +0  +0.000/hand
+  OPP folds @turn        n=  559 chips=  +3269  +0.341/hand
+  OPP folds @preflop     n= 2788 chips=  +4882  +0.509/hand
+  OPP folds @flop        n=  912 chips=  +5088  +0.530/hand
+  OPP folds @river       n=  556 chips=  +6139  +0.639/hand
+  showdown WIN           n= 1146 chips= +43205  +4.501/hand
+
+BY SEAT
+  button       n= 4800 chips=  +4992  +1.040/hand
+  big_blind    n= 4800 chips=  -1586  -0.330/hand
+
+SIZE
+  small              n= 8989 chips=  +1902
+  pot>=40 (|net|)    n=  611 chips=  +1504
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=4184: fold 0.39 call 0.55 raise 0.07 | opp first-in n=6303: bet 0.43
+  flop     facing our bet n=1978: fold 0.46 call 0.50 raise 0.04 | opp first-in n=5005: bet 0.29
+  turn     facing our bet n=1364: fold 0.41 call 0.55 raise 0.04 | opp first-in n=3422: bet 0.38
+  river    facing our bet n=879: fold 0.63 call 0.33 raise 0.04 | opp first-in n=2445: bet 0.38
+
+TRAITS
+- preflop: first-in bet 0.43, fold-to-our-bet 0.39, raise-vs-our-bet 0.07
+- flop: first-in bet 0.29, fold-to-our-bet 0.46, raise-vs-our-bet 0.04
+- turn: first-in bet 0.38, fold-to-our-bet 0.41, raise-vs-our-bet 0.04
+- river: first-in bet 0.38, fold-to-our-bet 0.63, raise-vs-our-bet 0.04
+- showdown win rate when it bets: not reported by leak_report (see showdown WIN/LOSS counts above)
