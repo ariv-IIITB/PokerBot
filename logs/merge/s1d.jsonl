@@ -197,3 +197,4 @@
 {"bot": "d_xfin_shadisc", "opp": "d_new_exploiter", "seed": 140032, "chips": [278, 490], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_shadisc", "opp": "d_xprobe_polar", "seed": 140032, "chips": [-510, 99], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_shadisc", "opp": "d_v16", "seed": 140033, "chips": [-332, 658], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_shadisc", "opp": "tier3x", "seed": 140033, "chips": [-914, 539], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
