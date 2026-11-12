@@ -68,3 +68,14 @@ the numbers is rejected; a fix that passes the numbers but has no principle is r
 - Be honest: report the numbers with their SE, say when something is noise. Do not claim wins the interval does not support.
 - Final message <= 200 words: files, branch, numbers, verdicts. Details belong in the report files.
 - git: commit only your report/candidate files (and edited sources under `panav-bots/loop/`), push with `git push -u origin <branch>`; never push to `panav-bots-12nov` or main.
+
+## OVERFIT PROTOCOL v2 (12 Nov, owner: "ensure you don't overfit; keep fixing recursively until near optimal")
+The loop is: diagnose -> fix -> check -> accepted candidate becomes the new base -> next round. Near-optimal = no remaining general leak that passes the check, not "wins vs the bots we looked at".
+1. **Pre-register** the PASS rule in the report BEFORE running the check (pooled delta > 2 SE of the noise floor, no guard bot down by > 2 SE, head-to-head not worse). Never relax it after seeing numbers.
+2. **Noise floor**: run base-vs-base (same bots, same seeds, two runs) once per round to get the SD of a paired delta (final's solver is wall-clock driven). A delta inside that noise is not an improvement.
+3. **Seeds are single-use**: design seeds, check seeds and confirm seeds never overlap; keep a ledger `panav-bots/loop/results/SEEDS.md` (range, purpose, bots). A bot used to find a leak becomes DEV forever and cannot serve as holdout.
+4. **Final holdout**: batches B3 and B4 (+ whatever bots are added later) are not opened until all other rounds are finished; they are run exactly once on the final candidate. If that run is worse than the original final, we ship the original final.
+5. **Ablation**: for each accepted move, run the candidate with that move removed on the check set; a move that does not earn its keep (delta within noise) is removed. Fewer, simpler, gated moves.
+6. **Regression ledger**: every new candidate is re-checked on all earlier guard sets, and head-to-head vs the ORIGINAL final and vs the previous candidate, so slow drift (each step fine, the sum worse) is caught.
+7. **Principle ledger** `panav-bots/loop/reports/PRINCIPLES.md`: one line per accepted move: trait gate, break-even maths, Ivey verdict, where it was measured. No principle, no ship.
+8. Stop when two consecutive rounds find no move that passes; then do the final-holdout run and package.
