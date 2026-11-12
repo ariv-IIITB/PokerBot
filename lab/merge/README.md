@@ -9,6 +9,9 @@ Bots (Opps/discard, seated as d_<folder>):
 - `xfin_soft`: final with a softer opponent range model (tau 0.7 -> 0.5, flat mix 0.10 -> 0.25): a sensitivity probe.
 - `xprobe_polar`: a probe opponent (copy of new_eqrandom): on the river, pot bets with the top ~15% and bottom ~15%
   by equity, checks the rest.
+- `xfin_shadisc`: final + a silent tier3x shadow (the bot/ and variant/ packages bundled in): tier3x follows every
+  engine line and our actual actions, and chooses our discard (PIMC); any shadow error -> the final's own discard.
+  Same seeds as s1a/s1b (140000) and s2a/s2b (150000), so their d_xfinal rows are its paired baseline.
 Variants are built by `lab/merge/build_variant.py BASE OUT ARM` (patches the module sources inside the bundle).
 
 Run (resumable; skips matches already in the output file):
