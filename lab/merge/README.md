@@ -12,6 +12,11 @@ Bots (Opps/discard, seated as d_<folder>):
 - `xfin_shadisc`: final + a silent tier3x shadow (the bot/ and variant/ packages bundled in): tier3x follows every
   engine line and our actual actions, and chooses our discard (PIMC); any shadow error -> the final's own discard.
   Same seeds as s1a/s1b (140000) and s2a/s2b (150000), so their d_xfinal rows are its paired baseline.
+- `xfin_rnr_shrange`: final + rnr + tier3x's opponent river range (Opponent.range_weights, through the shadow) in place of
+  the blueprint-tracked range at every river solve (dead cards from the final's own support; exploit hook still after).
+- `xfin_rnr_shtypes`: final + rnr + tier3x's X2 type posterior: each exploit trait's strength is max(its SPRT strength,
+  the type-family confidence) (station -> station, prefold -> nit; overfolder/aggressor moves stay off).
+  Both use seeds 140000 (Stage 1) / 150000 (Stage 2): their baseline is the d_xfin_rnr rows of s1a/s1b/s2a/s2b.
 Variants are built by `lab/merge/build_variant.py BASE OUT ARM` (patches the module sources inside the bundle).
 
 Run (resumable; skips matches already in the output file):

@@ -7,6 +7,7 @@ Arms:
   bigb  size-aware river over-folder move: a trait on their folds to our big (>= 0.8 pot, not all-in) river bets,
         and when it says yes, weak hands move part of their check / shove mass to a 0.85-pot bet that leaves
         them chips (botsrc/exploit.py, botsrc/hooks.py, botsrc/policy.py, config exploit += riverfold)
+  sh_disc, sh_range, sh_types  later shadow builds (lab/merge/shadow_patches.py): discard, river range, X2 types
   shadisc  the user's tier3x runs as a silent shadow (bot/ package + lab/merge/shadow_src.py bundled into
         _SOURCES): it follows every engine line and our actual actions, and chooses our discard
         (CONFIG shadow = "discard"; any shadow error -> the final bot's own discard for the rest of the leg)
@@ -262,7 +263,7 @@ REPO = os.path.dirname(os.path.dirname(HERE))
 
 def extra_modules(arm):
     """New _SOURCES entries an arm adds: name -> (is_package, source)."""
-    if arm != "shadisc":
+    if arm not in ("shadisc", "shadow"):
         return {}
     mods = {"botsrc.shadow": (False, open(os.path.join(HERE, "shadow_src.py")).read())}
     for d, dirs, files in [w for top in ("bot", "variant") for w in os.walk(os.path.join(REPO, top))]:
@@ -281,6 +282,18 @@ def main():
     base, out, arms = sys.argv[1], sys.argv[2], sys.argv[3].split(",")
     txt = open(base).read()
     src = sources(txt)
+    feats = [a for a in arms if a.startswith("sh_")]
+    if feats:                                          # later shadow builds: infrastructure once, then features
+        sys.path.insert(0, HERE)
+        import shadow_patches as SP
+        if "shadisc" in arms:
+            raise SystemExit("shadisc (first build) and sh_* arms do not mix")
+        PATCHES["shadow"] = SP.INFRA
+        for f in feats:
+            PATCHES[f] = SP.FEATURES[f][1]
+        names = [SP.FEATURES[f][0] for f in feats]
+        CONFIG_SET["shadow"] = ("shadow", ",".join(names))
+        arms = [a for a in arms if not a.startswith("sh_")] + ["shadow"] + feats
     for arm in arms:
         extra = extra_modules(arm)
         if extra:
