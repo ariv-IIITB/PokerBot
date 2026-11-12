@@ -1,0 +1,37 @@
+final vs trapper, 24 pairs x 200 hands, --first-seed 300
+bot vs trapper: +0.75 ± 0.29 chips/hand | match score 0.583 | pairs 24 | forfeits A/B 0/0
+hands 9600, net +7205, +0.751 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  681 chips= -39002  -4.063/hand
+  WE fold @turn          n=  607 chips=  -9329  -0.972/hand
+  WE fold @river         n=  340 chips=  -8902  -0.927/hand
+  WE fold @flop          n= 1038 chips=  -7293  -0.760/hand
+  WE fold @preflop       n= 1694 chips=  -4046  -0.421/hand
+  showdown split         n=   75 chips=     +0  +0.000/hand
+  OPP folds @flop        n=  233 chips=  +1286  +0.134/hand
+  OPP folds @preflop     n= 2680 chips=  +5860  +0.610/hand
+  OPP folds @turn        n=  671 chips=  +8534  +0.889/hand
+  OPP folds @river       n=  543 chips= +12225  +1.273/hand
+  showdown WIN           n= 1038 chips= +47872  +4.987/hand
+
+BY SEAT
+  button       n= 4800 chips=  +6639  +1.383/hand
+  big_blind    n= 4800 chips=   +566  +0.118/hand
+
+SIZE
+  small              n= 8889 chips=   +448
+  pot>=40 (|net|)    n=  711 chips=  +6757
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=4039: fold 0.40 call 0.48 raise 0.12 | opp first-in n=6301: bet 0.65
+  flop     facing our bet n=1609: fold 0.14 call 0.82 raise 0.03 | opp first-in n=4620: bet 0.61
+  turn     facing our bet n=1324: fold 0.51 call 0.46 raise 0.03 | opp first-in n=3419: bet 0.40
+  river    facing our bet n=792: fold 0.69 call 0.27 raise 0.04 | opp first-in n=2246: bet 0.26
+
+TRAITS (opponent, vs final):
+  preflop  facing our bet n=4039: fold 0.40 call 0.48 raise 0.12 | opp first-in n=6301: bet 0.65
+  flop     facing our bet n=1609: fold 0.14 call 0.82 raise 0.03 | opp first-in n=4620: bet 0.61
+  turn     facing our bet n=1324: fold 0.51 call 0.46 raise 0.03 | opp first-in n=3419: bet 0.40
+  river    facing our bet n=792: fold 0.69 call 0.27 raise 0.04 | opp first-in n=2246: bet 0.26
+  showdown win rate of FINAL when opp bet/raised in hand: 819/1453 = 0.56  (opp wins 0.44)

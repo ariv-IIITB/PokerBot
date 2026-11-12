@@ -1,0 +1,39 @@
+final vs s6_discard, 24 pairs x 200 hands, --first-seed 300
+bot vs s6_discard: +0.47 ± 0.32 chips/hand | match score 0.583 | pairs 24 | forfeits A/B 0/0
+500-hand legs (8 pairs, seeds 400..): bot vs s6_discard: -0.08 ± 0.35 chips/hand | match score 0.500 | pairs 8 | forfeits A/B 0/0
+
+hands 9600, net +4547, +0.474 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  611 chips= -37508  -3.907/hand
+  WE fold @turn          n=  563 chips= -10378  -1.081/hand
+  WE fold @river         n=  330 chips=  -9732  -1.014/hand
+  WE fold @flop          n= 1264 chips=  -9560  -0.996/hand
+  WE fold @preflop       n= 1688 chips=  -3978  -0.414/hand
+  showdown split         n=   63 chips=     +0  +0.000/hand
+  OPP folds @flop        n=  225 chips=  +1176  +0.122/hand
+  OPP folds @preflop     n= 2687 chips=  +5931  +0.618/hand
+  OPP folds @turn        n=  592 chips=  +7948  +0.828/hand
+  OPP folds @river       n=  540 chips= +12156  +1.266/hand
+  showdown WIN           n= 1037 chips= +48492  +5.051/hand
+
+BY SEAT
+  button       n= 4800 chips=  +4366  +0.910/hand
+  big_blind    n= 4800 chips=   +181  +0.038/hand
+
+SIZE
+  small              n= 8840 chips=   +809
+  pot>=40 (|net|)    n=  760 chips=  +3738
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=4047: fold 0.40 call 0.48 raise 0.12 | opp first-in n=6301: bet 0.65
+  flop     facing our bet n=1526: fold 0.15 call 0.79 raise 0.06 | opp first-in n=4604: bet 0.70
+  turn     facing our bet n=1230: fold 0.48 call 0.49 raise 0.02 | opp first-in n=3250: bet 0.42
+  river    facing our bet n=717: fold 0.75 call 0.24 raise 0.01 | opp first-in n=2198: bet 0.27
+
+TRAITS (opponent, vs final):
+  preflop  facing our bet n=4047: fold 0.40 call 0.48 raise 0.12 | opp first-in n=6301: bet 0.65
+  flop     facing our bet n=1526: fold 0.15 call 0.79 raise 0.06 | opp first-in n=4604: bet 0.70
+  turn     facing our bet n=1230: fold 0.48 call 0.49 raise 0.02 | opp first-in n=3250: bet 0.42
+  river    facing our bet n=717: fold 0.75 call 0.24 raise 0.01 | opp first-in n=2198: bet 0.27
+  showdown win rate of FINAL when opp bet/raised in hand: 826/1394 = 0.59  (opp wins 0.41)

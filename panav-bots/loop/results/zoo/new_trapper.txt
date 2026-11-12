@@ -1,0 +1,37 @@
+final vs new_trapper, 24 pairs x 200 hands, --first-seed 300
+bot vs new_trapper: +0.87 ± 0.26 chips/hand | match score 0.646 | pairs 24 | forfeits A/B 0/0
+hands 9600, net +8350, +0.870 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n= 1603 chips= -42177  -4.393/hand
+  WE fold @river         n=  710 chips=  -9250  -0.964/hand
+  WE fold @turn          n=  293 chips=  -3183  -0.332/hand
+  WE fold @flop          n=  133 chips=   -818  -0.085/hand
+  WE fold @preflop       n=  136 chips=   -329  -0.034/hand
+  showdown split         n=   79 chips=     +0  +0.000/hand
+  OPP folds @turn        n=  432 chips=  +1998  +0.208/hand
+  OPP folds @flop        n=  787 chips=  +3726  +0.388/hand
+  OPP folds @preflop     n= 3481 chips=  +4900  +0.510/hand
+  OPP folds @river       n=  584 chips=  +5647  +0.588/hand
+  showdown WIN           n= 1362 chips= +47836  +4.983/hand
+
+BY SEAT
+  button       n= 4800 chips=  +6063  +1.263/hand
+  big_blind    n= 4800 chips=  +2287  +0.476/hand
+
+SIZE
+  small              n= 9059 chips=  +1836
+  pot>=40 (|net|)    n=  541 chips=  +6514
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=4209: fold 0.34 call 0.65 raise 0.01 | opp first-in n=6327: bet 0.03
+  flop     facing our bet n=2469: fold 0.32 call 0.65 raise 0.03 | opp first-in n=5304: bet 0.05
+  turn     facing our bet n=2042: fold 0.21 call 0.73 raise 0.06 | opp first-in n=4254: bet 0.10
+  river    facing our bet n=1517: fold 0.38 call 0.49 raise 0.12 | opp first-in n=3576: bet 0.24
+
+TRAITS (opponent, vs final):
+  preflop  facing our bet n=4209: fold 0.34 call 0.65 raise 0.01 | opp first-in n=6327: bet 0.03
+  flop     facing our bet n=2469: fold 0.32 call 0.65 raise 0.03 | opp first-in n=5304: bet 0.05
+  turn     facing our bet n=2042: fold 0.21 call 0.73 raise 0.06 | opp first-in n=4254: bet 0.10
+  river    facing our bet n=1517: fold 0.38 call 0.49 raise 0.12 | opp first-in n=3576: bet 0.24
+  showdown win rate of FINAL when opp bet/raised in hand: 208/568 = 0.37  (opp wins 0.63)

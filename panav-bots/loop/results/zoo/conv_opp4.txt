@@ -1,0 +1,37 @@
+final vs conv_opp4, 24 pairs x 200 hands, --first-seed 300
+bot vs conv_opp4: +0.89 ± 0.26 chips/hand | match score 0.667 | pairs 24 | forfeits A/B 0/0
+hands 9600, net +8546, +0.890 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  353 chips= -27755  -2.891/hand
+  WE fold @flop          n= 1467 chips=  -8696  -0.906/hand
+  WE fold @turn          n=  379 chips=  -6694  -0.697/hand
+  WE fold @river         n=  227 chips=  -5602  -0.584/hand
+  WE fold @preflop       n= 1050 chips=  -2475  -0.258/hand
+  showdown split         n=   38 chips=     +0  +0.000/hand
+  OPP folds @flop        n=  149 chips=   +751  +0.078/hand
+  OPP folds @turn        n=  459 chips=  +5339  +0.556/hand
+  OPP folds @river       n=  262 chips=  +5659  +0.589/hand
+  OPP folds @preflop     n= 4444 chips=  +7584  +0.790/hand
+  showdown WIN           n=  772 chips= +40435  +4.212/hand
+
+BY SEAT
+  button       n= 4800 chips=  +7416  +1.545/hand
+  big_blind    n= 4800 chips=  +1130  +0.235/hand
+
+SIZE
+  small              n= 9081 chips=  +2208
+  pot>=40 (|net|)    n=  519 chips=  +6338
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=3783: fold 0.55 call 0.38 raise 0.07 | opp first-in n=6216: bet 0.45
+  flop     facing our bet n=845: fold 0.18 call 0.75 raise 0.07 | opp first-in n=3763: bet 0.84
+  turn     facing our bet n=811: fold 0.57 call 0.41 raise 0.02 | opp first-in n=2207: bet 0.43
+  river    facing our bet n=387: fold 0.68 call 0.31 raise 0.02 | opp first-in n=1391: bet 0.35
+
+TRAITS (opponent, vs final):
+  preflop  facing our bet n=3783: fold 0.55 call 0.38 raise 0.07 | opp first-in n=6216: bet 0.45
+  flop     facing our bet n=845: fold 0.18 call 0.75 raise 0.07 | opp first-in n=3763: bet 0.84
+  turn     facing our bet n=811: fold 0.57 call 0.41 raise 0.02 | opp first-in n=2207: bet 0.43
+  river    facing our bet n=387: fold 0.68 call 0.31 raise 0.02 | opp first-in n=1391: bet 0.35
+  showdown win rate of FINAL when opp bet/raised in hand: 674/1004 = 0.67  (opp wins 0.33)

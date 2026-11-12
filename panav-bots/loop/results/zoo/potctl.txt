@@ -1,0 +1,39 @@
+final vs potctl, 24 pairs x 200 hands, --first-seed 300
+bot vs potctl: +0.11 ± 0.30 chips/hand | match score 0.500 | pairs 24 | forfeits A/B 0/0
+500-hand legs (8 pairs, seeds 400..): bot vs potctl: +0.13 ± 0.34 chips/hand | match score 0.562 | pairs 8 | forfeits A/B 0/0
+
+hands 9600, net +1020, +0.106 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  407 chips= -33305  -3.469/hand
+  WE fold @river         n=  334 chips= -10596  -1.104/hand
+  WE fold @turn          n=  541 chips=  -9859  -1.027/hand
+  WE fold @flop          n= 1368 chips=  -9707  -1.011/hand
+  WE fold @preflop       n= 1690 chips=  -3981  -0.415/hand
+  showdown split         n=   50 chips=     +0  +0.000/hand
+  OPP folds @flop        n=  448 chips=  +4224  +0.440/hand
+  OPP folds @preflop     n= 2682 chips=  +5857  +0.610/hand
+  OPP folds @turn        n=  641 chips=  +8439  +0.879/hand
+  OPP folds @river       n=  500 chips= +10416  +1.085/hand
+  showdown WIN           n=  939 chips= +39532  +4.118/hand
+
+BY SEAT
+  button       n= 4800 chips=  +3659  +0.762/hand
+  big_blind    n= 4800 chips=  -2639  -0.550/hand
+
+SIZE
+  small              n= 8890 chips=  +5190
+  pot>=40 (|net|)    n=  710 chips=  -4170
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=4050: fold 0.40 call 0.48 raise 0.12 | opp first-in n=6290: bet 0.65
+  flop     facing our bet n=1319: fold 0.34 call 0.62 raise 0.04 | opp first-in n=4593: bet 0.81
+  turn     facing our bet n=1049: fold 0.61 call 0.36 raise 0.03 | opp first-in n=2972: bet 0.50
+  river    facing our bet n=602: fold 0.83 call 0.16 raise 0.01 | opp first-in n=1848: bet 0.38
+
+TRAITS (opponent, vs final):
+  preflop  facing our bet n=4050: fold 0.40 call 0.48 raise 0.12 | opp first-in n=6290: bet 0.65
+  flop     facing our bet n=1319: fold 0.34 call 0.62 raise 0.04 | opp first-in n=4593: bet 0.81
+  turn     facing our bet n=1049: fold 0.61 call 0.36 raise 0.03 | opp first-in n=2972: bet 0.50
+  river    facing our bet n=602: fold 0.83 call 0.16 raise 0.01 | opp first-in n=1848: bet 0.38
+  showdown win rate of FINAL when opp bet/raised in hand: 808/1223 = 0.66  (opp wins 0.34)

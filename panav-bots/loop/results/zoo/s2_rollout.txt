@@ -1,0 +1,37 @@
+final vs s2_rollout, 24 pairs x 200 hands, --first-seed 300
+bot vs s2_rollout: +0.59 ± 0.24 chips/hand | match score 0.583 | pairs 24 | forfeits A/B 0/0
+hands 9600, net +5641, +0.588 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  404 chips= -37237  -3.879/hand
+  WE fold @turn          n=  745 chips= -14992  -1.562/hand
+  WE fold @flop          n= 1706 chips= -14446  -1.505/hand
+  WE fold @river         n=  253 chips=  -7994  -0.833/hand
+  WE fold @preflop       n= 1702 chips=  -4024  -0.419/hand
+  showdown split         n=   49 chips=     +0  +0.000/hand
+  OPP folds @flop        n=  439 chips=  +3808  +0.397/hand
+  OPP folds @turn        n=  400 chips=  +5533  +0.576/hand
+  OPP folds @preflop     n= 2706 chips=  +5996  +0.625/hand
+  OPP folds @river       n=  327 chips=  +8483  +0.884/hand
+  showdown WIN           n=  869 chips= +60514  +6.304/hand
+
+BY SEAT
+  button       n= 4800 chips=  +6533  +1.361/hand
+  big_blind    n= 4800 chips=   -892  -0.186/hand
+
+SIZE
+  small              n= 8683 chips=  -5476
+  pot>=40 (|net|)    n=  917 chips= +11117
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=4055: fold 0.40 call 0.48 raise 0.12 | opp first-in n=6294: bet 0.65
+  flop     facing our bet n=1302: fold 0.34 call 0.33 raise 0.33 | opp first-in n=4568: bet 0.75
+  turn     facing our bet n=818: fold 0.49 call 0.36 raise 0.15 | opp first-in n=2563: bet 0.65
+  river    facing our bet n=458: fold 0.71 call 0.27 raise 0.01 | opp first-in n=1517: bet 0.34
+
+TRAITS (opponent, vs final):
+  preflop  facing our bet n=4055: fold 0.40 call 0.48 raise 0.12 | opp first-in n=6294: bet 0.65
+  flop     facing our bet n=1302: fold 0.34 call 0.33 raise 0.33 | opp first-in n=4568: bet 0.75
+  turn     facing our bet n=818: fold 0.49 call 0.36 raise 0.15 | opp first-in n=2563: bet 0.65
+  river    facing our bet n=458: fold 0.71 call 0.27 raise 0.01 | opp first-in n=1517: bet 0.34
+  showdown win rate of FINAL when opp bet/raised in hand: 791/1211 = 0.65  (opp wins 0.35)
