@@ -1,0 +1,14 @@
+== d_v16
+  d_xfinal       n= 30 score 0.833 +- 0.069  chips/hand +0.949 +- 0.185
+  d_xfin_bigb    n= 30 score 0.833 +- 0.069  chips/hand +1.043 +- 0.188   vs xfinal: chips +0.095 +- 0.212 (+0.4 SE), score +0.000 +- 0.083
+  d_xfin_rnr     n= 30 score 0.900 +- 0.056  chips/hand +0.913 +- 0.151   vs xfinal: chips -0.036 +- 0.173 (-0.2 SE), score +0.067 +- 0.067
+  d_xfin_soft    n= 30 score 0.833 +- 0.069  chips/hand +1.011 +- 0.180   vs xfinal: chips +0.062 +- 0.164 (+0.4 SE), score +0.000 +- 0.096
+== tier3x
+  d_xfinal       n= 30 score 0.367 +- 0.089  chips/hand -0.113 +- 0.176
+  d_xfin_bigb    n= 30 score 0.333 +- 0.088  chips/hand -0.124 +- 0.206   vs xfinal: chips -0.011 +- 0.231 (-0.0 SE), score -0.033 +- 0.112
+  d_xfin_rnr     n= 30 score 0.667 +- 0.088  chips/hand +0.436 +- 0.221   vs xfinal: chips +0.549 +- 0.241 (+2.3 SE), score +0.300 +- 0.098
+  d_xfin_soft    n= 30 score 0.533 +- 0.093  chips/hand +0.190 +- 0.167   vs xfinal: chips +0.303 +- 0.174 (+1.7 SE), score +0.167 +- 0.118
+
+pooled d_xfin_bigb - d_xfinal over 2 opponents (equal weight): chips/hand +0.042 +- 0.157 (+0.3 SE)
+pooled d_xfin_rnr - d_xfinal over 2 opponents (equal weight): chips/hand +0.256 +- 0.148 (+1.7 SE)
+pooled d_xfin_soft - d_xfinal over 2 opponents (equal weight): chips/hand +0.182 +- 0.120 (+1.5 SE)
