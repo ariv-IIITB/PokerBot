@@ -1,0 +1,38 @@
+== final vs s9_sizing: 24 pairs x 200 hands, first-seed 300
+bot vs s9_sizing: +1.99 ± 0.43 chips/hand | match score 0.708 | pairs 24 | forfeits A/B 0/0
+
+hands 9600, net +19121, +1.992 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  375 chips= -36722  -3.825/hand
+  WE fold @flop          n= 2063 chips= -13788  -1.436/hand
+  WE fold @turn          n=  400 chips=  -8118  -0.846/hand
+  WE fold @river         n=  174 chips=  -4487  -0.467/hand
+  WE fold @preflop       n= 1696 chips=  -4044  -0.421/hand
+  showdown split         n=   50 chips=     +0  +0.000/hand
+  OPP folds @flop        n=  246 chips=  +1433  +0.149/hand
+  OPP folds @preflop     n= 2685 chips=  +5970  +0.622/hand
+  OPP folds @river       n=  371 chips=  +7684  +0.800/hand
+  OPP folds @turn        n=  585 chips=  +7811  +0.814/hand
+  showdown WIN           n=  955 chips= +63382  +6.602/hand
+
+BY SEAT
+  button       n= 4800 chips= +14120  +2.942/hand
+  big_blind    n= 4800 chips=  +5001  +1.042/hand
+
+SIZE
+  small              n= 8794 chips=   -501
+  pot>=40 (|net|)    n=  806 chips= +19622
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=4022: fold 0.40 call 0.48 raise 0.12 | opp first-in n=6312: bet 0.65
+  flop     facing our bet n=1257: fold 0.20 call 0.75 raise 0.05 | opp first-in n=4610: bet 0.70
+  turn     facing our bet n=916: fold 0.64 call 0.34 raise 0.02 | opp first-in n=2340: bet 0.29
+  river    facing our bet n=444: fold 0.84 call 0.15 raise 0.01 | opp first-in n=1407: bet 0.23
+
+TRAITS (opp, vs final)
+1. opp first-in bet rate  : preflop 0.65 (n=6312), flop 0.70 (n=4610), turn 0.29 (n=2340), river 0.23 (n=1407)
+2. opp fold-to-our-bet    : preflop 0.40 (n=4022), flop 0.20 (n=1257), turn 0.64 (n=916), river 0.84 (n=444)
+3. opp raise rate vs our bet: 0.09 (n=6639)
+4. showdown win rate of final when opp bet/raised: 0.68 (n=1130)  (opp wins the rest)
+5. action names seen: {'raise': 15550, 'call': 8837, 'check': 9407, 'fold': 8220}

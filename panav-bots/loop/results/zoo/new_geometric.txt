@@ -1,0 +1,57 @@
+== final vs new_geometric: 24 pairs x 200 hands, first-seed 300
+bot vs new_geometric: +0.27 ± 0.27 chips/hand | match score 0.542 | pairs 24 | forfeits A/B 0/0
+
+hands 9600, net +2572, +0.268 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  697 chips= -30595  -3.187/hand
+  WE fold @river         n=  344 chips=  -9314  -0.970/hand
+  WE fold @turn          n=  575 chips=  -9091  -0.947/hand
+  WE fold @flop          n=  952 chips=  -5810  -0.605/hand
+  WE fold @preflop       n= 1807 chips=  -4533  -0.472/hand
+  showdown split         n=   67 chips=     +0  +0.000/hand
+  OPP folds @turn        n=  360 chips=  +3093  +0.322/hand
+  OPP folds @flop        n=  640 chips=  +5076  +0.529/hand
+  OPP folds @river       n=  501 chips=  +6535  +0.681/hand
+  OPP folds @preflop     n= 2712 chips=  +7348  +0.765/hand
+  showdown WIN           n=  945 chips= +39863  +4.152/hand
+
+BY SEAT
+  button       n= 4800 chips=  +5434  +1.132/hand
+  big_blind    n= 4800 chips=  -2862  -0.596/hand
+
+SIZE
+  small              n= 9047 chips=   +964
+  pot>=40 (|net|)    n=  553 chips=  +1608
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=4561: fold 0.59 call 0.26 raise 0.14 | opp first-in n=6139: bet 0.68
+  flop     facing our bet n=1559: fold 0.41 call 0.51 raise 0.08 | opp first-in n=4516: bet 0.34
+  turn     facing our bet n=1160: fold 0.31 call 0.60 raise 0.09 | opp first-in n=2895: bet 0.32
+  river    facing our bet n=782: fold 0.64 call 0.32 raise 0.04 | opp first-in n=2032: bet 0.28
+
+TRAITS (opp, vs final)
+1. opp first-in bet rate  : preflop 0.68 (n=6139), flop 0.34 (n=4516), turn 0.32 (n=2895), river 0.28 (n=2032)
+2. opp fold-to-our-bet    : preflop 0.59 (n=4561), flop 0.41 (n=1559), turn 0.31 (n=1160), river 0.64 (n=782)
+3. opp raise rate vs our bet: 0.11 (n=8062)
+4. showdown win rate of final when opp bet/raised: 0.56 (n=1137)  (opp wins the rest)
+5. action names seen: {'call': 9054, 'check': 13924, 'raise': 16188, 'fold': 7891}
+
+== Stage-2 length: 8 pairs x 500 hands, first-seed 400
+bot vs new_geometric: -0.22 ± 0.21 chips/hand | match score 0.312 | pairs 8 | forfeits A/B 0/0
+hands 8000, net -1785, -0.223 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  573 chips= -26815  -3.352/hand
+  WE fold @turn          n=  521 chips=  -7785  -0.973/hand
+  WE fold @river         n=  262 chips=  -7648  -0.956/hand
+  WE fold @flop          n=  717 chips=  -4421  -0.553/hand
+  WE fold @preflop       n= 1521 chips=  -3686  -0.461/hand
+  showdown split         n=   65 chips=     +0  +0.000/hand
+  OPP folds @turn        n=  320 chips=  +2630  +0.329/hand
+  OPP folds @flop        n=  550 chips=  +4198  +0.525/hand
+  OPP folds @preflop     n= 2201 chips=  +5994  +0.749/hand
+  OPP folds @river       n=  533 chips=  +6639  +0.830/hand
+  showdown WIN           n=  737 chips= +29109  +3.639/hand
+
+BY SEAT
