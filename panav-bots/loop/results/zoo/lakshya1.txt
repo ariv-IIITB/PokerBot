@@ -1,0 +1,39 @@
+bot vs lakshya1: +0.20 ± 0.34 chips/hand | match score 0.562 | pairs 24 | forfeits A/B 0/0
+24 pairs x 200 hands, --first-seed 300
+500-hand leg (8 pairs, first-seed 400): bot vs lakshya1: -0.30 ± 0.26 chips/hand | match score 0.438 | pairs 8 | forfeits A/B 0/0
+
+hands 9600, net +1924, +0.200 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  759 chips= -37308  -3.886/hand
+  WE fold @turn          n=  881 chips= -13212  -1.376/hand
+  WE fold @flop          n= 2351 chips= -12939  -1.348/hand
+  WE fold @river         n=  381 chips=  -7986  -0.832/hand
+  WE fold @preflop       n= 1066 chips=  -2734  -0.285/hand
+  showdown split         n=   79 chips=     +0  +0.000/hand
+  OPP folds @preflop     n= 1113 chips=  +3200  +0.333/hand
+  OPP folds @flop        n=  886 chips=  +6117  +0.637/hand
+  OPP folds @turn        n=  711 chips=  +8791  +0.916/hand
+  OPP folds @river       n=  508 chips= +13777  +1.435/hand
+  showdown WIN           n=  865 chips= +44218  +4.606/hand
+
+BY SEAT
+  button       n= 4800 chips=  +3757  +0.783/hand
+  big_blind    n= 4800 chips=  -1833  -0.382/hand
+
+SIZE
+  small              n= 8830 chips=  -5707
+  pot>=40 (|net|)    n=  770 chips=  +7631
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=4842: fold 0.23 call 0.71 raise 0.06 | opp first-in n=6280: bet 0.28
+  flop     facing our bet n=2019: fold 0.44 call 0.48 raise 0.08 | opp first-in n=6551: bet 0.64
+  turn     facing our bet n=1370: fold 0.52 call 0.41 raise 0.07 | opp first-in n=3562: bet 0.48
+  river    facing our bet n=707: fold 0.72 call 0.26 raise 0.03 | opp first-in n=2175: bet 0.34
+
+TRAITS (opponent)
+- preflop: first-in bet 0.28, fold-to-our-bet 0.23, raise 0.06
+- flop: first-in bet 0.64, fold-to-our-bet 0.44, raise 0.08
+- turn: first-in bet 0.48, fold-to-our-bet 0.52, raise 0.07
+- river: first-in bet 0.34, fold-to-our-bet 0.72, raise 0.03
+- our showdown win rate 0.51 (n=1703; per-bettor split not computed)

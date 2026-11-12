@@ -1,0 +1,38 @@
+bot vs new_lag: +2.22 ± 0.56 chips/hand | match score 0.646 | pairs 24 | forfeits A/B 0/0
+24 pairs x 200 hands, --first-seed 300
+
+hands 9600, net +21297, +2.218 chips/hand
+
+BY ENDING (n, chips, chips/hand-of-all)
+  showdown LOSS          n=  627 chips= -71459  -7.444/hand
+  WE fold @turn          n= 1284 chips= -28908  -3.011/hand
+  WE fold @river         n=  471 chips= -18013  -1.876/hand
+  WE fold @flop          n= 1936 chips= -16069  -1.674/hand
+  WE fold @preflop       n= 2216 chips=  -5852  -0.610/hand
+  showdown split         n=   64 chips=     +0  +0.000/hand
+  OPP folds @flop        n=  136 chips=  +1609  +0.168/hand
+  OPP folds @preflop     n=  916 chips=  +2794  +0.291/hand
+  OPP folds @turn        n=  176 chips=  +3124  +0.325/hand
+  OPP folds @river       n=  346 chips= +13071  +1.362/hand
+  showdown WIN           n= 1428 chips=+141000  +14.688/hand
+
+BY SEAT
+  button       n= 4800 chips= +21031  +4.381/hand
+  big_blind    n= 4800 chips=   +266  +0.055/hand
+
+SIZE
+  small              n= 7630 chips= -21477
+  pot>=40 (|net|)    n= 1970 chips= +42774
+
+OPPONENT TENDENCIES vs us (counts)
+  preflop  facing our bet n=4285: fold 0.16 call 0.61 raise 0.23 | opp first-in n=6308: bet 0.79
+  flop     facing our bet n=1730: fold 0.08 call 0.76 raise 0.16 | opp first-in n=5531: bet 0.75
+  turn     facing our bet n=1145: fold 0.15 call 0.65 raise 0.20 | opp first-in n=3683: bet 0.71
+  river    facing our bet n=770: fold 0.45 call 0.46 raise 0.09 | opp first-in n=2278: bet 0.69
+
+TRAITS (opponent)
+- preflop: first-in bet 0.79, fold-to-our-bet 0.16, raise 0.23
+- flop: first-in bet 0.75, fold-to-our-bet 0.08, raise 0.16
+- turn: first-in bet 0.71, fold-to-our-bet 0.15, raise 0.20
+- river: first-in bet 0.69, fold-to-our-bet 0.45, raise 0.09
+- our showdown win rate 0.67 (n=2119; per-bettor split not computed)
