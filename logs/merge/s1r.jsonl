@@ -352,3 +352,9 @@
 {"bot": "d_xfin_rnr_shrange", "opp": "calling_station", "seed": 140058, "chips": [6232, 5963], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_rnr_shrange", "opp": "d_new_exploiter", "seed": 140058, "chips": [-323, 70], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_rnr_shrange", "opp": "d_xprobe_polar", "seed": 140058, "chips": [120, -820], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shrange", "opp": "d_v16", "seed": 140059, "chips": [862, 545], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shrange", "opp": "d_new_lag", "seed": 140059, "chips": [1203, 1520], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shrange", "opp": "tier3x", "seed": 140059, "chips": [358, 217], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shrange", "opp": "calling_station", "seed": 140059, "chips": [6343, 7395], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shrange", "opp": "d_new_exploiter", "seed": 140059, "chips": [623, -145], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shrange", "opp": "d_xprobe_polar", "seed": 140059, "chips": [87, -209], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
