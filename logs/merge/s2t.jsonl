@@ -145,3 +145,4 @@
 {"bot": "d_xfin_rnr_shtypes", "opp": "d_v16", "seed": 150024, "chips": [-140, 779], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_rnr_shtypes", "opp": "d_new_lag", "seed": 150024, "chips": [2718, 538], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_rnr_shtypes", "opp": "tier3x", "seed": 150024, "chips": [155, 533], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "calling_station", "seed": 150024, "chips": [26576, 22235], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
