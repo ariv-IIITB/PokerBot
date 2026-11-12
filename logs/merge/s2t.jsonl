@@ -133,3 +133,15 @@
 {"bot": "d_xfin_rnr_shtypes", "opp": "d_v16", "seed": 150022, "chips": [-240, 1283], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_rnr_shtypes", "opp": "tier3x", "seed": 150022, "chips": [1224, -634], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_rnr_shtypes", "opp": "d_new_lag", "seed": 150022, "chips": [138, 51], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "calling_station", "seed": 150022, "chips": [22473, 20103], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "d_new_exploiter", "seed": 150022, "chips": [603, 1], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "d_xprobe_polar", "seed": 150022, "chips": [490, 523], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "d_v16", "seed": 150023, "chips": [-916, -239], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "tier3x", "seed": 150023, "chips": [-666, 1711], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "d_new_lag", "seed": 150023, "chips": [-153, 810], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "calling_station", "seed": 150023, "chips": [18961, 26056], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "d_new_exploiter", "seed": 150023, "chips": [-3, 349], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "d_xprobe_polar", "seed": 150023, "chips": [-188, -95], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "d_v16", "seed": 150024, "chips": [-140, 779], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "d_new_lag", "seed": 150024, "chips": [2718, 538], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr_shtypes", "opp": "tier3x", "seed": 150024, "chips": [155, 533], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
