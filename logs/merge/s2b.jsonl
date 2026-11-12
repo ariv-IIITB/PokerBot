@@ -411,3 +411,15 @@
 {"bot": "d_xfin_bigb", "opp": "d_new_exploiter", "seed": 150025, "chips": [326, 319], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_soft", "opp": "d_new_exploiter", "seed": 150025, "chips": [265, -587], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfinal", "opp": "d_xprobe_polar", "seed": 150025, "chips": [842, -853], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr", "opp": "d_xprobe_polar", "seed": 150025, "chips": [1266, 510], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_bigb", "opp": "d_xprobe_polar", "seed": 150025, "chips": [1227, -1397], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_soft", "opp": "d_xprobe_polar", "seed": 150025, "chips": [922, -327], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfinal", "opp": "calling_station", "seed": 150026, "chips": [10216, 14486], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr", "opp": "calling_station", "seed": 150026, "chips": [17803, 22604], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_bigb", "opp": "calling_station", "seed": 150026, "chips": [10500, 16617], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_soft", "opp": "calling_station", "seed": 150026, "chips": [10094, 16800], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfinal", "opp": "d_new_lag", "seed": 150026, "chips": [-1685, 3552], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr", "opp": "d_new_lag", "seed": 150026, "chips": [-1708, 5167], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_bigb", "opp": "d_new_lag", "seed": 150026, "chips": [-3389, 2317], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_soft", "opp": "d_new_lag", "seed": 150026, "chips": [-1099, 3871], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfinal", "opp": "d_new_exploiter", "seed": 150026, "chips": [-1253, 152], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
