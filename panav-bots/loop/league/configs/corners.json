@@ -1,0 +1,9 @@
+{
+ "default": {},
+ "nit": {"open":0.25,"defend":0.25,"three":0.04,"fold3":0.9,"bet_f":0.35,"bet_t":0.3,"bet_r":0.25,"probe":0.1,"size_f":0.5,"size_t":0.6,"size_r":0.6,"bluff":0.05,"xr":0.1,"raise_bi":0.05,"margin":0.08,"giveup":0.8},
+ "station": {"open":0.5,"defend":0.95,"three":0.0,"fold3":0.0,"bet_f":0.25,"bet_t":0.2,"bet_r":0.2,"probe":0.1,"size_f":0.4,"size_t":0.4,"size_r":0.4,"bluff":0.0,"xr":0.0,"raise_bi":0.02,"margin":-0.1,"giveup":0.5},
+ "maniac": {"open":1.0,"defend":0.9,"three":0.35,"fold3":0.1,"bet_f":1.0,"bet_t":1.0,"bet_r":0.9,"probe":0.9,"size_f":0.9,"size_t":1.0,"size_r":1.0,"bluff":0.5,"xr":0.0,"raise_bi":0.8,"margin":-0.05,"giveup":0.0},
+ "overbettor": {"open":0.5,"defend":0.5,"three":0.1,"fold3":0.5,"bet_f":0.6,"bet_t":0.55,"bet_r":0.5,"probe":0.4,"size_f":1.5,"size_t":2.0,"size_r":2.5,"bluff":0.35,"xr":0.1,"raise_bi":0.2,"margin":0.03,"giveup":0.3},
+ "checkraiser": {"open":0.5,"defend":0.6,"three":0.1,"fold3":0.4,"bet_f":0.3,"bet_t":0.3,"bet_r":0.3,"probe":0.2,"size_f":0.7,"size_t":0.8,"size_r":0.9,"bluff":0.3,"xr":0.9,"raise_bi":0.7,"margin":0.0,"giveup":0.2},
+ "probebettor": {"open":0.45,"defend":0.5,"three":0.06,"fold3":0.6,"bet_f":0.3,"bet_t":0.3,"bet_r":0.3,"probe":0.95,"size_f":0.45,"size_t":0.5,"size_r":0.5,"bluff":0.35,"xr":0.0,"raise_bi":0.1,"margin":0.03,"giveup":0.2}
+}
