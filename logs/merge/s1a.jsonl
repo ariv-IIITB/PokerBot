@@ -62,3 +62,11 @@
 {"bot": "d_xfin_rnr", "opp": "tier3x", "seed": 140007, "chips": [353, 181], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_bigb", "opp": "tier3x", "seed": 140007, "chips": [679, 128], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_soft", "opp": "tier3x", "seed": 140007, "chips": [250, -75], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfinal", "opp": "d_v16", "seed": 140008, "chips": [154, -60], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr", "opp": "d_v16", "seed": 140008, "chips": [-271, -143], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_soft", "opp": "d_v16", "seed": 140008, "chips": [745, 257], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_bigb", "opp": "d_v16", "seed": 140008, "chips": [144, -560], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfinal", "opp": "tier3x", "seed": 140008, "chips": [-429, 547], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_rnr", "opp": "tier3x", "seed": 140008, "chips": [38, 557], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_bigb", "opp": "tier3x", "seed": 140008, "chips": [621, 6], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_soft", "opp": "tier3x", "seed": 140008, "chips": [280, 280], "hands": 400, "forfeits": [0, 0], "errors": [0, 0]}
