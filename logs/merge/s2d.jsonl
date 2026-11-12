@@ -122,3 +122,4 @@
 {"bot": "d_xfin_shadisc", "opp": "tier3x", "seed": 150020, "chips": [531, 1430], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_shadisc", "opp": "d_new_lag", "seed": 150020, "chips": [2565, 1008], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
 {"bot": "d_xfin_shadisc", "opp": "calling_station", "seed": 150020, "chips": [14289, 11696], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
+{"bot": "d_xfin_shadisc", "opp": "d_new_exploiter", "seed": 150020, "chips": [689, 603], "hands": 1000, "forfeits": [0, 0], "errors": [0, 0]}
