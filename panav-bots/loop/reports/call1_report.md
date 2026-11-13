@@ -52,3 +52,22 @@ strong within-leg trait that the opponent bets pot-size rarely/value-heavily (ne
 ## Suggested next step (not done)
 Gate on the opponent's measured pot-size bet frequency (bets of that size per street opportunity) with a low prior, instead of on
 aggressor/riverbluff; try p=0.4 and a shadow ledger from showdowns of called pot bets; re-run the same validation with fresh seeds (10000+ are used up).
+
+## v2 (CF1's value-share gate), added after the parent's instructions -- also not shippable
+Change: fold only px .70-.85 calls of >= .70-pot bets, and only when the within-leg VALUE SHARE of the opponent's shown big bets
+(share that beat our calling hand, net < 0 at showdown) is >= 0.6 over >= 4 shown, ramping in over 4 more (plus the old trait gate and ledger).
+Dev A/B, 6 dev bots, seeds 6000-6029 (v1 = ungated version above; MATCH WINS base 99/180 = 55.0%):
+| | v1 (p=.75, eq<.9) | v2 (value-share gate, band .70-.85) |
+|---|---|---|
+| pooled chips delta | +0.389 +- 0.092 | -0.029 +- 0.060 |
+| match wins (cand) | 112.5/180 = 62.5% | 99/180 = 55.0% (= base) |
+| lakshya1 | +0.90, wins 15->18/30 | +0.16, 15->16 |
+| new_eqrandom | +0.40, 15->22.5/30 | -0.10, 15->17 |
+Stage 2 (500h, 24 pairs, seeds 10100/10200, info only): lakshya1 -0.02 +- 0.10, wins 10->11/24; eqrandom +0.02 +- 0.08, wins 8->9/24.
+Why: in a 200h leg we see only 0-7 SHOWN big bets of theirs (typically 2-3), so "share >= .6 over >= 4 shown" almost never opens
+(eqrandom: 0 folds in 30 pairs; 188 of 195 eligible spots gate-off); even at 500h the gate opens on lakshya1 (82 folds) but not on eqrandom (28).
+The value share is statistically unobservable within a Stage 1 leg; v2 collapses to the blueprint. The 22-bot validation of v2 was NOT run
+(dev result is base-equal; it would cost ~3.5 h for a known null). Both versions: FAIL / no ship.
+Takeaway: the v1 gain on eqrandom/lakshya1/conv_opp3/potctl is real on those dev bots, but separating value-heavy from bluff-heavy bettors needs
+a faster trait than shown-showdown share, e.g. their big-bet frequency (CF1: .82-.92 bluffy vs .30-.32 value-heavy; the existing aggressor/riverbluff SPRT is
+a proxy for it and v1 already uses it). Next try: gate on big-bet frequency alone with a low-p static shift on fresh seeds.

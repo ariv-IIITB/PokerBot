@@ -11,7 +11,9 @@ that are still made feed the ledger). Never touches the river solver's range or 
 """
 from . import exploit as X
 
-FMIN, FMAX = 0.75, 1.2
+FMIN, FMAX = 0.75, 1.2     # v2 (config pf_vs=on): 0.70-1.2
+VS_FMIN = 0.70
+VS_MIN_N, VS_SHARE, VS_RAMP = 4, 0.60, 4.0   # value-share gate: shown big bets needed, share needed, ramp length
 MAX_S1 = {"flop": 47 * 2 * 1035, "turn": 46 * 2 * 990, "river": 2 * 990}
 DEFAULTS = {
     "pf_p": {"flop:0": 0.75, "flop:1": 0.75, "turn:0": 0.75, "turn:1": 0.75, "river:0": 0.75, "river:1": 0.75},
@@ -45,10 +47,16 @@ class PotFold:
         self.n0 = float(config.get("pf_prior_n", d["pf_prior_n"]))
         self.ledger_on = config.get("pf_ledger", "on") == "on"
         self.gate = config.get("pf_gate", "on") == "on"
+        self.vs = config.get("pf_vs", "off") == "on"      # v2: value-share gate and a lower equity band
+        self.lo = float(config.get("pf_lo", 0.0))
+        self.fmin = VS_FMIN if self.vs else FMIN
+        self.shown = 0                                    # shown big bets of theirs that we called (net != 0)
+        self.value = 0                                    # ... that beat us
+        self.big_pending = set()
         self.n = 0
         self.sum = 0.0
         self.pending = {}            # hand_id -> [committed chips at each kept call]
-        self.stats = {"eligible": 0, "folded": 0, "kept": 0, "gated": 0}
+        self.stats = {"eligible": 0, "folded": 0, "kept": 0, "gated": 0, "vs_off": 0}
 
     def g(self):
         """Ledger factor in [0, 1]."""
@@ -64,26 +72,45 @@ class PotFold:
         if req["opp_stack"] == 0 or "fold" not in req["legal_actions"]:
             return reply
         f = size_fraction(req)
-        if f is None or not (FMIN <= f <= FMAX):
+        if f is None or not (self.fmin <= f <= FMAX):
             return reply
         street = req["street"]
-        if proxy >= self.cut.get(street, 0.9):
+        if proxy >= self.cut.get(street, 0.9) or proxy < self.lo:
+            if self.vs:
+                self.big_pending.add(hs.hand_id)        # a big bet of theirs that we call: its showdown feeds the value share
             return reply
         self.stats["eligible"] += 1
         if self.gate and (X.trait_yes("aggressor") or X.trait_yes("riverbluff")):
             self.stats["gated"] += 1        # a frequent big bettor: their bets are not all value, the shift stays off
             return reply
-        p = self.p.get(f"{street}:{hs.seat}", 0.0) * self.g()
+        w = self.vs_weight() if self.vs else 1.0
+        if w <= 0.0:
+            self.stats["vs_off"] += 1
+        p = self.p.get(f"{street}:{hs.seat}", 0.0) * self.g() * w
         if draw < p:
             self.stats["folded"] += 1
             return {"type": "action", "action": "fold"}
         self.stats["kept"] += 1
+        if self.vs:
+            self.big_pending.add(hs.hand_id)
         self.pending.setdefault(hs.hand_id, []).append(self.start_stack - int(req["my_stack"]))
         return reply
 
     start_stack = 200
 
+    def vs_weight(self):
+        """Ramp 0..1: needs >= VS_MIN_N shown big bets of theirs with a value share >= VS_SHARE (they bet big with value, not bluffs)."""
+        if self.shown < VS_MIN_N or self.value / self.shown < VS_SHARE:
+            return 0.0
+        return min(1.0, (self.shown - VS_MIN_N + 1) / VS_RAMP)
+
     def on_hand_result(self, msg):
+        if self.vs and msg.get("hand_id") in self.big_pending:
+            self.big_pending.discard(msg.get("hand_id"))
+            net = msg.get("net")
+            if msg.get("opp_hole_cards") and isinstance(net, (int, float)) and net != 0:
+                self.shown += 1
+                self.value += 1 if net < 0 else 0
         pend = self.pending.pop(msg.get("hand_id"), None)
         if not pend or not isinstance(msg.get("net"), (int, float)):
             return
@@ -92,4 +119,4 @@ class PotFold:
             self.sum += float(msg["net"]) + committed
 
     def summary(self):
-        return dict(self.stats, ledger_n=self.n, ledger_mean=(self.sum / self.n if self.n else None), g=round(self.g(), 3))
+        return dict(self.stats, shown=self.shown, value=self.value, ledger_n=self.n, ledger_mean=(self.sum / self.n if self.n else None), g=round(self.g(), 3))
