@@ -9,14 +9,14 @@ the calls win in this match (the opponent bluffs a lot) the shift goes to 0. A l
 (about 3-10 per 200 hands), so the shift is mostly prior-driven; it is bounded by P (< 1 on purpose: the calls
 that are still made feed the ledger). Never touches the river solver's range or the discard; only a call -> fold.
 """
-from . import hooks  # noqa: F401  (keeps the import graph of the exploit layer in one place)
+from . import exploit as X
 
 FMIN, FMAX = 0.75, 1.2
 MAX_S1 = {"flop": 47 * 2 * 1035, "turn": 46 * 2 * 990, "river": 2 * 990}
 DEFAULTS = {
-    "pf_p": {"flop:0": 0.5, "flop:1": 0.5, "turn:0": 0.5, "turn:1": 0.5, "river:0": 0.5, "river:1": 0.5},
+    "pf_p": {"flop:0": 0.75, "flop:1": 0.75, "turn:0": 0.75, "turn:1": 0.75, "river:0": 0.75, "river:1": 0.75},
     "pf_cut": {"flop": 0.9, "turn": 0.9, "river": 0.9},
-    "pf_mu0": -25.0, "pf_sigma": 70.0, "pf_prior_n": 20.0,
+    "pf_mu0": -15.0, "pf_sigma": 70.0, "pf_prior_n": 25.0,
 }
 
 
@@ -44,10 +44,11 @@ class PotFold:
         self.sigma = float(config.get("pf_sigma", d["pf_sigma"]))
         self.n0 = float(config.get("pf_prior_n", d["pf_prior_n"]))
         self.ledger_on = config.get("pf_ledger", "on") == "on"
+        self.gate = config.get("pf_gate", "on") == "on"
         self.n = 0
         self.sum = 0.0
         self.pending = {}            # hand_id -> [committed chips at each kept call]
-        self.stats = {"eligible": 0, "folded": 0, "kept": 0}
+        self.stats = {"eligible": 0, "folded": 0, "kept": 0, "gated": 0}
 
     def g(self):
         """Ledger factor in [0, 1]."""
@@ -69,6 +70,9 @@ class PotFold:
         if proxy >= self.cut.get(street, 0.9):
             return reply
         self.stats["eligible"] += 1
+        if self.gate and (X.trait_yes("aggressor") or X.trait_yes("riverbluff")):
+            self.stats["gated"] += 1        # a frequent big bettor: their bets are not all value, the shift stays off
+            return reply
         p = self.p.get(f"{street}:{hs.seat}", 0.0) * self.g()
         if draw < p:
             self.stats["folded"] += 1
