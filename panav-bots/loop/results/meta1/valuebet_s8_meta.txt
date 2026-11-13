@@ -1,0 +1,2 @@
+sw_valuebet vs s8_meta: +0.47 ± 0.31 chips/hand | match score 0.521 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.53 +1.47

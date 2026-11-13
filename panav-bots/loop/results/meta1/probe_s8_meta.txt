@@ -1,0 +1,2 @@
+sw_probe vs s8_meta: +1.02 ± 0.30 chips/hand | match score 0.625 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +0.64 +1.39
