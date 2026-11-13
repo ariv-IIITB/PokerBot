@@ -53,3 +53,17 @@ h2h >= 0), but the pooled chip gain is ~0.075 chips/hand, about what the audit i
 (0.051) is as large as the effect. No `final_disc.py` non-seeded build produced (only on PASS). If the owner accepts a lower bar
 (the rule was pre-registered, so I did not relax it), the change is low-risk: discard path only, 1.6 ms, falls back to the blueprint.
 Unexplored: the same coarse-key problem may exist in other blueprint tables (flop bucket by best pair only).
+
+## 7. Addendum: MATCH WINS tables (owner rule; match = one duplicate pair, win if chips>0). Full text: `results/disc1/wins_tables.txt`, `tools/disc1_wins.py`
+Stage 1 (200h legs), W = wins out of N matches, base -> cand (ties .5):
+- ALL 18 bots (N=720): 457.0 (63.5%) -> 467.0 (64.9%), +1.4pp +-1.9; chips +0.075 +-0.051.
+- TOUGH group (D1's 7: conv_opp3, new_eqrandom, new_exploiter, new_geometric, new_minraise, potctl + lakshya1 200h run now; N=280):
+  159.0 (56.8%) -> 166.0 (59.3%), +2.5pp +-3.0; chips +0.099 +-0.063.
+  conv_opp3 19->23, new_eqrandom 20->23, new_geometric 19->24, potctl 26->29, new_minraise 20->19, lakshya1 26->26, new_exploiter 29->22.
+- NON-TOUGH (N=480): 324.0 (67.5%) -> 327.0 (68.1%), +0.6pp +-2.3; chips +0.064 +-0.068.
+  Hurt: new_rules 31->26 (-12.5pp +-7, chips -0.02), betfold 36->32 (-10pp +-7, chips -0.17), donk 30->27 (-7.5pp). Helped: new_trapper 19->26 (+17.5pp).
+- Down by > 2 SE in win rate: new_exploiter (tough group): -17.5pp +-9 (about -1.9 to -2.0 SE, borderline); no other bot.
+Stage 2 (500h legs): lakshya1 13.0->9.0 of 24 (-16.7pp +-10; chips -0.14 +-0.20); new_eqrandom 12.0->14.0 of 24 (+8.3pp; chips +0.12). Pooled 25.0->23.0 of 48.
+Head-to-head cand vs base (200h): cand wins 24/40 = 60%.
+Against the updated PRIMARY METRIC (+2.0pp pooled wins, no bot down > 2 SE, lakshya1 500h wins not lower, h2h >= 50%): pooled all-bots +1.4pp (miss),
+lakshya1 500h wins lower (13 -> 9; miss), new_exploiter borderline: still FAIL. Tough group +2.5pp +-3.0 is positive but not distinguishable from 0.
