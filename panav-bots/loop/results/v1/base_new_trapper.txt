@@ -1,0 +1,2 @@
+base_seeded vs new_trapper: +0.77 ± 0.31 chips/hand | match score 0.542 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +0.44 +1.11
