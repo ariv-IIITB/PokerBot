@@ -12,6 +12,22 @@ the decision on = net + chips already put in; fold = 0) -> `d1_discard.py` -> `d
 Amounts verified: history `amount` = per-street cumulative "raise to"/"call to"; request `pot` includes the opponent's bet; replies recovered as
 `final_history[len(request.history)]`. Size f = translate's definition (open: X/pot_before; raise: (X-our_bet)/(pot_before+their_to_call)).
 
+## 0. Real match wins (one match = one duplicate pair: total chips of seed S legs m1+m2 > 0 wins, = 0 draws .5; from the logs)
+| opponent | chips/hand ± SE | match wins W/N | % |
+|---|---|---|---|
+| lakshya1 | -0.31 ± 0.23 | 24/60 | 40% |
+| new_geometric | -0.18 ± 0.14 | 29/60 | 48% |
+| conv_opp3 | -0.15 ± 0.13 | 26/60 | 43% |
+| potctl | +0.18 ± 0.14 | 32/60 | 53% |
+| new_exploiter | +0.26 ± 0.13 | 34/60 | 57% |
+| new_eqrandom | +0.40 ± 0.16 | 35/60 | 58% |
+| new_minraise | -0.17 ± 0.14 | 26/60 | 43% |
+| **pooled 200h (Stage 1 legs)** | | **206/420** | **49%** |
+| lakshya1 500h | -0.36 ± 0.20 | 12/30 | 40% |
+| new_eqrandom 500h | -0.15 ± 0.19 | 13/30 | 43% |
+| **pooled 500h (Stage 2 legs)** | | **25/60** | **42%** |
+(The match score in the first table is a per-leg score and differs from these pair-level wins.)
+
 ## 1. Headline: calls of ~pot-size bets (0.75-1.2 pot) postflop are the leak (exact, not an estimate)
 Facing a postflop bet of 0.75-1.2 pot, final calls with hands of equity-vs-random below .9 and loses **-15 to -40 chips per call vs folding**:
 flop -18.2±2.3 (eq .65-.8, n=998), turn -34.1±3.5 (n=489), river -40.3±5.2 (n=143); no equity bucket below .9 breaks even, only eq>=.9 wins (+48).
