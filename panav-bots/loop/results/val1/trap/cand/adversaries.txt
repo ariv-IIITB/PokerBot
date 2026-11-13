@@ -1,0 +1,2 @@
+cand vs trapper2: +3.19 ± 0.35 chips/hand | match score 0.887 | pairs 40 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +4.05 +2.32

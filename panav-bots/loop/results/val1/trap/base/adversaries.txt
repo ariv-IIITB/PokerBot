@@ -1,0 +1,2 @@
+final_seeded vs trapper2: +3.39 ± 0.37 chips/hand | match score 0.863 | pairs 40 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +4.18 +2.61
