@@ -75,16 +75,14 @@ def main():
     n = len(per); m = sum(per) / n
     se = math.sqrt(sum((x - m) ** 2 for x in per) / (n - 1) / n) if n > 1 else float("nan")
     sc = sum(r["score"] for r in rs) / n
-    # REAL match result: one duplicate pair = one match (both legs, same deals, seats swapped); won if total chips > 0, drawn 0.5.
-    wins = sum(1.0 if r["chips"] > 0 else 0.5 if r["chips"] == 0 else 0.0 for r in rs)
     print(f"{Path(a.a).stem} vs {Path(a.b).parent.name if Path(a.b).name=='bot.py' else Path(a.b).stem}: "
-          f"{m:+.2f} ± {se:.2f} chips/hand | MATCH WINS {wins:g}/{n} ({100 * wins / n:.0f}%) | per-leg score {sc:.3f} | pairs {n} | "
+          f"{m:+.2f} ± {se:.2f} chips/hand | match score {sc:.3f} | pairs {n} | "
           f"forfeits A/B {sum(r['ff_a'] for r in rs)}/{sum(r['ff_b'] for r in rs)}", flush=True)
     nwin = max(len(r["win"]) for r in rs)
     cols = [sum(r["win"][i] for r in rs if len(r["win"]) > i) / (2 * 100 * n) for i in range(nwin)]
     print("  chips/hand by 100-hand window (A, avg of 2 legs): " + " ".join(f"{c:+.2f}" for c in cols), flush=True)
     if a.out:
-        Path(a.out).write_text(json.dumps(dict(a=a.a, b=a.b, hands=a.hands, mean=m, se=se, score=sc, match_wins=wins, matches=n, pairs=rs)))
+        Path(a.out).write_text(json.dumps(dict(a=a.a, b=a.b, hands=a.hands, mean=m, se=se, score=sc, pairs=rs)))
 
 
 if __name__ == "__main__":
