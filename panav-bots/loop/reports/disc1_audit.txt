@@ -1,0 +1,81 @@
+# DISC1 audit: final_seeded discards, seeds 9000-9029, 6 bots (trapper betfold donk light3b new_exploiter new_lag), 30 pairs x 200h
+== overall (equity points, loss of chosen keep vs best keep, cross-fitted)
+  loss_rnd:  1.19 +-0.03 (n=27656)
+  loss_opt:  1.02 +-0.02 (n=27656)
+  loss_act:  1.86 +-0.06 (n=11915)
+  share >=3pts (opt): 0.086
+== by bot (opt)
+  Opps_new_exploiter rnd  1.32 +-0.06 (n=5557) | opt  1.10 +-0.05 (n=5557)
+  Opps_new_lag   rnd  1.17 +-0.06 (n=5798) | opt  1.03 +-0.05 (n=5798)
+  betfold        rnd  0.98 +-0.09 (n=2225) | opt  0.88 +-0.08 (n=2225)
+  spar_donk      rnd  1.09 +-0.06 (n=4765) | opt  0.91 +-0.05 (n=4765)
+  spar_light3b   rnd  1.26 +-0.07 (n=4327) | opt  1.11 +-0.06 (n=4327)
+  trapper        rnd  1.18 +-0.06 (n=4984) | opt  0.99 +-0.05 (n=4984)
+== by seat (opt)
+  button      1.09 +-0.03 (n=15372)
+  big_blind   0.93 +-0.03 (n=12284)
+== by chosen type (opt): mean loss, share>=3pts
+  pair_other            0.42 +-0.02 (n=4300)  >=3: 0.050  rnd  0.31 +-0.02 (n=4300)
+  top_pair              0.11 +-0.01 (n=3639)  >=3: 0.009  rnd  0.07 +-0.01 (n=3639)
+  2pair                 0.05 +-0.01 (n=3528)  >=3: 0.007  rnd  0.05 +-0.01 (n=3528)
+  pocket_pair           0.36 +-0.04 (n=2731)  >=3: 0.035  rnd  0.29 +-0.03 (n=2731)
+  high+sd               1.50 +-0.09 (n=2452)  >=3: 0.125  rnd  2.07 +-0.12 (n=2452)
+  high                  6.08 +-0.18 (n=2208)  >=3: 0.439  rnd  7.45 +-0.22 (n=2208)
+  trips                 0.10 +-0.03 (n=1485)  >=3: 0.014  rnd  0.12 +-0.03 (n=1485)
+  board_pair            2.34 +-0.13 (n=1358)  >=3: 0.239  rnd  2.51 +-0.14 (n=1358)
+  high+fd               0.10 +-0.03 (n=768)  >=3: 0.020  rnd  0.08 +-0.04 (n=768)
+  overcards             2.33 +-0.18 (n=750)  >=3: 0.233  rnd  2.29 +-0.19 (n=750)
+  overcards+sd          0.27 +-0.05 (n=477)  >=3: 0.038  rnd  0.13 +-0.03 (n=477)
+  pair_other+sd         0.21 +-0.05 (n=471)  >=3: 0.030  rnd  0.06 +-0.02 (n=471)
+  suited_conn_hi+sd     0.97 +-0.16 (n=453)  >=3: 0.091  rnd  1.74 +-0.24 (n=453)
+  top_pair+sd           0.02 +-0.02 (n=397)  >=3: 0.003  rnd  0.02 +-0.01 (n=397)
+  suited_conn_hi        4.37 +-0.43 (n=391)  >=3: 0.299  rnd  6.00 +-0.53 (n=391)
+  straight              0.00 +-0.00 (n=329)  >=3: 0.000  rnd  0.00 +-0.00 (n=329)
+  pair_other+fd        -0.00 +-0.00 (n=278)  >=3: 0.000  rnd -0.00 +-0.00 (n=278)
+  board_pair+fd         0.03 +-0.03 (n=202)  >=3: 0.010  rnd  0.01 +-0.01 (n=202)
+  board_pair+sd         0.24 +-0.08 (n=194)  >=3: 0.026  rnd  0.49 +-0.13 (n=194)
+  high+fd+sd            0.16 +-0.08 (n=166)  >=3: 0.024  rnd  0.22 +-0.10 (n=166)
+  flush                 0.00 +-0.00 (n=166)  >=3: 0.000  rnd  0.00 +-0.00 (n=166)
+  suited_conn_hi+fd     0.09 +-0.05 (n=157)  >=3: 0.013  rnd  0.20 +-0.11 (n=157)
+  top_pair+fd          -0.02 +-0.01 (n=154)  >=3: 0.000  rnd -0.00 +-0.00 (n=154)
+  pocket_pair+sd        0.00 +-0.00 (n=112)  >=3: 0.000  rnd  0.00 +-0.00 (n=112)
+  pocket_pair+fd        0.00 +-0.00 (n=109)  >=3: 0.000  rnd  0.00 +-0.00 (n=109)
+  suited_conn_hi+fd+sd  0.06 +-0.04 (n=108)  >=3: 0.019  rnd -0.01 +-0.02 (n=108)
+  fullhouse             0.00 +-0.00 (n=96)  >=3: 0.000  rnd  0.00 +-0.00 (n=96)
+  overcards+fd          0.19 +-0.07 (n=70)  >=3: 0.000  rnd  0.02 +-0.02 (n=70)
+  quads                 0.00 +-0.00 (n=34)  >=3: 0.000  rnd  0.00 +-0.00 (n=34)
+  straight+fd           0.00 +-0.00 (n=26)  >=3: 0.000  rnd  0.00 +-0.00 (n=26)
+  pair_other+fd+sd      0.00 +-0.00 (n=16)  >=3: 0.000  rnd  0.00 +-0.00 (n=16)
+  board_pair+fd+sd      0.00 +-0.00 (n=10)  >=3: 0.000  rnd  0.20 +-0.20 (n=10)
+  top_pair+fd+sd        0.00 +-0.00 (n=9)  >=3: 0.000  rnd  0.00 +-0.00 (n=9)
+  overcards+fd+sd       0.00 +-0.00 (n=6)  >=3: 0.000  rnd  0.00 +-0.00 (n=6)
+  pocket_pair+fd+sd     0.00 +-0.00 (n=6)  >=3: 0.000  rnd  0.00 +-0.00 (n=6)
+== mistakes >=3pts (opt): chosen type -> best type
+  high              -> high               457
+  board_pair        -> board_pair         274
+  high              -> pair_other         162
+  high              -> pocket_pair        145
+  pair_other        -> pair_other         109
+  high              -> high+sd            96
+  high+sd           -> high+sd            87
+  overcards         -> overcards          87
+== by pot at discard (opt)
+  pot 0-10:  1.24 +-0.06 (n=4840)
+  pot 10-20:  1.04 +-0.05 (n=4721)
+  pot 20-40:  0.85 +-0.03 (n=12341)
+  pot 40-80:  1.43 +-0.08 (n=3323)
+  pot 80-500:  0.83 +-0.06 (n=2431)
+== by flop aggression (opt)
+  nobody bet    1.14 +-0.04 (n=6813)
+  we bet only   1.08 +-0.05 (n=5522)
+  opp bet only  0.89 +-0.03 (n=13472)
+  both          1.27 +-0.10 (n=1849)
+
+== rule re-scoring
+n=27656
+blueprint              opt  1.02 +-0.02 | rnd  1.19 +-0.03
+slot0(max S1)          opt  0.28 +-0.01 | rnd  0.15 +-0.01
+bp if S1>=max-0.01     opt  0.28 +-0.01 | rnd  0.15 +-0.01
+bp if S1>=max-0.02     opt  0.30 +-0.01 | rnd  0.16 +-0.01
+bp if S1>=max-0.04     opt  0.32 +-0.01 | rnd  0.18 +-0.01
+bp if S1>=max-0.08     opt  0.33 +-0.01 | rnd  0.21 +-0.01
