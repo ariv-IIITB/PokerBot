@@ -326,9 +326,11 @@ def mean_se(xs):
 def value(leg_info, d, forced, ours_path, opp_path, n_min=6, n_max=30, se_target=1.0, deterministic=False, warm=False):
     """Mean chips (and SE) of `forced` at decision d. Adaptive N: at least n_min, stops when SE <= se_target
     or n_max; a forced fold / all-values-equal runs stop at n_min (sd = 0)."""
-    xs, bad = [], 0
+    xs, bad, i = [], 0, 0
     while len(xs) < n_max:
-        r = replay(leg_info, d, forced, ours_path, opp_path, warm)
+        op = ours_path[i % len(ours_path)] if isinstance(ours_path, (list, tuple)) else ours_path
+        i += 1
+        r = replay(leg_info, d, forced, op, opp_path, warm)
         if r.get("delta") is None or not r.get("state_ok", False):
             bad += 1
             if bad >= 3:
@@ -417,7 +419,7 @@ def alternatives(cls: str, d: dict):
 
 def work(args):
     """Worker: (leg file, decision index tuple, cls, ours, opp, n_max) -> result dict."""
-    legf, key, cls, ours, opp, n_max, se_t, warm = args
+    legf, key, cls, ours, opp, n_max, se_t, warm, n_min = args
     li = _LEGS.get(legf)
     if li is None:
         li = _LEGS[legf] = parse_leg(legf)
@@ -427,8 +429,8 @@ def work(args):
     if alt is None:
         return None
     try:
-        vl = value(li, d, lg, ours, opp, n_max=n_max, se_target=se_t, warm=warm)
-        va = value(li, d, alt, ours, opp, n_max=n_max, se_target=se_t, warm=warm)
+        vl = value(li, d, lg, ours, opp, n_max=n_max, se_target=se_t, warm=warm, n_min=n_min)
+        va = value(li, d, alt, ours, opp, n_max=n_max, se_target=se_t, warm=warm, n_min=n_min)
         eq = equity_vs_random(d, hd, seed=d["h"] * 7 + d["seed"])
     except Exception as e:                                    # never lose a whole run to one decision
         return dict(error=repr(e), cls=cls, seed=d["seed"], leg=d["leg"], h=d["h"], k=d["k"])
@@ -530,7 +532,30 @@ def cmd_knownanswer(a):
         print("   ", r)
 
 
+def make_seed_builds(src: str, k: int, outdir: str) -> list[str]:
+    """k copies of the bot build whose sampling seed (CONFIG sample_seed, keyed by the deal) differs, so that N replays
+    of one decision also resample OUR mixed strategy. Uses panav-bots/loop/tools/bundle_tool.py."""
+    import subprocess
+    out = Path(outdir)
+    out.mkdir(parents=True, exist_ok=True)
+    work = out / "unpacked"
+    tool = str(Path(__file__).with_name("bundle_tool.py"))
+    subprocess.run([sys.executable, tool, "unpack", src, str(work)], check=True, capture_output=True)
+    cfgp = work / "config.json"
+    cfg = json.loads(cfgp.read_text())
+    paths = []
+    for i in range(1, k + 1):
+        cfg["sample_seed"] = i
+        cfgp.write_text(json.dumps(cfg, indent=1))
+        dst = out / f"ours_s{i}.py"
+        subprocess.run([sys.executable, tool, "pack", src, str(work), str(dst)], check=True, capture_output=True)
+        paths.append(str(dst))
+    return paths
+
+
 def cmd_run(a):
+    if a.ours_seeds > 1:
+        a.ours = make_seed_builds(a.ours, a.ours_seeds, a.build_dir)
     legs = load_decisions(a.logdir)
     rnd = random.Random(a.sample_seed)
     byc = {"i_fold": [], "ii_bigcall": [], "iii_checkbehind": []}
@@ -556,7 +581,7 @@ def cmd_run(a):
             m = re.match(r"seed(\d+)_m([12])", Path(f).name)
             if (c, int(m.group(1)), int(m.group(2)), key[0], key[1]) in done:
                 continue
-            tasks.append((f, key, c, a.ours, a.opp, a.n_max, a.se_target, a.warm))
+            tasks.append((f, key, c, a.ours, a.opp, a.n_max, a.se_target, a.warm, a.n_min))
     rnd.shuffle(tasks)
     print(len(tasks), "decisions to replay", flush=True)
     t0 = time.time()
@@ -628,6 +653,9 @@ def main():
     r.add_argument("--per-class", type=int, default=150); r.add_argument("--processes", type=int, default=3)
     r.add_argument("--n-max", type=int, default=30); r.add_argument("--se-target", type=float, default=1.0)
     r.add_argument("--sample-seed", type=int, default=1)
+    r.add_argument("--ours-seeds", type=int, default=1, help="K>1: replay i uses a build with sampling seed i%%K+1")
+    r.add_argument("--build-dir", default="/tmp/cf_builds")
+    r.add_argument("--n-min", type=int, default=6)
     r.add_argument("--warm", action="store_true", help="warm-start both processes with the hands before the decision")
     q = sub.add_parser("report")
     q.add_argument("--out", required=True)
