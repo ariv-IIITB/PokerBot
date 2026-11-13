@@ -579,6 +579,16 @@ def cmd_run(a):
     tasks = []
     for c, v in byc.items():
         rnd.shuffle(v)
+        if c == "iii_checkbehind" and a.min_eq > 0:
+            keep = []
+            for f, key in v:
+                li = legs[f]
+                d = next(x for x in li["decisions"] if (x["h"], x["k"]) == key)
+                if equity_vs_random(d, li["hands"][d["h"]], seed=d["h"] * 7 + d["seed"]) >= a.min_eq:
+                    keep.append((f, key))
+                    if len(keep) >= a.per_class:
+                        break
+            v = keep
         for f, key in v[: a.per_class]:
             m = re.match(r"seed(\d+)_m([12])", Path(f).name)
             if (c, int(m.group(1)), int(m.group(2)), key[0], key[1]) in done:
@@ -658,6 +668,7 @@ def main():
     r.add_argument("--ours-seeds", type=int, default=1, help="K>1: replay i uses a build with sampling seed i%%K+1")
     r.add_argument("--build-dir", default="/tmp/cf_builds")
     r.add_argument("--n-min", type=int, default=6)
+    r.add_argument("--min-eq", type=float, default=0.0, help="iii_checkbehind only: keep decisions with equity vs random >= this")
     r.add_argument("--classes", default="i_fold,ii_bigcall,iii_checkbehind")
     r.add_argument("--warm", action="store_true", help="warm-start both processes with the hands before the decision")
     q = sub.add_parser("report")
