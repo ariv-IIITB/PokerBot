@@ -2,6 +2,9 @@ bot                    pairs  base c/h  cand c/h       delta c/h    wins b/c
 opps_conv_opp3            40     -0.18     +0.15    +0.33 +-0.18   0.47/0.57  ff=0
 opps_conv_opp4            40     +0.45     +0.84    +0.39 +-0.15   0.68/0.70  ff=0
 opps_new_eqrandom         40     +0.29     +0.55    +0.26 +-0.11   0.50/0.57  ff=0
+opps_new_exploiter        40     +0.53     +0.19    -0.34 +-0.19   0.72/0.55  ff=0
+opps_new_geometric        40     -0.05     +0.17    +0.22 +-0.18   0.47/0.60  ff=0
+opps_new_lag              40     +1.96     +2.33    +0.37 +-0.45   0.80/0.82  ff=0
 spar_adapt                40     +0.38     +0.23    -0.14 +-0.17   0.62/0.65  ff=0
 spar_betfold              40     +1.52     +1.35    -0.17 +-0.23   0.90/0.80  ff=0
 spar_discardread          40     +0.50     +0.39    -0.10 +-0.17   0.60/0.65  ff=0
@@ -12,7 +15,7 @@ spar_potctl               40     +0.35     +0.56    +0.21 +-0.14   0.65/0.72  ff
 spar_tilt                 40     +0.51     +0.79    +0.29 +-0.21   0.62/0.70  ff=0
 spar_trapper              40     +0.21     +0.32    +0.10 +-0.19   0.57/0.57  ff=0
 
-POOLED (12 bots, 480 pairs): delta +0.107 +-0.057 chips/hand  (ratio 1.90)
-match wins pooled: base 0.640 cand 0.660   (cand-base +0.021)
+POOLED (15 bots, 600 pairs): delta +0.103 +-0.057 chips/hand  (ratio 1.80)
+match wins pooled: base 0.645 cand 0.660   (cand-base +0.015)
 bots down by > 2 SE: none
 PASS pooled>=+0.10 and >=1.5 SE: True | wins not lower: True
