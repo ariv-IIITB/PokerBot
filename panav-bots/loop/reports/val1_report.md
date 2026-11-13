@@ -43,3 +43,13 @@ hypothesis is mostly selection (hands the blueprint bets are different hands fro
 ## 6. Files (branch loop/val1)
 `val1/src/botsrc.exploit.py` (move, off by default; not in `config exploit`), `val1/build.py`, `runset.sh`, `compare.py`, `unit_vb.py` (move unit test, passes),
 `adversaries/trapper2.py`, `results/val1/dev/*` (dev pair data).
+
+## 7. Addendum (rerun of the validation set, with MATCH WINS; owner's primary metric)
+The first validation run's data was lost, so 7 of the 8 bots (all but discardread) were rerun, same seeds 12000-12039, 40 pairs x 200h (final's solver is wall-clock driven: not bit-identical).
+**The rerun does not reproduce the first run: pooled chips -0.014 +- 0.069 (first run: -0.17 +- 0.07); donk -0.20 +- 0.17 (first: -0.44). So the earlier "donk -2.7 SE" and the pooled
+-0.17 were largely run-to-run noise; I should not have stopped on one run.** The verdict does not change: no gain.
+Match wins (a match = a duplicate pair; chips>0 win), Stage 1 only (200h legs), base -> cand: adapt 24/40 -> 23.5, betfold 34 -> 35, donk 27 -> 20, light3b 19 -> 24,
+polar 26 -> 27, tilt 24 -> 22, trapper 24 -> 25. **Pooled 178.0/280 (63.6%) -> 176.5/280 (63.0%): -0.5 pp** (SE of the difference ~4 pp). Needed +2.0 pp: FAIL.
+Dev bots (7 bots x 24 pairs, 168 matches), base 91.5 (54.5%): gated cand 95.0 (+2.1 pp), ungated bet +3.3 pp, forced bet +5.1 pp, call->raise -5.7 pp (all within ~5 pp SE).
+trapper2: see section 4 (chips only; wins in results/val1/trap). Not run: lakshya1 500h, Stage 2, head-to-head.
+Conclusion: bet-up with strong hands is neutral to slightly positive vs callers and noise elsewhere; call->raise is negative. Not shipped. `wins.py` computes the wins tables.
