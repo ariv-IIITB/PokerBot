@@ -1,0 +1,2 @@
+final_seeded vs conv_opp3: +0.08 ± 0.22 chips/hand | match score 0.583 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.58 +0.75
