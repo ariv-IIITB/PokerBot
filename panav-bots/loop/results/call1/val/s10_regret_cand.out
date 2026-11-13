@@ -1,0 +1,2 @@
+cand_final vs s10_regret: +0.70 ± 0.23 chips/hand | match score 0.581 | pairs 40 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +0.49 +0.91

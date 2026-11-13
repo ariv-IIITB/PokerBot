@@ -1,0 +1,2 @@
+final_seeded vs s2_rollout: +0.38 ± 0.29 chips/hand | match score 0.512 | pairs 40 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +0.74 +0.03
