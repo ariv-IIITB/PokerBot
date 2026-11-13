@@ -18,9 +18,13 @@ replay(decision, forced):
   * returns our chip result for the whole hand (blinds included). Value of an action = mean over N replays.
 
 Commands (run from the repo root, PYTHONPATH=.):
-  validate   --log LEG.jsonl --opp BOT [--hands 40]       deal reconstruction + determinism of the opponent
-  knownanswer --logdir DIR --opp BOT [--n 12]              forced fold / call at river vs known showdown result
-  run        --logdir DIR --opp BOT --out OUT.json [...]   the three decision classes (i) (ii) (iii)
+  validate    --log LEG.jsonl --opp BOT [--hands 40] [--fresh]   A1: deal reconstruction; A2: opponent determinism
+  knownanswer --logdir DIR --opp BOT [--n 12]                    forced fold / call at the river vs the true showdown
+  run         --logdir DIR --opp BOT --out OUT.jsonl [...]       classes i_fold, ii_bigcall, iii_checkbehind
+        --ours-seeds K  replay i uses a build with sampling seed i%K+1 (resamples OUR mixed strategy too)
+        --warm          warm-start both processes with the hands before the decision (slow, keeps in-match learning)
+        --classes a,b   subset of classes; --per-class N sample size; resumable (skips rows already in --out)
+  report      --out OUT.jsonl                                    per-class summary (alt vs logged, by equity bucket)
 """
 from __future__ import annotations
 
@@ -112,7 +116,7 @@ def to_action(e: dict) -> Action:
     a = e["action"]
     if a == "raise":
         return Action.raise_to(int(e["amount"]))
-    return Action(dict(fold="F", check="K", call="C").get(a) or a) if False else _simple(a)
+    return _simple(a)
 
 
 def _simple(a: str) -> Action:
@@ -198,10 +202,6 @@ def spawn(path, bank_s: float, total_hands: int):
     pl = SubprocessPlayer([sys.executable, str(p)], cwd=str(p.parent), name=p.stem, protocol="pokerbots")
     pl.notify(MatchInfo(total_hands, bank_s, 1, 2, 200))
     return pl
-
-
-class NullAdapter:
-    pass
 
 
 def play_hand(leg: int, seed: int, hd: dict, script_ours, script_opp, discard_ours, discard_opp,
@@ -558,10 +558,12 @@ def cmd_run(a):
         a.ours = make_seed_builds(a.ours, a.ours_seeds, a.build_dir)
     legs = load_decisions(a.logdir)
     rnd = random.Random(a.sample_seed)
-    byc = {"i_fold": [], "ii_bigcall": [], "iii_checkbehind": []}
+    byc = {c: [] for c in a.classes.split(",")}
     for f, li in legs.items():
         for d in li["decisions"]:
             for c in classify(d):
+                if c not in byc:
+                    continue
                 if c == "iii_checkbehind" and not is_check_behind(li, d):
                     continue
                 if c == "iii_checkbehind" and min_bet_amount(d) is None:
@@ -599,7 +601,7 @@ SE_FLOOR = 0.5      # chips; replayed values with a tiny sample can show SE ~ 0 
 def _se(v):
     se = v["se"]
     se = 0.0 if se is None or se != se else se
-    return max(se, SE_FLOOR) if v["n"] > 1 or v["xs"] and v["n"] == 1 and False else se
+    return max(se, SE_FLOOR) if v["n"] > 1 else se
 
 
 def cmd_report(a):
@@ -656,6 +658,7 @@ def main():
     r.add_argument("--ours-seeds", type=int, default=1, help="K>1: replay i uses a build with sampling seed i%%K+1")
     r.add_argument("--build-dir", default="/tmp/cf_builds")
     r.add_argument("--n-min", type=int, default=6)
+    r.add_argument("--classes", default="i_fold,ii_bigcall,iii_checkbehind")
     r.add_argument("--warm", action="store_true", help="warm-start both processes with the hands before the decision")
     q = sub.add_parser("report")
     q.add_argument("--out", required=True)
