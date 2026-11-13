@@ -122,42 +122,65 @@ def pos(rows):
 
 
 def cells(rows, top=12):
-    print("== CELLS: street x seat x facing-size x our hand bucket x action; loss = n x (best alternative mean - cell mean)")
     d = [r for r in rows if r["street"] != "HAND"]
+    bots = sorted(set(r["bot"] for r in d))
+    # Table A (robust): we face a bet and CONTINUE (call/raise). Fold is always available and pays exactly 0, so
+    # a cell whose realised chips are negative lost that much against folding. loss = -sum(out).
+    g = collections.defaultdict(list)
+    for r in d:
+        if r["facing"] and r["act"] in ("call", "raise"):
+            g[(r["street"], r["seat"], bk(r["f"], FB), bk(r["eq"], EB), r["act"])].append(r)
+    out = []
+    for k, v in g.items():
+        if len(v) < 30:
+            continue
+        o = np.array([r["out"] for r in v], float)
+        se = o.std(ddof=1) / math.sqrt(len(o))
+        br = sum(1 for b in bots if sum(1 for r in v if r["bot"] == b) >= 10 and np.mean([r["out"] for r in v if r["bot"] == b]) < 0)
+        out.append((-o.sum(), k, len(o), o.mean(), se, br, se * len(o)))
+    out.sort(key=lambda t: -t[0])
+    print("== CELLS A (robust): facing a bet, we continue; loss = -sum(chips from the decision on); fold would pay 0")
+    print("rank loss  street seat size    our-eq   act    n    mean±SE        bots-losing  SE(total)")
+    for i, (loss, k, n, m, se, br, st) in enumerate(out[:top], 1):
+        print(f"{i:2d} {loss:7.0f} {k[0]:7s}{k[1][:3]} {k[2]:8s} {k[3]:8s} {k[4]:6s}{n:5d} {m:+7.2f}±{se:.2f}   {br}/{len(bots)}   {st:.0f}")
+    # Table B (confounded): same context, compare with the mean of the best other action (hidden info differs).
     ctx = collections.defaultdict(list)
     for r in d:
         fb = bk(r["f"], FB) if r["facing"] else "none"
         ctx[(r["street"], r["seat"], fb, bk(r["eq"], EB))].append(r)
-    out = []
-    bots = sorted(set(r["bot"] for r in d))
+    res = []
     for key, v in ctx.items():
-        for act in ("fold", "call", "check", "raise"):
-            c = [r for r in v if r["act"] == act]
+        for act in ("call", "check", "raise"):
+            c = [r["out"] for r in v if r["act"] == act]
             if len(c) < 30:
                 continue
-            alts = [("fold", 0.0, 10 ** 9)] if key[2] != "none" and act != "fold" else []
-            for a2 in ("fold", "call", "check", "raise"):
-                if a2 == act:
-                    continue
-                w = [r["out"] for r in v if r["act"] == a2]
-                if len(w) >= 30:
-                    alts.append((a2, float(np.mean(w)), len(w)))
+            alts = [(a2, float(np.mean([r["out"] for r in v if r["act"] == a2])), sum(1 for r in v if r["act"] == a2))
+                    for a2 in ("call", "check", "raise") if a2 != act and sum(1 for r in v if r["act"] == a2) >= 30]
             if not alts:
                 continue
             alt = max(alts, key=lambda t: t[1])
-            mean = float(np.mean([r["out"] for r in c]))
-            se = float(np.std([r["out"] for r in c], ddof=1) / math.sqrt(len(c)))
-            loss = len(c) * (alt[1] - mean)
-            breadth = 0
-            for b in bots:
-                cb = [r["out"] for r in c if r["bot"] == b]
-                if len(cb) >= 10 and np.mean(cb) < alt[1]:
-                    breadth += 1
-            out.append((loss, key, act, len(c), mean, se, alt, breadth, len(c) * se))
-    out.sort(key=lambda t: -t[0])
-    print("rank loss(chips) cell                                   act  n    mean±SE        best alt (mean,n)   bots-worse/7  SE(total)")
-    for i, (loss, key, act, n, mean, se, alt, br, sset) in enumerate(out[:top], 1):
-        print(f"{i:2d} {loss:8.0f} {key[0]:7s}{key[1][:3]} {str(key[2]):8s}{key[3]:8s} {act:6s} {n:5d} {mean:+6.2f}±{se:.2f}  {alt[0]}({alt[1]:+.2f},{alt[2]})  {br}/{len(bots)}  {sset:.0f}")
+            res.append((len(c) * (alt[1] - float(np.mean(c))), key, act, len(c), float(np.mean(c)), alt))
+    res.sort(key=lambda t: -t[0])
+    print("== CELLS B (CONFOUNDED by hidden info: opponent action/board differ between actions): n x (best other mean - cell mean)")
+    for i, (loss, key, act, n, m, alt) in enumerate(res[:8], 1):
+        print(f"{i:2d} {loss:7.0f} {key[0]:7s}{key[1][:3]} {str(key[2]):8s}{key[3]:8s} {act:6s} n={n:5d} mean {m:+.2f}  alt {alt[0]} {alt[1]:+.2f} (n={alt[2]})")
+
+
+def ladder(rows, scope="ALL", sizes=("1.2-2", ">2"), streets=("flop", "turn", "river")):
+    """For big bets: fold share and call outcome by our-equity bucket. If calls in the lowest populated bucket still pay > 0
+    while hands below it are folded, the fold boundary is too tight (extrapolation; selection means calls are the better hands)."""
+    print(f"== LADDER ({scope}): facing bets of size in {sizes}: per eq bucket  n, fold%, out(call)")
+    d = [r for r in rows if r["street"] != "HAND" and r["facing"] and (scope == "ALL" or r["bot"] == scope)]
+    for st in streets:
+        for seat in ("button", "big_blind"):
+            parts = []
+            for _, e in EB:
+                v = [r for r in d if r["street"] == st and r["seat"] == seat and bk(r["f"], FB) in sizes and bk(r["eq"], EB) == e]
+                if len(v) < 15:
+                    continue
+                c = [r["out"] for r in v if r["act"] == "call"]
+                parts.append(f"{e}: n={len(v)} fold {np.mean([r['act'] == 'fold' for r in v]):.2f} call-out {ms(c)[0]}(n={len(c)})")
+            print(f"  {st:6s} {seat[:3]} | " + " | ".join(parts))
 
 
 def main():
@@ -175,6 +198,8 @@ def main():
             pos(rows)
         if a.section in ("all", "cells"):
             cells(rows)
+        if a.section in ("all", "ladder"):
+            ladder(rows)
 
 
 if __name__ == "__main__":
