@@ -1,0 +1,2 @@
+cand_seeded vs new_lag: +2.20 ± 0.53 chips/hand | match score 0.750 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +3.32 +1.08
