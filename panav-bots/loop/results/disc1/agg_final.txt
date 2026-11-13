@@ -1,0 +1,28 @@
+bot                    pairs  base c/h  cand c/h       delta c/h    wins b/c
+opps_conv_opp3            40     -0.18     +0.15    +0.33 +-0.18   0.47/0.57  ff=0
+opps_conv_opp4            40     +0.45     +0.84    +0.39 +-0.15   0.68/0.70  ff=0
+opps_new_eqrandom         40     +0.29     +0.55    +0.26 +-0.11   0.50/0.57  ff=0
+opps_new_exploiter        40     +0.53     +0.19    -0.34 +-0.19   0.72/0.55  ff=0
+opps_new_geometric        40     -0.05     +0.17    +0.22 +-0.18   0.47/0.60  ff=0
+opps_new_lag              40     +1.96     +2.33    +0.37 +-0.45   0.80/0.82  ff=0
+opps_new_minraise         40     +0.06     -0.03    -0.09 +-0.17   0.50/0.47  ff=0
+opps_new_rules            40     +0.51     +0.49    -0.02 +-0.15   0.78/0.65  ff=0
+opps_new_trapper          40     +0.36     +0.27    -0.09 +-0.21   0.47/0.65  ff=0
+spar_adapt                40     +0.38     +0.23    -0.14 +-0.17   0.62/0.65  ff=0
+spar_betfold              40     +1.52     +1.35    -0.17 +-0.23   0.90/0.80  ff=0
+spar_discardread          40     +0.50     +0.39    -0.10 +-0.17   0.60/0.65  ff=0
+spar_donk                 40     +0.67     +0.51    -0.15 +-0.18   0.75/0.68  ff=0
+spar_light3b              40     +0.19     +0.29    +0.10 +-0.23   0.62/0.60  ff=0
+spar_polar                40     +0.82     +1.01    +0.19 +-0.32   0.68/0.70  ff=0
+spar_potctl               40     +0.35     +0.56    +0.21 +-0.14   0.65/0.72  ff=0
+spar_tilt                 40     +0.51     +0.79    +0.29 +-0.21   0.62/0.70  ff=0
+spar_trapper              40     +0.21     +0.32    +0.10 +-0.19   0.57/0.57  ff=0
+
+POOLED (18 bots, 720 pairs): delta +0.075 +-0.051 chips/hand  (ratio 1.48)
+match wins pooled: base 0.635 cand 0.649   (cand-base +0.014)
+bots down by > 2 SE: none
+PASS pooled>=+0.10 and >=1.5 SE: False | wins not lower: True
+
+head-to-head cand vs base: +0.065 +-0.152 chips/hand over 40 pairs; cand match wins 0.600
+lakshya1_500 (500h legs): 24 pairs base -0.08 cand -0.21 delta -0.14 +-0.20  wins 0.54/0.38
+new_eqrandom_500 (500h legs): 24 pairs base -0.03 cand +0.10 delta +0.12 +-0.13  wins 0.50/0.58
