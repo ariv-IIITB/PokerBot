@@ -1,0 +1,2 @@
+sw_potfold vs s1_ranges: +3.62 ± 0.09 chips/hand | match score 1.000 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +3.60 +3.64

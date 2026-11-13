@@ -1,0 +1,2 @@
+sw_foldall vs s6_discard: +0.58 ± 0.34 chips/hand | match score 0.562 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.27 +1.43

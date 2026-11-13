@@ -1,0 +1,2 @@
+sw_probe vs s6_discard: +1.02 ± 0.29 chips/hand | match score 0.667 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +0.89 +1.15
