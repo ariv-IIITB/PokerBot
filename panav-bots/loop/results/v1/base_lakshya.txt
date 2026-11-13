@@ -1,0 +1,2 @@
+base_seeded vs lakshya1: -0.43 ± 0.31 chips/hand | match score 0.375 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.15 -0.11 -0.42 -1.41 -0.05
