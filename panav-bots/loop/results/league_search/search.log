@@ -1,0 +1,6 @@
+[r0] 14 cfgs x 8 pairs in 569s; best -0.04 median -0.96
+[r1] 12 cfgs x 8 pairs in 502s; best +0.41 median -0.52
+  top: [('r1_09', 0.41), ('r1_07', -0.15), ('r1_11', -0.35)]
+[r2] 12 cfgs x 8 pairs in 542s; best +0.02 median -1.06
+  top: [('r2_11', 0.02), ('r2_08', -0.11), ('r2_07', -0.21)]
+done; seeds 1000 1023
