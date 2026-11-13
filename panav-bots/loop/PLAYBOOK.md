@@ -84,3 +84,13 @@ The loop is: diagnose -> fix -> check -> accepted candidate becomes the new base
 Every result table must show, per opponent and pooled, BOTH chips/hand (+- SE) and MATCH WINS (a match = one duplicate pair; win if total chips over both legs > 0, draw 0.5; show W/N and %),
 for base and candidate, separately for Stage 1 (200-hand legs) and Stage 2 (500-hand legs). `file_duel.py` now prints `MATCH WINS W/N` and writes `match_wins`/`matches`
 to `--out`. The per-leg "match score" printed before is NOT the tournament score. The target is >= 65% match wins vs each opponent class.
+
+## PRIMARY METRIC (owner, 13 Nov, set before any fix session reported final numbers): MATCH WINS decide; chips only support
+A candidate PASSES only if ALL hold (replaces the chips-first thresholds in the briefs of CALL1 / VAL1 / DISC1; their other checks stay):
+1. PRIMARY: pooled MATCH-WIN rate (one duplicate pair = one match; win if total chips > 0, draw 0.5) over the validation bots (disjoint from the dev bots), cand minus base, paired by seed, >= +2.0 percentage points. Report it with its SE.
+2. Pooled chips/hand (cand - base) >= 0.0 (chips must not argue against it).
+3. No single validation bot with a match-win rate down by more than 2 SE of its paired difference.
+4. lakshya1 (500h legs, Stage 2): match wins not lower than base; head-to-head cand vs base: cand wins >= 50% of matches.
+5. Exploit-back adversary: the match-win loss against it is smaller than the pooled gain; zero forfeits; reply time within 5 ms of base.
+Stage 1 (200h legs) and Stage 2 (500h legs) are judged separately; a move that passes one stage may be enabled for that stage only (the bot knows total_hands from init).
+Target remains >= 65% match wins per opponent class. Always show W/N and % for base and cand per bot, and pooled.
