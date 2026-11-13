@@ -1,0 +1,2 @@
+sw_foldall vs light3b: +0.27 ± 0.42 chips/hand | match score 0.500 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.80 +1.33

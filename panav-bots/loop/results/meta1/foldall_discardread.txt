@@ -1,0 +1,2 @@
+sw_foldall vs discardread: +0.07 ± 0.33 chips/hand | match score 0.438 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.60 +0.75
