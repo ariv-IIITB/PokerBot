@@ -34,6 +34,9 @@ def encode(p):
     return out
 
 
+FINAL_USED = FINAL
+
+
 def run_round(pool, out: Path, tag: str, cfgs: list, seeds: list, hands: int):
     """Evaluate every cfg on every seed. Returns list of dict(tag, id, params, mean, se, ...)."""
     bots = out / "bots"
@@ -43,7 +46,7 @@ def run_round(pool, out: Path, tag: str, cfgs: list, seeds: list, hands: int):
         f = bots / f"{tag}_{i:02d}.py"
         f.write_text(build(p))
         for s in seeds:
-            tasks.append((str(f), FINAL, s, hands, None, None))
+            tasks.append((str(f), FINAL_USED, s, hands, None, None))
             meta.append(i)
     t0 = time.time()
     res = pool.map(pair, tasks, chunksize=1)
@@ -86,8 +89,11 @@ def main():
     ap.add_argument("--processes", type=int, default=3)
     ap.add_argument("--first-seed", type=int, default=1000)
     ap.add_argument("--elite", type=float, default=0.25)
+    ap.add_argument("--final", default=FINAL)
     ap.add_argument("--rng", type=int, default=7)
     a = ap.parse_args()
+    global FINAL_USED
+    FINAL_USED = a.final
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     rng = random.Random(a.rng)
