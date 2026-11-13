@@ -2,6 +2,8 @@
 
 Tool: `panav-bots/loop/tools/cf_replay.py` (`validate`, `knownanswer`, `run`, `report`). Raw rows: `panav-bots/loop/results/cf1/`.
 Logs: 30 pairs x 200 h, `--first-seed 7000` (final_seeded vs eqrandom +0.51+-0.20 c/h; vs lakshya1 +0.43+-0.25 c/h, 0 forfeits).
+MATCH WINS (duplicate pair = match, Stage 1 200h legs, base final_seeded only): vs eqrandom 20/30 = 67%; vs lakshya1 17/30 = 57%.
+This report measures single decisions, not candidate matches, so there are no candidate match wins.
 
 ## How it works
 Deal = `deck_for(seed, hand_id-1)`; leg 1 has A=SB in even h, leg 2 in odd h. One decision is replayed with the lab engine: BOTH sides are
