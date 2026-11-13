@@ -1,0 +1,2 @@
+sw_valuebet vs new_geometric: +0.49 ± 0.27 chips/hand | match score 0.604 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.04 +1.02
