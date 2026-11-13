@@ -13,6 +13,7 @@ from . import exploit as X
 
 FMIN, FMAX = 0.75, 1.2     # v2 (config pf_vs=on): 0.70-1.2
 VS_FMIN = 0.70
+FQ_MIN_OPP, FQ_FULL, FQ_ZERO, FQ_RAMP, BIG = 12, 0.40, 0.55, 6.0, 0.70   # v3 big-bet-frequency gate
 VS_MIN_N, VS_SHARE, VS_RAMP = 4, 0.60, 4.0   # value-share gate: shown big bets needed, share needed, ramp length
 MAX_S1 = {"flop": 47 * 2 * 1035, "turn": 46 * 2 * 990, "river": 2 * 990}
 DEFAULTS = {
@@ -49,7 +50,10 @@ class PotFold:
         self.gate = config.get("pf_gate", "on") == "on"
         self.vs = config.get("pf_vs", "off") == "on"      # v2: value-share gate and a lower equity band
         self.lo = float(config.get("pf_lo", 0.0))
-        self.fmin = VS_FMIN if self.vs else FMIN
+        self.freq = config.get("pf_freq", "off") == "on"  # v3: gate on the opponent's big-bet frequency
+        self.fmin = VS_FMIN if (self.vs or self.freq) else FMIN
+        self.opps = 0                                     # their postflop bet opportunities (no bet of ours to face)
+        self.bigs = 0                                     # ... answered with a bet of >= BIG pot
         self.shown = 0                                    # shown big bets of theirs that we called (net != 0)
         self.value = 0                                    # ... that beat us
         self.big_pending = set()
@@ -83,7 +87,7 @@ class PotFold:
         if self.gate and (X.trait_yes("aggressor") or X.trait_yes("riverbluff")):
             self.stats["gated"] += 1        # a frequent big bettor: their bets are not all value, the shift stays off
             return reply
-        w = self.vs_weight() if self.vs else 1.0
+        w = self.vs_weight() if self.vs else self.freq_weight() if self.freq else 1.0
         if w <= 0.0:
             self.stats["vs_off"] += 1
         p = self.p.get(f"{street}:{hs.seat}", 0.0) * self.g() * w
@@ -98,6 +102,41 @@ class PotFold:
 
     start_stack = 200
 
+    def freq_weight(self):
+        """1 when the opponent bets big rarely (value-heavy: <= FQ_FULL of their opportunities), 0 when it bets big often (>= FQ_ZERO,
+        bluff-heavy), linear between; ramps in over FQ_RAMP opportunities after FQ_MIN_OPP."""
+        if self.opps < FQ_MIN_OPP:
+            return 0.0
+        fr = self.bigs / self.opps
+        w = 1.0 if fr <= FQ_FULL else 0.0 if fr >= FQ_ZERO else (FQ_ZERO - fr) / (FQ_ZERO - FQ_FULL)
+        return w * min(1.0, (self.opps - FQ_MIN_OPP + 1) / FQ_RAMP)
+
+    def observe_history(self, hist):
+        """Their postflop bet opportunities and big bets from a finished hand's history (pot rebuilt from the per-street amounts)."""
+        pot0 = 0                        # chips in the pot at the start of the street (both players)
+        for street in ("preflop", "flop", "turn", "river"):
+            acts = [a for a in hist if a.get("street") == street]
+            if street != "preflop":
+                faced = False           # a bet of ours is on the table
+                top = 0
+                for a in acts:
+                    act, amt = a.get("action"), a.get("amount") or 0
+                    if a.get("actor") == "opp" and not faced and act in ("check", "raise") and top == 0:
+                        self.opps += 1
+                        if act == "raise" and amt >= BIG * max(pot0, 1):
+                            self.bigs += 1
+                    if act == "raise":
+                        faced = a.get("actor") == "me"
+                        top = max(top, amt)
+                        if a.get("actor") == "opp":
+                            break       # their first bet: the opportunity is counted, the street is read
+                    elif act in ("call", "check", "fold"):
+                        faced = False if act == "call" else faced
+            top = max([a.get("amount") or 0 for a in acts if a.get("action") in ("raise", "call")] or [0])
+            pot0 += 2 * top
+            if any(a.get("action") == "fold" for a in acts):
+                break
+
     def vs_weight(self):
         """Ramp 0..1: needs >= VS_MIN_N shown big bets of theirs with a value share >= VS_SHARE (they bet big with value, not bluffs)."""
         if self.shown < VS_MIN_N or self.value / self.shown < VS_SHARE:
@@ -105,6 +144,11 @@ class PotFold:
         return min(1.0, (self.shown - VS_MIN_N + 1) / VS_RAMP)
 
     def on_hand_result(self, msg):
+        if self.freq and isinstance(msg.get("history"), list):
+            try:
+                self.observe_history(msg["history"])
+            except Exception:
+                pass
         if self.vs and msg.get("hand_id") in self.big_pending:
             self.big_pending.discard(msg.get("hand_id"))
             net = msg.get("net")
@@ -119,4 +163,4 @@ class PotFold:
             self.sum += float(msg["net"]) + committed
 
     def summary(self):
-        return dict(self.stats, shown=self.shown, value=self.value, ledger_n=self.n, ledger_mean=(self.sum / self.n if self.n else None), g=round(self.g(), 3))
+        return dict(self.stats, opps=self.opps, bigs=self.bigs, shown=self.shown, value=self.value, ledger_n=self.n, ledger_mean=(self.sum / self.n if self.n else None), g=round(self.g(), 3))
