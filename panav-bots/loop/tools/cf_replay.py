@@ -101,7 +101,7 @@ def parse_leg(path) -> dict:
                      legal=r["legal_actions"], min_raise=r.get("min_raise"), max_raise=r.get("max_raise"),
                      logged=hist[k], board=r["board"], total_hands=total)
             decisions.append(d)
-    return dict(seed=seed, leg=leg, hands=hands, decisions=decisions, total=total)
+    return dict(seed=seed, leg=leg, hands=hands, decisions=decisions, total=total, file=str(path))
 
 
 def a_is_sb(leg: int, h: int) -> bool:
@@ -206,13 +206,13 @@ class NullAdapter:
 
 def play_hand(leg: int, seed: int, hd: dict, script_ours, script_opp, discard_ours, discard_opp,
               ours_path: Optional[str], opp_path: str, bank_per_hand=0.15, total_hands=200,
-              opp_player=None):
+              opp_player=None, ours_player=None):
     """Play hand hd['h'] of (seed, leg) with the given scripts. -> dict(delta, opp_actions, ours_actions, ...)."""
     h = hd["h"]
     sb_is_a = a_is_sb(leg, h)
     bank = max(8.0, bank_per_hand * (total_hands - h))
     opp = opp_player if opp_player is not None else spawn(opp_path, bank, total_hands)
-    ours = spawn(ours_path, bank, total_hands) if ours_path else Null()
+    ours = ours_player if ours_player is not None else (spawn(ours_path, bank, total_hands) if ours_path else Null())
     try:
         so = Scripted(ours, script_ours, discard_ours)
         sp = Scripted(opp, script_opp, discard_opp)
@@ -232,11 +232,44 @@ def play_hand(leg: int, seed: int, hd: dict, script_ours, script_opp, discard_ou
                     board=list(hand.st.board), consumed=(so.pos == len(so.script), sp.pos == len(sp.script)),
                     state_at_forced=so.state_at_forced, role_a=role_a, opp_live=list(sp.log), diverged=so.diverged, illegal=so.illegal or sp.illegal)
     finally:
-        for p in (ours, opp if opp_player is None else Null()):
+        for p in (ours if ours_player is None else Null(), opp if opp_player is None else Null()):
             try:
                 p.close()
             except Exception:
                 pass
+
+
+# --------------------------------------------------------------------------- warm start (optional)
+
+def warm_players(leg_info: dict, h: int, ours_path, opp_path):
+    """Processes that have lived through hands 0..h-1 of the leg, so that in-match learning is NOT lost:
+    ours is fed the logged stream (it sees what it saw in the match; its replies are read and ignored),
+    the opponent plays hands 0..h-1 live against our logged actions in one persistent process (exact for
+    deterministic opponents, a re-draw of the same stream for random ones)."""
+    total = leg_info["total"]
+    bank = 0.15 * total
+    opp = spawn(opp_path, bank, total)
+    for g in range(h):
+        hd = leg_info["hands"].get(g)
+        if hd is None or "history" not in hd:
+            continue
+        so = [to_action(e) for e in hd["history"] if e["actor"] == "me"]
+        play_hand(leg_info["leg"], leg_info["seed"], hd, so, [], hd["my_discard"], None, None, opp_path,
+                  total_hands=total, opp_player=opp)
+    ours = spawn(ours_path, bank, total)
+    for line in Path(leg_info["file"]).read_text().splitlines():
+        if not line.strip():
+            continue
+        o = json.loads(line)
+        t = o.get("type")
+        if t == "init":
+            continue                                   # spawn() already sent the init
+        if t == "new_hand" and o["hand_id"] - 1 >= h:
+            break
+        ours._send(line)
+        if t in ("action_request", "discard_request"):
+            ours._read_line(10.0)                      # the reply is ignored: the history carries the real action
+    return ours, opp
 
 
 # --------------------------------------------------------------------------- the replay of one decision
@@ -257,11 +290,22 @@ def scripts_for(hd: dict, d: Optional[dict], forced: Optional[Action]):
     return ours, opp, dour, dopp
 
 
-def replay(leg_info: dict, d: dict, forced: Action, ours_path, opp_path):
+def replay(leg_info: dict, d: dict, forced: Action, ours_path, opp_path, warm=False):
     hd = leg_info["hands"][d["h"]]
     so, sp, do_, dp = scripts_for(hd, d, forced)
-    r = play_hand(leg_info["leg"], leg_info["seed"], hd, so, sp, do_, dp, ours_path, opp_path,
-                  total_hands=leg_info["total"])
+    op = pl = None
+    try:
+        if warm and ours_path:
+            pl, op = warm_players(leg_info, d["h"], ours_path, opp_path)
+        r = play_hand(leg_info["leg"], leg_info["seed"], hd, so, sp, do_, dp, ours_path, opp_path,
+                      total_hands=leg_info["total"], opp_player=op, ours_player=pl)
+    finally:
+        for x in (pl, op):
+            if x is not None:
+                try:
+                    x.close()
+                except Exception:
+                    pass
     if r.get("delta") is None:
         return r
     st = r["state_at_forced"]
@@ -279,12 +323,12 @@ def mean_se(xs):
     return m, math.sqrt(sum((x - m) ** 2 for x in xs) / (n - 1) / n)
 
 
-def value(leg_info, d, forced, ours_path, opp_path, n_min=6, n_max=30, se_target=1.0, deterministic=False):
+def value(leg_info, d, forced, ours_path, opp_path, n_min=6, n_max=30, se_target=1.0, deterministic=False, warm=False):
     """Mean chips (and SE) of `forced` at decision d. Adaptive N: at least n_min, stops when SE <= se_target
     or n_max; a forced fold / all-values-equal runs stop at n_min (sd = 0)."""
     xs, bad = [], 0
     while len(xs) < n_max:
-        r = replay(leg_info, d, forced, ours_path, opp_path)
+        r = replay(leg_info, d, forced, ours_path, opp_path, warm)
         if r.get("delta") is None or not r.get("state_ok", False):
             bad += 1
             if bad >= 3:
@@ -373,7 +417,7 @@ def alternatives(cls: str, d: dict):
 
 def work(args):
     """Worker: (leg file, decision index tuple, cls, ours, opp, n_max) -> result dict."""
-    legf, key, cls, ours, opp, n_max, se_t = args
+    legf, key, cls, ours, opp, n_max, se_t, warm = args
     li = _LEGS.get(legf)
     if li is None:
         li = _LEGS[legf] = parse_leg(legf)
@@ -383,8 +427,8 @@ def work(args):
     if alt is None:
         return None
     try:
-        vl = value(li, d, lg, ours, opp, n_max=n_max, se_target=se_t)
-        va = value(li, d, alt, ours, opp, n_max=n_max, se_target=se_t)
+        vl = value(li, d, lg, ours, opp, n_max=n_max, se_target=se_t, warm=warm)
+        va = value(li, d, alt, ours, opp, n_max=n_max, se_target=se_t, warm=warm)
         eq = equity_vs_random(d, hd, seed=d["h"] * 7 + d["seed"])
     except Exception as e:                                    # never lose a whole run to one decision
         return dict(error=repr(e), cls=cls, seed=d["seed"], leg=d["leg"], h=d["h"], k=d["k"])
@@ -512,7 +556,7 @@ def cmd_run(a):
             m = re.match(r"seed(\d+)_m([12])", Path(f).name)
             if (c, int(m.group(1)), int(m.group(2)), key[0], key[1]) in done:
                 continue
-            tasks.append((f, key, c, a.ours, a.opp, a.n_max, a.se_target))
+            tasks.append((f, key, c, a.ours, a.opp, a.n_max, a.se_target, a.warm))
     rnd.shuffle(tasks)
     print(len(tasks), "decisions to replay", flush=True)
     t0 = time.time()
@@ -524,33 +568,49 @@ def cmd_run(a):
                 print(f"  {i}/{len(tasks)} done, {time.time() - t0:.0f}s", flush=True)
 
 
+SE_FLOOR = 0.5      # chips; replayed values with a tiny sample can show SE ~ 0 by luck
+
+
+def _se(v):
+    se = v["se"]
+    se = 0.0 if se is None or se != se else se
+    return max(se, SE_FLOOR) if v["n"] > 1 or v["xs"] and v["n"] == 1 and False else se
+
+
 def cmd_report(a):
-    rows = [json.loads(l) for l in Path(a.out).read_text().splitlines()]
-    rows = [r for r in rows if "v_logged" in r]
-    res = {}
+    allrows = [json.loads(l) for l in Path(a.out).read_text().splitlines()]
+    errs = sum(1 for r in allrows if "error" in r)
+    rows = [r for r in allrows if "v_logged" in r and r["v_logged"]["n"] > 0 and r["v_alt"]["n"] > 0]
+    res = {"rows": len(allrows), "errors": errs, "dropped_no_valid_replay": len(allrows) - errs - len(rows)}
     for c in ("i_fold", "ii_bigcall", "iii_checkbehind"):
         rs = [r for r in rows if r["cls"] == c]
         if not rs:
             continue
-        gains, better, worse = [], 0, 0
+        better = worse = repro = 0
+        gains = []
+        bk: dict = {}
         for r in rs:
             vl, va = r["v_logged"], r["v_alt"]
             g = va["mean"] - vl["mean"]
-            se = math.sqrt(sum(x for x in (vl["se"], va["se"]) if x == x and x is not None) ** 2 if False else
-                           sum((x if x == x else 0.0) ** 2 for x in (vl["se"], va["se"])))
+            se = math.hypot(_se(vl), _se(va)) if (va["n"] > 1 or vl["n"] > 1) else 0.0
             gains.append(g)
-            if g > max(se, 1e-9) and (se > 0 or g > 0):
-                better += 1
-            elif -g > max(se, 1e-9):
-                worse += 1
-        bk = {}
-        for r, g in zip(rs, gains):
-            bk.setdefault(r["bucket"], []).append(g)
+            better += int(g > se and g > 0)
+            worse += int(-g > se and g < 0)
+            repro += int(abs(vl["mean"] - r["actual_net"]) <= max(_se(vl), SE_FLOOR) + 1e-9)
+            bk.setdefault(r["bucket"], []).append((g, g > se and g > 0, -g > se and g < 0))
         m, se = mean_se(gains)
-        res[c] = dict(n=len(rs), better=better, worse=worse, mean_gain=m, se_gain=se,
-                      buckets={b: (len(v), sum(v) / len(v)) for b, v in sorted(bk.items())},
-                      mean_logged=mean_se([r["v_logged"]["mean"] for r in rs])[0],
-                      mean_actual=mean_se([r["actual_net"] for r in rs])[0])
+        n = len(rs)
+        res[c] = dict(n=n, alt_better_gt1se=better / n, logged_better_gt1se=worse / n, mean_gain_always_switch=round(m, 2),
+                      se_gain=round(se, 2),
+                      replay_of_logged_matches_actual=repro / n,
+                      mean_v_logged=round(mean_se([r["v_logged"]["mean"] for r in rs])[0], 2),
+                      mean_actual_net=round(mean_se([r["actual_net"] for r in rs])[0], 2),
+                      mean_v_alt=round(mean_se([r["v_alt"]["mean"] for r in rs])[0], 2),
+                      mean_n_logged=round(sum(r["v_logged"]["n"] for r in rs) / n, 1),
+                      by_bucket={b: dict(n=len(v), gain=round(sum(x[0] for x in v) / len(v), 2),
+                                          alt_better=round(sum(x[1] for x in v) / len(v), 2),
+                                          logged_better=round(sum(x[2] for x in v) / len(v), 2))
+                                 for b, v in sorted(bk.items())})
     print(json.dumps(res, indent=1))
 
 
@@ -568,6 +628,7 @@ def main():
     r.add_argument("--per-class", type=int, default=150); r.add_argument("--processes", type=int, default=3)
     r.add_argument("--n-max", type=int, default=30); r.add_argument("--se-target", type=float, default=1.0)
     r.add_argument("--sample-seed", type=int, default=1)
+    r.add_argument("--warm", action="store_true", help="warm-start both processes with the hands before the decision")
     q = sub.add_parser("report")
     q.add_argument("--out", required=True)
     a = ap.parse_args()
