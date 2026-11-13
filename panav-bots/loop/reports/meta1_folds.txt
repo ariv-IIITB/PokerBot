@@ -1,0 +1,32 @@
+probe
+  F1: dwin +13.2pp  dchips +0.49  (n=6)
+  F2: dwin  +7.1pp  dchips +0.11  (n=7)
+  F3: dwin  +5.7pp  dchips +0.36  (n=8)
+  F4: dwin  +4.2pp  dchips +0.29  (n=8)
+  seeds even: dwin  +3.4pp
+  seeds odd: dwin +10.9pp
+  pooled match wins base 439.0/696 = 63.1%  cand 489.0/696 = 70.3%
+foldall
+  F1: dwin  -5.6pp  dchips -0.20  (n=6)
+  F2: dwin  -4.8pp  dchips -0.32  (n=7)
+  F3: dwin -12.0pp  dchips -0.31  (n=8)
+  F4: dwin -10.9pp  dchips -0.49  (n=8)
+  seeds even: dwin -11.2pp
+  seeds odd: dwin  -6.0pp
+  pooled match wins base 439.0/696 = 63.1%  cand 379.0/696 = 54.5%
+valuebet
+  F1: dwin  -3.5pp  dchips +0.04  (n=6)
+  F2: dwin  +7.7pp  dchips +0.14  (n=7)
+  F3: dwin  -4.2pp  dchips -0.02  (n=8)
+  F4: dwin  -5.7pp  dchips -0.28  (n=8)
+  seeds even: dwin  -5.5pp
+  seeds odd: dwin  +2.3pp
+  pooled match wins base 439.0/696 = 63.1%  cand 428.0/696 = 61.5%
+potfold
+  F1: dwin +10.8pp  dchips +0.27  (n=6)
+  F2: dwin  +4.8pp  dchips +0.07  (n=7)
+  F3: dwin  -2.1pp  dchips +0.06  (n=8)
+  F4: dwin  +4.2pp  dchips +0.17  (n=8)
+  seeds even: dwin  +2.6pp
+  seeds odd: dwin  +5.3pp
+  pooled match wins base 439.0/696 = 63.1%  cand 466.5/696 = 67.0%

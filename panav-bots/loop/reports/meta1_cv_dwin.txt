@@ -1,0 +1,17 @@
+metric=dwin (pp for dwin, chips/hand for dchips) trait window N=100
+
+probe: 29 bots | always-on +7.18 ± 1.96 | oracle(hindsight) +8.76 | oracle(split-half, noise-corrected) +4.74
+   LOBO 1-feature +5.75 ± 1.84   LOBO 2-feature +5.75 ± 1.84   (always-off = 0)
+   LOBO picks: [("('sd_value', -1)", 26), ("('pre_fold_open', -1)", 1), ("('fb_flop', 1)", 1)]
+
+foldall: 29 bots | always-on -8.62 ± 2.31 | oracle(hindsight) +1.58 | oracle(split-half, noise-corrected) -1.29
+   LOBO 1-feature -2.16 ± 1.35   LOBO 2-feature -2.16 ± 1.35   (always-off = 0)
+   LOBO picks: [("('raise_fb', 1)", 23), ("('fold_river', 1)", 4), ("('pre_fold_vs_raise', -1)", 1)]
+
+valuebet: 29 bots | always-on -1.58 ± 2.03 | oracle(hindsight) +3.30 | oracle(split-half, noise-corrected) -1.01
+   LOBO 1-feature -3.02 ± 1.42   LOBO 2-feature -2.16 ± 1.03   (always-off = 0)
+   LOBO picks: [("('sd_value', -1)", 23), ("('fold_turn', -1)", 2), ("('big_share', 1)", 1)]
+
+potfold: 29 bots | always-on +3.95 ± 2.46 | oracle(hindsight) +7.33 | oracle(split-half, noise-corrected) +2.16
+   LOBO 1-feature +4.02 ± 1.67   LOBO 2-feature +3.16 ± 1.61   (always-off = 0)
+   LOBO picks: [("('fold_flop', 1)", 27), ("('sd_big_value', 1)", 1), ("('pre_3bet', -1)", 1)]
