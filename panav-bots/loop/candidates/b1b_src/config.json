@@ -1,0 +1,9 @@
+{
+ "river_allin_rule": "mix",
+ "preflop_allin_rule": "on",
+ "small_bet": "gated",
+ "river_solver": "s1",
+ "solver_fold": "on",
+ "river_min_ms": 25.0,
+ "exploit": "station,prefold,riverbluff,rivernarrow,overfolder,foldall"
+}
