@@ -1,0 +1,7 @@
+spar_adapt       n= 40 delta +0.158 ± 0.230 (z +0.7) | base +0.12 cand +0.28 | wins base 19.0 cand 21.0 | cand forfeits 0
+spar_betfold     n= 40 delta +0.041 ± 0.203 (z +0.2) | base +1.37 cand +1.41 | wins base 36.0 cand 35.0 | cand forfeits 0
+spar_donk        n= 40 delta +0.028 ± 0.212 (z +0.1) | base +0.22 cand +0.25 | wins base 19.0 cand 18.0 | cand forfeits 0
+spar_light3b     n= 40 delta -0.018 ± 0.181 (z -0.1) | base +0.06 cand +0.04 | wins base 20.0 cand 19.0 | cand forfeits 0
+spar_polar       n= 40 delta +0.573 ± 0.237 (z +2.4) | base +0.33 cand +0.91 | wins base 23.0 cand 31.0 | cand forfeits 0
+spar_trapper     n= 40 delta -0.050 ± 0.180 (z -0.3) | base +0.43 cand +0.38 | wins base 26.0 cand 22.0 | cand forfeits 0
+POOLED over 6 bots: delta +0.122 ± 0.085 (z +1.4); wins base 143.0 cand 146.0 of 240; worst bot z -0.3
