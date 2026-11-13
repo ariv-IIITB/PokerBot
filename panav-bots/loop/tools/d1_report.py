@@ -108,6 +108,16 @@ def pos(rows):
             tot = len([r for r in H if r["seat"] == seat])
             bits = [f"{k} {sum(v) / tot:+.2f}" for k, v in sorted(e.items(), key=lambda kv: sum(kv[1]) / tot)]
             print(f"   {seat[:3]} by ending (chips/hand of seat): " + "; ".join(bits))
+    H = [r for r in rows if r["street"] == "HAND"]
+    for seat in ("button", "big_blind"):
+        per = [np.mean([r["net"] for r in H if r["bot"] == b and r["seat"] == seat]) for b in sorted(set(r["bot"] for r in H))]
+        print(f"-- POOLED {seat}: mean of per-bot chips/hand {np.mean(per):+.3f} (sd across bots {np.std(per, ddof=1):.2f}); per bot: " + " ".join(f"{x:+.2f}" for x in per))
+    e = collections.defaultdict(list)
+    for r in H:
+        e[(r["seat"], r["ending"])].append(r["net"])
+    n = {s: sum(1 for r in H if r["seat"] == s) for s in ("button", "big_blind")}
+    for seat in ("button", "big_blind"):
+        print(f"   pooled {seat[:3]} by ending (chips/hand of seat): " + "; ".join(f"{k[1]} {sum(v) / n[seat]:+.2f}" for k, v in sorted(e.items(), key=lambda kv: sum(kv[1])) if k[0] == seat))
     print("-- value of entering each street, ALL bots (mean over hands reaching it of net + chips committed before)")
     first = {}
     for r in rows:
@@ -186,12 +196,12 @@ def ladder(rows, scope="ALL", sizes=("1.2-2", ">2"), streets=("flop", "turn", "r
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--nodes"); ap.add_argument("--discard")
-    ap.add_argument("--section", default="all")
+    ap.add_argument("--section", default="all"); ap.add_argument("--bot", default=None)
     a = ap.parse_args()
     if a.discard and a.section in ("all", "disc"):
         discard(json.load(open(a.discard)))
     if a.nodes:
-        rows = json.load(open(a.nodes))
+        rows = [r for r in json.load(open(a.nodes)) if a.bot is None or r["bot"].startswith(a.bot)]
         if a.section in ("all", "facing"):
             facing(rows)
         if a.section in ("all", "pos"):
