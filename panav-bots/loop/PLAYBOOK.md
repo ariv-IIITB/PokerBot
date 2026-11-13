@@ -79,3 +79,8 @@ The loop is: diagnose -> fix -> check -> accepted candidate becomes the new base
 6. **Regression ledger**: every new candidate is re-checked on all earlier guard sets, and head-to-head vs the ORIGINAL final and vs the previous candidate, so slow drift (each step fine, the sum worse) is caught.
 7. **Principle ledger** `panav-bots/loop/reports/PRINCIPLES.md`: one line per accepted move: trait gate, break-even maths, Ivey verdict, where it was measured. No principle, no ship.
 8. Stop when two consecutive rounds find no move that passes; then do the final-holdout run and package.
+
+## REPORTING RULE (owner, 13 Nov): always report MATCH WINS together with chips
+Every result table must show, per opponent and pooled, BOTH chips/hand (+- SE) and MATCH WINS (a match = one duplicate pair; win if total chips over both legs > 0, draw 0.5; show W/N and %),
+for base and candidate, separately for Stage 1 (200-hand legs) and Stage 2 (500-hand legs). `file_duel.py` now prints `MATCH WINS W/N` and writes `match_wins`/`matches`
+to `--out`. The per-leg "match score" printed before is NOT the tournament score. The target is >= 65% match wins vs each opponent class.
