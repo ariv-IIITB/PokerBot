@@ -67,3 +67,40 @@ By hand strength (gain per decision, alternative minus logged; n in brackets):
 
 ## Cost
 Cold: 450 decisions x ~10-20 replays ~ 19 min per opponent on 3 cores; warm: ~1 min per decision per core.
+
+## Follow-up: 4 more opponents, classes ii and iii, opponent traits (13 Nov)
+Logs: 30 pairs x 200 h, seeds 7200-7229 (eqrandom/lakshya1: 7000-7029, from above). Cold runs: `--ours-seeds 10`, 150 decisions per class
+(new_minraise: only 82 big calls exist). Class iii sampled with `--min-eq 0.7` (eqrandom/lakshya1: the eq >= 0.7 rows of the earlier unfiltered
+sample). Warm runs: 30 class-ii decisions per opponent (a different random sample from the cold 150, except for eqrandom/lakshya1).
+Traits come from `panav-bots/loop/tools/opp_traits.py` on the same logs: flop bet = the opponent's first flop action with no bet before it is
+a bet; big/100 = bets/raises of at least 0.7 pot we faced on flop/turn per 100 hands that reached the flop; big share = share of the flop/turn
+bets we faced that were big; value share = in hands where we CALLED a big bet and reached showdown, the share where the opponent's hand beat
+ours (n sd = number of those showdowns). Gains are in chips per decision (alternative minus logged), mean +- SE over decisions.
+Base MATCH WINS = duplicate pairs won by final_seeded, Stage 1 (200 h legs). No Stage 2 legs were played.
+
+| opponent | base chips/h | MATCH WINS | flop bet | big/100 flop hands | big share | value share (n sd) | ii fold-gain cold (n) | ii warm n=30 | ii eq0.7-0.85 cold (n) | iii bet-gain eq>=0.7 (n) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| new_minraise | +0.51±0.24 | 20/30 (67%) | 0.38 | 2.6 | 0.04 | 0.77 (73) | +5.5±9.8 (82) | -0.5±11.7 (30) | +15.2±10.8 (39) | +2.4±2.3 (150) |
+| new_exploiter | +0.39±0.16 | 18/30 (60%) | 0.40 | 17.2 | 0.30 | 0.72 (262) | +12.7±7.3 (150) | +25.0±7.8 (30) | +24.2±10.1 (60) | +5.8±1.8 (150) |
+| new_eqrandom | +0.51±0.20 | 20/30 (67%) | 0.29 | 16.6 | 0.32 | 0.67 (228) | +19.7±8.9 (150) | +44.6±17.6 (30) | +45.0±10.5 (59) | +5.0±2.0 (65) |
+| conv_opp3 | +0.21±0.23 | 15/30 (50%) | 0.62 | 31.5 | 0.37 | 0.55 (499) | -8.3±7.1 (150) | +5.3±12.2 (30) | +1.7±11.5 (50) | +4.8±2.8 (150) |
+| new_geometric | +0.49±0.24 | 18/30 (60%) | 0.34 | 48.2 | 0.92 | 0.42 (489) | -20.7±8.6 (150) | -50.2±17.9 (30) | +10.9±13.4 (53) | +9.7±1.9 (150) |
+| lakshya1 | +0.43±0.25 | 17/30 (57%) | 0.64 | 67.6 | 0.82 | 0.42 (888) | -5.5±6.3 (150) | -50.3±16.5 (30) | +9.3±11.1 (63) | +17.8±5.5 (59) |
+
+- **Trait for class ii (fold big calls): the value share of the opponent's shown big bets.** corr(value share, cold fold-gain) = 0.80 over
+  6 opponents. Folding helps vs the value-heavy bettors (exploiter 0.72: +12.7+-7.3 cold, +25.0+-7.8 warm; eqrandom 0.67: +19.7 / +44.6).
+  It hurts vs the bluffy ones (geometric and lakshya1 0.42: -20.7 / -50 and -5.5 / -50). It is neutral vs conv_opp3 (0.55) and minraise (0.77,
+  only 2.6 big bets per 100 flops, n small). The bluffy opponents also show a high big share (0.82-0.92) and high big/100 (48-68); the
+  value-heavy ones show a low big share (0.30-0.32) and big/100 of about 17. Either is a usable within-leg gate: a big share <= ~0.4 with
+  value share >= ~0.65 means fold more, a big share >= ~0.8 means call. The value share needs about 30+ showdowns to estimate; the big share
+  is visible from the first hands.
+- **Class ii is also strength-dependent on every opponent:** calling with eq 0.7-0.85 loses to folding vs all 6 (+1.7 to +45; significant
+  vs eqrandom and exploiter only). Calling with eq > 0.85 is right vs all 6 (fold-gain -6.9 eqrandom, +0.3 exploiter, -28 to -80 elsewhere).
+  A gate should therefore fold only the 0.7-0.85 calls, and only vs a low-big-share / high-value-share opponent.
+- Class ii fidelity (cold replay of the logged call reproduces the logged net): 39-66% on the new 4, so cold class-ii numbers carry the
+  learning-loss bias described above. Where the warm sample (n=30) is available it agrees in sign with cold for 5 of 6 opponents (conv_opp3
+  goes from -8.3 to +5.3, both within noise).
+- **Class iii (bet instead of check-behind, eq >= 0.7): positive vs all 6 opponents** (+2.4+-2.3 minraise, +4.8+-2.8 conv_opp3, +5.0+-2.0
+  eqrandom, +5.8+-1.8 exploiter, +9.7+-1.9 geometric, +17.8+-5.5 lakshya1); more than 2 SE on 4 of 6. The gain is largest for eq > 0.85
+  (+4.6 to +33) and largest vs the bluffy, high-aggression opponents. Fidelity is 75-92%. This supports VAL1 as a general change rather than a
+  trait-gated one; it still needs a paired match check on unseen bots, since the logged check is the blueprint's trapping mix (selection bias).
