@@ -1,0 +1,148 @@
+== DISCARD AUDIT (loss = best-keep equity - chosen-keep equity; value = loss x pot at discard)
+conv_opp3_200h n= 3500 | vs random: share>=3pts 0.080 (>=6pts 0.055) mean loss 1.15 pts, 0.29 chips/discard | vs actual opp (showdowns n=1260): share>=3pts 0.129, mean loss 1.76 pts
+lakshya1_200h  n= 3500 | vs random: share>=3pts 0.078 (>=6pts 0.056) mean loss 1.16 pts, 0.26 chips/discard | vs actual opp (showdowns n=1400): share>=3pts 0.145, mean loss 1.79 pts
+new_eqrandom_200h n= 3500 | vs random: share>=3pts 0.097 (>=6pts 0.074) mean loss 1.42 pts, 0.29 chips/discard | vs actual opp (showdowns n=1599): share>=3pts 0.154, mean loss 2.22 pts
+new_exploiter_200h n= 3500 | vs random: share>=3pts 0.091 (>=6pts 0.067) mean loss 1.32 pts, 0.28 chips/discard | vs actual opp (showdowns n=1251): share>=3pts 0.164, mean loss 2.30 pts
+new_geometric_200h n= 3500 | vs random: share>=3pts 0.092 (>=6pts 0.066) mean loss 1.31 pts, 0.25 chips/discard | vs actual opp (showdowns n=1690): share>=3pts 0.157, mean loss 2.29 pts
+new_minraise_200h n= 3500 | vs random: share>=3pts 0.098 (>=6pts 0.067) mean loss 1.36 pts, 0.24 chips/discard | vs actual opp (showdowns n=1676): share>=3pts 0.148, mean loss 1.88 pts
+potctl_200h    n= 3500 | vs random: share>=3pts 0.079 (>=6pts 0.055) mean loss 1.18 pts, 0.36 chips/discard | vs actual opp (showdowns n=1445): share>=3pts 0.127, mean loss 1.97 pts
+ALL            n=24500 | vs random: share>=3pts 0.088 (>=6pts 0.063) mean loss 1.27 pts, 0.28 chips/discard | vs actual opp (showdowns n=10321): share>=3pts 0.147, mean loss 2.04 pts
+-- by chosen-keep type (ALL bots): n, share>=3pts, mean loss pts, chips/discard
+  pair_other             n= 3937 0.026  0.29 0.07
+  2pair                  n= 2823 0.007  0.06 0.02
+  top_pair               n= 2753 0.005  0.09 0.03
+  high                   n= 2592 0.389  6.43 1.24
+  pocket_pair            n= 2382 0.018  0.18 0.05
+  high+sd                n= 2277 0.130  1.72 0.41
+  board_pair             n= 1553 0.199  2.27 0.48
+  trips                  n= 1008 0.005  0.08 0.02
+  overcards              n=  692 0.146  1.93 0.55
+  high+fd                n=  594 0.015  0.14 0.03
+  suited_conn_hi         n=  422 0.360  5.53 1.64
+  pair_other+sd          n=  373 0.000  0.04 0.01
+  suited_conn_hi+sd      n=  365 0.123  1.71 0.70
+  pair_other+fd          n=  322 0.000  0.00 0.00
+-- by seat (ALL)
+  button     n=13212 share>=3pts 0.096 mean 1.39 pts, 0.33 chips/discard
+  big_blind  n=11288 share>=3pts 0.079 mean 1.13 pts, 0.23 chips/discard
+-- where best keep differs: chosen type -> best type (top 8 mistakes >=3pts, ALL)
+  high                 -> high                 544
+  board_pair           -> board_pair           285
+  high                 -> pocket_pair          166
+  high                 -> pair_other           89
+  suited_conn_hi       -> high                 89
+  high+sd              -> high                 78
+  high                 -> high+sd              77
+  pair_other           -> pair_other           62
+== FACING A BET: response mix, strength, realised chips from the decision on (per bucket)
+-- scope ALL
+street seat bucket     n   fold/call/raise  eq(fold) eq(call) eq(raise) | out(call) out(raise)  [mean±SE, n]
+preflop but .33-.75  88300  0.02/0.32/0.66  0.46  0.54  0.59   | +0.47±0.19 (n=28257)  +1.24±0.15 (n=57926)
+preflop but .75-1.2   7346  0.32/0.60/0.08  0.50  0.57  0.69   | -2.92±0.94 (n=4423)  +14.80±4.43 (n=565)
+preflop but 1.2-2     4086  0.42/0.54/0.04  0.47  0.58  0.65   | -0.97±1.00 (n=2223)  +1.95±7.65 (n=154)
+preflop but >2         873  0.60/0.37/0.03  0.51  0.62  0.66   | -13.10±5.04 (n=323)  +7.09±24.89 (n=23)
+preflop big .33-.75  15568  0.35/0.47/0.17  0.49  0.59  0.69   | +1.94±0.47 (n=7377)  +4.57±1.15 (n=2676)
+preflop big .75-1.2  32195  0.37/0.46/0.17  0.49  0.59  0.69   | +0.69±0.33 (n=14729)  +9.15±0.93 (n=5496)
+preflop big 1.2-2     1736  0.49/0.37/0.13  0.51  0.60  0.69   | -4.79±2.24 (n=645)  -6.87±6.92 (n=233)
+preflop big >2         699  0.62/0.28/0.10  0.53  0.61  0.70   | -2.59±4.88 (n=198)  -10.66±11.00 (n=67)
+flop    but <=.33     1215  0.18/0.67/0.14  0.42  0.66  0.67   | +7.88±2.04 (n=820)  +11.51±5.90 (n=176)
+flop    but .33-.75  15746  0.27/0.62/0.11  0.45  0.66  0.68   | +3.90±0.51 (n=9773)  +14.66±1.79 (n=1744)
+flop    but .75-1.2   5914  0.48/0.47/0.05  0.49  0.69  0.74   | -8.82±1.62 (n=2802)  +13.27±6.82 (n=301)
+flop    but 1.2-2     3992  0.55/0.41/0.04  0.52  0.70  0.68   | +9.86±1.79 (n=1632)  +7.92±6.47 (n=147)
+flop    but >2          47  0.85/0.15/0.00  0.52  0.82    -    | -2.86±84.54 (n=7)  - (n=0)
+flop    big <=.33     1194  0.37/0.53/0.10  0.50  0.69  0.67   | +6.78±1.90 (n=634)  -1.35±8.64 (n=121)
+flop    big .33-.75   9990  0.45/0.48/0.07  0.47  0.69  0.68   | +3.82±0.65 (n=4763)  +6.83±3.13 (n=699)
+flop    big .75-1.2   4580  0.63/0.33/0.04  0.52  0.72  0.76   | -6.99±2.08 (n=1508)  +2.20±9.55 (n=172)
+flop    big 1.2-2     4525  0.67/0.31/0.02  0.50  0.72  0.73   | +10.10±1.72 (n=1410)  +4.43±11.04 (n=69)
+flop    big >2          47  0.79/0.21/0.00  0.60  0.86    -    | -143.50±41.55 (n=10)  - (n=0)
+turn    but <=.33     1427  0.40/0.47/0.13  0.43  0.75  0.70   | +28.68±3.26 (n=665)  +44.15±7.40 (n=186)
+turn    but .33-.75   9362  0.36/0.52/0.13  0.46  0.74  0.69   | +11.52±0.96 (n=4832)  +29.73±3.16 (n=1176)
+turn    but .75-1.2   3197  0.51/0.43/0.06  0.52  0.79  0.81   | -13.91±2.84 (n=1371)  +34.76±11.44 (n=206)
+turn    but 1.2-2     2105  0.58/0.39/0.03  0.52  0.81  0.68   | +27.79±3.32 (n=815)  +46.08±11.54 (n=65)
+turn    but >2         159  0.77/0.23/0.00  0.63  0.90    -    | -61.53±29.17 (n=36)  - (n=0)
+turn    big <=.33     1101  0.44/0.52/0.04  0.48  0.77  0.83   | +27.28±3.48 (n=570)  +57.04±19.32 (n=46)
+turn    big .33-.75   5505  0.43/0.52/0.05  0.46  0.75  0.81   | +13.83±1.15 (n=2854)  +30.61±6.93 (n=278)
+turn    big .75-1.2   1964  0.54/0.43/0.04  0.54  0.82  0.80   | -1.03±3.56 (n=836)  -24.37±19.73 (n=73)
+turn    big 1.2-2     1716  0.59/0.39/0.02  0.54  0.82  0.83   | +27.93±3.75 (n=663)  +39.03±15.83 (n=36)
+turn    big >2          62  0.89/0.11/0.00  0.61  0.93    -    | -68.43±74.55 (n=7)  - (n=0)
+river   but <=.33     1058  0.35/0.46/0.19  0.48  0.79  0.79   | +34.19±3.70 (n=487)  +76.84±8.30 (n=200)
+river   but .33-.75   3880  0.48/0.40/0.12  0.56  0.79  0.82   | +22.94±2.09 (n=1544)  +65.89±7.04 (n=459)
+river   but .75-1.2   2171  0.59/0.30/0.11  0.63  0.82  0.83   | -4.56±4.18 (n=650)  +22.53±11.77 (n=236)
+river   but 1.2-2     1105  0.61/0.32/0.07  0.60  0.79  0.84   | +13.17±5.55 (n=358)  +41.01±16.30 (n=75)
+river   but >2         118  0.62/0.38/0.00  0.66  0.86    -    | -24.27±29.26 (n=45)  - (n=0)
+river   big <=.33      758  0.35/0.57/0.09  0.53  0.79  0.82   | +32.82±3.66 (n=430)  +47.33±9.49 (n=66)
+river   big .33-.75   2616  0.54/0.37/0.09  0.57  0.79  0.82   | +26.42±2.41 (n=976)  +38.67±8.61 (n=238)
+river   big .75-1.2   1564  0.63/0.29/0.08  0.63  0.82  0.82   | +6.32±4.45 (n=457)  +39.14±15.27 (n=127)
+river   big 1.2-2      830  0.68/0.26/0.07  0.58  0.80  0.81   | +49.41±7.34 (n=213)  -2.85±20.46 (n=54)
+river   big >2         166  0.70/0.30/0.00  0.73  0.87    -    | +91.04±27.29 (n=49)  - (n=0)
+-- scope lakshya1
+street seat bucket     n   fold/call/raise  eq(fold) eq(call) eq(raise) | out(call) out(raise)  [mean±SE, n]
+-- INSIDE vs ABOVE our tree's biggest non-allin size (postflop opening bets; flop .75, turn/river 1.0; allin separate)
+ALL      flop   inside n=28288 fold/call/raise 0.33/0.57/0.10 eq(call) 0.67 out(call) +3.64±0.39 out(raise) +12.99±1.43 | eq(fold) 0.46
+ALL      flop   above  n=17207 fold/call/raise 0.58/0.39/0.03 eq(call) 0.70 out(call) +0.58±0.92 out(raise) +8.98±4.14 | eq(fold) 0.50
+ALL      flop   allin  n=  132 fold/call/raise 0.78/0.22/0.00 eq(call) 0.83 out(call) -36.48±35.42 out(raise) - | eq(fold) 0.58
+ALL      turn   inside n=20779 fold/call/raise 0.41/0.50/0.09 eq(call) 0.75 out(call) +8.36±0.67 out(raise) +32.16±2.68 | eq(fold) 0.47
+ALL      turn   above  n= 4072 fold/call/raise 0.58/0.39/0.02 eq(call) 0.81 out(call) +23.82±2.43 out(raise) +49.52±8.97 | eq(fold) 0.53
+ALL      turn   allin  n=  549 fold/call/raise 0.63/0.37/0.00 eq(call) 0.88 out(call) +59.06±14.70 out(raise) - | eq(fold) 0.59
+ALL      river  inside n=10832 fold/call/raise 0.52/0.36/0.12 eq(call) 0.79 out(call) +12.58±0.85 out(raise) +58.07±4.14 | eq(fold) 0.58
+ALL      river  above  n= 1649 fold/call/raise 0.65/0.28/0.07 eq(call) 0.77 out(call) +22.84±3.15 out(raise) +26.38±13.10 | eq(fold) 0.58
+ALL      river  allin  n= 1429 fold/call/raise 0.53/0.47/0.00 eq(call) 0.88 out(call) +69.76±7.64 out(raise) - | eq(fold) 0.68
+== POSITION: chips/hand by seat per opponent; by ending; value of reaching each street (mean out of first decision on it)
+conv_opp3_200h but -0.40±0.29 (n=12000) | big +0.09±0.27 (n=12000)
+   but by ending (chips/hand of seat): WE fold@turn -1.38; WE fold@river -1.10; WE fold@flop -1.04; showdown -0.36; WE fold@preflop -0.27; OPP fold@preflop +0.37; OPP fold@flop +0.76; OPP fold@river +1.13; OPP fold@turn +1.49
+   big by ending (chips/hand of seat): WE fold@river -1.04; WE fold@flop -0.87; WE fold@turn -0.78; WE fold@preflop -0.45; OPP fold@flop +0.43; OPP fold@preflop +0.46; OPP fold@turn +0.56; showdown +0.86; OPP fold@river +0.91
+lakshya1_200h  but -0.43±0.35 (n=12000) | big -0.19±0.31 (n=12000)
+   but by ending (chips/hand of seat): WE fold@turn -1.70; WE fold@flop -1.39; WE fold@river -0.94; WE fold@preflop -0.22; showdown +0.03; OPP fold@preflop +0.20; OPP fold@flop +0.75; OPP fold@turn +1.05; OPP fold@river +1.78
+   big by ending (chips/hand of seat): WE fold@flop -1.34; WE fold@turn -1.09; WE fold@river -0.84; WE fold@preflop -0.24; OPP fold@preflop +0.37; OPP fold@flop +0.55; OPP fold@turn +0.66; showdown +0.70; OPP fold@river +1.03
+new_eqrandom_200h but +0.30±0.33 (n=12000) | big +0.50±0.28 (n=12000)
+   but by ending (chips/hand of seat): WE fold@river -1.77; WE fold@turn -1.27; WE fold@flop -0.54; WE fold@preflop -0.22; OPP fold@preflop +0.46; OPP fold@turn +0.46; OPP fold@river +0.67; OPP fold@flop +0.72; showdown +1.80
+   big by ending (chips/hand of seat): WE fold@river -0.79; WE fold@turn -0.67; WE fold@flop -0.54; WE fold@preflop -0.44; OPP fold@turn +0.20; OPP fold@flop +0.35; OPP fold@preflop +0.55; OPP fold@river +0.64; showdown +1.21
+new_exploiter_200h but +0.19±0.25 (n=12000) | big +0.33±0.26 (n=12000)
+   but by ending (chips/hand of seat): WE fold@river -1.04; WE fold@turn -0.95; WE fold@flop -0.58; WE fold@preflop -0.19; showdown -0.17; OPP fold@preflop +0.55; OPP fold@river +0.61; OPP fold@flop +0.93; OPP fold@turn +1.03
+   big by ending (chips/hand of seat): WE fold@river -0.69; WE fold@turn -0.65; WE fold@flop -0.52; WE fold@preflop -0.41; showdown -0.28; OPP fold@preflop +0.27; OPP fold@turn +0.78; OPP fold@flop +0.82; OPP fold@river +1.02
+new_geometric_200h but +0.00±0.31 (n=12000) | big -0.37±0.28 (n=12000)
+   but by ending (chips/hand of seat): WE fold@turn -1.12; WE fold@river -1.08; WE fold@flop -0.51; WE fold@preflop -0.32; OPP fold@turn +0.44; showdown +0.50; OPP fold@river +0.64; OPP fold@flop +0.67; OPP fold@preflop +0.78
+   big by ending (chips/hand of seat): WE fold@turn -0.84; WE fold@river -0.68; WE fold@flop -0.65; WE fold@preflop -0.60; showdown +0.29; OPP fold@turn +0.29; OPP fold@flop +0.46; OPP fold@river +0.64; OPP fold@preflop +0.73
+new_minraise_200h but -0.03±0.27 (n=12000) | big -0.32±0.26 (n=12000)
+   but by ending (chips/hand of seat): WE fold@turn -1.20; WE fold@river -1.12; WE fold@preflop -0.29; WE fold@flop -0.29; showdown +0.24; OPP fold@turn +0.52; OPP fold@preflop +0.54; OPP fold@flop +0.74; OPP fold@river +0.84
+   big by ending (chips/hand of seat): WE fold@turn -0.71; WE fold@preflop -0.65; WE fold@river -0.55; WE fold@flop -0.38; showdown +0.23; OPP fold@turn +0.25; OPP fold@preflop +0.38; OPP fold@flop +0.42; OPP fold@river +0.68
+potctl_200h    but +0.03±0.32 (n=12000) | big +0.32±0.33 (n=12000)
+   but by ending (chips/hand of seat): WE fold@turn -1.42; WE fold@river -1.19; WE fold@flop -1.11; WE fold@preflop -0.28; OPP fold@preflop +0.61; OPP fold@flop +0.61; showdown +0.71; OPP fold@river +0.95; OPP fold@turn +1.17
+   big by ending (chips/hand of seat): WE fold@flop -0.91; WE fold@river -0.81; WE fold@turn -0.76; WE fold@preflop -0.56; OPP fold@flop +0.22; OPP fold@turn +0.60; OPP fold@preflop +0.60; showdown +0.68; OPP fold@river +1.26
+-- POOLED button: mean of per-bot chips/hand -0.048 (sd across bots 0.28); per bot: -0.40 -0.43 +0.30 +0.19 +0.00 -0.03 +0.03
+-- POOLED big_blind: mean of per-bot chips/hand +0.053 (sd across bots 0.35); per bot: +0.09 -0.19 +0.50 +0.33 -0.37 -0.32 +0.32
+   pooled but by ending (chips/hand of seat): WE fold@turn -1.29; WE fold@river -1.18; WE fold@flop -0.78; WE fold@preflop -0.26; showdown +0.39; OPP fold@preflop +0.50; OPP fold@flop +0.74; OPP fold@turn +0.88; OPP fold@river +0.95
+   pooled big by ending (chips/hand of seat): WE fold@turn -0.79; WE fold@river -0.77; WE fold@flop -0.74; WE fold@preflop -0.48; OPP fold@flop +0.46; OPP fold@turn +0.48; OPP fold@preflop +0.48; showdown +0.53; OPP fold@river +0.88
+-- value of entering each street, ALL bots (mean over hands reaching it of net + chips committed before)
+  but: flop +5.60±0.17 (n=57357)  turn +11.14±0.25 (n=37602)  river +19.73±0.38 (n=23154)
+  big: flop +5.87±0.18 (n=47277)  turn +11.07±0.26 (n=31851)  river +18.66±0.35 (n=21792)
+== CELLS A (robust): facing a bet, we continue; loss = -sum(chips from the decision on); fold would pay 0
+rank loss  street seat size    our-eq   act    n    mean±SE        bots-losing  SE(total)
+ 1   18190 flop   but .75-1.2  .65-.8   call    998  -18.23±2.31   6/7   2306
+ 2   16666 turn   but .75-1.2  .65-.8   call    489  -34.08±3.47   6/7   1696
+ 3    8839 flop   but .75-1.2  .5-.65   call    717  -12.33±2.54   6/7   1819
+ 4    7718 preflopbut .75-1.2  .5-.65   call   2561   -3.01±1.17   6/7   3000
+ 5    6044 flop   big .75-1.2  .65-.8   call    535  -11.30±2.91   5/7   1555
+ 6    5758 river  but .75-1.2  .65-.8   call    143  -40.27±5.23   6/7   747
+ 7    5320 turn   big .75-1.2  .65-.8   call    250  -21.28±5.12   6/7   1280
+ 8    3810 flop   but .75-1.2  .35-.5   call    309  -12.33±3.33   5/7   1028
+ 9    3573 river  but .33-.75  eq<.35   raise    43  -83.09±13.00   2/7   559
+10    3313 turn   but .33-.75  .5-.65   raise   234  -14.16±4.68   4/7   1094
+11    3129 preflopbut .75-1.2  .35-.5   call    978   -3.20±1.95   4/7   1909
+12    2998 preflopbut 1.2-2    .5-.65   call   1455   -2.06±1.11   3/7   1612
+== CELLS B (CONFOUNDED by hidden info: opponent action/board differ between actions): n x (best other mean - cell mean)
+ 1   97609 turn   but .33-.75 eq>=.8   call   n= 1829 mean +31.43  alt raise +84.80 (n=499)
+ 2   68294 flop   big none    eq>=.8   check  n= 5040 mean +12.05  alt raise +25.60 (n=3745)
+ 3   64481 river  but .33-.75 eq>=.8   call   n=  869 mean +47.43  alt raise +121.63 (n=326)
+ 4   64000 flop   but .33-.75 eq>=.8   call   n= 2149 mean +14.72  alt raise +44.50 (n=566)
+ 5   55763 flop   big none    .65-.8   check  n= 7064 mean +3.23  alt raise +11.12 (n=3669)
+ 6   54897 flop   big none    .35-.5   check  n= 9562 mean +0.99  alt raise +6.73 (n=1298)
+ 7   54524 preflopbig .75-1.2 .5-.65   call   n=11012 mean +0.35  alt raise +5.30 (n=1949)
+ 8   46815 turn   but .75-1.2 eq>=.8   call   n=  730 mean +2.94  alt raise +67.07 (n=146)
+== LADDER (ALL): facing bets of size in ('1.2-2', '>2'): per eq bucket  n, fold%, out(call)
+  flop   but | eq<.35: n=397 fold 0.91 call-out -14.23±5.61(n=26) | .35-.5: n=864 fold 0.78 call-out +0.00±2.82(n=188) | .5-.65: n=1210 fold 0.65 call-out -1.39±2.66(n=371) | .65-.8: n=889 fold 0.39 call-out +0.47±3.00(n=501) | eq>=.8: n=679 fold 0.13 call-out +30.25±4.03(n=553)
+  flop   big | eq<.35: n=487 fold 0.97 call-out -17.20±13.15(n=15) | .35-.5: n=1257 fold 0.89 call-out -1.18±2.96(n=137) | .5-.65: n=1250 fold 0.79 call-out +0.40±2.86(n=250) | .65-.8: n=942 fold 0.44 call-out +2.66±2.38(n=512) | eq>=.8: n=636 fold 0.17 call-out +23.25±3.93(n=506)
+  turn   but | eq<.35: n=286 fold 0.95 call-out -27.67±11.79(n=6) | .35-.5: n=332 fold 0.91 call-out +4.41±15.89(n=17) | .5-.65: n=429 fold 0.86 call-out +8.80±9.33(n=51) | .65-.8: n=590 fold 0.52 call-out +2.25±4.88(n=278) | eq>=.8: n=627 fold 0.15 call-out +38.98±5.02(n=499)
+  turn   big | eq<.35: n=202 fold 0.97 call-out +9.50±11.98(n=6) | .35-.5: n=264 fold 0.91 call-out -5.00±15.55(n=22) | .5-.65: n=303 fold 0.92 call-out +7.15±16.62(n=20) | .65-.8: n=479 fold 0.57 call-out +6.04±5.77(n=197) | eq>=.8: n=530 fold 0.15 call-out +39.44±5.16(n=425)
+  river  but | eq<.35: n=131 fold 0.94 call-out -48.00±1.00(n=2) | .35-.5: n=116 fold 0.77 call-out -10.96±8.82(n=25) | .5-.65: n=193 fold 0.76 call-out -9.86±10.99(n=44) | .65-.8: n=342 fold 0.68 call-out -32.17±9.40(n=103) | eq>=.8: n=441 fold 0.35 call-out +33.80±8.90(n=229)
+  river  big | eq<.35: n=138 fold 0.95 call-out +49.67±55.17(n=3) | .35-.5: n=104 fold 0.80 call-out -10.38±14.74(n=16) | .5-.65: n=130 fold 0.81 call-out +42.23±21.32(n=22) | .65-.8: n=229 fold 0.78 call-out +5.07±18.67(n=45) | eq>=.8: n=395 fold 0.46 call-out +78.67±9.87(n=176)
