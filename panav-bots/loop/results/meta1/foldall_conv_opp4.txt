@@ -1,0 +1,2 @@
+sw_foldall vs conv_opp4: -0.76 ± 0.40 chips/hand | match score 0.417 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -1.28 -0.24
