@@ -45,7 +45,10 @@ def pair(args):
     m2 = play_match([make(b), make(a, lb)], cfg, seed, hands, "fold", time_bank_s=bank)
     ffa = int(m1.forfeit == 0) + int(m2.forfeit == 1)
     ffb = int(m1.forfeit == 1) + int(m2.forfeit == 0)
-    return dict(seed=seed, chips=m1.chips[0] + m2.chips[1], hands=m1.hands_played + m2.hands_played,
+    W = 100
+    d1 = m1.hand_deltas; d2 = [-x for x in m2.hand_deltas]      # A's chips per hand in each leg
+    win = [sum(d1[i:i + W]) + sum(d2[i:i + W]) for i in range(0, max(len(d1), len(d2)), W)]
+    return dict(seed=seed, win=win, chips=m1.chips[0] + m2.chips[1], hands=m1.hands_played + m2.hands_played,
                 score=(m1.score(0) + m2.score(1)) / 2, ff_a=ffa, ff_b=ffb,
                 reasons=[r for r in (m1.forfeit_reason, m2.forfeit_reason) if r])
 
@@ -63,6 +66,8 @@ def main():
     a = ap.parse_args()
     if a.logdir:
         Path(a.logdir).mkdir(parents=True, exist_ok=True)
+    if a.bank is None:
+        a.bank = 0.15 * a.hands        # real bank: 30 s per 200-hand leg, 75 s per 500-hand leg (the lab default is 60 s)
     tasks = [(a.a, a.b, s, a.hands, a.logdir, a.bank) for s in range(a.first_seed, a.first_seed + a.seeds)]
     with mp.get_context("spawn").Pool(min(a.processes, len(tasks))) as pool:
         rs = pool.map(pair, tasks, chunksize=1)
@@ -73,6 +78,9 @@ def main():
     print(f"{Path(a.a).stem} vs {Path(a.b).parent.name if Path(a.b).name=='bot.py' else Path(a.b).stem}: "
           f"{m:+.2f} ± {se:.2f} chips/hand | match score {sc:.3f} | pairs {n} | "
           f"forfeits A/B {sum(r['ff_a'] for r in rs)}/{sum(r['ff_b'] for r in rs)}", flush=True)
+    nwin = max(len(r["win"]) for r in rs)
+    cols = [sum(r["win"][i] for r in rs if len(r["win"]) > i) / (2 * 100 * n) for i in range(nwin)]
+    print("  chips/hand by 100-hand window (A, avg of 2 legs): " + " ".join(f"{c:+.2f}" for c in cols), flush=True)
     if a.out:
         Path(a.out).write_text(json.dumps(dict(a=a.a, b=a.b, hands=a.hands, mean=m, se=se, score=sc, pairs=rs)))
 
