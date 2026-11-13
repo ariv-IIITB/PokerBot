@@ -1,0 +1,25 @@
++ cd /home/user/pokerbot
++ R=panav-bots/loop/results/league_confirm
++ for n in W1 W2 W3 W4
++ PYTHONPATH=.
++ .venv/bin/python panav-bots/loop/tools/file_duel.py panav-bots/loop/league/W1.py panav-bots/final/bot.py --seeds 24 --hands 200 --first-seed 2000 --processes 3 --logdir panav-bots/loop/results/league_confirm/logs_W1 --out panav-bots/loop/results/league_confirm/W1_24x200.json
+W1 vs final: -0.59 ± 0.32 chips/hand | match score 0.354 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.07 -1.11
++ for n in W1 W2 W3 W4
++ PYTHONPATH=.
++ .venv/bin/python panav-bots/loop/tools/file_duel.py panav-bots/loop/league/W2.py panav-bots/final/bot.py --seeds 24 --hands 200 --first-seed 2000 --processes 3 --logdir panav-bots/loop/results/league_confirm/logs_W2 --out panav-bots/loop/results/league_confirm/W2_24x200.json
+W2 vs final: -0.89 ± 0.29 chips/hand | match score 0.354 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.57 -1.21
++ for n in W1 W2 W3 W4
++ PYTHONPATH=.
++ .venv/bin/python panav-bots/loop/tools/file_duel.py panav-bots/loop/league/W3.py panav-bots/final/bot.py --seeds 24 --hands 200 --first-seed 2000 --processes 3 --logdir panav-bots/loop/results/league_confirm/logs_W3 --out panav-bots/loop/results/league_confirm/W3_24x200.json
+W3 vs final: -0.88 ± 0.30 chips/hand | match score 0.292 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.58 -1.18
++ for n in W1 W2 W3 W4
++ PYTHONPATH=.
++ .venv/bin/python panav-bots/loop/tools/file_duel.py panav-bots/loop/league/W4.py panav-bots/final/bot.py --seeds 24 --hands 200 --first-seed 2000 --processes 3 --logdir panav-bots/loop/results/league_confirm/logs_W4 --out panav-bots/loop/results/league_confirm/W4_24x200.json
+W4 vs final: -1.06 ± 0.37 chips/hand | match score 0.333 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.92 -1.21
++ for n in W1 W2 W3 W4
++ PYTHONPATH=.
++ .venv/bin/python panav-bots/loop/tools/file_duel.py panav-bots/loop/league/W1.py panav-bots/final/bot.py --seeds 8 --hands 500 --first-seed 2050 --processes 3 --out panav-bots/loop/results/league_confirm/W1_8x500.json
