@@ -1,0 +1,2 @@
+sw_valuebet vs s4_balanced: +0.53 ± 0.30 chips/hand | match score 0.604 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.32 +1.38
