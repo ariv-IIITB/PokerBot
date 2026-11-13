@@ -1,12 +1,16 @@
 bot                    pairs  base c/h  cand c/h       delta c/h    wins b/c
+opps_conv_opp3            40     -0.18     +0.15    +0.33 +-0.18   0.47/0.57  ff=0
+spar_adapt                40     +0.38     +0.23    -0.14 +-0.17   0.62/0.65  ff=0
 spar_betfold              40     +1.52     +1.35    -0.17 +-0.23   0.90/0.80  ff=0
+spar_discardread          40     +0.50     +0.39    -0.10 +-0.17   0.60/0.65  ff=0
 spar_donk                 40     +0.67     +0.51    -0.15 +-0.18   0.75/0.68  ff=0
 spar_light3b              40     +0.19     +0.29    +0.10 +-0.23   0.62/0.60  ff=0
 spar_polar                40     +0.82     +1.01    +0.19 +-0.32   0.68/0.70  ff=0
 spar_potctl               40     +0.35     +0.56    +0.21 +-0.14   0.65/0.72  ff=0
+spar_tilt                 40     +0.51     +0.79    +0.29 +-0.21   0.62/0.70  ff=0
 spar_trapper              40     +0.21     +0.32    +0.10 +-0.19   0.57/0.57  ff=0
 
-POOLED (6 bots, 240 pairs): delta +0.045 +-0.090 chips/hand  (ratio 0.50)
-match wins pooled: base 0.696 cand 0.679   (cand-base -0.017)
+POOLED (10 bots, 400 pairs): delta +0.064 +-0.065 chips/hand  (ratio 0.97)
+match wins pooled: base 0.650 cand 0.665   (cand-base +0.015)
 bots down by > 2 SE: none
-PASS pooled>=+0.10 and >=1.5 SE: False | wins not lower: False
+PASS pooled>=+0.10 and >=1.5 SE: False | wins not lower: True
