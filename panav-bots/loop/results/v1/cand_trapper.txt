@@ -1,0 +1,2 @@
+cand_seeded vs trapper: +0.80 ± 0.29 chips/hand | match score 0.646 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +0.86 +0.74

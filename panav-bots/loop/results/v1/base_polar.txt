@@ -1,0 +1,2 @@
+base_seeded vs polar: +1.23 ± 0.35 chips/hand | match score 0.688 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +1.10 +1.36
