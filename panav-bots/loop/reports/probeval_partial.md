@@ -3,10 +3,12 @@
 |---|---|---|---|---|---|---|
 | adapt | 40 | 26/40 (65%) | 26/40 (65%) | +0.0 ± 8.8 | +0.34 ± 0.19 |  |
 | betfold | 40 | 35/40 (88%) | 34/40 (85%) | -2.5 ± 6.7 | -0.16 ± 0.20 |  |
+| conv_opp3 | 40 | 18/40 (45%) | 30/40 (75%) | +30.0 ± 9.6 | +0.71 ± 0.18 | up>2SE |
 | discardread | 40 | 24/40 (60%) | 29/40 (72%) | +12.5 ± 8.2 | +0.37 ± 0.18 |  |
 | donk | 40 | 22/40 (55%) | 22/40 (55%) | +0.0 ± 7.2 | +0.29 ± 0.19 |  |
 | eqtag | 40 | 26/40 (65%) | 28/40 (70%) | +5.0 ± 8.0 | +0.20 ± 0.21 |  |
 | light3b | 40 | 18/40 (45%) | 21/40 (52%) | +7.5 ± 7.5 | +0.25 ± 0.23 |  |
+| new_lag | 40 | 30/40 (75%) | 32/40 (80%) | +5.0 ± 9.4 | -0.10 ± 0.44 |  |
 | polar | 40 | 28/40 (70%) | 32/40 (80%) | +10.0 ± 7.0 | +0.04 ± 0.22 |  |
 | potctl | 40 | 24/40 (60%) | 27/40 (68%) | +7.5 ± 7.5 | +0.26 ± 0.21 |  |
 | s10_regret | 40 | 25/40 (62%) | 28/40 (70%) | +7.5 ± 8.3 | +0.79 ± 0.22 |  |
@@ -22,10 +24,10 @@
 | tilt | 40 | 26/40 (65%) | 28/40 (70%) | +5.0 ± 7.1 | +0.25 ± 0.23 |  |
 | trapper | 40 | 24/40 (60%) | 27/40 (68%) | +7.5 ± 9.7 | +0.18 ± 0.21 |  (trapper-type) |
 
-POOLED MATCH WINS 20 bots: base 510/800 (63.8%) -> probe 564/800 (70.5%)
-- all (rule 1): dwin +6.75 ± 2.05 pp (SE over 40 seeds); dchips/hand +0.302 ± 0.057
-- excl trapper-type: dwin +6.71 ± 2.01 pp (SE over 40 seeds); dchips/hand +0.308 ± 0.058
-- excl trapper-type & s1_ranges: dwin +7.08 ± 2.12 pp (SE over 40 seeds); dchips/hand +0.304 ± 0.060
+POOLED MATCH WINS 22 bots: base 558/880 (63.4%) -> probe 626/880 (71.1%)
+- all (rule 1): dwin +7.73 ± 1.85 pp (SE over 40 seeds); dchips/hand +0.302 ± 0.055
+- excl trapper-type: dwin +7.74 ± 1.83 pp (SE over 40 seeds); dchips/hand +0.308 ± 0.056
+- excl trapper-type & s1_ranges: dwin +8.12 ± 1.92 pp (SE over 40 seeds); dchips/hand +0.304 ± 0.058
 - forfeits (A side) 0
 
 ## Stage 2 (500h legs, seeds 30100-30123)
