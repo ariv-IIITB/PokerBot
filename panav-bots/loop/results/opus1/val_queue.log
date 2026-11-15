@@ -15,3 +15,11 @@ v2_S1_conv_opp3 444 sub_v2 vs conv_opp3: +0.44 ± 0.17 chips/hand | match score 
   S1_conv_opp3: exit fired in 0/80 legs
 v2_S1_eqtag 337 sub_v2 vs eqtag: +0.45 ± 0.26 chips/hand | match score 0.613 | pairs 40 | forfeits A/B 0/0
   S1_eqtag: exit fired in 0/80 legs
+v2_S1_potctl 321 sub_v2 vs potctl: +0.17 ± 0.19 chips/hand | match score 0.537 | pairs 40 | forfeits A/B 0/0
+  S1_potctl: exit fired in 0/80 legs
+v2_S1_polar 341 sub_v2 vs polar: +0.95 ± 0.31 chips/hand | match score 0.562 | pairs 40 | forfeits A/B 0/0
+  S1_polar: exit fired in 5/80 legs
+A_S1_polar 324 sub_disc_probe vs polar: +1.13 ± 0.34 chips/hand | match score 0.650 | pairs 40 | forfeits A/B 0/0
+v2_S1_new_geometric 441 sub_v2 vs new_geometric: +0.01 ± 0.24 chips/hand | match score 0.537 | pairs 40 | forfeits A/B 0/0
+  S1_new_geometric: exit fired in 19/80 legs
+A_S1_new_geometric 446 sub_disc_probe vs new_geometric: -0.07 ± 0.22 chips/hand | match score 0.537 | pairs 40 | forfeits A/B 0/0
