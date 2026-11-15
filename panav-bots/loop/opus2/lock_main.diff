@@ -1,0 +1,98 @@
+27a28,29
+> STAGE2_MIN_HANDS = 800        # OPUS2: init total_hands >= this = a Stage 2 match (~1000); Stage 1 is 400
+> LOCK_MAX_LOSS = 2             # OPUS2 lock: the most a check/fold-only hand can lose (the big blind)
+105a108,119
+>         # OPUS2 match lock (Stage 2 only): the bot is one process per match, so the sum of hand_result nets is
+>         # the match score. Once net > LOCK_MAX_LOSS x (hands left, this one included), checking/folding every
+>         # remaining hand cannot lose the match: we lock in the win. Off in Stage 1 (identical to A there).
+>         self.lock_cfg = self.config.get("s2_lock") == "on"
+>         self.lock_armed = False
+>         self.locked = False
+>         self.lock_at = None
+>         self.match_net = 0
+>         self.last_net_hand = None
+>         self.lock_R = None            # risk budget for this hand while locked (chips we may still put in)
+>         self.hand_stack = 200
+>         self.lock_clamps = 0
+154a169
+>                     self.lock_armed = self.lock_cfg and self.total_hands >= STAGE2_MIN_HANDS
+161a177,180
+>                     if self.lock_armed:
+>                         st = msg.get("stack")
+>                         self.hand_stack = st if type(st) is int else 200
+>                         self.update_lock(msg.get("hand_id"))
+166c185,187
+<                 elif t == "hand_result" and self.hs is not None:
+---
+>                 elif t == "hand_result" and self.lock_armed:
+>                     self.add_net(msg)
+>                 if t == "hand_result" and self.hs is not None:
+186a208,266
+>     def add_net(self, msg):
+>         """OPUS2 lock: the match score, from each hand's net (counted once per hand_id)."""
+>         hid = msg.get("hand_id")
+>         net = msg.get("net")
+>         if hid == self.last_net_hand or type(net) is not int:
+>             if type(net) is not int:
+>                 self.lock_armed = self.locked = False; self.lock_R = None         # unreadable score: never lock on a guess
+>             return
+>         self.last_net_hand = hid
+>         self.match_net += net
+> 
+>     def update_lock(self, hand_id):
+>         """At each new hand: lock once the lead covers the worst case of check/folding every hand left."""
+>         try:
+>             hid = int(hand_id)
+>         except Exception:
+>             self.lock_armed = self.locked = False; self.lock_R = None
+>             return
+>         left = self.total_hands - hid + 1                     # hands not finished, this one included
+>         if left < 1:                                          # more hands than announced: play normally
+>             self.locked, self.lock_R = False, None
+>             return
+>         lock = self.match_net > LOCK_MAX_LOSS * left
+>         if lock and not self.locked:
+>             self.lock_at = hid
+>             log(f"match lock: hand {hid}, net {self.match_net}, hands left {left}: risk-capped play from here")
+>         self.locked = lock
+>         self.lock_R = self.match_net - LOCK_MAX_LOSS * (left - 1) - 1 if lock else None
+> 
+>     def lock_clamp(self, req, reply, slot):
+>         """OPUS2 lock: keep our decision if the chips it puts in this hand stay within the risk budget R (what
+>         the lead can lose this hand and still cover LOCK_MAX_LOSS for every later hand); else the cheapest of
+>         call / check / fold that does. Only call, check or fold replace a decision, so no new raise size."""
+>         try:
+>             R = self.lock_R
+>             if R is None:
+>                 return reply, slot
+>             put = self.hand_stack - int(req["my_stack"])           # chips already in this hand
+>             def cost(r):
+>                 a = r.get("action")
+>                 if a == "raise":
+>                     return int(r["amount"]) - int(req["my_bet"])
+>                 if a == "call":
+>                     return min(int(req["to_call"]), int(req["my_stack"]))
+>                 return 0
+>             if put + cost(reply) <= R:
+>                 return reply, slot
+>             legal = req.get("legal_actions") or []
+>             for a in ("call", "check", "fold"):
+>                 r = {"type": "action", "action": a}
+>                 if a in legal and put + cost(r) <= R and P.legal_reply(r, req):
+>                     self.lock_clamps += 1
+>                     return r, a
+>         except Exception as e:
+>             self.stats.error("lock", e)
+>         legal = req.get("legal_actions") or []
+>         r = {"type": "action", "action": "check" if "check" in legal else "fold"}
+>         return (r, r["action"]) if P.legal_reply(r, req) else (reply, slot)
+> 
+217a298,299
+>             if self.locked:
+>                 reply, slot = self.lock_clamp(req, reply, slot)
+224a307,308
+>             if self.locked:
+>                 reply = self.lock_clamp(req, reply, None)[0]
+315a400,401
+>         if self.lock_armed:
+>             log(f"match lock: armed, locked at hand {self.lock_at}, net {self.match_net}, clamps {self.lock_clamps}")

@@ -1,0 +1,4 @@
+sub_disc_probe vs lakshya1: MATCH WINS 11/24 (45.8%) chips/hand -0.242 ± 0.194 forfeits A/B 0/0 | min bank left A 79.7s worst reply 0.63s
+sub_s2_lock vs lakshya1: MATCH WINS 14/24 (58.3%) chips/hand -0.407 ± 0.157 forfeits A/B 0/0 | min bank left A 98.3s worst reply 0.45s
+sub_disc_probe vs new_eqrandom: MATCH WINS 11/24 (45.8%) chips/hand -0.231 ± 0.261 forfeits A/B 0/0 | min bank left A 95.1s worst reply 0.47s
+sub_s2_lock vs new_eqrandom: MATCH WINS 13/24 (54.2%) chips/hand -0.601 ± 0.205 forfeits A/B 0/0 | min bank left A 93.6s worst reply 0.50s

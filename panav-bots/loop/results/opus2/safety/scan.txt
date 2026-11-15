@@ -1,0 +1,12 @@
+== panav-bots/loop/cands/sub_disc_probe.py
+ imports: ['__future__', 'base64', 'collections', 'contextlib', 'dataclasses', 'hashlib', 'itertools', 'json', 'math', 'numbers', 'numpy', 'random', 'shared', 'struct', 'sys', 'time', 'typing', 'zlib']
+ non-stdlib/numpy/local imports: []
+ forbidden-module imports: []
+ flagged calls (module,name):count = {('botsrc.river_glue', 'run'): 1, ('botsrc.river_solver', 'run'): 1}
+ outside _SOURCES (loader) flagged: []
+== panav-bots/loop/cands/sub_s2_lock.py
+ imports: ['__future__', 'base64', 'collections', 'contextlib', 'dataclasses', 'hashlib', 'itertools', 'json', 'math', 'numbers', 'numpy', 'random', 'shared', 'struct', 'sys', 'time', 'typing', 'zlib']
+ non-stdlib/numpy/local imports: []
+ forbidden-module imports: []
+ flagged calls (module,name):count = {('botsrc.river_glue', 'run'): 1, ('botsrc.river_solver', 'run'): 1}
+ outside _SOURCES (loader) flagged: []
