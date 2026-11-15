@@ -11,15 +11,18 @@
 | potctl | 40 | 24/40 (60%) | 27/40 (68%) | +7.5 ± 7.5 | +0.26 ± 0.21 |  |
 | s1_ranges | 40 | 40/40 (100%) | 40/40 (100%) | +0.0 ± 0.0 | +0.39 ± 0.03 |  |
 | s2_rollout | 40 | 24/40 (60%) | 30/40 (75%) | +15.0 ± 10.5 | +0.42 ± 0.28 |  |
+| s3_exploit | 40 | 21/40 (52%) | 29/40 (72%) | +20.0 ± 8.9 | +0.46 ± 0.19 | up>2SE |
 | s5_preflop | 40 | 21/40 (52%) | 27/40 (68%) | +15.0 ± 6.7 | +0.68 ± 0.20 | up>2SE |
 | s6_discard | 40 | 23/40 (58%) | 21/40 (52%) | -5.0 ± 8.0 | -0.01 ± 0.17 |  |
+| s7_solver | 40 | 22/40 (55%) | 29/40 (72%) | +17.5 ± 9.4 | +0.47 ± 0.26 |  |
+| s9_sizing | 40 | 34/40 (85%) | 34/40 (85%) | +0.0 ± 7.2 | -0.05 ± 0.22 |  |
 | tilt | 40 | 26/40 (65%) | 28/40 (70%) | +5.0 ± 7.1 | +0.25 ± 0.23 |  |
 | trapper | 40 | 24/40 (60%) | 27/40 (68%) | +7.5 ± 9.7 | +0.18 ± 0.21 |  (trapper-type) |
 
-POOLED MATCH WINS 14 bots: base 361/560 (64.5%) -> probe 392/560 (70.0%)
-- all (rule 1): dwin +5.54 ± 2.15 pp (SE over 40 seeds); dchips/hand +0.249 ± 0.057
-- excl trapper-type: dwin +5.38 ± 1.95 pp (SE over 40 seeds); dchips/hand +0.255 ± 0.058
-- excl trapper-type & s1_ranges: dwin +5.83 ± 2.11 pp (SE over 40 seeds); dchips/hand +0.244 ± 0.062
+POOLED MATCH WINS 17 bots: base 438/680 (64.4%) -> probe 484/680 (71.2%)
+- all (rule 1): dwin +6.76 ± 2.14 pp (SE over 40 seeds); dchips/hand +0.257 ± 0.062
+- excl trapper-type: dwin +6.72 ± 2.01 pp (SE over 40 seeds); dchips/hand +0.262 ± 0.063
+- excl trapper-type & s1_ranges: dwin +7.17 ± 2.14 pp (SE over 40 seeds); dchips/hand +0.253 ± 0.067
 - forfeits (A side) 0
 
 ## Stage 2 (500h legs, seeds 30100-30123)
