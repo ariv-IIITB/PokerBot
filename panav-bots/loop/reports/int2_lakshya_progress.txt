@@ -1,0 +1,1 @@
+S1 A 5/100 MATCH WINS 4/5 (80%) chips/hand +0.80±0.35 ff 0
