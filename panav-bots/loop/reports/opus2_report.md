@@ -54,7 +54,8 @@ among bots level on match points. It buys about +12 pp match wins, i.e. about +3
    identical to A: PASS. Size 737 KB: PASS. 60-hand real-protocol run with python 3.11.18 vs starter bot at total 1000: 0 illegal, 0 forfeits,
    RSS 106 MB: PASS. No forfeits in any of the 1000-hand matches; worst reply in the validation runs 0.50 s; min bank left 68.6 s of 150.
    Stage 1 identity: replayed 400-hand input streams give byte-identical output to one of A's own outputs (A itself is not deterministic):
-   PASS. 2x-slowdown timing: see below.
+   PASS. 2x-slowdown timing (1000-hand match vs lakshya1, both seats): lock mean 24.4 ms / p99 128 ms / worst 0.32 s; A mean 24.4 / p99 128 /
+   worst 0.27 s; bank used at most 86.6 s of 150 (58%) vs A 82.3 s (55%); RSS 130 MB vs 127 MB: PASS (worst < 1.5 s, same mean and p99).
    Lock legality: replay checker found 0 budget violations (`opus2/lockcheck.py`). The 2 flagged cases were desync artifacts, after we had folded.
 **Overall by the letter: FAIL (rule 2 only).** Recommendation: ship stage2 lock for Stage 2; it does nothing at Stage 1 (total_hands < 800).
 
