@@ -56,3 +56,4 @@ S1 final 75/100 MATCH WINS 40/75 (53%) chips/hand -0.04±0.16 ff 0
 S1 final 80/100 MATCH WINS 43/80 (54%) chips/hand -0.03±0.16 ff 0
 S1 final 85/100 MATCH WINS 43/85 (51%) chips/hand -0.09±0.15 ff 0
 S1 final 90/100 MATCH WINS 44/90 (49%) chips/hand -0.13±0.15 ff 0
+S1 final 95/100 MATCH WINS 47/95 (49%) chips/hand -0.13±0.14 ff 0
