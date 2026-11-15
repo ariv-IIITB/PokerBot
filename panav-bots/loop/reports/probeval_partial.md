@@ -8,6 +8,7 @@
 | discardread | 40 | 24/40 (60%) | 29/40 (72%) | +12.5 ± 8.2 | +0.37 ± 0.18 |  |
 | donk | 40 | 22/40 (55%) | 22/40 (55%) | +0.0 ± 7.2 | +0.29 ± 0.19 |  |
 | eqtag | 40 | 26/40 (65%) | 28/40 (70%) | +5.0 ± 8.0 | +0.20 ± 0.21 |  |
+| lakshya1 | 40 | 20/40 (50%) | 24.5/40 (61%) | +11.2 ± 6.1 | +0.52 ± 0.17 |  |
 | light3b | 40 | 18/40 (45%) | 21/40 (52%) | +7.5 ± 7.5 | +0.25 ± 0.23 |  |
 | new_eqrandom | 40 | 22/40 (55%) | 27/40 (68%) | +12.5 ± 5.3 | +0.38 ± 0.06 | up>2SE |
 | new_exploiter | 40 | 27/40 (68%) | 28/40 (70%) | +2.5 ± 9.1 | -0.03 ± 0.20 |  |
@@ -31,12 +32,19 @@
 | tilt | 40 | 26/40 (65%) | 28/40 (70%) | +5.0 ± 7.1 | +0.25 ± 0.23 |  |
 | trapper | 40 | 24/40 (60%) | 27/40 (68%) | +7.5 ± 9.7 | +0.18 ± 0.21 |  (trapper-type) |
 
-POOLED MATCH WINS 29 bots: base 732/1160 (63.1%) -> probe 798/1160 (68.8%)
-- all (rule 1): dwin +5.69 ± 1.64 pp (SE over 40 seeds); dchips/hand +0.196 ± 0.043
-- excl trapper-type: dwin +6.48 ± 1.64 pp (SE over 40 seeds); dchips/hand +0.243 ± 0.045
-- excl trapper-type & s1_ranges: dwin +6.73 ± 1.71 pp (SE over 40 seeds); dchips/hand +0.237 ± 0.047
+POOLED MATCH WINS 30 bots: base 752/1200 (62.7%) -> probe 822.5/1200 (68.5%)
+- all (rule 1): dwin +5.87 ± 1.55 pp (SE over 40 seeds); dchips/hand +0.207 ± 0.041
+- excl trapper-type: dwin +6.65 ± 1.56 pp (SE over 40 seeds); dchips/hand +0.253 ± 0.043
+- excl trapper-type & s1_ranges: dwin +6.90 ± 1.61 pp (SE over 40 seeds); dchips/hand +0.248 ± 0.045
 - forfeits (A side) 0
 
 ## Stage 2 (500h legs, seeds 30100-30123)
 | bot | pairs | base W/N (%) | probe W/N (%) | dwin pp ± SE | dchips/hand ± SE | flag |
 |---|---|---|---|---|---|---|
+| lakshya1 | 24 | 9/24 (38%) | 14/24 (58%) | +20.8 ± 12.0 | +0.26 ± 0.16 |  |
+
+POOLED MATCH WINS 1 bots: base 9/24 (37.5%) -> probe 14/24 (58.3%)
+- all (rule 1): dwin +20.83 ± 12.01 pp (SE over 24 seeds); dchips/hand +0.262 ± 0.156
+- excl trapper-type: dwin +20.83 ± 12.01 pp (SE over 24 seeds); dchips/hand +0.262 ± 0.156
+- excl trapper-type & s1_ranges: dwin +20.83 ± 12.01 pp (SE over 24 seeds); dchips/hand +0.262 ± 0.156
+- forfeits (A side) 0
