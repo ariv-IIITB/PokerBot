@@ -1,0 +1,2 @@
+sub_v2 vs new_lag: +2.43 ± 0.47 chips/hand | match score 0.738 | pairs 40 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +1.92 +2.95

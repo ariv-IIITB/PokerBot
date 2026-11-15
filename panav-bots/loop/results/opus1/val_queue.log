@@ -23,3 +23,8 @@ A_S1_polar 324 sub_disc_probe vs polar: +1.13 ± 0.34 chips/hand | match score 0
 v2_S1_new_geometric 441 sub_v2 vs new_geometric: +0.01 ± 0.24 chips/hand | match score 0.537 | pairs 40 | forfeits A/B 0/0
   S1_new_geometric: exit fired in 19/80 legs
 A_S1_new_geometric 446 sub_disc_probe vs new_geometric: -0.07 ± 0.22 chips/hand | match score 0.537 | pairs 40 | forfeits A/B 0/0
+v2_S1_new_exploiter 546 sub_v2 vs new_exploiter: +0.35 ± 0.19 chips/hand | match score 0.550 | pairs 40 | forfeits A/B 0/0
+  S1_new_exploiter: exit fired in 0/80 legs
+v2_S1_new_lag 381 sub_v2 vs new_lag: +2.43 ± 0.47 chips/hand | match score 0.738 | pairs 40 | forfeits A/B 0/0
+  S1_new_lag: exit fired in 21/80 legs
+A_S1_new_lag 387 sub_disc_probe vs new_lag: +2.68 ± 0.38 chips/hand | match score 0.675 | pairs 40 | forfeits A/B 0/0
