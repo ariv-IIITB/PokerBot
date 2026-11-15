@@ -29,3 +29,4 @@ S2 A 40/100 MATCH WINS 22/40 (55%) chips/hand +0.07±0.16 ff 0
 S2 A 45/100 MATCH WINS 25/45 (56%) chips/hand +0.06±0.15 ff 0
 S2 A 50/100 MATCH WINS 28/50 (56%) chips/hand +0.06±0.14 ff 0
 S2 A 55/100 MATCH WINS 31/55 (56%) chips/hand +0.05±0.13 ff 0
+S2 A 60/100 MATCH WINS 34/60 (57%) chips/hand +0.12±0.13 ff 0
