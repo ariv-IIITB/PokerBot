@@ -63,3 +63,11 @@ among bots level on match points. It buys about +12 pp match wins, i.e. about +3
 - In one-process 1000-hand matches A wins only 3/16 vs new_minraise (design) and 8/24 vs trapper. Worth knowing; not addressed here.
 - Not pursued, with reasons in opus2_research.md: phase schedules on Bayesian trait intervals, Exp3 over styles (payoff noise 40 chips/hand),
   deeper solving (the time manager already gives the river solver up to a 67% bank plan).
+
+## Combined build OPUS1 + OPUS2 (owner request, 17:30 UTC)
+`panav-bots/submission/bot_stage2_opus1_opus2.py`, **sha256 333a552fd37c203ae997f3b564fa450c968ea6ca6886ce59700415b051695ddb** (739 KB).
+It is OPUS1's `loop/opus1:panav-bots/loop/cands/sub_v2.py` (botsrc.exploit change + `probe_exit: on`) with OPUS2's lock `botsrc.main` + `s2_lock: on`.
+The two changes touch different modules, and every other module is byte-identical to sub_v2. Checks run on the combined file: lock budget replay 0 violations;
+fuzz at total_hands 1000 vs weird:mixed/all_in/malformed + starter bot: 0 illegal, 0 forfeits; 60-hand real-protocol run clean.
+NOT match-validated as a combination (no time). OPUS1's part is OPUS1's verdict. The lock only acts at total_hands >= 800 and only once the match
+is mathematically won, so it cannot interact with OPUS1's change before that point.
