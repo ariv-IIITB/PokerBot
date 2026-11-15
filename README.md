@@ -1,5 +1,7 @@
 # Synergy PokerBots toolkit
 
+> **SUBMISSION: the file to upload is [`bot.py`](bot.py) in this directory (details, checksum and evidence: [`SUBMISSION.md`](SUBMISSION.md)). It is the only file named `bot.py` in the repo; all other bots are `main_bot.py`.**
+
 > **Main repo:** this checkout, `/home/fioriv/synergy/PokerBot` (GitHub `ariv-IIITB/PokerBot`).
 > **Variant known: Discard Hold'em.** Official rules in `docs/rules/` (summary: `docs/rules/SUMMARY.md`).
 > Full Problem Statement 1 Nov 2026; deadline 15 Nov 2026, 23:59 IST.

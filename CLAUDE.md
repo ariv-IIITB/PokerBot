@@ -1,5 +1,7 @@
 # CLAUDE.md — Synergy PokerBots toolkit
 
+> **Submission file: `bot.py` in the repo root (see `SUBMISSION.md`).** Every other bot in the repo is named `main_bot.py`; do not add another `bot.py`.
+
 **Main repo: `/home/fioriv/synergy/PokerBot`** (GitHub `ariv-IIITB/PokerBot`, branch `main`;
 canonical since 2026-10-28). The old `~/Desktop/pokerbots_synergy*` copies are not on this
 machine and are no longer used.
