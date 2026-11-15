@@ -21,7 +21,6 @@ for o in OPP: jobs.append((f"A_{o}", "A", o, 41000, 24, 200))
 for o in OPP: jobs.append((f"F_{o}", "F", o, 41000, 24, 200))
 jobs.append(("h2h_A_C", "A", "C", 40100, 24, 200))
 for o in OPP: jobs.append((f"C_{o}", "C", o, 41000, 24, 200))
-jobs += [("A_lakshya1_500", "A", "lakshya1", 42000, 24, 500), ("F_lakshya1_500", "F", "lakshya1", 42000, 24, 500)]
 for o in OPP: jobs.append((f"B_{o}", "B", o, 41000, 24, 200))
 for tag, a, b, f, s, h in jobs:
     run(tag, BOT.get(a, a) if a in BOT else a, OPP.get(b, BOT.get(b, b)), f, s, h)
