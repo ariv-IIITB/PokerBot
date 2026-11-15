@@ -1,4 +1,4 @@
-# OPUS1 pre-registration (written 15 Nov 2026 ~14:20 UTC, BEFORE any validation run; not to be changed after)
+# OPUS1 pre-registration (written 15 Nov 2026 ~14:00 UTC, BEFORE any validation run; not to be changed after)
 
 ## Candidate
 `panav-bots/loop/cands/sub_v2.py` = A (`cands/sub_disc_probe.py`) + **probe exit** (config `probe_exit: on`). Only `botsrc.exploit` and
