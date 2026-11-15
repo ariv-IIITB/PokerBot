@@ -1,0 +1,27 @@
+| bot | n | A wins | lock wins (post-hoc) | d wins pp ± SE | fired | A chips/h | A capped/h | adjacent-order d pp |
+|---|---|---|---|---|---|---|---|---|
+| conv_opp3 | 24 | 17 (71%) | 19 (79%) | +8.3 ± 5.8 | 19 | +0.52 ± 0.22 | +0.34 | +4.2 |
+| eqtag | 24 | 17 (71%) | 21 (88%) | +16.7 ± 7.8 | 21 | +0.58 ± 0.21 | +0.35 | +16.7 |
+| lakshya1 | 24 | 11 (46%) | 16 (67%) | +20.8 ± 8.5 | 16 | -0.24 ± 0.19 | -0.13 | +12.5 |
+| new_eqrandom | 24 | 11 (46%) | 12 (50%) | +4.2 ± 4.2 | 12 | -0.23 ± 0.26 | -0.08 | +8.3 |
+| new_exploiter | 24 | 10 (42%) | 11 (46%) | +4.2 ± 4.2 | 11 | -0.33 ± 0.18 | -0.23 | +4.2 |
+| new_geometric | 24 | 12 (50%) | 15 (62%) | +12.5 ± 6.9 | 15 | +0.22 ± 0.23 | +0.08 | +4.2 |
+| new_trapper | 24 | 12 (50%) | 15 (62%) | +12.5 ± 6.9 | 15 | -0.00 ± 0.22 | +0.03 | +12.5 |
+| polar | 24 | 21 (88%) | 21 (88%) | +0.0 ± 0.0 | 21 | +0.89 ± 0.24 | +0.58 | +0.0 |
+| potctl | 24 | 18 (75%) | 19 (79%) | +4.2 ± 4.2 | 19 | +0.67 ± 0.18 | +0.48 | +4.2 |
+| s2_rollout | 24 | 19 (79%) | 21 (88%) | +8.3 ± 5.8 | 21 | +0.76 ± 0.25 | +0.48 | +4.2 |
+| s3_exploit | 24 | 19 (79%) | 22 (92%) | +12.5 ± 6.9 | 22 | +0.55 ± 0.18 | +0.38 | +0.0 |
+| s4_balanced | 24 | 13 (54%) | 20 (83%) | +29.2 ± 9.5 | 20 | +0.11 ± 0.16 | +0.06 | +8.3 |
+| s5_preflop | 24 | 15 (62%) | 17 (71%) | +8.3 ± 5.8 | 16 | +0.07 ± 0.25 | +0.11 | +8.3 |
+| s7_solver | 24 | 17 (71%) | 20 (83%) | +12.5 ± 6.9 | 20 | +0.48 ± 0.20 | +0.33 | +4.2 |
+| trapper | 24 | 8 (33%) | 14 (58%) | +25.0 ± 9.0 | 14 | -0.45 ± 0.21 | -0.29 | +0.0 |
+
+POOLED 15 bots, 360 matches: A 220/360 (61.1%) -> lock 263/360 (73.1%): +11.94 ± 1.71 pp (mean of per-bot +11.94 ± 2.11); adjacent order +6.11 ± 1.26 pp
+REAL conv_opp3: n 24 wins A 17 -> L 17 (+0.0 ± 13.5 pp); chips/h -0.488 ± 0.231; capped/h -0.326 ± 0.174; L forfeits 0; L min bank left 100.4s worst 0.42s
+REAL eqtag: n 24 wins A 17 -> L 20 (+12.5 ± 12.5 pp); chips/h -0.487 ± 0.206; capped/h -0.302 ± 0.147; L forfeits 0; L min bank left 104.7s worst 0.40s
+REAL lakshya1: n 24 wins A 11 -> L 14 (+12.5 ± 15.1 pp); chips/h -0.165 ± 0.237; capped/h -0.157 ± 0.190; L forfeits 0; L min bank left 98.3s worst 0.45s
+REAL new_eqrandom: n 24 wins A 11 -> L 13 (+8.3 ± 11.9 pp); chips/h -0.369 ± 0.269; capped/h -0.244 ± 0.170; L forfeits 0; L min bank left 93.6s worst 0.50s
+REAL new_trapper: n 24 wins A 12 -> L 13 (+4.2 ± 12.7 pp); chips/h -0.164 ± 0.239; capped/h -0.154 ± 0.180; L forfeits 0; L min bank left 68.6s worst 0.36s
+REAL s7_solver: n 24 wins A 17 -> L 22 (+20.8 ± 12.0 pp); chips/h -0.517 ± 0.223; capped/h -0.307 ± 0.146; L forfeits 0; L min bank left 103.7s worst 0.41s
+REAL POOLED 6 bots 144 matches: wins +9.72 ± 5.24 pp; chips/h -0.365 ± 0.095; capped/h -0.248 ± 0.068
+H2H lock vs A: MATCH WINS 30/40 (75.0%), chips/h -0.078 ± 0.076, forfeits 0/0

@@ -1,0 +1,4 @@
+sub_disc_probe vs s6_discard: MATCH WINS 12/16 (75.0%) chips/hand +0.441 ± 0.262 forfeits A/B 0/0 | min bank left A 84.4s worst reply 0.43s
+sub_disc_probe vs conv_opp4: MATCH WINS 14/16 (87.5%) chips/hand +1.203 ± 0.256 forfeits A/B 0/0 | min bank left A 109.7s worst reply 0.49s
+sub_disc_probe vs new_minraise: MATCH WINS 3/16 (18.8%) chips/hand -0.573 ± 0.194 forfeits A/B 0/0 | min bank left A 82.9s worst reply 0.36s
+DESIGNDONE
