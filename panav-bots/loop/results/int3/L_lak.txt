@@ -1,0 +1,1 @@
+L_sd2 vs lakshya1: MATCH WINS 3/3 (100.0%) chips/hand +0.003 ± 0.001 forfeits A/B 0/0 | min bank left A 64.8s worst reply 0.37s

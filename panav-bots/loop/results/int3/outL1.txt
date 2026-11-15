@@ -1,0 +1,750 @@
+{"type": "action", "action": "call"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "4h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "6d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 190}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "Ts"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 24}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "discard", "card": "6d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "6s"}
+{"type": "action", "action": "raise", "amount": 12}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "7s"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "Ac"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "discard", "card": "Td"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 50}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "raise", "amount": 3}
+{"type": "discard", "card": "3s"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "raise", "amount": 8}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "5s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "discard", "card": "5c"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "4s"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 8}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "4d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "Qc"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "Qd"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "4c"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 12}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3h"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "2s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "2s"}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "Kc"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "5d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 30}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "9s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "Kh"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "discard", "card": "4s"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6h"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "5h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "4c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "Qh"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "7s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "As"}
+{"type": "action", "action": "raise", "amount": 20}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 7}
+{"type": "discard", "card": "8s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "3h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "Td"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "7h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 30}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "4s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "5s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "discard", "card": "2d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3c"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 200}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "2d"}
+{"type": "action", "action": "raise", "amount": 20}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "2d"}
+{"type": "action", "action": "raise", "amount": 20}
+{"type": "action", "action": "raise", "amount": 60}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "Tc"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "discard", "card": "3d"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "raise", "amount": 8}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "discard", "card": "Td"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "Tc"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "Jc"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3c"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "7h"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 8}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "raise", "amount": 3}
+{"type": "discard", "card": "5d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "5h"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "4d"}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "action", "action": "raise", "amount": 155}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6h"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "As"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 12}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "5d"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "Td"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "discard", "card": "3h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 8}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2d"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 40}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "7h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "Tc"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 7}
+{"type": "discard", "card": "6c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "8s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 60}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "8d"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 8}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "discard", "card": "4c"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 7}
+{"type": "discard", "card": "2s"}
+{"type": "action", "action": "raise", "amount": 17}
+{"type": "action", "action": "raise", "amount": 17}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "Kh"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 20}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "Ts"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 8}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3s"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "discard", "card": "2c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "discard", "card": "4c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "raise", "amount": 3}
+{"type": "discard", "card": "3d"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 30}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "discard", "card": "Qd"}
+{"type": "action", "action": "raise", "amount": 50}
+{"type": "action", "action": "raise", "amount": 175}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "Qd"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "Tc"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 170}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "6d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "Jc"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 20}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "Ts"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 90}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2c"}
+{"type": "action", "action": "raise", "amount": 12}
+{"type": "action", "action": "raise", "amount": 18}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "6c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 30}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "discard", "card": "8d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "4s"}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2d"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "discard", "card": "2c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 8}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "8s"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "7h"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "5c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "5d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 20}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "Kc"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 40}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "7s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "discard", "card": "6d"}
+{"type": "action", "action": "raise", "amount": 8}
+{"type": "action", "action": "raise", "amount": 12}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "4s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "2h"}
+{"type": "action", "action": "raise", "amount": 30}
+{"type": "action", "action": "raise", "amount": 90}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "raise", "amount": 3}
+{"type": "discard", "card": "2s"}
+{"type": "action", "action": "raise", "amount": 5}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "5c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "8s"}
+{"type": "action", "action": "raise", "amount": 30}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "5h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "Th"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "3c"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "Jd"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 20}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "Js"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "4d"}
+{"type": "action", "action": "raise", "amount": 12}
+{"type": "action", "action": "raise", "amount": 36}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "Qs"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "5d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 60}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "6h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "9c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "7c"}
+{"type": "action", "action": "raise", "amount": 20}
+{"type": "action", "action": "raise", "amount": 60}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "7s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "2c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 12}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "5h"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 20}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "4d"}
+{"type": "action", "action": "raise", "amount": 20}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "discard", "card": "3h"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "raise", "amount": 8}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 3}
+{"type": "discard", "card": "Ac"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "8c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "7h"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 40}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "7c"}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "raise", "amount": 12}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "Qc"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "4c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "6h"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "5c"}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "call"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "Jh"}
+{"type": "action", "action": "raise", "amount": 2}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "4d"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 12}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 9}
+{"type": "discard", "card": "5s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 30}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "8c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "raise", "amount": 4}
+{"type": "discard", "card": "Ks"}
+{"type": "action", "action": "raise", "amount": 30}
+{"type": "action", "action": "raise", "amount": 45}
+{"type": "action", "action": "raise", "amount": 10}
+{"type": "action", "action": "raise", "amount": 15}
+{"type": "discard", "card": "5s"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 6}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "5c"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 20}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "check"}
+{"type": "discard", "card": "Th"}
+{"type": "action", "action": "check"}
+{"type": "action", "action": "raise", "amount": 2}
