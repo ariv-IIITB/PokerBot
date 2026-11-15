@@ -3,3 +3,4 @@ S1 A 10/100 MATCH WINS 5/10 (50%) chips/hand +0.03±0.38 ff 0
 S1 A 15/100 MATCH WINS 6/15 (40%) chips/hand -0.04±0.36 ff 0
 S1 A 20/100 MATCH WINS 9/20 (45%) chips/hand +0.03±0.38 ff 0
 S1 A 25/100 MATCH WINS 14/25 (56%) chips/hand +0.26±0.32 ff 0
+S1 A 30/100 MATCH WINS 17/30 (57%) chips/hand +0.29±0.29 ff 0
