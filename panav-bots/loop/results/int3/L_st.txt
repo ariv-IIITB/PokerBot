@@ -1,0 +1,1 @@
+L_sd2 vs starter_bot: MATCH WINS 3/3 (100.0%) chips/hand +5.123 ± 0.220 forfeits A/B 0/0 | min bank left A 45.6s worst reply 0.44s
