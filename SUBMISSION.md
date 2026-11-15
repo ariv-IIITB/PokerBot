@@ -8,17 +8,20 @@ the previous final in `panav-bots/final/`) was renamed to `main_bot.py`, and the
 | | |
 |---|---|
 | Run command | `python3.11 bot.py` (JSON lines on stdin/stdout, official `pokerbots` protocol; debug output goes to stderr) |
-| Format | one self-contained file, 732 KB (limit 5 MB) |
+| Format | one self-contained file, 737 KB (limit 5 MB) |
 | Imports | standard library and NumPy only; no file, socket or subprocess access |
-| sha256 | `2309eedc310d33cb408374ac591da2e00357a85d0bf41ddb40ae0febb4362afe` |
+| sha256 | `5855fc7a8282b8a1971eb4205737a246c6571435334b6ddb136fa4967458fd85` |
 | Check | `sha256sum bot.py` should print the line above |
 
 ## What it is
-Candidate "A" = the previous final bot (`panav-bots/final/main_bot.py`: CFR blueprint, online river solver and
+Candidate "A + Stage 2 lock". Candidate "A" = the previous final bot (`panav-bots/final/main_bot.py`: CFR blueprint, online river solver and
 exploit layer) **plus** two changes: DISC1 (an equity-based discard choice) and the raw probe move. It was built
 and checked in the INT2 session (branch `loop/int2`, report `panav-bots/loop/reports/int2_report.md`).
+On top of A, `bot.py` adds a **Stage 2 risk-capped match lock** (OPUS2, branch `loop/opus2`, report `panav-bots/loop/reports/opus2_report.md`, safety report `loop/int3`): it activates only when `init.total_hands >= 800` (Stage 2); once the match lead exceeds twice the hands left it never risks more than the lead can spare, so the match cannot be lost. In Stage 1 it plays exactly like A.
 
 ## Evidence (honest summary)
+- Stage 2 lock, 1000-hand single-process matches: 220/360 (61.1%) -> 263/360 (73.1%) match wins over 15 bots (+11.9 +- 1.7 points, replay estimator); real build +9.7 +- 5.2 points over 6 bots, 74/96 vs 61/96 over 4 more bots; head-to-head against A 30/40 (75%). Cost: chips/hand -0.37 raw (-0.25 capped), because the bot stops pressing once safely ahead. Timing at 2x slowdown: worst reply 0.44 s, bank <= 104 s of 150 s (A is at the same level); fuzz 0 illegal / 0 forfeits.
+- The numbers below are for A (Stage 1 behaviour is identical).
 - 7 opponents x 24 duplicate pairs, 200-hand legs, normal builds: **110/168 match wins (65.5%)** against 86/168 (51.2%) for the previous final (paired +14.3 +- 5.5 points).
 - Against `lakshya1` (100 matches each): 56/100 at 200-hand legs and 55/100 at 500-hand legs; the previous final scored 50/100 at 200-hand legs.
 - Probe alone, 30 bots x 40 pairs on fresh seeds: 62.7% -> 68.5% match wins (+5.9 +- 1.55 points).
