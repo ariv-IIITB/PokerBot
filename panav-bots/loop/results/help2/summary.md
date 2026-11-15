@@ -6,6 +6,6 @@
 - **s7_solver**: MATCH WINS A 12/24, v2 13/24; paired delta (v2-A) +4.2±12.7 pp | chips/hand A -0.36±0.40, v2 +0.26±0.32, delta +0.619±0.335 | ff A (0, 0) v2 (0, 0)
 - **s10_regret**: MATCH WINS A 14/24, v2 13/24; paired delta (v2-A) -4.2±12.7 pp | chips/hand A +0.42±0.35, v2 +0.39±0.30, delta -0.025±0.318 | ff A (0, 0) v2 (0, 0)
 - **light3b**: MATCH WINS A 13/24, v2 13/24; paired delta (v2-A) +0.0±12.0 pp | chips/hand A +0.18±0.36, v2 +0.44±0.32, delta +0.264±0.354 | ff A (0, 0) v2 (0, 0)
-- tilt: incomplete
+- **tilt**: MATCH WINS A 13/24, v2 12/24; paired delta (v2-A) -4.2±12.7 pp | chips/hand A +0.63±0.42, v2 +0.27±0.26, delta -0.367±0.418 | ff A (0, 0) v2 (0, 0)
 
-**Pooled MATCH WINS: A 83/144, v2 80/144**
+**Pooled MATCH WINS: A 96/168, v2 92/168**
