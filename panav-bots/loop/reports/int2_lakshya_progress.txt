@@ -12,3 +12,4 @@ S1 A 55/100 MATCH WINS 33/55 (60%) chips/hand +0.35±0.21 ff 0
 S1 A 60/100 MATCH WINS 36/60 (60%) chips/hand +0.39±0.20 ff 0
 S1 A 65/100 MATCH WINS 41/65 (63%) chips/hand +0.46±0.19 ff 0
 S1 A 70/100 MATCH WINS 44/70 (63%) chips/hand +0.46±0.19 ff 0
+S1 A 75/100 MATCH WINS 46/75 (61%) chips/hand +0.42±0.18 ff 0
