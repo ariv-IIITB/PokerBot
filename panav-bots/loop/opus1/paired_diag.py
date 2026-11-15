@@ -97,7 +97,7 @@ def main():
     da, db = Path(sys.argv[1]), Path(sys.argv[2])
     A, B = load(da), load(db)
     keys = sorted(set(A) & set(B))
-    cls = defaultdict(lambda: [0, 0, 0, 0])     # n, sum dA-B, sum A, sum B
+    cls = defaultdict(lambda: [0, 0, 0, 0, 0])  # n, sum dA-B, sum A, sum B, sum (dA-B)^2
     for k in keys:
         c = diverge(A[k], B[k])
         if c is None:
@@ -107,13 +107,15 @@ def main():
         r[1] += A[k]["net"] - B[k]["net"]
         r[2] += A[k]["net"]
         r[3] += B[k]["net"]
+        r[4] += (A[k]["net"] - B[k]["net"]) ** 2
     tot = sum(A[k]["net"] - B[k]["net"] for k in keys)
     print(f"hands {len(keys)}  total A-B {tot:+d} chips ({tot / max(1, len(keys)):+.3f}/hand)  A {sum(A[k]['net'] for k in keys):+d}"
           f"  B {sum(B[k]['net'] for k in keys):+d}")
-    print(f"{'divergence class':52s} {'n':>5s} {'A-B':>7s} {'A':>7s} {'B':>7s}")
+    print(f"{'divergence class':52s} {'n':>5s} {'A-B':>7s} {'se':>5s} {'A':>7s} {'B':>7s}")
     for c, r in sorted(cls.items(), key=lambda kv: kv[1][1]):
         if r[0] >= 5 or abs(r[1]) >= 100:
-            print(f"{c:52s} {r[0]:5d} {r[1]:+7d} {r[2]:+7d} {r[3]:+7d}")
+            se = (max(0.0, r[4] - r[1] ** 2 / r[0])) ** 0.5
+            print(f"{c:52s} {r[0]:5d} {r[1]:+7d} {se:5.0f} {r[2]:+7d} {r[3]:+7d}")
     for name, H in (("A", A), ("B", B)):
         ps = probe_spots({k: H[k] for k in keys})
         print(f"-- {name}: we bet after the opponent checked (first such street per hand): answer n net")

@@ -1,0 +1,76 @@
+hands 9600  total A-B +5403 chips (+0.563/hand)  A +4316  B -1087
+divergence class                                         n     A-B    se       A       B
+us flop first: A bet / B check                          64    -711   362    -210    +501
+us river first: A bet / B check                         72    -601   515    -399    +202
+us river raise: A call / B fold                         14    -540   150    -950    -410
+us river raise: A raise / B fold                         6    -540   401    -800    -260
+us river check/raise: A raise / B fold                   3    -512    53    -600     -88
+us turn raise: A call / B raise                         10    -456   222    +439    +895
+us turn first: A bet / B check                          53    -424   365    -643    -219
+us preflop call/raise: A call / B fold                  19    -423   341    -461     -38
+us preflop raise: A raise / B fold                       7    -415   158    -429     -14
+us flop raise: A raise / B call                         18    -377   459    -504    -127
+us preflop raise/raise/raise: A call / B fold            3    -372    64    -444     -72
+us turn check/raise: A call / B fold                     4    -286   142    -327     -41
+opp flop first: size                                    23    -219   198    -316     -97
+us preflop raise: A fold / B raise                       5    -194   240     -10    +184
+us river raise: A raise / B call                         7    -186   272    -125     +61
+us river afterOppCheck: A check / B bet                 10    -150   106     +41    +191
+us turn raise/raise: A call / B fold                     2    -146    95    -210     -64
+us preflop call: A bet / B check                        36    -145   200     +73    +218
+us preflop raise: A call / B fold                       25     -58   205    -108     -50
+us preflop raise: A call / B raise                      26     -45   383    +510    +555
+opp flop afterOppCheck: size                             9     -44    42    -102     -58
+us preflop call: A check / B bet                        34     -39    72      -9     +30
+us preflop first: A fold / B call                        7     -27    24      -7     +20
+opp turn afterOppCheck: size                             8     -24    22     -89     -65
+us preflop raise/raise: A call / B fold                  9     -22   295     -76     -54
+us turn afterOppCheck: size                             35      -8    67    +356    +364
+us turn afterOppCheck: A check / B bet                  11      -7    20     +51     +58
+opp turn first: size                                    13     +44    84    -392    -436
+opp turn check/raise: A fold / B call                    5     +44    43     +28     -16
+us flop afterOppCheck: size                             66     +53    84    +225    +172
+us turn raise: A fold / B call                           5     +60    19     -42    -102
+us preflop raise: A raise / B call                      19     +63   229     +11     -52
+us preflop call: size                                   83     +70   117    +195    +125
+opp turn first: A bet / B check                         15    +104   198     +35     -69
+us preflop raise: size                                   3    +153   175    +212     +59
+opp turn first: A check / B bet                          7    +157   138    +151      -6
+us river raise: A fold / B call                         11    +158   277    -409    -567
+us flop first: size                                     29    +159   179    +822    +663
+us river afterOppCheck: size                            14    +186   193    +706    +520
+us flop afterOppCheck: A bet / B check                 127    +188   326    +450    +262
+us flop afterOppCheck: A check / B bet                  13    +208   190     +74    -134
+us river check/raise: size                               2    +222   109    +251     +29
+opp flop afterOppCheck: A check / B bet                  4    +227   160     -18    -245
+us river check/raise: A fold / B raise                   3    +228   109     -47    -275
+us turn first: size                                     34    +230   191     +83    -147
+us flop first: A check / B bet                          64    +234   416   +1362   +1128
+opp flop first: A bet / B check                         10    +244   220    +214     -30
+us preflop raise/raise: A call / B raise                 1    +286     0    +200     -86
+us preflop raise/raise: A fold / B call                  9    +286   270     -54    -340
+us flop raise: A call / B raise                         11    +288   315    +245     -43
+us river raise: A fold / B raise                         4    +366   197     -93    -459
+us preflop raise/raise/raise: A fold / B call            7    +373   330    -168    -541
+us turn afterOppCheck: A bet / B check                 120    +374   234    +776    +402
+us preflop first: A call / B bet                       180    +377   287    -194    -571
+us river check/raise: A call / B fold                    9    +458   365    +194    -264
+us river afterOppCheck: A bet / B check                 86    +464   246    +934    +470
+us river first: A check / B bet                         64    +504   456    +503      -1
+us preflop call/raise: A raise / B call                  4    +510   215    +480     -30
+opp flop first: A check / B bet                         13    +521   305    +358    -163
+us preflop raise: A fold / B call                       39    +530   445     -78    -608
+us river first: size                                    26    +534   441    +928    +394
+us turn raise: A raise / B call                         16    +585   417    +143    -442
+us turn first: A check / B bet                          69    +638   388    +371    -267
+us preflop call/raise: A fold / B call                  15    +646   199     -30    -676
+us preflop first: A bet / B call                       180    +673   410   +1358    +685
+discard                                               1038    +727  1314   -3317   -4044
+-- A: we bet after the opponent checked (first such street per hand): answer n net
+   flop  fold  875  +3892 | call  693  +3535 | raise    0     +0
+   turn  fold  229  +1060 | call  179   +967 | raise    0     +0
+   river fold  137  +1261 | call   31  +1563 | raise    0     +0
+-- B: we bet after the opponent checked (first such street per hand): answer n net
+   flop  fold  754  +3462 | call  522  +1606 | raise    0     +0
+   turn  fold  227   +987 | call  165   +426 | raise    0     +0
+   river fold  120  +1048 | call   15   +607 | raise    0     +0
