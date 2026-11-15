@@ -1,0 +1,2 @@
+sub_disc_probe vs new_minraise: +0.05 ± 0.27 chips/hand | match score 0.479 | pairs 24 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): -0.23 +0.33
