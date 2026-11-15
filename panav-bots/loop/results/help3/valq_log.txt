@@ -7,3 +7,4 @@ sub_s2_lock vs new_geometric: MATCH WINS 17/24 (70.8%) chips/hand +0.113 ± 0.14
 sub_disc_probe vs new_exploiter: MATCH WINS 10/24 (41.7%) chips/hand -0.332 ± 0.183 forfeits A/B 0/0 | min bank left A 97.4s worst reply 0.50s
 sub_s2_lock vs new_exploiter: MATCH WINS 18/24 (75.0%) chips/hand +0.013 ± 0.152 forfeits A/B 0/0 | min bank left A 98.3s worst reply 0.41s
 sub_disc_probe vs s4_balanced: MATCH WINS 13/24 (54.2%) chips/hand +0.111 ± 0.163 forfeits A/B 0/0 | min bank left A 103.9s worst reply 0.34s
+sub_s2_lock vs s4_balanced: MATCH WINS 21/24 (87.5%) chips/hand +0.027 ± 0.133 forfeits A/B 0/0 | min bank left A 105.6s worst reply 0.27s
