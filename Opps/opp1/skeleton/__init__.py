@@ -13,7 +13,7 @@ from skeleton.states import (
     SMALL_BLIND,
     NUM_ROUNDS,
 )
-from skeleton.bot import Bot
+from skeleton.main_bot import Bot
 
 __all__ = [
     "FoldAction",

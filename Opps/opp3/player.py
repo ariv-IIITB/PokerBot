@@ -7,7 +7,7 @@ get_action). If your starter code differs, ONLY this file needs changing: conver
 engine state into `pb.types.Obs`, call brain.act(obs), convert the returned tuple back.
 """
 from skeleton.actions import CallAction, CheckAction, FoldAction, RaiseAction
-from skeleton.bot import Bot
+from skeleton.main_bot import Bot
 from skeleton.runner import parse_args, run_bot
 from skeleton.states import BIG_BLIND, NUM_ROUNDS, SMALL_BLIND, STARTING_STACK
 

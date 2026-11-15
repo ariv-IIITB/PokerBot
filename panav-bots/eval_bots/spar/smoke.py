@@ -23,7 +23,7 @@ NAMES = ["eqtag", "trapper", "potctl", "polar", "betfold", "light3b", "donk", "a
 
 def one(a, b, stage, seed):
     with tempfile.TemporaryDirectory() as d:
-        cmd = [str(PY), str(ENGINE), str(HERE / a / "bot.py"), str(HERE / b / "bot.py"), "--stage", str(stage),
+        cmd = [str(PY), str(ENGINE), str(HERE / a / "main_bot.py"), str(HERE / b / "main_bot.py"), "--stage", str(stage),
                "--seed", seed, "--log-dir", d, "--python", str(PY)]
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
         out = r.stdout + r.stderr

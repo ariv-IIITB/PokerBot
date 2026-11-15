@@ -31,7 +31,7 @@ if not PY.exists():
 def resolve(spec):
     if spec == "final":
         return ROOT / "dist" / "bot.py"
-    p = HERE / spec / "bot.py"
+    p = HERE / spec / "main_bot.py"
     if p.exists():
         return p
     q = pathlib.Path(spec).expanduser()

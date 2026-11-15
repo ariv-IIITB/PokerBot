@@ -40,7 +40,7 @@ from equity import calculate_river_exact, calculate_equity
 from meta_controller import MatchUtilityModel, standard_normal_cdf
 from strategy import StrategyEngine
 from safety import ActionSanitizer
-from bot import PokerBot
+from main_bot import PokerBot
 
 
 class TestEvaluator(unittest.TestCase):

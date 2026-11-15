@@ -11,7 +11,7 @@ Features:
 
 import time
 import random
-from skeleton.bot import Bot
+from skeleton.main_bot import Bot
 from skeleton.actions import FoldAction, CallAction, CheckAction, RaiseAction
 from skeleton.states import (
     GameState,

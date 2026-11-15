@@ -8,7 +8,7 @@ import numpy as np
 from scipy import stats
 
 from evaluator import card_to_str, evaluate_7cards
-from bot import PokerBot
+from main_bot import PokerBot
 from baselines import CallingStationBot, CheckFoldBot, AllInManiacBot, NitTagBot
 
 

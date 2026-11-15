@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Sequence, Tuple
 import numpy as np
 
 from evaluator import card_to_str, evaluate_7cards
-from bot import PokerBot
+from main_bot import PokerBot
 from baselines import CallingStationBot, CheckFoldBot, AllInManiacBot, NitTagBot, RandomBot
 
 

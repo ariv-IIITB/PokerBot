@@ -3,7 +3,7 @@
     .venv/bin/python -m lab.pool_health [d_name ...] [--pairs 10] [--hands 400] [--vs starter,tier2]
         [--bank 60] [--clock-scale 1.0] [--processes N] [--out logs/pool_health.txt]
 
-Every Opps/discard/<name>/bot.py (as d_<name>) plays duplicate pairs against the opponents in
+Every Opps/discard/<name>/main_bot.py (as d_<name>) plays duplicate pairs against the opponents in
 --vs (the organisers' starter bot, and Tier 2 with the endgame lock on) over the real protocol,
 under the real limits: the time bank, a 5 s cap on any single reply, start-up within 5 s.
 Per bot and opponent it reports:
@@ -47,7 +47,7 @@ class ProbePlayer(SubprocessPlayer):
 
     def __init__(self, name: str, folder: Path, stderr_path: str) -> None:
         self.t_launch = time.perf_counter()
-        super().__init__([sys.executable, "bot.py"], str(folder), name, stderr_to=stderr_path,
+        super().__init__([sys.executable, "main_bot.py"], str(folder), name, stderr_to=stderr_path,
                          protocol="pokerbots")
         self.first_reply_s: Optional[float] = None
         self.malformed = 0
@@ -172,7 +172,7 @@ def check_bot(bot: str, opp: str, cfg, pairs: int, hands: Optional[int], bank: O
 
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Health check of the Discard Hold'em opponent pool.")
-    ap.add_argument("bots", nargs="*", help="d_<name> ... (default: every Opps/discard/*/bot.py)")
+    ap.add_argument("bots", nargs="*", help="d_<name> ... (default: every Opps/discard/*/main_bot.py)")
     ap.add_argument("--pairs", type=int, default=10)
     ap.add_argument("--hands", type=int, default=400)
     ap.add_argument("--vs", default="starter,tier2", help="comma list of opponents")

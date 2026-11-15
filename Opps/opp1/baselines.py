@@ -8,7 +8,7 @@ Includes:
 """
 
 import random
-from skeleton.bot import Bot
+from skeleton.main_bot import Bot
 from skeleton.actions import FoldAction, CallAction, CheckAction, RaiseAction
 from skeleton.evaluate import get_preflop_equity, estimate_equity
 

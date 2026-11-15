@@ -21,13 +21,13 @@ OPPS = [("v16", ROOT / "logs/v16.noindex/bot/bot.py"), ("v6", ROOT / "logs/v6.no
         ("final", ROOT / "dist/bot.py"), ("tier3x", ROOT / "logs/tier3x.noindex/bot/bot.py")]
 SPAR = "eqtag trapper potctl polar betfold light3b donk adapt tilt discardread".split()
 STRONG = "s1_ranges s3_exploit s6_discard s2_rollout s7_solver s8_meta s9_sizing s10_regret s5_preflop s4_balanced".split()
-BOTS = [(n, ROOT / "eval/bots/strong" / n / "bot.py") for n in STRONG[:2]] + \
-       [(n, ROOT / "eval/bots/spar" / n / "bot.py") for n in SPAR[:3]] + \
-       [(n, ROOT / "eval/bots/strong" / n / "bot.py") for n in STRONG[2:]] + \
-       [(n, ROOT / "eval/bots/spar" / n / "bot.py") for n in SPAR[3:]]
+BOTS = [(n, ROOT / "eval/bots/strong" / n / "main_bot.py") for n in STRONG[:2]] + \
+       [(n, ROOT / "eval/bots/spar" / n / "main_bot.py") for n in SPAR[:3]] + \
+       [(n, ROOT / "eval/bots/strong" / n / "main_bot.py") for n in STRONG[2:]] + \
+       [(n, ROOT / "eval/bots/spar" / n / "main_bot.py") for n in SPAR[3:]]
 
 
-V4 = [("v4_" + n, ROOT / "eval/bots/spar_v4" / n / "bot.py") for n in SPAR]
+V4 = [("v4_" + n, ROOT / "eval/bots/spar_v4" / n / "main_bot.py") for n in SPAR]
 
 
 def cell(bot, opp):

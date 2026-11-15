@@ -53,10 +53,10 @@ BRAINS.update({
 
 
 def discard_pool_bots() -> dict[str, Path]:
-    """Every Opps/discard/<folder>/bot.py as `d_<folder>` -> its folder (Phase F opponent pool)."""
+    """Every Opps/discard/<folder>/main_bot.py as `d_<folder>` -> its folder (Phase F opponent pool)."""
     if not DISCARD_DIR.is_dir():
         return {}
-    return {f"d_{p.parent.name}": p.parent for p in sorted(DISCARD_DIR.glob("*/bot.py"))}
+    return {f"d_{p.parent.name}": p.parent for p in sorted(DISCARD_DIR.glob("*/main_bot.py"))}
 
 
 class PlayerTimeout(Exception):
@@ -200,7 +200,7 @@ class PlayerSpec:
     def brain(name: str, config: Optional[dict] = None, label: str = "") -> "PlayerSpec":
         folder = discard_pool_bots().get(name)
         if folder is not None:       # a pool bot: run `python bot.py` in its folder, real protocol
-            return PlayerSpec.subprocess([sys.executable, "bot.py"], cwd=str(folder),
+            return PlayerSpec.subprocess([sys.executable, "main_bot.py"], cwd=str(folder),
                                          label=label or name, protocol="pokerbots")
         cfg = tuple(sorted(config.items())) if config else None
         return PlayerSpec("brain", name, cfg, label=label or name)

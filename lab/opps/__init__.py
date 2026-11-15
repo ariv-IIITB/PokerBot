@@ -44,7 +44,7 @@ def _load(folder: str, module: str, fresh: bool = True):
             del sys.modules[name]
     sys.path[:] = [p for p in sys.path if not p.startswith(str(OPPS_DIR))]
     sys.path.insert(0, str(root))
-    if module.endswith(".py"):  # a file whose name clashes with ours (opp2/opp4 bot.py)
+    if module.endswith(".py"):  # a file whose name clashes with ours (opp2/opp4 main_bot.py)
         spec = importlib.util.spec_from_file_location(f"{folder}_{module[:-3]}", root / module)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)  # type: ignore[union-attr]
@@ -161,7 +161,7 @@ class _DictBrain(_OppBrain):
 
     def __init__(self, config: Optional[dict] = None) -> None:
         super().__init__(config)
-        self.bot = _load(self.folder, "bot.py").PokerBot()
+        self.bot = _load(self.folder, "main_bot.py").PokerBot()
 
     def hand_start(self, state):
         h = state.hand
@@ -192,7 +192,7 @@ class Opp2Brain(_DictBrain):
         # at import and forfeit. Patch the one name so we can study its strategy.
         _load("opp2", "preflop").TOTAL_COMBOS = _load("opp2", "equity", fresh=False).TOTAL_COMBOS
         _OppBrain.__init__(self, config)
-        self.bot = _load("opp2", "bot.py", fresh=False).PokerBot()
+        self.bot = _load("opp2", "main_bot.py", fresh=False).PokerBot()
 
     def hand_end(self, state):
         h = state.hand

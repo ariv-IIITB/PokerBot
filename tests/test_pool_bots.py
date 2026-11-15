@@ -1,4 +1,4 @@
-"""Phase F: the Discard Hold'em opponent pool (Opps/discard/<name>/bot.py, registered as d_<name>).
+"""Phase F: the Discard Hold'em opponent pool (Opps/discard/<name>/main_bot.py, registered as d_<name>).
 
 Each bot must start, answer action and discard requests over the real protocol and finish a few
 hands without a forfeit, a malformed reply or an illegal action. Strength is not tested here.
@@ -19,7 +19,7 @@ BOTS = sorted(discard_pool_bots())
 
 
 def test_pool_bots_are_registered() -> None:
-    assert BOTS, "no Opps/discard/*/bot.py found"
+    assert BOTS, "no Opps/discard/*/main_bot.py found"
     assert all(name.startswith("d_") for name in BOTS)
     spec = PlayerSpec.brain(BOTS[0])
     assert spec.kind == "subprocess" and spec.protocol == "pokerbots"

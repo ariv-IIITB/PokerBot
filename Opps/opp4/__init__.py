@@ -2,6 +2,6 @@
 Opponent 4 Poker Bot Package.
 """
 
-from bot import PokerBot
+from main_bot import PokerBot
 
 __all__ = ["PokerBot"]
