@@ -15,3 +15,7 @@ sub_disc_probe vs potctl: MATCH WINS 18/24 (75.0%) chips/hand +0.674 ± 0.181 fo
 sub_disc_probe vs polar: MATCH WINS 21/24 (87.5%) chips/hand +0.889 ± 0.241 forfeits A/B 0/0 | min bank left A 107.2s worst reply 0.34s
 sub_disc_probe vs new_geometric: MATCH WINS 12/24 (50.0%) chips/hand +0.217 ± 0.230 forfeits A/B 0/0 | min bank left A 97.7s worst reply 0.38s
 sub_disc_probe vs new_exploiter: MATCH WINS 10/24 (41.7%) chips/hand -0.332 ± 0.183 forfeits A/B 0/0 | min bank left A 97.4s worst reply 0.50s
+sub_disc_probe vs s4_balanced: MATCH WINS 13/24 (54.2%) chips/hand +0.111 ± 0.163 forfeits A/B 0/0 | min bank left A 103.9s worst reply 0.34s
+sub_disc_probe vs s2_rollout: MATCH WINS 19/24 (79.2%) chips/hand +0.761 ± 0.249 forfeits A/B 0/0 | min bank left A 112.4s worst reply 0.48s
+sub_disc_probe vs s3_exploit: MATCH WINS 19/24 (79.2%) chips/hand +0.547 ± 0.184 forfeits A/B 0/0 | min bank left A 104.4s worst reply 0.35s
+sub_disc_probe vs trapper: MATCH WINS 8/24 (33.3%) chips/hand -0.446 ± 0.209 forfeits A/B 0/0 | min bank left A 101.6s worst reply 0.36s
