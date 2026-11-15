@@ -71,3 +71,25 @@ The value share is statistically unobservable within a Stage 1 leg; v2 collapses
 Takeaway: the v1 gain on eqrandom/lakshya1/conv_opp3/potctl is real on those dev bots, but separating value-heavy from bluff-heavy bettors needs
 a faster trait than shown-showdown share, e.g. their big-bet frequency (CF1: .82-.92 bluffy vs .30-.32 value-heavy; the existing aggressor/riverbluff SPRT is
 a proxy for it and v1 already uses it). Next try: gate on big-bet frequency alone with a low-p static shift on fresh seeds.
+
+## v3 (gate on the opponent's big-bet FREQUENCY) -- pre-registered in `call1_prereg_v3.md`; verdict FAIL (primary metric)
+Move: calls of >= .70-pot bets with proxy .70-.85, p=.75, ledger, old trait gate; weight w = 1 if their big-bet frequency <= .40, 0 if >= .55
+(after >= 12 opportunities, ramp 6). Fresh seeds only (20000+). Tables show MATCH WINS (pair = match) first, then chips.
+Dev (6 bots, seeds 20000-20029): wins base 108.5/180 (60.3%) -> cand 124/180 (68.9%), chips +0.203 +- 0.074 (every bot >= 0).
+**Validation, 22 bots, seeds 21000-21039, Stage 1 (200h legs):** wins base 556/880 (63.2%) -> cand 570.5/880 (64.8%) = **+1.65 pp** (need +2.0: FAIL);
+chips **+0.001 +- 0.046** (>= 0: pass). Per bot (wins base->cand /40, chips +- SE): s7_solver 21->27 +0.50 .22; polar 23->31 +0.57 .24; s6_discard 21->25 +0.33 .18;
+s5_preflop 24->26 +0.27 .16; new_rules 25->30 +0.10 .15; adapt 19->21 +0.16 .23; s8_meta 22->25 +0.09 .20; conv_opp4 24->26 -0.03 .15; s3_exploit 23->23 +0.05 .22;
+discardread 23->24 0.00; betfold 36->35 +0.04; donk 19->18 +0.03; s1_ranges 40->40 +0.01; s4_balanced 24->24 -0.12 .20; light3b 20->19 -0.02 .18;
+tilt 23->22.5 -0.20 .22; s2_rollout 23->26 -0.23 .26; trapper 26->22 -0.05 .18; s10_regret 28->25 -0.08 .22; new_trapper 27->22 -0.13 .22;
+s9_sizing 32->31 -0.53 .26 (z -2.1 in chips; win rate -1/40, within noise); new_lag 33->28 -0.76 .45 (z -1.7). No bot's WIN rate is down by > 2 SE.
+**Stage 2 (500h legs, 24 pairs, seeds 22100/22200):** lakshya1 wins 9->12/24 (37.5%->50%), chips +0.34 +- 0.19 (rule "not lower": pass);
+new_eqrandom wins 18->18/24, chips +0.21 +- 0.09.
+**Head-to-head cand vs base, 40 pairs (seeds 23000):** cand wins 11/40 = **27.5%** (need >= 50%: FAIL), chips -0.21 +- 0.09.
+potbluffer (seeds 23100, 40 pairs): wins 40/40 both; chips base +6.30 -> cand +5.77: loss 0.53 +- 0.37 vs pooled gain 0.00 (FAIL, loss > gain).
+Timing: mean decision 13.12 (base) vs 12.93 ms (cand), 0 fallbacks/errors/forfeits in all runs.
+Scorecard vs PRIMARY METRIC: wins +1.65 pp FAIL; chips >= 0 pass; no bot win-rate down > 2 SE pass; lakshya1 500h wins not lower pass; head-to-head >= 50% FAIL;
+adversary loss < gain FAIL. => **v3 FAIL, no candidate built.**
+Reading: the dev gain (+8.6 pp wins) did not transfer to 22 unseen bots (+1.65 pp, chips 0): the frequency gate opens on a handful of bots (s7_solver, polar,
+s6_discard) and costs on others; a ~28% head-to-head says a bot that bets big with value is hurt by the extra folds. Dev-selected gates overfit again.
+Ivey: folding the middle of the range against someone who bets big only with value is right; the question is whether that opponent is identifiable
+in 200 hands. It is not reliably (frequency separates the 6 dev bots but not the 22), so SITUATIONAL at best; do not ship. Final: v1, v2, v3 all FAIL; ship the base.
