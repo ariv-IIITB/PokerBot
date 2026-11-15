@@ -1,0 +1,2 @@
+sub_v2 vs conv_opp4: +0.86 ± 0.22 chips/hand | match score 0.700 | pairs 40 | forfeits A/B 0/0
+  chips/hand by 100-hand window (A, avg of 2 legs): +0.27 +1.45

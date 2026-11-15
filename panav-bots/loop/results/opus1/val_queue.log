@@ -33,3 +33,5 @@ v2_S1_new_minraise 317 sub_v2 vs new_minraise: -0.08 ± 0.20 chips/hand | match 
 A_S1_new_minraise 315 sub_disc_probe vs new_minraise: -0.04 ± 0.20 chips/hand | match score 0.450 | pairs 40 | forfeits A/B 0/0
 v2_S1_new_rules 261 sub_v2 vs new_rules: +0.04 ± 0.20 chips/hand | match score 0.500 | pairs 40 | forfeits A/B 0/0
   S1_new_rules: exit fired in 0/80 legs
+v2_S1_conv_opp4 335 sub_v2 vs conv_opp4: +0.86 ± 0.22 chips/hand | match score 0.700 | pairs 40 | forfeits A/B 0/0
+  S1_conv_opp4: exit fired in 0/80 legs
