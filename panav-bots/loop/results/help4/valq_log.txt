@@ -1,0 +1,3 @@
+sub_s2_lock vs s2_rollout: MATCH WINS 23/24 (95.8%) chips/hand +0.029 ± 0.093 forfeits A/B 0/0 | min bank left A 111.3s worst reply 0.49s
+sub_s2_lock vs s3_exploit: MATCH WINS 15/24 (62.5%) chips/hand -0.062 ± 0.136 forfeits A/B 0/0 | min bank left A 102.5s worst reply 0.44s
+sub_s2_lock vs trapper: MATCH WINS 19/24 (79.2%) chips/hand -0.188 ± 0.160 forfeits A/B 0/0 | min bank left A 92.6s worst reply 0.42s
